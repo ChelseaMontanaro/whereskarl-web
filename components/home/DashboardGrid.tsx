@@ -24,7 +24,7 @@ type DashboardGridProps = {
 
 function CardLabel({ children }: { children: ReactNode }) {
   return (
-    <p className="text-[0.625rem] font-bold uppercase tracking-[0.14em] text-white/38 lg:text-[0.68rem] lg:tracking-[0.16em] lg:text-karl-gold/88">
+    <p className="text-[0.625rem] font-bold uppercase tracking-[0.14em] text-white/38 lg:text-[0.68rem] lg:tracking-[0.16em] lg:text-karl-gold/82">
       {children}
     </p>
   );
@@ -37,7 +37,7 @@ function MetricCard({
   isLoading,
   icon,
   iconFrameClassName,
-  valueClassName = "lg:text-[1.85rem]",
+  valueClassName = "lg:text-[1.65rem]",
 }: {
   label: string;
   value: string;
@@ -48,10 +48,10 @@ function MetricCard({
   valueClassName?: string;
 }) {
   return (
-    <GlassCard className="border-white/8 bg-karl-navy-glass/55 px-3.5 py-3 backdrop-blur-md lg:border-white/10 lg:bg-black/58 lg:px-4 lg:py-3 lg:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] lg:ring-1 lg:ring-karl-gold/10 lg:backdrop-blur-md">
+    <GlassCard className="border-white/8 bg-karl-navy-glass/55 px-3.5 py-3 backdrop-blur-md lg:border-white/10 lg:bg-black/34 lg:px-4 lg:py-4 lg:shadow-[0_4px_20px_rgba(0,0,0,0.14)] lg:backdrop-blur-md">
       <div className="flex items-center gap-3 lg:items-center lg:gap-3.5">
         <div
-          className={`order-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/8 bg-white/4 lg:order-1 ${desktopMetricIconFrameClass} ${iconFrameClassName}`}
+          className={`order-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/8 bg-white/4 lg:order-1 ${desktopMetricIconFrameClass} ${iconFrameClassName}`}
         >
           {icon}
         </div>
@@ -59,12 +59,12 @@ function MetricCard({
           <CardLabel>{label}</CardLabel>
           <p
             className={`mt-1 text-[1.35rem] font-light leading-none lg:mt-1.5 lg:font-light ${valueClassName} ${
-              isLoading ? "opacity-35 text-white" : "text-white/96"
+              isLoading ? "opacity-35 text-white" : "text-white/94"
             }`}
           >
             {value}
           </p>
-          <p className="mt-1 text-[0.6875rem] font-medium text-white/50 lg:text-xs lg:text-white/58">
+          <p className="mt-1 text-[0.6875rem] font-medium text-white/50 lg:mt-1.5 lg:text-xs lg:text-white/55">
             {detail}
           </p>
         </div>
@@ -84,7 +84,7 @@ export function DashboardGrid({
   isNightPresentation = false,
 }: DashboardGridProps) {
   const spotIcon = isNightPresentation ? (
-    <MoonIcon className={desktopMetricIconSizeClass} />
+    <MoonIcon className={`${desktopMetricIconSizeClass} text-[#8CB8D8]`} />
   ) : (
     <SunshineIcon className={desktopMetricIconSizeClass} />
   );
@@ -109,7 +109,7 @@ export function DashboardGrid({
         isLoading={isLoading}
         icon={<KarlStatusIcon className={desktopMetricIconSizeClass} />}
         iconFrameClassName={desktopMistIconClass}
-        valueClassName="lg:text-[1.05rem] lg:leading-snug lg:tracking-[-0.01em]"
+        valueClassName="lg:text-[0.98rem] lg:leading-snug lg:tracking-[-0.01em]"
       />
       <MetricCard
         label="Sunshine Score"

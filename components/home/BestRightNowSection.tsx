@@ -58,13 +58,13 @@ function DesktopBestRightNowCard({ item }: { item: BestRightNowItem }) {
       aria-label={`View ${item.locationName} on map`}
       className="group block rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-karl-gold"
     >
-      <GlassCard variant="desktop" className="flex h-full items-center gap-4 px-5 py-4 transition-colors group-hover:border-white/16">
+      <GlassCard variant="desktop" className="flex h-full items-center gap-4 px-5 py-5 transition-colors group-hover:border-white/14">
         <InsightIconFrame tone="gold">
           <SunshineIcon className={desktopInsightIconSizeClass} />
         </InsightIconFrame>
         <div className="min-w-0 flex-1">
           <CardLabel>Best Right Now</CardLabel>
-          <p className="mt-1.5 text-xl font-semibold text-white">
+          <p className="mt-1.5 text-lg font-semibold text-white lg:text-xl">
             {item.locationName}
           </p>
           <p className="mt-1 text-sm leading-relaxed text-white/68">{item.detail}</p>

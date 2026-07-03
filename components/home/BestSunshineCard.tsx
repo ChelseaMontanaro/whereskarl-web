@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import { MoonIcon, SunshineIcon } from "@/components/home/ConditionIcons";
+import { SunshineIcon } from "@/components/home/ConditionIcons";
 import { FindClearSkiesCta } from "@/components/home/FindClearSkiesCta";
 import {
   CardLabel,
@@ -149,11 +149,7 @@ function DesktopBestSunshineCard({
     recommendation.reason ||
     recommendation.status;
   const href = buildMapHref(recommendation.locationID);
-  const spotIcon = isNightPresentation ? (
-    <MoonIcon className={desktopInsightIconSizeClass} />
-  ) : (
-    <SunshineIcon className={desktopInsightIconSizeClass} />
-  );
+  const spotIcon = <SunshineIcon className={desktopInsightIconSizeClass} />;
 
   return (
     <Link
@@ -163,17 +159,17 @@ function DesktopBestSunshineCard({
     >
       <GlassCard
         variant="desktop"
-        className="flex h-full items-center gap-4 px-5 py-4 transition-colors group-hover:border-white/16"
+        className="flex h-full items-center gap-4 px-5 py-5 transition-colors group-hover:border-white/14"
       >
         <InsightIconFrame tone="gold">
           {spotIcon}
         </InsightIconFrame>
         <div className="min-w-0 flex-1">
           <CardLabel>{clearestSpotDesktopLabel(isNightPresentation)}</CardLabel>
-          <h2 className="mt-1.5 text-xl font-semibold text-white">
+          <h2 className="mt-1.5 text-lg font-semibold text-white lg:text-xl">
             {recommendation.locationName}
           </h2>
-          <p className="mt-1 text-sm font-medium text-karl-gold/92">{subtitle}</p>
+          <p className="mt-1 text-sm leading-relaxed text-white/68">{subtitle}</p>
           <p className="mt-1 text-sm text-white/62">
             {recommendation.distanceText} · {recommendation.temperature}°
           </p>

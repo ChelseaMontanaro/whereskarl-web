@@ -36,9 +36,9 @@ export function DesktopTopNav() {
       <div className="mx-auto flex max-w-7xl items-center gap-6 px-6 py-4 xl:px-8">
         <Link
           href="/"
-          className="flex shrink-0 items-center gap-3.5 rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-karl-gold"
+          className="flex shrink-0 items-center gap-2.5 rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-karl-gold"
         >
-          <KarlLogo className="h-11 w-11 shrink-0 xl:h-12 xl:w-12" />
+          <KarlLogo className="h-8 w-8 shrink-0" />
           <span className="min-w-0">
             <span className="block font-serif text-lg font-semibold tracking-[0.02em] text-white/[0.96]">
               Where&apos;s Karl?

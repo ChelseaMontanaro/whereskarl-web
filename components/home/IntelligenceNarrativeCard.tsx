@@ -1,4 +1,4 @@
-import { KarlStatusIcon } from "@/components/home/ConditionIcons";
+import { FogMistIcon } from "@/components/home/ConditionIcons";
 import {
   CardLabel,
   InsightCardChevron,
@@ -62,9 +62,9 @@ function DesktopIntelligenceNarrativeCard({
 }: Omit<IntelligenceNarrativeCardProps, "layout">) {
   if (isLoading) {
     return (
-      <GlassCard variant="desktop" className="flex items-center gap-4 px-5 py-4">
+      <GlassCard variant="desktop" className="flex items-center gap-4 px-5 py-5">
         <InsightIconFrame>
-          <KarlStatusIcon className={desktopInsightIconSizeClass} />
+          <FogMistIcon className={desktopInsightIconSizeClass} />
         </InsightIconFrame>
         <div className="min-w-0 flex-1">
           <CardLabel>Karl&apos;s Read</CardLabel>
@@ -86,13 +86,13 @@ function DesktopIntelligenceNarrativeCard({
       : intelligence.narrative.confidenceLabel;
 
   return (
-    <GlassCard variant="desktop" className="flex items-center gap-4 px-5 py-4">
+    <GlassCard variant="desktop" className="flex items-center gap-4 px-5 py-5">
       <InsightIconFrame>
-        <KarlStatusIcon className={desktopInsightIconSizeClass} />
+        <FogMistIcon className={desktopInsightIconSizeClass} />
       </InsightIconFrame>
       <div className="min-w-0 flex-1">
         <CardLabel>Karl&apos;s Read</CardLabel>
-        <h2 className="mt-1.5 text-xl font-semibold leading-snug text-white">
+        <h2 className="mt-1.5 text-lg font-semibold leading-snug text-white lg:text-xl">
           {intelligence.narrative.headline}
         </h2>
         <p className="mt-1.5 text-sm leading-relaxed text-white/72">

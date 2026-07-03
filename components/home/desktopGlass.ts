@@ -1,21 +1,21 @@
 export const desktopGlassCardClass =
-  "rounded-2xl border border-white/10 bg-black/58 backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] ring-1 ring-karl-gold/10";
+  "rounded-2xl border border-white/10 bg-black/34 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.14)]";
 
 export const desktopMistIconClass =
-  "border-white/12 bg-black/35 ring-1 ring-white/10";
+  "border-white/14 bg-white/6 text-white/88";
 
 export const desktopGoldIconClass =
-  "border-karl-gold/24 bg-black/35 ring-1 ring-karl-gold/14";
+  "border-karl-gold/22 bg-karl-gold/8 text-karl-gold";
 
 export const desktopMetricIconFrameClass =
-  "flex shrink-0 items-center justify-center rounded-2xl border lg:h-[3.75rem] lg:w-[3.75rem]";
+  "flex shrink-0 items-center justify-center rounded-full border lg:h-12 lg:w-12";
 
 export const desktopInsightIconFrameClass =
-  "flex shrink-0 items-center justify-center rounded-2xl border lg:h-[4.25rem] lg:w-[4.25rem]";
+  "flex shrink-0 items-center justify-center rounded-full border lg:h-14 lg:w-14";
 
-export const desktopMetricIconSizeClass = "h-9 w-9 lg:h-11 lg:w-11";
+export const desktopMetricIconSizeClass = "h-5 w-5 lg:h-6 lg:w-6";
 
-export const desktopInsightIconSizeClass = "h-10 w-10 lg:h-12 lg:w-12";
+export const desktopInsightIconSizeClass = "h-6 w-6 lg:h-7 lg:w-7";
 
 export function clearestSpotDesktopLabel(isNightPresentation: boolean): string {
   return isNightPresentation ? "Clearest Spot" : "Clearest Spot";

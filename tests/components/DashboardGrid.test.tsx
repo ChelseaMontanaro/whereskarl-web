@@ -3,19 +3,19 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { DashboardGrid } from "@/components/home/DashboardGrid";
 import {
-  IllustratedFogCoverage,
-  IllustratedKarlFog,
-  IllustratedSun,
+  FogCoverageIcon,
+  FogMistIcon,
+  SunshineIcon,
 } from "@/components/home/ConditionIcons";
+import { DashboardGrid } from "@/components/home/DashboardGrid";
 
 describe("DashboardGrid", () => {
   afterEach(() => {
     cleanup();
   });
 
-  it("renders illustrated condition icons alongside dashboard metrics", () => {
+  it("renders minimal line condition icons alongside dashboard metrics", () => {
     const { container } = render(
       <DashboardGrid
         current={{
@@ -83,19 +83,19 @@ describe("DashboardGrid", () => {
     expect(screen.getByText("Karl is lingering")).toBeInTheDocument();
     expect(container.querySelectorAll("svg")).toHaveLength(4);
     expect(
-      container.querySelector("svg[viewBox='0 0 48 48']"),
+      container.querySelector("svg[viewBox='0 0 24 24']"),
     ).toBeInTheDocument();
   });
 });
 
-describe("ConditionIcons illustrations", () => {
-  it("renders custom illustrated fog, Karl, and sun artwork", () => {
-    const { container: fog } = render(<IllustratedFogCoverage />);
-    const { container: karl } = render(<IllustratedKarlFog />);
-    const { container: sun } = render(<IllustratedSun />);
+describe("ConditionIcons", () => {
+  it("renders refined line icons without illustrated fills", () => {
+    const { container: fog } = render(<FogCoverageIcon />);
+    const { container: mist } = render(<FogMistIcon />);
+    const { container: sun } = render(<SunshineIcon />);
 
-    expect(fog.querySelector("ellipse")).toBeTruthy();
-    expect(karl.querySelector("circle")).toBeTruthy();
-    expect(sun.querySelector("circle[fill='#F2A326']")).toBeTruthy();
+    expect(fog.querySelector("ellipse")).toBeNull();
+    expect(mist.querySelector("circle[fill='#162636']")).toBeNull();
+    expect(sun.querySelector("path[stroke-linecap='round']")).toBeTruthy();
   });
 });
