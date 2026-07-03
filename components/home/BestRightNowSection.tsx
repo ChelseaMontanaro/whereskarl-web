@@ -5,7 +5,6 @@ import {
   CardLabel,
   InsightCardChevron,
   InsightIconFrame,
-  SunshineScoreBadge,
 } from "@/components/home/InsightCardParts";
 import {
   desktopClickableCardHoverClass,
@@ -54,6 +53,14 @@ function MobileBestRightNowSection({ items }: BestRightNowSectionProps) {
   );
 }
 
+function BestRightNowScore({ score }: { score: number }) {
+  return (
+    <span className="text-xl font-light leading-none text-karl-gold lg:text-[1.65rem]">
+      {score}
+    </span>
+  );
+}
+
 function DesktopBestRightNowCard({ item }: { item: BestRightNowItem }) {
   if (!item.locationId) {
     return (
@@ -70,7 +77,7 @@ function DesktopBestRightNowCard({ item }: { item: BestRightNowItem }) {
         </div>
         {item.score != null ? (
           <div className="flex shrink-0 items-center gap-2">
-            <SunshineScoreBadge score={item.score} />
+            <BestRightNowScore score={item.score} />
           </div>
         ) : null}
       </GlassCard>
@@ -100,7 +107,7 @@ function DesktopBestRightNowCard({ item }: { item: BestRightNowItem }) {
           <p className="mt-1 text-sm leading-relaxed text-white/68">{item.detail}</p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          {item.score != null ? <SunshineScoreBadge score={item.score} /> : null}
+          {item.score != null ? <BestRightNowScore score={item.score} /> : null}
           <InsightCardChevron />
         </div>
       </GlassCard>

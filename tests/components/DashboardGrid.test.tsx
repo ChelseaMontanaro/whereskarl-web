@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -87,13 +87,31 @@ describe("DashboardGrid", () => {
 
     expect(screen.getByText("Fog Coverage")).toBeInTheDocument();
     expect(screen.getByText("Karl Status")).toBeInTheDocument();
-    expect(screen.getByText("Karl is lingering")).toBeInTheDocument();
+    expect(screen.getByText("Clearest Spot")).toBeInTheDocument();
+    expect(screen.queryByText("What does this mean?")).not.toBeInTheDocument();
     expect(container.querySelectorAll("svg")).toHaveLength(4);
     expect(
       screen.getByRole("link", {
-        name: "View brightest spot on map: Tiburon",
+        name: "View clearest spot on map: Tiburon",
       }),
     ).toHaveAttribute("href", "/map?location=tiburon");
+  });
+
+  it("opens a metric detail sheet without the removed heading copy", () => {
+    render(
+      <DashboardGrid
+        current={currentFixture}
+        bestSunshine={bestSunshineFixture}
+        isLoading={false}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Learn about Fog Coverage" }));
+
+    const dialog = screen.getByRole("dialog");
+    expect(dialog).toHaveTextContent("Fog Coverage");
+    expect(dialog).toHaveTextContent(METRIC_DETAILS["fog-coverage"].body);
+    expect(within(dialog).queryByText("What does this mean?")).not.toBeInTheDocument();
   });
 
   it("opens a metric detail sheet for explanatory cards without routing to map", () => {
@@ -154,13 +172,13 @@ describe("ConditionIcons", () => {
     cleanup();
   });
 
-  it("renders distinct premium fog, mist, and sun artwork", () => {
+  it("uses the shared fog cloud icon for Karl Status and Karl's Read aliases", () => {
     const { container: fog } = render(<FogCoverageIcon />);
-    const { container: mist } = render(<FogMistIcon />);
+    const { container: status } = render(<FogMistIcon />);
     const { container: sun } = render(<SunshineIcon />);
 
     expect(fog.querySelector("ellipse")).toBeTruthy();
-    expect(mist.querySelector("ellipse")).toBeNull();
+    expect(status.querySelector("ellipse")).toBeTruthy();
     expect(sun.querySelector("circle[fill='currentColor']")).toBeTruthy();
   });
 });

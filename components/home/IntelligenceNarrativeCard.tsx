@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { FogMistIcon } from "@/components/home/ConditionIcons";
+import { FogCoverageIcon } from "@/components/home/ConditionIcons";
 import {
   CardLabel,
   InsightCardChevron,
@@ -71,7 +71,7 @@ function DesktopIntelligenceNarrativeCard({
     return (
       <GlassCard variant="desktop" className="flex items-center gap-4 px-5 py-5">
         <InsightIconFrame>
-          <FogMistIcon className={desktopInsightIconSizeClass} />
+          <FogCoverageIcon className={desktopInsightIconSizeClass} />
         </InsightIconFrame>
         <div className="min-w-0 flex-1">
           <CardLabel>Karl&apos;s Read</CardLabel>
@@ -102,7 +102,7 @@ function DesktopIntelligenceNarrativeCard({
   const cardBody = (
     <>
       <InsightIconFrame>
-        <FogMistIcon className={desktopInsightIconSizeClass} />
+        <FogCoverageIcon className={desktopInsightIconSizeClass} />
       </InsightIconFrame>
       <div className="min-w-0 flex-1">
         <CardLabel>Karl&apos;s Read</CardLabel>

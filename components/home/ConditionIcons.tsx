@@ -28,41 +28,13 @@ export function FogCoverageIcon({ className = "h-5 w-5" }: IconProps) {
   );
 }
 
-/** Horizontal mist layers — Karl Status and Karl's Read (no face). */
-function FogMistLines({ className = "h-5 w-5" }: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className={className} fill="none">
-      <path
-        d="M3.5 8.5c1.5 0 2.3-.75 3-1.45.7.7 1.5 1.45 3 1.45s2.3-.75 3-1.45c.7.7 1.5 1.45 3 1.45s2.3-.75 3-1.45c.7.7 1.5 1.45 3 1.45"
-        stroke="#C5DDF0"
-        strokeWidth="1.25"
-        strokeLinecap="round"
-        opacity="0.95"
-      />
-      <path
-        d="M5 12.5c1.3 0 2-.65 2.6-1.25.6.6 1.3 1.25 2.6 1.25s2-.65 2.6-1.25c.6.6 1.3 1.25 2.6 1.25s2-.65 2.6-1.25c.6.6 1.3 1.25 2.6 1.25"
-        stroke="#93B8D8"
-        strokeWidth="1.15"
-        strokeLinecap="round"
-        opacity="0.82"
-      />
-      <path
-        d="M6.5 16.5c1.1 0 1.7-.55 2.2-1.05.5.5 1.1 1.05 2.2 1.05s1.7-.55 2.2-1.05c.5.5 1.1 1.05 2.2 1.05s1.7-.55 2.2-1.05c.5.5 1.1 1.05 2.2 1.05"
-        stroke="#B8D4EA"
-        strokeWidth="1"
-        strokeLinecap="round"
-        opacity="0.58"
-      />
-    </svg>
-  );
-}
-
+/** Shared fog cloud icon for Fog Coverage, Karl Status, and Karl's Read. */
 export function KarlStatusIcon(props: IconProps) {
-  return <FogMistLines {...props} />;
+  return <FogCoverageIcon {...props} />;
 }
 
 export function FogMistIcon(props: IconProps) {
-  return <FogMistLines {...props} />;
+  return <FogCoverageIcon {...props} />;
 }
 
 /** Warm gold sun with crisp rays. */

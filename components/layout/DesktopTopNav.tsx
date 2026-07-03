@@ -1,8 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
 
 import { KarlLogo } from "@/components/brand/KarlLogo";
 import { FindClearSkiesCta } from "@/components/home/FindClearSkiesCta";
@@ -10,28 +8,11 @@ import { PrimaryNavList } from "@/components/layout/NavLinks";
 import { useClearSkiesNav } from "@/components/providers/ClearSkiesNavProvider";
 
 export function DesktopTopNav() {
-  const pathname = usePathname();
   const { locationId, isLoading } = useClearSkiesNav();
-  const [isScrolled, setIsScrolled] = useState(false);
-  const isHome = pathname === "/";
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 48);
-    };
-
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [pathname]);
-
-  const headerSurfaceClass = isScrolled || !isHome
-    ? "border-b border-white/10 bg-karl-navy/78 backdrop-blur-md"
-    : "bg-gradient-to-b from-black/50 via-black/20 to-transparent";
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-30 hidden transition-colors duration-300 motion-reduce:transition-none lg:block ${headerSurfaceClass}`}
+      className="fixed inset-x-0 top-0 z-30 hidden bg-gradient-to-b from-black/50 via-black/20 to-transparent lg:block"
     >
       <div className="mx-auto flex max-w-7xl items-center gap-6 px-6 py-4 xl:px-8">
         <Link
