@@ -38,6 +38,51 @@ vi.mock("@/components/map/BayAreaMap", () => ({
   ),
 }));
 
+const multiRegionLocations = {
+  locations: [
+    JSON.parse(readFileSync(join(FIXTURES_DIR, "locations.json"), "utf8"))
+      .locations[0],
+    JSON.parse(readFileSync(join(FIXTURES_DIR, "locations.json"), "utf8"))
+      .locations[1],
+    {
+      id: "oakland",
+      name: "Oakland",
+      latitude: 37.8044,
+      longitude: -122.2712,
+      status: "Mostly Sunny",
+      temperature: 68,
+      sunshineScore: 72,
+      distanceText: "10 mi",
+      cloudCover: 30,
+      visibility: 8,
+      humidity: 60,
+      windSpeed: 8,
+      windDirection: "W",
+      weatherCode: 2,
+      iconName: "cloud.sun.fill",
+      fogScore: 30,
+      karlReason: "Mostly clear across Oakland.",
+      primaryDrivers: [],
+      microclimateFactors: [],
+      updatedAt: "2026-07-01T16:00:00.000Z",
+      confidenceScore: 0,
+      confidenceLabel: "Unavailable",
+      confidenceExplanation: "Confidence unavailable for demo or fallback data.",
+      confidenceComponents: {
+        freshness: 0,
+        observationQuality: 0,
+        fieldCompleteness: 0,
+        sourceReliability: 0,
+      },
+      prediction: {
+        predictionConfidenceScore: 0,
+        predictionConfidenceLabel: "Unavailable",
+        predictionReason: "Prediction is unavailable while Karl is using fallback data.",
+      },
+    },
+  ],
+};
+
 function renderMap() {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -64,9 +109,7 @@ describe("MapView", () => {
 
   beforeEach(() => {
     useSearchParamsMock.mockReturnValue(new URLSearchParams("location=tiburon"));
-    vi.spyOn(weatherApi, "getLocations").mockResolvedValue(
-      JSON.parse(readFileSync(join(FIXTURES_DIR, "locations.json"), "utf8")),
-    );
+    vi.spyOn(weatherApi, "getLocations").mockResolvedValue(multiRegionLocations);
   });
 
   it("reads the selected location query param and shows the focused location", async () => {
@@ -98,6 +141,68 @@ describe("MapView", () => {
     fireEvent.click(await screen.findByTestId("map-marker-sausalito"));
 
     expect(replaceMock).toHaveBeenCalledWith("/map?location=sausalito", {
+      scroll: false,
+    });
+  });
+
+  it("filters the location list when a region param is active", async () => {
+    useSearchParamsMock.mockReturnValue(
+      new URLSearchParams("region=north-bay"),
+    );
+
+    renderMap();
+
+    expect(await screen.findByText("North Bay Locations")).toBeInTheDocument();
+    expect(screen.getByText("Tiburon")).toBeInTheDocument();
+    expect(screen.getByText("Sausalito")).toBeInTheDocument();
+    expect(screen.queryByText("Oakland")).not.toBeInTheDocument();
+  });
+
+  it("prioritizes location over region in the UI", async () => {
+    useSearchParamsMock.mockReturnValue(
+      new URLSearchParams("location=tiburon&region=south-bay"),
+    );
+
+    renderMap();
+
+    expect(await screen.findByText("Focused on Tiburon.")).toBeInTheDocument();
+    expect(screen.getByText("Bay Area Locations")).toBeInTheDocument();
+    expect(screen.queryByText("South Bay Locations")).not.toBeInTheDocument();
+  });
+
+  it("handles unknown region params without crashing", async () => {
+    useSearchParamsMock.mockReturnValue(
+      new URLSearchParams("region=peninsula"),
+    );
+
+    renderMap();
+
+    expect(await screen.findByText(/Couldn't find region/i)).toBeInTheDocument();
+    expect(await screen.findByText("Bay Area Locations")).toBeInTheDocument();
+  });
+
+  it("selects a location from the list and updates routing", async () => {
+    useSearchParamsMock.mockReturnValue(new URLSearchParams("region=north-bay"));
+
+    renderMap();
+
+    const viewButtons = await screen.findAllByRole("button", {
+      name: "View on map",
+    });
+    fireEvent.click(viewButtons[0]);
+
+    expect(replaceMock).toHaveBeenCalledWith("/map?location=tiburon", {
+      scroll: false,
+    });
+  });
+
+  it("frames a region through the shareable region route", async () => {
+    useSearchParamsMock.mockReturnValue(new URLSearchParams());
+    renderMap();
+
+    fireEvent.click(await screen.findByRole("button", { name: "North Bay" }));
+
+    expect(replaceMock).toHaveBeenCalledWith("/map?region=north-bay", {
       scroll: false,
     });
   });

@@ -1,18 +1,24 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { BayAreaMap } from "@/components/map/BayAreaMap";
+import { MapLocationList } from "@/components/map/MapLocationList";
 import { MapRegionChips } from "@/components/map/MapRegionChips";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { getLocations } from "@/lib/api/weather";
 import { WEATHER_STALE_TIME_MS } from "@/lib/constants/config";
-import { isBayAreaProductRegionId } from "@/lib/map/config";
+import { findBayAreaProductRegion, isBayAreaProductRegionId } from "@/lib/map/config";
 import { resolveMapLocationFocus } from "@/lib/map/locationSelection";
+import { getProductRegionNameForLocation } from "@/lib/map/regions";
 import type { MapMarkerLocation } from "@/lib/map/markers";
-import { buildMapHref, readMapLocationParam } from "@/lib/map/routing";
+import {
+  buildMapHref,
+  buildMapRegionHref,
+  resolveMapQueryState,
+} from "@/lib/map/routing";
 
 function MapLocationCard({
   location,
@@ -28,6 +34,8 @@ function MapLocationCard({
   };
   isSelected: boolean;
 }) {
+  const regionName = getProductRegionNameForLocation(location.id);
+
   return (
     <GlassCard
       className={`px-4 py-4 ${
@@ -40,6 +48,11 @@ function MapLocationCard({
           <p className="text-[0.68rem] font-bold uppercase tracking-[0.14em] text-white/45">
             {isSelected ? "Selected Location" : "Location"}
           </p>
+          {regionName ? (
+            <p className="mt-1 text-[0.625rem] font-semibold uppercase tracking-[0.12em] text-karl-gold/80">
+              {regionName}
+            </p>
+          ) : null}
           <h2 className="mt-2 text-lg font-semibold text-white">{location.name}</h2>
           <p className="mt-1 text-sm text-white/65">{location.status}</p>
           <p className="mt-2 text-sm text-white/50">
@@ -60,8 +73,7 @@ function MapLocationCard({
 export function MapView() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const requestedLocationId = readMapLocationParam(searchParams);
-  const [selectedRegionId, setSelectedRegionId] = useState<string | null>(null);
+  const mapQuery = resolveMapQueryState(searchParams);
 
   const locationsQuery = useQuery({
     queryKey: ["locations"],
@@ -73,10 +85,15 @@ export function MapView() {
     () => locationsQuery.data?.locations ?? [],
     [locationsQuery.data?.locations],
   );
+
   const { selectedLocation, unknownLocationId } = resolveMapLocationFocus({
-    requestedLocationId,
+    requestedLocationId: mapQuery.requestedLocationId,
     locations,
   });
+
+  const activeRegion = mapQuery.activeRegionId
+    ? findBayAreaProductRegion(mapQuery.activeRegionId)
+    : null;
 
   const markerLocations = useMemo<MapMarkerLocation[]>(
     () =>
@@ -92,7 +109,6 @@ export function MapView() {
 
   const handleSelectLocation = useCallback(
     (locationId: string) => {
-      setSelectedRegionId(null);
       router.replace(buildMapHref(locationId), { scroll: false });
     },
     [router],
@@ -104,11 +120,21 @@ export function MapView() {
         return;
       }
 
-      setSelectedRegionId((current) => (current === regionId ? null : regionId));
-      router.replace("/map", { scroll: false });
+      if (mapQuery.activeRegionId === regionId) {
+        router.replace("/map", { scroll: false });
+        return;
+      }
+
+      router.replace(buildMapRegionHref(regionId), { scroll: false });
     },
-    [router],
+    [mapQuery.activeRegionId, router],
   );
+
+  const headerCopy = selectedLocation
+    ? `Focused on ${selectedLocation.name}.`
+    : activeRegion
+      ? `Framing ${activeRegion.name} across the Bay.`
+      : "Explore conditions across San Francisco, North Bay, East Bay, and South Bay.";
 
   return (
     <div className="mx-auto flex w-full max-w-[430px] flex-col gap-4 px-4 py-6 sm:py-8">
@@ -117,15 +143,11 @@ export function MapView() {
           Where&apos;s Karl?
         </p>
         <h1 className="text-3xl font-semibold tracking-tight text-white">Map</h1>
-        <p className="text-base text-white/70">
-          {selectedLocation
-            ? `Focused on ${selectedLocation.name}.`
-            : "Explore conditions across San Francisco, North Bay, East Bay, and South Bay."}
-        </p>
+        <p className="text-base text-white/70">{headerCopy}</p>
       </header>
 
       <MapRegionChips
-        selectedRegionId={selectedLocation ? null : selectedRegionId}
+        selectedRegionId={selectedLocation ? null : mapQuery.activeRegionId}
         onSelectRegion={handleSelectRegion}
       />
 
@@ -133,7 +155,7 @@ export function MapView() {
         <BayAreaMap
           locations={markerLocations}
           selectedLocationId={selectedLocation?.id ?? null}
-          selectedRegionId={selectedLocation ? null : selectedRegionId}
+          selectedRegionId={selectedLocation ? null : mapQuery.activeRegionId}
           onSelectLocation={handleSelectLocation}
           isLoading={locationsQuery.isLoading}
         />
@@ -151,28 +173,29 @@ export function MapView() {
         </GlassCard>
       ) : null}
 
+      {mapQuery.unknownRegionId ? (
+        <GlassCard className="px-4 py-3">
+          <p className="text-sm text-white/70">
+            Couldn&apos;t find region{" "}
+            <span className="font-semibold text-white">
+              {mapQuery.unknownRegionId.replaceAll("-", " ")}
+            </span>
+            . Showing the full Bay Area map instead.
+          </p>
+        </GlassCard>
+      ) : null}
+
       {selectedLocation ? (
         <MapLocationCard location={selectedLocation} isSelected />
       ) : null}
 
-      {!locationsQuery.isLoading && locations.length > 0 ? (
-        <section aria-label="Bay Area locations" className="space-y-2">
-          <p className="text-[0.68rem] font-bold uppercase tracking-[0.14em] text-white/45">
-            Bay Area Locations
-          </p>
-          <div className="space-y-2">
-            {locations
-              .filter((location) => location.id !== selectedLocation?.id)
-              .map((location) => (
-                <MapLocationCard
-                  key={location.id}
-                  location={location}
-                  isSelected={false}
-                />
-              ))}
-          </div>
-        </section>
-      ) : null}
+      <MapLocationList
+        locations={locations}
+        selectedLocationId={selectedLocation?.id ?? null}
+        activeRegionId={selectedLocation ? null : mapQuery.activeRegionId}
+        onSelectLocation={handleSelectLocation}
+        isLoading={locationsQuery.isLoading}
+      />
 
       <p className="text-center text-[0.65rem] text-white/30">
         Map data © OpenStreetMap contributors · CARTO
