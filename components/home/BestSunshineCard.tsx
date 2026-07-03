@@ -11,6 +11,7 @@ import {
   InsightIconFrame,
   SunshineScoreBadge,
 } from "@/components/home/InsightCardParts";
+import { clearestSpotDesktopLabel } from "@/components/home/desktopGlass";
 import { GlassCard } from "@/components/ui/GlassCard";
 import {
   isNighttime,
@@ -123,8 +124,8 @@ function DesktopBestSunshineCard({
 
   if (isLoading) {
     return (
-      <GlassCard className="border-white/8 bg-karl-navy-glass/48 px-5 py-4 backdrop-blur-md">
-        <CardLabel>Brightest Spot</CardLabel>
+      <GlassCard variant="desktop" className="px-5 py-4">
+        <CardLabel>Clearest Spot</CardLabel>
         <p className="mt-3 text-lg font-semibold text-white/50">
           Finding brighter spots…
         </p>
@@ -134,10 +135,10 @@ function DesktopBestSunshineCard({
 
   if (isUnavailable || !recommendation) {
     return (
-      <GlassCard className="border-white/8 bg-karl-navy-glass/48 px-5 py-4 backdrop-blur-md">
-        <CardLabel>Brightest Spot</CardLabel>
+      <GlassCard variant="desktop" className="px-5 py-4">
+        <CardLabel>Clearest Spot</CardLabel>
         <p className="mt-3 text-sm text-white/60">
-          Brightest spot details are unavailable right now.
+          Clearest spot details are unavailable right now.
         </p>
       </GlassCard>
     );
@@ -149,33 +150,31 @@ function DesktopBestSunshineCard({
     recommendation.status;
   const href = buildMapHref(recommendation.locationID);
   const spotIcon = isNightPresentation ? (
-    <MoonIcon className="h-8 w-8" />
+    <MoonIcon className="h-8 w-8 lg:h-9 lg:w-9" />
   ) : (
-    <SunshineIcon className="h-8 w-8" />
+    <SunshineIcon className="h-8 w-8 lg:h-9 lg:w-9" />
   );
 
   return (
     <Link
       href={href}
-      aria-label={`View brightest spot on map: ${recommendation.locationName}`}
+      aria-label={`View clearest spot on map: ${recommendation.locationName}`}
       className="group block rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-karl-gold"
     >
-      <GlassCard className="flex h-full items-center gap-4 border-white/8 bg-karl-navy-glass/48 px-5 py-4 backdrop-blur-md transition-colors group-hover:border-white/14">
-        <InsightIconFrame tone={isNightPresentation ? "mist" : "gold"}>
+      <GlassCard
+        variant="desktop"
+        className="flex h-full items-center gap-4 px-5 py-4 transition-colors group-hover:border-white/16"
+      >
+        <InsightIconFrame tone="gold">
           {spotIcon}
         </InsightIconFrame>
         <div className="min-w-0 flex-1">
-          <CardLabel>
-            {sunshineResultTitle(
-              recommendation.sunshineScore,
-              isNightPresentation,
-            )}
-          </CardLabel>
+          <CardLabel>{clearestSpotDesktopLabel(isNightPresentation)}</CardLabel>
           <h2 className="mt-1.5 text-xl font-semibold text-white">
             {recommendation.locationName}
           </h2>
-          <p className="mt-1 text-sm font-medium text-karl-gold/90">{subtitle}</p>
-          <p className="mt-1 text-sm text-white/58">
+          <p className="mt-1 text-sm font-medium text-karl-gold/92">{subtitle}</p>
+          <p className="mt-1 text-sm text-white/62">
             {recommendation.distanceText} · {recommendation.temperature}°
           </p>
         </div>

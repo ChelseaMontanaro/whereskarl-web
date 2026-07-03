@@ -89,6 +89,22 @@ describe("HomeView", () => {
     ).toHaveAttribute("href", "/map?location=tiburon");
   });
 
+  it("shows the live hero headline once core weather resolves, before best sunshine finishes", async () => {
+    vi.spyOn(weatherApi, "getBestSunshine").mockImplementation(
+      () => new Promise(() => {}),
+    );
+
+    renderHome();
+
+    expect(
+      await screen.findByRole("heading", {
+        level: 1,
+        name: /Karl is advancing into Mill Valley\./,
+      }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Reading Karl intelligence")).not.toBeInTheDocument();
+  });
+
   it("falls back to the general map route when best sunshine is unavailable", async () => {
     vi.spyOn(weatherApi, "getBestSunshine").mockRejectedValue(
       new Error("best sunshine unavailable"),

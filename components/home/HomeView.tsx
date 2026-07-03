@@ -125,13 +125,13 @@ export function HomeView() {
     current,
     karlLocation,
     intelligenceFocusLocationId: intelligence?.heroImagery?.focusLocationId,
-    hasLoadedWeather,
+    hasLoadedWeather: hasLoadedCoreWeather,
   });
 
   const subheadline = heroSubheadline({
     current,
     karlLocation,
-    hasLoadedWeather,
+    hasLoadedWeather: hasLoadedCoreWeather,
   });
 
   const isFindingClearSkies =
@@ -222,7 +222,7 @@ export function HomeView() {
         isFindingClearSkies={isFindingClearSkies}
       />
 
-      <div className="relative z-10 mx-auto -mt-12 flex w-full max-w-[430px] flex-col px-4 lg:-mt-8 lg:max-w-6xl lg:px-8 xl:max-w-7xl">
+      <div className="relative z-10 mx-auto -mt-12 flex w-full max-w-[430px] flex-col px-4 lg:-mt-6 lg:max-w-6xl lg:px-8 xl:max-w-7xl">
         <DashboardGrid
           current={current}
           bestSunshine={bestSunshine}
@@ -255,14 +255,14 @@ export function HomeView() {
           />
         </div>
 
-        <div className="mt-5 hidden flex-col gap-5 lg:flex">
+        <div className="mt-4 hidden flex-col gap-4 lg:flex">
           <IntelligenceNarrativeCard
             intelligence={intelligence}
             isLoading={intelligenceQuery.isLoading && !intelligence}
             layout="desktop"
           />
 
-          <div className="grid grid-cols-2 gap-5">
+          <div className="grid grid-cols-2 gap-4">
             <BestSunshineCard
               recommendation={bestSunshine}
               isLoading={

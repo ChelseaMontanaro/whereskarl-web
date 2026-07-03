@@ -95,20 +95,20 @@ export function HomeHero({
           </p>
         </div>
 
-        <div className="mt-auto px-5 pb-14 lg:mt-0 lg:px-0 lg:pb-8 lg:pt-28 lg:text-left">
+        <div className="mt-auto px-5 pb-14 lg:mt-0 lg:min-h-[17rem] lg:px-0 lg:pb-6 lg:pt-32 lg:text-left xl:min-h-[18rem]">
           <HeroPositionBadge isLoading={isLoading} />
           <h1
-            className={`mt-2 max-w-[18ch] font-serif text-[1.75rem] font-semibold leading-[1.12] text-white/[0.98] [text-shadow:0_5px_14px_rgba(0,0,0,0.56)] sm:text-[1.85rem] lg:max-w-[24ch] lg:text-[2.5rem] lg:leading-[1.08] xl:max-w-[26ch] xl:text-[2.75rem] ${
+            className={`mt-3 max-w-[18ch] font-serif text-[1.75rem] font-semibold leading-[1.12] text-white/[0.98] [text-shadow:0_5px_14px_rgba(0,0,0,0.56)] sm:text-[1.85rem] lg:max-w-[22ch] lg:text-[2.65rem] lg:leading-[1.06] xl:max-w-[24ch] xl:text-[2.85rem] ${
               isLoading ? "opacity-70" : ""
             }`}
           >
             {headline}
           </h1>
-          <p className="mt-2 max-w-[34ch] text-[0.9375rem] font-medium leading-snug text-white/[0.76] [text-shadow:0_4px_10px_rgba(0,0,0,0.46)] lg:max-w-[48ch] lg:text-base lg:leading-relaxed xl:max-w-[52ch]">
+          <p className="mt-3 max-w-[34ch] text-[0.9375rem] font-medium leading-snug text-white/[0.82] [text-shadow:0_4px_10px_rgba(0,0,0,0.46)] lg:max-w-[44ch] lg:text-[1.05rem] lg:leading-relaxed xl:max-w-[48ch]">
             {subheadline}
           </p>
           {confidenceText ? (
-            <p className="mt-2 max-w-[34ch] text-[0.6875rem] font-medium text-white/44 [text-shadow:0_3px_8px_rgba(0,0,0,0.36)] lg:max-w-[48ch] lg:text-xs">
+            <p className="mt-2.5 max-w-[34ch] text-[0.6875rem] font-medium text-white/50 [text-shadow:0_3px_8px_rgba(0,0,0,0.36)] lg:max-w-[44ch] lg:text-xs">
               {confidenceText}
             </p>
           ) : null}

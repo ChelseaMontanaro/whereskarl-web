@@ -43,16 +43,16 @@ export function HomeDesktopBackground({
       <div
         className="absolute inset-0 mix-blend-multiply"
         style={{
-          background: `linear-gradient(180deg, rgba(3,11,20,${presentation.atmosphereTopOpacity}) 0%, rgba(3,11,20,0.08) 42%, rgba(3,11,20,${presentation.atmosphereBottomOpacity * 0.72}) 100%)`,
+          background: `linear-gradient(180deg, rgba(3,11,20,${presentation.atmosphereTopOpacity * 0.72}) 0%, rgba(3,11,20,0.04) 46%, rgba(3,11,20,${presentation.atmosphereBottomOpacity * 0.42}) 100%)`,
         }}
       />
       <div
         className="absolute inset-0"
         style={{
-          background: `linear-gradient(0deg, rgba(0,0,0,${presentation.bottomGradientLeadOpacity * 0.55}) 0%, rgba(0,0,0,${presentation.bottomGradientMidOpacity * 0.35}) 38%, rgba(0,0,0,0.18) 72%, rgba(0,0,0,0.08) 100%)`,
+          background: `linear-gradient(0deg, rgba(0,0,0,${presentation.bottomGradientLeadOpacity * 0.38}) 0%, rgba(0,0,0,${presentation.bottomGradientMidOpacity * 0.22}) 42%, rgba(0,0,0,0.1) 78%, rgba(0,0,0,0.04) 100%)`,
         }}
       />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/45 via-black/15 to-black/35" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/38 via-black/10 to-black/28" />
     </div>
   );
 }

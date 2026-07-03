@@ -61,9 +61,9 @@ function DesktopIntelligenceNarrativeCard({
 }: Omit<IntelligenceNarrativeCardProps, "layout">) {
   if (isLoading) {
     return (
-      <GlassCard className="flex items-center gap-5 border-white/8 bg-karl-navy-glass/48 px-5 py-4 backdrop-blur-md">
+      <GlassCard variant="desktop" className="flex items-center gap-4 px-5 py-4">
         <InsightIconFrame>
-          <KarlStatusIcon className="h-8 w-8" />
+          <KarlStatusIcon className="h-8 w-8 lg:h-9 lg:w-9" />
         </InsightIconFrame>
         <div className="min-w-0 flex-1">
           <CardLabel>Karl&apos;s Read</CardLabel>
@@ -85,20 +85,20 @@ function DesktopIntelligenceNarrativeCard({
       : intelligence.narrative.confidenceLabel;
 
   return (
-    <GlassCard className="flex items-center gap-5 border-white/8 bg-karl-navy-glass/48 px-5 py-4 backdrop-blur-md">
+    <GlassCard variant="desktop" className="flex items-center gap-4 px-5 py-4">
       <InsightIconFrame>
-        <KarlStatusIcon className="h-8 w-8" />
+        <KarlStatusIcon className="h-8 w-8 lg:h-9 lg:w-9" />
       </InsightIconFrame>
       <div className="min-w-0 flex-1">
         <CardLabel>Karl&apos;s Read</CardLabel>
         <h2 className="mt-1.5 text-xl font-semibold leading-snug text-white">
           {intelligence.narrative.headline}
         </h2>
-        <p className="mt-1.5 text-sm leading-relaxed text-white/68">
+        <p className="mt-1.5 text-sm leading-relaxed text-white/72">
           {intelligence.narrative.summary}
         </p>
         {confidenceLabel ? (
-          <p className="mt-2 text-xs font-medium text-white/42">
+          <p className="mt-2 text-xs font-medium text-white/48">
             {confidenceLabel} confidence
           </p>
         ) : null}
