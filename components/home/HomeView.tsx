@@ -22,6 +22,7 @@ import { resolveConditionsPresentation } from "@/lib/home/conditionsStatus";
 import { resolveHeroPresentation } from "@/lib/home/heroPresentation";
 import {
   bestRightNowItems,
+  bestRightNowLocationItems,
   foggiestKarlLocation,
   formatUpdatedAt,
   heroConfidenceText,
@@ -117,6 +118,15 @@ export function HomeView() {
 
   const heroPresentation = resolveHeroPresentation(intelligence?.heroImagery);
   const bestRightNow = bestRightNowItems(intelligence, bestSunshine);
+  const primaryClearestLocationId = bestSunshine?.locationID ?? null;
+  const desktopBestRightNow = useMemo(
+    () =>
+      bestRightNowLocationItems(
+        locationsQuery.data?.locations,
+        primaryClearestLocationId,
+      ),
+    [locationsQuery.data?.locations, primaryClearestLocationId],
+  );
   const nextHourSummary = nextHourOutlookSummary(karlLocation?.prediction);
   const nextHourConfidence =
     karlLocation?.prediction?.predictionConfidenceLabel ?? null;
@@ -263,16 +273,11 @@ export function HomeView() {
           />
 
           <div className="grid grid-cols-2 gap-4">
-            <BestSunshineCard
-              recommendation={bestSunshine}
-              isLoading={
-                bestSunshineQuery.isLoading || bestSunshineQuery.isFetching
-              }
-              isUnavailable={bestSunshineQuery.isError}
+            <BestRightNowSection
+              items={desktopBestRightNow}
+              isLoading={!hasLoadedCoreWeather}
               layout="desktop"
             />
-
-            <BestRightNowSection items={bestRightNow} layout="desktop" />
           </div>
         </div>
 

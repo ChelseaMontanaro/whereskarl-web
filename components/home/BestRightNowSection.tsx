@@ -7,13 +7,18 @@ import {
   InsightIconFrame,
   SunshineScoreBadge,
 } from "@/components/home/InsightCardParts";
-import { desktopClickableCardHoverClass, desktopClickableCardLinkClass, desktopInsightIconSizeClass } from "@/components/home/desktopGlass";
+import {
+  desktopClickableCardHoverClass,
+  desktopClickableCardLinkClass,
+  desktopInsightIconSizeClass,
+} from "@/components/home/desktopGlass";
 import { GlassCard } from "@/components/ui/GlassCard";
 import type { BestRightNowItem } from "@/lib/home/weatherDisplay";
 import { buildMapHref } from "@/lib/map/routing";
 
 type BestRightNowSectionProps = {
   items: BestRightNowItem[];
+  isLoading?: boolean;
   layout?: "both" | "mobile" | "desktop";
 };
 
@@ -78,7 +83,7 @@ function DesktopBestRightNowCard({ item }: { item: BestRightNowItem }) {
     <Link
       href={href}
       aria-label={`View ${item.locationName} on map`}
-      className={desktopClickableCardLinkClass}
+      className={`${desktopClickableCardLinkClass} h-full`}
     >
       <GlassCard
         variant="desktop"
@@ -103,20 +108,50 @@ function DesktopBestRightNowCard({ item }: { item: BestRightNowItem }) {
   );
 }
 
-export function BestRightNowSection({
+function DesktopBestRightNowGrid({
   items,
-  layout = "both",
+  isLoading = false,
 }: BestRightNowSectionProps) {
+  if (isLoading) {
+    return (
+      <GlassCard variant="desktop" className="col-span-2 px-5 py-5">
+        <p className="text-lg font-semibold text-white/50">Finding best spots…</p>
+      </GlassCard>
+    );
+  }
+
   if (items.length === 0) {
     return null;
   }
 
+  return (
+    <>
+      {items.map((item) => (
+        <DesktopBestRightNowCard key={item.locationId} item={item} />
+      ))}
+    </>
+  );
+}
+
+export function BestRightNowSection({
+  items,
+  isLoading = false,
+  layout = "both",
+}: BestRightNowSectionProps) {
   if (layout === "mobile") {
+    if (items.length === 0) {
+      return null;
+    }
+
     return <MobileBestRightNowSection items={items} />;
   }
 
   if (layout === "desktop") {
-    return <DesktopBestRightNowCard item={items[0]} />;
+    return <DesktopBestRightNowGrid items={items} isLoading={isLoading} />;
+  }
+
+  if (items.length === 0) {
+    return null;
   }
 
   return (
@@ -125,7 +160,7 @@ export function BestRightNowSection({
         <MobileBestRightNowSection items={items} />
       </div>
       <div className="hidden lg:block">
-        <DesktopBestRightNowCard item={items[0]} />
+        <DesktopBestRightNowGrid items={items} isLoading={isLoading} />
       </div>
     </>
   );

@@ -14,6 +14,38 @@ export type BestRightNowItem = {
   rank: number | null;
 };
 
+function normalizeLocationId(locationId: string | null | undefined): string | null {
+  const normalized = locationId?.trim().toLowerCase() ?? "";
+  return normalized.length > 0 ? normalized : null;
+}
+
+export function bestRightNowLocationItems(
+  locations: LocationWeather[] | undefined,
+  excludeLocationId: string | null | undefined,
+  limit = 4,
+): BestRightNowItem[] {
+  if (!locations?.length) {
+    return [];
+  }
+
+  const excludedId = normalizeLocationId(excludeLocationId);
+
+  return [...locations]
+    .filter((location) => normalizeLocationId(location.id) !== excludedId)
+    .sort((left, right) => right.sunshineScore - left.sunshineScore)
+    .slice(0, limit)
+    .map((location, index) => ({
+      locationId: location.id,
+      locationName: location.name,
+      detail:
+        trimmedNonEmpty(location.karlReason) ??
+        trimmedNonEmpty(location.status) ??
+        "Current conditions available",
+      score: location.sunshineScore,
+      rank: index + 1,
+    }));
+}
+
 export function foggiestKarlLocation(
   locations: LocationWeather[],
 ): LocationWeather | null {

@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import {
+  bestRightNowLocationItems,
   heroConfidenceText,
   heroSubheadline,
   movementPhrase,
@@ -38,6 +39,97 @@ const currentFixture: CurrentResponse = {
     sourceReliability: 0,
   },
 };
+
+describe("bestRightNowLocationItems", () => {
+  it("excludes the primary clearest spot and sorts remaining locations by score", () => {
+    const items = bestRightNowLocationItems(
+      [
+        {
+          id: "tiburon",
+          name: "Tiburon",
+          latitude: 0,
+          longitude: 0,
+          distanceText: "9 mi",
+          status: "Mostly Sunny",
+          temperature: 72,
+          sunshineScore: 82,
+          cloudCover: 22,
+          visibility: 9,
+          humidity: 58,
+          windSpeed: 7,
+          windDirection: "W",
+          weatherCode: 1,
+          iconName: "sun.max.fill",
+          fogScore: 26,
+          karlReason: "Clear",
+          primaryDrivers: [],
+          microclimateFactors: [],
+          updatedAt: "2026-07-01T16:00:00.000Z",
+          confidenceScore: 0,
+          confidenceLabel: "Unavailable",
+          confidenceExplanation: "Unavailable",
+          confidenceComponents: {
+            freshness: 0,
+            observationQuality: 0,
+            fieldCompleteness: 0,
+            sourceReliability: 0,
+          },
+          prediction: {
+            predictionConfidenceScore: 0,
+            predictionConfidenceLabel: "Unavailable",
+            predictionReason: "Unavailable",
+          },
+        },
+        {
+          id: "sausalito",
+          name: "Sausalito",
+          latitude: 0,
+          longitude: 0,
+          distanceText: "7 mi",
+          status: "Mostly Sunny",
+          temperature: 68,
+          sunshineScore: 74,
+          cloudCover: 34,
+          visibility: 8,
+          humidity: 64,
+          windSpeed: 9,
+          windDirection: "W",
+          weatherCode: 2,
+          iconName: "cloud.sun.fill",
+          fogScore: 41,
+          karlReason: "Clearing",
+          primaryDrivers: [],
+          microclimateFactors: [],
+          updatedAt: "2026-07-01T16:00:00.000Z",
+          confidenceScore: 0,
+          confidenceLabel: "Unavailable",
+          confidenceExplanation: "Unavailable",
+          confidenceComponents: {
+            freshness: 0,
+            observationQuality: 0,
+            fieldCompleteness: 0,
+            sourceReliability: 0,
+          },
+          prediction: {
+            predictionConfidenceScore: 0,
+            predictionConfidenceLabel: "Unavailable",
+            predictionReason: "Unavailable",
+          },
+        },
+      ],
+      "tiburon",
+    );
+
+    expect(items).toEqual([
+      expect.objectContaining({
+        locationId: "sausalito",
+        locationName: "Sausalito",
+        score: 74,
+        detail: "Clearing",
+      }),
+    ]);
+  });
+});
 
 describe("movementPhrase", () => {
   it("returns a stable phrase for a location id", () => {
