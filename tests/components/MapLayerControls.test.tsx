@@ -47,4 +47,41 @@ describe("MapLayerControls", () => {
 
     expect(onMapStyleChange).toHaveBeenCalledWith("hybrid");
   });
+
+  it("shows the desktop layers panel expanded by default", () => {
+    render(
+      <MapLayerControls
+        layout="desktop"
+        mapStyle="standard"
+        fogLayerEnabled
+        onMapStyleChange={vi.fn()}
+        onFogLayerChange={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText("Map Layers")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Satellite" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Collapse layers panel" })).toBeInTheDocument();
+  });
+
+  it("collapses and restores the desktop layers panel", () => {
+    render(
+      <MapLayerControls
+        layout="desktop"
+        mapStyle="standard"
+        fogLayerEnabled
+        onMapStyleChange={vi.fn()}
+        onFogLayerChange={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Collapse layers panel" }));
+
+    expect(screen.queryByRole("button", { name: "Satellite" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Layers" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Layers" }));
+
+    expect(screen.getByRole("button", { name: "Satellite" })).toBeInTheDocument();
+  });
 });

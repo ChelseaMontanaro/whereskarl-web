@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 
-import { MapFogLegend } from "@/components/map/MapFogLegend";
 import { desktopGlassCardClass } from "@/components/home/desktopGlass";
 import {
   KARL_MAP_STYLE_OPTIONS,
@@ -38,6 +37,21 @@ function ZoomButton({
   );
 }
 
+function LayersIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+    >
+      <path d="M4 6h16M4 12h16M4 18h10" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function LayerPanelContent({
   mapStyle,
   fogLayerEnabled,
@@ -54,7 +68,7 @@ function LayerPanelContent({
         <p className="text-[0.625rem] font-bold uppercase tracking-[0.14em] text-white/45">
           Map Style
         </p>
-        <div className={`mt-2 grid gap-2 ${compact ? "grid-cols-1" : "grid-cols-3"}`}>
+        <div className={`mt-2 grid gap-2 ${compact ? "grid-cols-3" : "grid-cols-3"}`}>
           {KARL_MAP_STYLE_OPTIONS.map((option) => {
             const isSelected = mapStyle === option.id;
 
@@ -105,11 +119,11 @@ export function MapLayerControls({
   onZoomOut,
 }: MapLayerControlsProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [legendOpen, setLegendOpen] = useState(false);
+  const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false);
 
   if (layout === "desktop") {
     return (
-      <div className="absolute right-5 top-[5.5rem] z-10 flex flex-col items-end gap-2">
+      <div className="absolute right-5 top-[5.5rem] z-10 flex w-[min(100%,17rem)] flex-col items-end gap-2">
         <div
           className={`${desktopGlassCardClass} flex flex-col items-center p-1`}
           aria-label="Map zoom controls"
@@ -119,69 +133,45 @@ export function MapLayerControls({
           <ZoomButton label="Zoom out" onClick={onZoomOut} />
         </div>
 
-        <div className={`${desktopGlassCardClass} relative p-1.5`}>
+        {isDesktopCollapsed ? (
           <button
             type="button"
-            aria-expanded={isOpen}
+            aria-expanded={false}
             aria-controls="map-layer-panel-desktop"
-            onClick={() => setIsOpen((open) => !open)}
-            className="flex h-9 w-9 items-center justify-center rounded-xl text-xs font-semibold text-white/80 transition-colors hover:bg-white/[0.06] hover:text-karl-gold motion-reduce:transition-none"
-            aria-label="Map layers"
+            onClick={() => setIsDesktopCollapsed(false)}
+            className={`${desktopGlassCardClass} flex items-center gap-2 px-3 py-2 text-xs font-semibold text-white/80 transition-colors hover:text-karl-gold motion-reduce:transition-none`}
           >
-            <svg
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              className="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.6"
-            >
-              <path d="M4 6h16M4 12h16M4 18h10" strokeLinecap="round" />
-            </svg>
+            <LayersIcon />
+            Layers
           </button>
-
-          {isOpen ? (
-            <div
-              id="map-layer-panel-desktop"
-              className="absolute right-full top-0 mr-2 w-52 rounded-2xl border border-white/10 bg-black/40 p-3 shadow-xl backdrop-blur-md"
-            >
+        ) : (
+          <div
+            id="map-layer-panel-desktop"
+            className={`${desktopGlassCardClass} w-full p-3 shadow-xl`}
+          >
+            <div className="flex items-start justify-between gap-3">
               <div className="space-y-1">
                 <p className="text-sm font-semibold text-white">Map Layers</p>
                 <p className="text-xs text-white/55">Customize the Karl map</p>
               </div>
-              <LayerPanelContent
-                mapStyle={mapStyle}
-                fogLayerEnabled={fogLayerEnabled}
-                onMapStyleChange={onMapStyleChange}
-                onFogLayerChange={onFogLayerChange}
-                compact
-              />
-            </div>
-          ) : null}
-        </div>
-
-        {fogLayerEnabled ? (
-          <div className={`${desktopGlassCardClass} relative p-1.5`}>
-            <button
-              type="button"
-              aria-expanded={legendOpen}
-              aria-controls="map-fog-legend-desktop"
-              onClick={() => setLegendOpen((open) => !open)}
-              className="flex h-9 w-9 items-center justify-center rounded-xl text-[0.65rem] font-bold uppercase tracking-[0.08em] text-white/70 transition-colors hover:bg-white/[0.06] hover:text-karl-gold motion-reduce:transition-none"
-              aria-label="Fog intensity legend"
-            >
-              Fog
-            </button>
-            {legendOpen ? (
-              <div
-                id="map-fog-legend-desktop"
-                className="absolute right-full top-0 mr-2"
+              <button
+                type="button"
+                aria-label="Collapse layers panel"
+                onClick={() => setIsDesktopCollapsed(true)}
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/12 bg-white/[0.04] text-sm text-white/65 transition-colors hover:border-white/20 hover:text-white motion-reduce:transition-none"
               >
-                <MapFogLegend layout="desktop" />
-              </div>
-            ) : null}
+                ×
+              </button>
+            </div>
+            <LayerPanelContent
+              mapStyle={mapStyle}
+              fogLayerEnabled={fogLayerEnabled}
+              onMapStyleChange={onMapStyleChange}
+              onFogLayerChange={onFogLayerChange}
+              compact
+            />
           </div>
-        ) : null}
+        )}
       </div>
     );
   }

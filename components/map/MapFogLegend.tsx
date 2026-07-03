@@ -15,10 +15,36 @@ const LEGEND_ITEMS: Array<{
 ];
 
 type MapFogLegendProps = {
-  layout?: "mobile" | "desktop";
+  layout?: "mobile" | "desktop" | "desktop-stack";
 };
 
 export function MapFogLegend({ layout = "mobile" }: MapFogLegendProps) {
+  if (layout === "desktop-stack") {
+    return (
+      <div
+        aria-label="Fog intensity legend"
+        className={`${desktopGlassCardClass} max-w-xs px-3 py-2`}
+      >
+        <p className="text-[0.58rem] font-bold uppercase tracking-[0.14em] text-white/38">
+          Fog Intensity
+        </p>
+        <ul className="mt-1.5 grid grid-cols-2 gap-x-3 gap-y-1">
+          {LEGEND_ITEMS.map((item) => (
+            <li key={item.intensity} className="flex items-center gap-1.5">
+              <span
+                aria-hidden="true"
+                className={`h-2 w-2 shrink-0 rounded-full ${item.className}`}
+              />
+              <span className="text-[0.62rem] text-white/58">
+                {getFogIntensityLabel(item.intensity)}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+
   if (layout === "desktop") {
     return (
       <div

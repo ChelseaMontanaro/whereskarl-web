@@ -32,6 +32,7 @@ type BayAreaMapProps = {
   onFogLayerChange: (enabled: boolean) => void;
   isLoading?: boolean;
   layout?: "mobile" | "desktop";
+  preserveViewport?: boolean;
 };
 
 export function BayAreaMap({
@@ -45,6 +46,7 @@ export function BayAreaMap({
   onFogLayerChange,
   isLoading = false,
   layout = "mobile",
+  preserveViewport = false,
 }: BayAreaMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<import("maplibre-gl").Map | null>(null);
@@ -210,7 +212,7 @@ export function BayAreaMap({
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !mapReady) {
+    if (!map || !mapReady || preserveViewport) {
       return;
     }
 
@@ -229,7 +231,7 @@ export function BayAreaMap({
     }
 
     fitDefaultBayAreaViewport(map);
-  }, [locations, mapReady, selectedLocationId, selectedRegionId]);
+  }, [locations, mapReady, preserveViewport, selectedLocationId, selectedRegionId]);
 
   return (
     <div

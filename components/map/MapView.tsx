@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { BayAreaMap } from "@/components/map/BayAreaMap";
 import { MapBestRightNowTray } from "@/components/map/MapBestRightNowTray";
 import { MapConditionsPanel } from "@/components/map/MapConditionsPanel";
+import { MapFogLegend } from "@/components/map/MapFogLegend";
 import { MapLocationList } from "@/components/map/MapLocationList";
 import { MapRegionChips } from "@/components/map/MapRegionChips";
 import { MapSelectedLocationCard } from "@/components/map/MapSelectedLocationCard";
@@ -90,7 +91,7 @@ function MapQueryWarnings({
 
   const wrapperClass =
     variant === "desktop"
-      ? "pointer-events-auto absolute left-6 top-[11.5rem] z-20 max-w-xs"
+      ? "pointer-events-auto max-w-xs"
       : undefined;
 
   return (
@@ -143,6 +144,8 @@ type MapViewModel = {
   bestRightNowItems: ReturnType<typeof bestRightNowLocationItems>;
   handleSelectLocation: (locationId: string) => void;
   handleSelectRegion: (regionId: string) => void;
+  handleClearSelectedLocation: () => void;
+  preserveViewport: boolean;
   statusSentence: string;
 };
 
@@ -152,6 +155,7 @@ function useMapViewState(): MapViewModel {
   const mapQuery = resolveMapQueryState(searchParams);
   const [mapStyle, setMapStyle] = useState<KarlMapStyleId>("standard");
   const [fogLayerEnabled, setFogLayerEnabled] = useState(true);
+  const [preserveViewport, setPreserveViewport] = useState(false);
 
   const locationsQuery = useQuery({
     queryKey: ["locations"],
@@ -205,13 +209,20 @@ function useMapViewState(): MapViewModel {
 
   const handleSelectLocation = useCallback(
     (locationId: string) => {
+      setPreserveViewport(false);
       router.replace(buildMapHref(locationId), { scroll: false });
     },
     [router],
   );
 
+  const handleClearSelectedLocation = useCallback(() => {
+    setPreserveViewport(true);
+    router.replace("/map", { scroll: false });
+  }, [router]);
+
   const handleSelectRegion = useCallback(
     (regionId: string) => {
+      setPreserveViewport(false);
       if (!isBayAreaProductRegionId(regionId)) {
         return;
       }
@@ -247,6 +258,8 @@ function useMapViewState(): MapViewModel {
     bestRightNowItems: bestRightNow,
     handleSelectLocation,
     handleSelectRegion,
+    handleClearSelectedLocation,
+    preserveViewport,
     statusSentence,
   };
 }
@@ -342,6 +355,8 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
     markerLocations,
     bestRightNowItems,
     handleSelectLocation,
+    handleClearSelectedLocation,
+    preserveViewport,
     statusSentence,
   } = state;
 
@@ -358,21 +373,22 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
         onFogLayerChange={setFogLayerEnabled}
         isLoading={locationsQuery.isLoading}
         layout="desktop"
+        preserveViewport={preserveViewport}
       />
 
       <div className="pointer-events-none absolute inset-0 z-20">
-        <div className="pointer-events-auto absolute left-6 top-[5.5rem]">
+        <div className="pointer-events-auto absolute left-6 top-[5.5rem] flex max-w-xs flex-col gap-2">
           <MapConditionsPanel
             statusSentence={statusSentence}
             isLoading={currentQuery.isLoading && !currentQuery.data}
           />
+          <MapFogLegend layout="desktop-stack" />
+          <MapQueryWarnings
+            unknownLocationId={unknownLocationId}
+            unknownRegionId={mapQuery.unknownRegionId}
+            variant="desktop"
+          />
         </div>
-
-        <MapQueryWarnings
-          unknownLocationId={unknownLocationId}
-          unknownRegionId={mapQuery.unknownRegionId}
-          variant="desktop"
-        />
 
         <div className="absolute inset-x-0 bottom-6 flex flex-col items-center gap-3 px-6">
           <div className="pointer-events-auto flex w-full max-w-5xl items-end justify-start">
@@ -384,8 +400,11 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
           </div>
 
           {selectedLocation ? (
-            <div className="pointer-events-auto w-full max-w-2xl">
-              <MapSelectedLocationCard location={selectedLocation} />
+            <div className="pointer-events-auto flex w-full justify-center px-4">
+              <MapSelectedLocationCard
+                location={selectedLocation}
+                onClose={handleClearSelectedLocation}
+              />
             </div>
           ) : null}
         </div>
