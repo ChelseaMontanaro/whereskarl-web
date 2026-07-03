@@ -1,16 +1,18 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
+import { BayAreaMap } from "@/components/map/BayAreaMap";
+import { MapRegionChips } from "@/components/map/MapRegionChips";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { getLocations } from "@/lib/api/weather";
 import { WEATHER_STALE_TIME_MS } from "@/lib/constants/config";
-import {
-  mapViewportForLocation,
-  resolveMapLocationFocus,
-} from "@/lib/map/locationSelection";
-import { readMapLocationParam } from "@/lib/map/routing";
+import { isBayAreaProductRegionId } from "@/lib/map/config";
+import { resolveMapLocationFocus } from "@/lib/map/locationSelection";
+import type { MapMarkerLocation } from "@/lib/map/markers";
+import { buildMapHref, readMapLocationParam } from "@/lib/map/routing";
 
 function MapLocationCard({
   location,
@@ -56,8 +58,10 @@ function MapLocationCard({
 }
 
 export function MapView() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const requestedLocationId = readMapLocationParam(searchParams);
+  const [selectedRegionId, setSelectedRegionId] = useState<string | null>(null);
 
   const locationsQuery = useQuery({
     queryKey: ["locations"],
@@ -65,14 +69,46 @@ export function MapView() {
     staleTime: WEATHER_STALE_TIME_MS,
   });
 
-  const locations = locationsQuery.data?.locations ?? [];
+  const locations = useMemo(
+    () => locationsQuery.data?.locations ?? [],
+    [locationsQuery.data?.locations],
+  );
   const { selectedLocation, unknownLocationId } = resolveMapLocationFocus({
     requestedLocationId,
     locations,
   });
-  const viewport = selectedLocation
-    ? mapViewportForLocation(selectedLocation)
-    : null;
+
+  const markerLocations = useMemo<MapMarkerLocation[]>(
+    () =>
+      locations.map((location) => ({
+        id: location.id,
+        name: location.name,
+        latitude: location.latitude,
+        longitude: location.longitude,
+        sunshineScore: location.sunshineScore,
+      })),
+    [locations],
+  );
+
+  const handleSelectLocation = useCallback(
+    (locationId: string) => {
+      setSelectedRegionId(null);
+      router.replace(buildMapHref(locationId), { scroll: false });
+    },
+    [router],
+  );
+
+  const handleSelectRegion = useCallback(
+    (regionId: string) => {
+      if (!isBayAreaProductRegionId(regionId)) {
+        return;
+      }
+
+      setSelectedRegionId((current) => (current === regionId ? null : regionId));
+      router.replace("/map", { scroll: false });
+    },
+    [router],
+  );
 
   return (
     <div className="mx-auto flex w-full max-w-[430px] flex-col gap-4 px-4 py-6 sm:py-8">
@@ -84,43 +120,23 @@ export function MapView() {
         <p className="text-base text-white/70">
           {selectedLocation
             ? `Focused on ${selectedLocation.name}.`
-            : "Explore Bay Area conditions by location."}
+            : "Explore conditions across San Francisco, North Bay, East Bay, and South Bay."}
         </p>
       </header>
 
-      <GlassCard className="relative aspect-[4/5] overflow-hidden px-0 py-0">
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(242,163,38,0.12),transparent_42%),linear-gradient(180deg,rgb(9_27_42)_0%,rgb(3_11_20)_100%)]"
-        />
-        <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:24px_24px]" />
+      <MapRegionChips
+        selectedRegionId={selectedLocation ? null : selectedRegionId}
+        onSelectRegion={handleSelectRegion}
+      />
 
-        {locationsQuery.isLoading ? (
-          <div className="relative flex h-full items-center justify-center px-6 text-center text-sm text-white/55">
-            Loading Bay Area locations…
-          </div>
-        ) : selectedLocation && viewport ? (
-          <>
-            <div
-              aria-hidden="true"
-              className="absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-karl-gold bg-karl-gold/80 shadow-[0_0_0_6px_rgba(242,163,38,0.18)]"
-              style={{
-                left: `${viewport.markerLeftPercent}%`,
-                top: `${viewport.markerTopPercent}%`,
-              }}
-            />
-            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-4 pb-4 pt-10">
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-karl-gold">
-                {viewport.zoomLabel}
-              </p>
-              <p className="mt-1 text-sm text-white/70">{viewport.centerLabel}</p>
-            </div>
-          </>
-        ) : (
-          <div className="relative flex h-full items-center justify-center px-6 text-center text-sm text-white/55">
-            Select a location to focus the map preview.
-          </div>
-        )}
+      <GlassCard className="relative aspect-[4/5] overflow-hidden px-0 py-0">
+        <BayAreaMap
+          locations={markerLocations}
+          selectedLocationId={selectedLocation?.id ?? null}
+          selectedRegionId={selectedLocation ? null : selectedRegionId}
+          onSelectLocation={handleSelectLocation}
+          isLoading={locationsQuery.isLoading}
+        />
       </GlassCard>
 
       {unknownLocationId ? (
@@ -158,8 +174,8 @@ export function MapView() {
         </section>
       ) : null}
 
-      <p className="text-center text-xs text-white/35">
-        MapLibre integration is planned for a later step.
+      <p className="text-center text-[0.65rem] text-white/30">
+        Map data © OpenStreetMap contributors · CARTO
       </p>
     </div>
   );
