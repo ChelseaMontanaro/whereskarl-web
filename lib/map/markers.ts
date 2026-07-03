@@ -57,7 +57,11 @@ function shouldHideFilteredMarker(
     return false;
   }
 
-  return intensityFilter === "clear" || intensityFilter === "karlTerritory";
+  return (
+    intensityFilter === "clear" ||
+    intensityFilter === "lightFog" ||
+    intensityFilter === "karlTerritory"
+  );
 }
 
 export function createMapMarkerElement(input: {

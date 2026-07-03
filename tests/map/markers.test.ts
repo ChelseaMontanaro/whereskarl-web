@@ -204,7 +204,7 @@ describe("createMapMarkerElement", () => {
     expect(marker.innerHTML).not.toContain("/brand/wheres-karl-logo@2x.png");
   });
 
-  it("dims but does not hide non-matching markers for light fog filter", () => {
+  it("hides non-light-fog markers when the Light Fog filter is active", () => {
     const marker = createMapMarkerElement({
       location: tiburon,
       isSelected: false,
@@ -213,7 +213,33 @@ describe("createMapMarkerElement", () => {
       onSelect: vi.fn(),
     });
 
+    expect(marker.className).toContain("is-filtered-hidden");
     expect(marker.className).toContain("is-filtered-out");
-    expect(marker.className).not.toContain("is-filtered-hidden");
+    expect(marker.className).toContain("karl-map-marker--karlTerritory");
+  });
+
+  it("shows light fog cloud icons for matching locations when the Light Fog filter is active", () => {
+    const marker = createMapMarkerElement({
+      location: {
+        id: "sausalito",
+        name: "Sausalito",
+        latitude: 37.8591,
+        longitude: -122.4853,
+        fogScore: 35,
+        sunshineScore: 40,
+        status: "Light Fog",
+      },
+      isSelected: false,
+      fogLayerEnabled: true,
+      intensityFilter: "lightFog",
+      onSelect: vi.fn(),
+    });
+
+    expect(marker.className).toContain("karl-map-marker--lightFog");
+    expect(marker.className).toContain("is-intensity-match");
+    expect(marker.className).not.toContain("is-filtered-out");
+    expect(marker.innerHTML).toContain('ellipse cx="12" cy="11"');
+    expect(marker.innerHTML).not.toContain("/brand/wheres-karl-logo@2x.png");
+    expect(marker.innerHTML).not.toContain('circle cx="12" cy="12"');
   });
 });
