@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { BestRightNowSection } from "@/components/home/BestRightNowSection";
 import { BestSunshineCard } from "@/components/home/BestSunshineCard";
 import { DashboardGrid } from "@/components/home/DashboardGrid";
+import { HomeDesktopBackground } from "@/components/home/HomeDesktopBackground";
 import { HomeHero } from "@/components/home/HomeHero";
 import { IntelligenceNarrativeCard } from "@/components/home/IntelligenceNarrativeCard";
 import { NextHourOutlookCard } from "@/components/home/NextHourOutlookCard";
@@ -208,7 +209,9 @@ export function HomeView() {
   ]);
 
   return (
-    <div className="pb-8">
+    <div className="relative pb-8 lg:pb-12">
+      <HomeDesktopBackground presentation={heroPresentation} />
+
       <HomeHero
         presentation={heroPresentation}
         headline={headline}
@@ -219,7 +222,7 @@ export function HomeView() {
         isFindingClearSkies={isFindingClearSkies}
       />
 
-      <div className="relative z-10 mx-auto -mt-12 flex w-full max-w-[430px] flex-col gap-3.5 px-4 lg:-mt-16 lg:max-w-6xl lg:gap-5 lg:px-8 xl:max-w-7xl">
+      <div className="relative z-10 mx-auto -mt-12 flex w-full max-w-[430px] flex-col px-4 lg:-mt-8 lg:max-w-6xl lg:px-8 xl:max-w-7xl">
         <DashboardGrid
           current={current}
           bestSunshine={bestSunshine}
@@ -227,29 +230,54 @@ export function HomeView() {
           isNightPresentation={isNightPresentation}
         />
 
-        <BestSunshineCard
-          recommendation={bestSunshine}
-          isLoading={
-            bestSunshineQuery.isLoading || bestSunshineQuery.isFetching
-          }
-          isUnavailable={bestSunshineQuery.isError}
-        />
+        <div className="mt-3.5 flex flex-col gap-3.5 lg:hidden">
+          <BestSunshineCard
+            recommendation={bestSunshine}
+            isLoading={
+              bestSunshineQuery.isLoading || bestSunshineQuery.isFetching
+            }
+            isUnavailable={bestSunshineQuery.isError}
+            layout="mobile"
+          />
 
-        <IntelligenceNarrativeCard
-          intelligence={intelligence}
-          isLoading={intelligenceQuery.isLoading && !intelligence}
-        />
+          <IntelligenceNarrativeCard
+            intelligence={intelligence}
+            isLoading={intelligenceQuery.isLoading && !intelligence}
+            layout="mobile"
+          />
 
-        <BestRightNowSection items={bestRightNow} />
+          <BestRightNowSection items={bestRightNow} layout="mobile" />
 
-        <NextHourOutlookCard
-          summary={nextHourSummary}
-          confidenceLabel={nextHourConfidence}
-          isLoading={!hasLoadedCoreWeather}
-        />
+          <NextHourOutlookCard
+            summary={nextHourSummary}
+            confidenceLabel={nextHourConfidence}
+            isLoading={!hasLoadedCoreWeather}
+          />
+        </div>
+
+        <div className="mt-5 hidden flex-col gap-5 lg:flex">
+          <IntelligenceNarrativeCard
+            intelligence={intelligence}
+            isLoading={intelligenceQuery.isLoading && !intelligence}
+            layout="desktop"
+          />
+
+          <div className="grid grid-cols-2 gap-5">
+            <BestSunshineCard
+              recommendation={bestSunshine}
+              isLoading={
+                bestSunshineQuery.isLoading || bestSunshineQuery.isFetching
+              }
+              isUnavailable={bestSunshineQuery.isError}
+              layout="desktop"
+            />
+
+            <BestRightNowSection items={bestRightNow} layout="desktop" />
+          </div>
+        </div>
 
         {current ? (
-          <p className="text-center text-xs text-white/35">
+          <p className="mt-4 text-center text-xs text-white/35 lg:mt-6">
             Updated {formatUpdatedAt(current.updatedAt)}
           </p>
         ) : null}

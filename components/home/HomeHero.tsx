@@ -46,44 +46,46 @@ export function HomeHero({
   return (
     <section
       aria-label="Karl conditions hero"
-      className="relative min-h-[min(540px,70vh)] w-full overflow-hidden lg:min-h-[78vh]"
+      className="relative min-h-[min(540px,70vh)] w-full overflow-hidden lg:min-h-0 lg:overflow-visible"
     >
-      {imageSource === "remote" && presentation.imageUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          key={presentation.stabilityKey}
-          src={presentation.imageUrl}
-          alt={presentation.altText ?? "Bay Area weather hero image"}
-          className="absolute inset-0 h-full w-full scale-[1.02] object-cover motion-reduce:scale-100 motion-reduce:transition-none"
-          onError={() => setRemoteLoadFailed(true)}
-        />
-      ) : (
+      <div className="lg:hidden">
+        {imageSource === "remote" && presentation.imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            key={presentation.stabilityKey}
+            src={presentation.imageUrl}
+            alt={presentation.altText ?? "Bay Area weather hero image"}
+            className="absolute inset-0 h-full w-full scale-[1.02] object-cover motion-reduce:scale-100 motion-reduce:transition-none"
+            onError={() => setRemoteLoadFailed(true)}
+          />
+        ) : (
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(242,163,38,0.22),transparent_38%),radial-gradient(circle_at_82%_18%,rgba(148,92,20,0.14),transparent_34%),linear-gradient(180deg,rgb(7_22_35)_0%,rgb(3_11_20)_52%,rgb(0_0_0)_100%)]"
+          />
+        )}
+
         <div
           aria-hidden="true"
-          className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(242,163,38,0.22),transparent_38%),radial-gradient(circle_at_82%_18%,rgba(148,92,20,0.14),transparent_34%),linear-gradient(180deg,rgb(7_22_35)_0%,rgb(3_11_20)_52%,rgb(0_0_0)_100%)]"
+          className="absolute inset-0 mix-blend-multiply"
+          style={{
+            background: `linear-gradient(180deg, rgba(3,11,20,${presentation.atmosphereTopOpacity}) 0%, rgba(3,11,20,0) 38%, rgba(3,11,20,${presentation.atmosphereBottomOpacity}) 100%)`,
+          }}
         />
-      )}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0"
+          style={{
+            background: `linear-gradient(0deg, rgba(0,0,0,${presentation.bottomGradientLeadOpacity}) 0%, rgba(0,0,0,${presentation.bottomGradientMidOpacity}) 34%, rgba(0,0,0,0.22) 62%, rgba(0,0,0,0.12) 100%)`,
+          }}
+        />
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/70 via-black/35 to-transparent"
+        />
+      </div>
 
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 mix-blend-multiply"
-        style={{
-          background: `linear-gradient(180deg, rgba(3,11,20,${presentation.atmosphereTopOpacity}) 0%, rgba(3,11,20,0) 38%, rgba(3,11,20,${presentation.atmosphereBottomOpacity}) 100%)`,
-        }}
-      />
-      <div
-        aria-hidden="true"
-        className="absolute inset-0"
-        style={{
-          background: `linear-gradient(0deg, rgba(0,0,0,${presentation.bottomGradientLeadOpacity}) 0%, rgba(0,0,0,${presentation.bottomGradientMidOpacity}) 34%, rgba(0,0,0,0.22) 62%, rgba(0,0,0,0.12) 100%)`,
-        }}
-      />
-      <div
-        aria-hidden="true"
-        className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/70 via-black/35 to-transparent"
-      />
-
-      <div className="relative mx-auto flex min-h-[min(540px,70vh)] w-full max-w-[430px] flex-col lg:min-h-[78vh] lg:max-w-5xl lg:px-8 xl:max-w-6xl">
+      <div className="relative mx-auto flex min-h-[min(540px,70vh)] w-full max-w-[430px] flex-col lg:min-h-0 lg:max-w-6xl lg:px-8 xl:max-w-7xl">
         <div className="flex flex-col items-center px-5 pt-6 text-center sm:pt-8 lg:hidden">
           <h2 className="font-serif text-[2rem] font-semibold leading-none tracking-[0.01em] text-white/[0.96] [text-shadow:0_7px_16px_rgba(0,0,0,0.52)] sm:text-[2.15rem]">
             Where&apos;s Karl?
@@ -93,10 +95,10 @@ export function HomeHero({
           </p>
         </div>
 
-        <div className="mt-auto px-5 pb-14 lg:pb-20 lg:pt-28">
+        <div className="mt-auto px-5 pb-14 lg:mt-0 lg:px-0 lg:pb-8 lg:pt-28 lg:text-left">
           <HeroPositionBadge isLoading={isLoading} />
           <h1
-            className={`mt-2 max-w-[18ch] font-serif text-[1.75rem] font-semibold leading-[1.12] text-white/[0.98] [text-shadow:0_5px_14px_rgba(0,0,0,0.56)] sm:text-[1.85rem] lg:max-w-[22ch] lg:text-[2.5rem] lg:leading-[1.08] xl:max-w-[24ch] xl:text-[2.75rem] ${
+            className={`mt-2 max-w-[18ch] font-serif text-[1.75rem] font-semibold leading-[1.12] text-white/[0.98] [text-shadow:0_5px_14px_rgba(0,0,0,0.56)] sm:text-[1.85rem] lg:max-w-[24ch] lg:text-[2.5rem] lg:leading-[1.08] xl:max-w-[26ch] xl:text-[2.75rem] ${
               isLoading ? "opacity-70" : ""
             }`}
           >

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { KarlLogo } from "@/components/brand/KarlLogo";
 import { FindClearSkiesCta } from "@/components/home/FindClearSkiesCta";
 import { PrimaryNavList } from "@/components/layout/NavLinks";
 import { useClearSkiesNav } from "@/components/providers/ClearSkiesNavProvider";
@@ -35,13 +36,16 @@ export function DesktopTopNav() {
       <div className="mx-auto flex max-w-7xl items-center gap-6 px-6 py-4 xl:px-8">
         <Link
           href="/"
-          className="shrink-0 rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-karl-gold"
+          className="flex shrink-0 items-center gap-3 rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-karl-gold"
         >
-          <span className="block font-serif text-lg font-semibold tracking-[0.02em] text-white/[0.96]">
-            Where&apos;s Karl?
-          </span>
-          <span className="mt-0.5 block text-[0.625rem] font-bold uppercase tracking-[0.24em] text-karl-gold/90">
-            Track Karl across the Bay
+          <KarlLogo className="h-10 w-10" />
+          <span>
+            <span className="block font-serif text-lg font-semibold tracking-[0.02em] text-white/[0.96]">
+              Where&apos;s Karl?
+            </span>
+            <span className="mt-0.5 block text-[0.625rem] font-bold uppercase tracking-[0.24em] text-karl-gold/90">
+              Track Karl across the Bay
+            </span>
           </span>
         </Link>
 

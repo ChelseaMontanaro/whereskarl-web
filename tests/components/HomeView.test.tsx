@@ -75,12 +75,12 @@ describe("HomeView", () => {
     renderHome();
 
     expect(await screen.findByText("56%")).toBeInTheDocument();
-    expect(screen.getByText(/Karl's Read/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Karl's Read/i).length).toBeGreaterThan(0);
     expect(
-      screen.getByText("Karl is picking favorites across the Bay"),
-    ).toBeInTheDocument();
+      screen.getAllByText("Karl is picking favorites across the Bay").length,
+    ).toBeGreaterThan(0);
     expect(screen.getAllByText("Tiburon").length).toBeGreaterThan(0);
-    expect(screen.getByText("BEST SUNSHINE")).toBeInTheDocument();
+    expect(screen.getAllByText("BEST SUNSHINE").length).toBeGreaterThan(0);
     expect(
       screen.getByRole("link", { name: "Find Clear Skies" }),
     ).toHaveAttribute("href", "/map?location=tiburon");

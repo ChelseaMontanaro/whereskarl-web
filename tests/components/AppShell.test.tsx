@@ -74,6 +74,7 @@ describe("AppShell", () => {
     expect(within(topNav).getByRole("link", { name: "Home" })).toBeInTheDocument();
     expect(within(topNav).getByRole("link", { name: "Map" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Find Clear Skies" })).toBeInTheDocument();
+    expect(screen.getByText("Where's Karl?").closest("a")?.querySelector("svg")).toBeTruthy();
   });
 
   it("highlights the active primary route in the desktop top navigation", () => {

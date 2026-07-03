@@ -1,31 +1,33 @@
-import type { ReactNode } from "react";
+import Link from "next/link";
 
+import { SunshineIcon } from "@/components/home/ConditionIcons";
+import {
+  CardLabel,
+  InsightCardChevron,
+  InsightIconFrame,
+  SunshineScoreBadge,
+} from "@/components/home/InsightCardParts";
 import { GlassCard } from "@/components/ui/GlassCard";
 import type { BestRightNowItem } from "@/lib/home/weatherDisplay";
+import { buildMapHref } from "@/lib/map/routing";
 
 type BestRightNowSectionProps = {
   items: BestRightNowItem[];
+  layout?: "both" | "mobile" | "desktop";
 };
 
-function CardLabel({ children }: { children: ReactNode }) {
-  return (
-    <p className="text-[0.68rem] font-bold uppercase tracking-[0.14em] text-white/45">
-      {children}
-    </p>
-  );
-}
-
-export function BestRightNowSection({ items }: BestRightNowSectionProps) {
-  if (items.length === 0) {
-    return null;
-  }
-
+function MobileBestRightNowSection({ items }: BestRightNowSectionProps) {
   return (
     <GlassCard className="px-4 py-4">
-      <CardLabel>Best Right Now</CardLabel>
+      <CardLabel className="text-white/45 lg:text-white/45">
+        Best Right Now
+      </CardLabel>
       <ul className="mt-3 space-y-3">
         {items.map((item) => (
-          <li key={item.locationId} className="border-t border-white/8 pt-3 first:border-t-0 first:pt-0">
+          <li
+            key={item.locationId}
+            className="border-t border-white/8 pt-3 first:border-t-0 first:pt-0"
+          >
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-base font-semibold text-white">
@@ -43,5 +45,62 @@ export function BestRightNowSection({ items }: BestRightNowSectionProps) {
         ))}
       </ul>
     </GlassCard>
+  );
+}
+
+function DesktopBestRightNowCard({ item }: { item: BestRightNowItem }) {
+  const href = buildMapHref(item.locationId);
+
+  return (
+    <Link
+      href={href}
+      aria-label={`View ${item.locationName} on map`}
+      className="group block rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-karl-gold"
+    >
+      <GlassCard className="flex h-full items-center gap-4 border-white/8 bg-karl-navy-glass/48 px-5 py-4 backdrop-blur-md transition-colors group-hover:border-white/14">
+        <InsightIconFrame tone="gold">
+          <SunshineIcon className="h-8 w-8" />
+        </InsightIconFrame>
+        <div className="min-w-0 flex-1">
+          <CardLabel>Best Right Now</CardLabel>
+          <p className="mt-1.5 text-xl font-semibold text-white">
+            {item.locationName}
+          </p>
+          <p className="mt-1 text-sm leading-relaxed text-white/65">{item.detail}</p>
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          {item.score != null ? <SunshineScoreBadge score={item.score} /> : null}
+          <InsightCardChevron />
+        </div>
+      </GlassCard>
+    </Link>
+  );
+}
+
+export function BestRightNowSection({
+  items,
+  layout = "both",
+}: BestRightNowSectionProps) {
+  if (items.length === 0) {
+    return null;
+  }
+
+  if (layout === "mobile") {
+    return <MobileBestRightNowSection items={items} />;
+  }
+
+  if (layout === "desktop") {
+    return <DesktopBestRightNowCard item={items[0]} />;
+  }
+
+  return (
+    <>
+      <div className="lg:hidden">
+        <MobileBestRightNowSection items={items} />
+      </div>
+      <div className="hidden lg:block">
+        <DesktopBestRightNowCard item={items[0]} />
+      </div>
+    </>
   );
 }
