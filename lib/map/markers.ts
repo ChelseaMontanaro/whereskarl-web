@@ -60,6 +60,7 @@ function shouldHideFilteredMarker(
   return (
     intensityFilter === "clear" ||
     intensityFilter === "lightFog" ||
+    intensityFilter === "foggy" ||
     intensityFilter === "karlTerritory"
   );
 }
