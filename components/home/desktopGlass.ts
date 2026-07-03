@@ -13,9 +13,15 @@ export const desktopMetricIconFrameClass =
 export const desktopInsightIconFrameClass =
   "flex shrink-0 items-center justify-center rounded-full border lg:h-14 lg:w-14";
 
-export const desktopMetricIconSizeClass = "h-5 w-5 lg:h-6 lg:w-6";
+export const desktopMetricIconSizeClass = "h-6 w-6 lg:h-7 lg:w-7";
 
-export const desktopInsightIconSizeClass = "h-6 w-6 lg:h-7 lg:w-7";
+export const desktopInsightIconSizeClass = "h-7 w-7 lg:h-8 lg:w-8";
+
+export const desktopClickableCardLinkClass =
+  "group block rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-karl-gold";
+
+export const desktopClickableCardHoverClass =
+  "transition-colors group-hover:border-white/14 group-hover:bg-white/[0.03] motion-reduce:transition-none";
 
 export function clearestSpotDesktopLabel(isNightPresentation: boolean): string {
   return isNightPresentation ? "Clearest Spot" : "Clearest Spot";

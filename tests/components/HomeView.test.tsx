@@ -85,8 +85,13 @@ describe("HomeView", () => {
       screen.getByRole("link", { name: "Find Clear Skies" }),
     ).toHaveAttribute("href", "/map?location=tiburon");
     expect(
-      screen.getByRole("link", { name: "View brightest spot on map" }),
+      screen.getByRole("link", { name: "View clearest spot on map: Tiburon" }),
     ).toHaveAttribute("href", "/map?location=tiburon");
+    expect(
+      screen.getByRole("link", {
+        name: "View Karl's read on map: Marin Headlands / Hawk Hill",
+      }),
+    ).toHaveAttribute("href", "/map?location=mill-valley");
   });
 
   it("shows the live hero headline once core weather resolves, before best sunshine finishes", async () => {

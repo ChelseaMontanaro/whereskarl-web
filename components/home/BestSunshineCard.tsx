@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import { SunshineIcon } from "@/components/home/ConditionIcons";
+import { MoonIcon, SunshineIcon } from "@/components/home/ConditionIcons";
 import { FindClearSkiesCta } from "@/components/home/FindClearSkiesCta";
 import {
   CardLabel,
@@ -11,7 +11,12 @@ import {
   InsightIconFrame,
   SunshineScoreBadge,
 } from "@/components/home/InsightCardParts";
-import { clearestSpotDesktopLabel, desktopInsightIconSizeClass } from "@/components/home/desktopGlass";
+import {
+  clearestSpotDesktopLabel,
+  desktopClickableCardHoverClass,
+  desktopClickableCardLinkClass,
+  desktopInsightIconSizeClass,
+} from "@/components/home/desktopGlass";
 import { GlassCard } from "@/components/ui/GlassCard";
 import {
   isNighttime,
@@ -149,19 +154,23 @@ function DesktopBestSunshineCard({
     recommendation.reason ||
     recommendation.status;
   const href = buildMapHref(recommendation.locationID);
-  const spotIcon = <SunshineIcon className={desktopInsightIconSizeClass} />;
+  const spotIcon = isNightPresentation ? (
+    <MoonIcon className={`${desktopInsightIconSizeClass} text-[#8CB8D8]`} />
+  ) : (
+    <SunshineIcon className={desktopInsightIconSizeClass} />
+  );
 
   return (
     <Link
       href={href}
       aria-label={`View clearest spot on map: ${recommendation.locationName}`}
-      className="group block rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-karl-gold"
+      className={desktopClickableCardLinkClass}
     >
       <GlassCard
         variant="desktop"
-        className="flex h-full items-center gap-4 px-5 py-5 transition-colors group-hover:border-white/14"
+        className={`flex h-full items-center gap-4 px-5 py-5 ${desktopClickableCardHoverClass}`}
       >
-        <InsightIconFrame tone="gold">
+        <InsightIconFrame tone={isNightPresentation ? "mist" : "gold"}>
           {spotIcon}
         </InsightIconFrame>
         <div className="min-w-0 flex-1">

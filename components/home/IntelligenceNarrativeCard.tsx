@@ -1,11 +1,18 @@
+import Link from "next/link";
+
 import { FogMistIcon } from "@/components/home/ConditionIcons";
 import {
   CardLabel,
   InsightCardChevron,
   InsightIconFrame,
 } from "@/components/home/InsightCardParts";
-import { desktopInsightIconSizeClass } from "@/components/home/desktopGlass";
+import {
+  desktopClickableCardHoverClass,
+  desktopClickableCardLinkClass,
+  desktopInsightIconSizeClass,
+} from "@/components/home/desktopGlass";
 import { GlassCard } from "@/components/ui/GlassCard";
+import { buildMapHref } from "@/lib/map/routing";
 import type { KarlIntelligenceResponse } from "@/lib/schemas/intelligence";
 
 type IntelligenceNarrativeCardProps = {
@@ -84,9 +91,16 @@ function DesktopIntelligenceNarrativeCard({
     intelligence.narrative.confidenceLabel.toLowerCase() === "unavailable"
       ? null
       : intelligence.narrative.confidenceLabel;
+  const focusLocationId = intelligence.heroImagery?.focusLocationId ?? null;
+  const mapHref = focusLocationId ? buildMapHref(focusLocationId) : null;
+  const mapLabel = intelligence.heroImagery?.sceneName?.trim()
+    ? `View Karl's read on map: ${intelligence.heroImagery.sceneName}`
+    : focusLocationId
+      ? `View Karl's read on map: ${focusLocationId.replaceAll("-", " ")}`
+      : null;
 
-  return (
-    <GlassCard variant="desktop" className="flex items-center gap-4 px-5 py-5">
+  const cardBody = (
+    <>
       <InsightIconFrame>
         <FogMistIcon className={desktopInsightIconSizeClass} />
       </InsightIconFrame>
@@ -104,7 +118,26 @@ function DesktopIntelligenceNarrativeCard({
           </p>
         ) : null}
       </div>
-      <InsightCardChevron />
+      {mapHref ? <InsightCardChevron /> : null}
+    </>
+  );
+
+  if (mapHref && mapLabel) {
+    return (
+      <Link href={mapHref} aria-label={mapLabel} className={desktopClickableCardLinkClass}>
+        <GlassCard
+          variant="desktop"
+          className={`flex items-center gap-4 px-5 py-5 ${desktopClickableCardHoverClass}`}
+        >
+          {cardBody}
+        </GlassCard>
+      </Link>
+    );
+  }
+
+  return (
+    <GlassCard variant="desktop" className="flex items-center gap-4 px-5 py-5">
+      {cardBody}
     </GlassCard>
   );
 }

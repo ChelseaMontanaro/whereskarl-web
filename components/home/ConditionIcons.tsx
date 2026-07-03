@@ -2,27 +2,59 @@ type IconProps = {
   className?: string;
 };
 
-/** Thin mist/fog lines — no face. Used for Fog Coverage, Karl Status, Karl's Read. */
-function FogMistLines({ className = "h-5 w-5" }: IconProps) {
+/** Blue-white cloud with soft fog lines — Fog Coverage metric. */
+export function FogCoverageIcon({ className = "h-5 w-5" }: IconProps) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      className={className}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.35"
-      strokeLinecap="round"
-    >
-      <path d="M4 15.5c1.6 0 2.5-.9 3.2-1.6.7.7 1.6 1.6 3.2 1.6s2.5-.9 3.2-1.6c.7.7 1.6 1.6 3.2 1.6s2.5-.9 3.2-1.6c.7.7 1.6 1.6 3.2 1.6" />
-      <path d="M6 11.5c1.2 0 1.9-.6 2.4-1.2.5.6 1.2 1.2 2.4 1.2s1.9-.6 2.4-1.2c.5.6 1.2 1.2 2.4 1.2s1.9-.6 2.4-1.2c.5.6 1.2 1.2 2.4 1.2" opacity="0.82" />
-      <path d="M8 7.5c.9 0 1.4-.4 1.8-.9.4.5.9.9 1.8.9s1.4-.4 1.8-.9c.4.5.9.9 1.8.9s1.4-.4 1.8-.9c.4.5.9.9 1.8.9" opacity="0.55" />
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={className} fill="none">
+      <ellipse cx="12" cy="9.5" rx="6.5" ry="4.2" fill="#C5DDF0" />
+      <ellipse cx="7.5" cy="10.5" rx="3.8" ry="3.2" fill="#E8F3FA" />
+      <ellipse cx="16.5" cy="10.5" rx="3.8" ry="3.2" fill="#E8F3FA" />
+      <ellipse cx="12" cy="8" rx="4.8" ry="3" fill="#F2F8FC" />
+      <path
+        d="M4 16.5c1.5 0 2.4-.85 3.1-1.55.7.7 1.6 1.55 3.1 1.55s2.4-.85 3.1-1.55c.7.7 1.6 1.55 3.1 1.55s2.4-.85 3.1-1.55c.7.7 1.6 1.55 3.1 1.55"
+        stroke="#93B8D8"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        opacity="0.88"
+      />
+      <path
+        d="M6 19.5c1.1 0 1.7-.55 2.2-1.05.5.5 1.1 1.05 2.2 1.05s1.7-.55 2.2-1.05c.5.5 1.1 1.05 2.2 1.05s1.7-.55 2.2-1.05c.5.5 1.1 1.05 2.2 1.05"
+        stroke="#B8D4EA"
+        strokeWidth="1"
+        strokeLinecap="round"
+        opacity="0.62"
+      />
     </svg>
   );
 }
 
-export function FogCoverageIcon(props: IconProps) {
-  return <FogMistLines {...props} />;
+/** Horizontal mist layers — Karl Status and Karl's Read (no face). */
+function FogMistLines({ className = "h-5 w-5" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={className} fill="none">
+      <path
+        d="M3.5 8.5c1.5 0 2.3-.75 3-1.45.7.7 1.5 1.45 3 1.45s2.3-.75 3-1.45c.7.7 1.5 1.45 3 1.45s2.3-.75 3-1.45c.7.7 1.5 1.45 3 1.45"
+        stroke="#C5DDF0"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        opacity="0.95"
+      />
+      <path
+        d="M5 12.5c1.3 0 2-.65 2.6-1.25.6.6 1.3 1.25 2.6 1.25s2-.65 2.6-1.25c.6.6 1.3 1.25 2.6 1.25s2-.65 2.6-1.25c.6.6 1.3 1.25 2.6 1.25"
+        stroke="#93B8D8"
+        strokeWidth="1.15"
+        strokeLinecap="round"
+        opacity="0.82"
+      />
+      <path
+        d="M6.5 16.5c1.1 0 1.7-.55 2.2-1.05.5.5 1.1 1.05 2.2 1.05s1.7-.55 2.2-1.05c.5.5 1.1 1.05 2.2 1.05s1.7-.55 2.2-1.05c.5.5 1.1 1.05 2.2 1.05"
+        stroke="#B8D4EA"
+        strokeWidth="1"
+        strokeLinecap="round"
+        opacity="0.58"
+      />
+    </svg>
+  );
 }
 
 export function KarlStatusIcon(props: IconProps) {
@@ -33,37 +65,35 @@ export function FogMistIcon(props: IconProps) {
   return <FogMistLines {...props} />;
 }
 
+/** Warm gold sun with crisp rays. */
 export function SunshineIcon({ className = "h-5 w-5" }: IconProps) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      className={className}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.35"
-    >
-      <circle cx="12" cy="12" r="3.75" strokeLinecap="round" />
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={className} fill="none">
+      <circle cx="12" cy="12" r="4.1" fill="currentColor" opacity="0.95" />
       <path
-        d="M12 4.5v2M12 17.5v2M4.5 12h2M17.5 12h2M6.8 6.8l1.4 1.4M15.8 15.8l1.4 1.4M6.8 17.2l1.4-1.4M15.8 8.2l1.4-1.4"
+        d="M12 4.25v2.1M12 17.65v2.1M4.25 12h2.1M17.65 12h2.1M6.55 6.55l1.48 1.48M16.97 16.97l1.48 1.48M6.55 17.45l1.48-1.48M16.97 7.03l1.48-1.48"
+        stroke="currentColor"
+        strokeWidth="1.35"
         strokeLinecap="round"
+        opacity="0.92"
       />
     </svg>
   );
 }
 
+/** Blue crescent moon with a small star. */
 export function MoonIcon({ className = "h-5 w-5" }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" className={className} fill="none">
       <path
-        d="M15.5 5.2a7.2 7.2 0 1 0 6.2 10.8A9 9 0 0 1 15.5 5.2Z"
-        fill="currentColor"
-        opacity="0.92"
+        d="M16.2 5.1a7.4 7.4 0 1 0 6.4 11.1A9.2 9.2 0 0 1 16.2 5.1Z"
+        fill="#8CB8D8"
+        opacity="0.95"
       />
       <path
-        d="M6.2 7.2 7 9.6 9.4 10.4 7 11.2 6.2 13.6 5.4 11.2 3 10.4 5.4 9.6 6.2 7.2Z"
-        fill="currentColor"
-        opacity="0.75"
+        d="M6.4 7.4 7.1 9.6 9.3 10.3 7.1 11 6.4 13.2 5.7 11 3.5 10.3 5.7 9.6 6.4 7.4Z"
+        fill="#C5DDF0"
+        opacity="0.9"
       />
     </svg>
   );

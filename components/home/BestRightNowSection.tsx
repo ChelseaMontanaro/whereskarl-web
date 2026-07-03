@@ -7,7 +7,7 @@ import {
   InsightIconFrame,
   SunshineScoreBadge,
 } from "@/components/home/InsightCardParts";
-import { desktopInsightIconSizeClass } from "@/components/home/desktopGlass";
+import { desktopClickableCardHoverClass, desktopClickableCardLinkClass, desktopInsightIconSizeClass } from "@/components/home/desktopGlass";
 import { GlassCard } from "@/components/ui/GlassCard";
 import type { BestRightNowItem } from "@/lib/home/weatherDisplay";
 import { buildMapHref } from "@/lib/map/routing";
@@ -50,15 +50,40 @@ function MobileBestRightNowSection({ items }: BestRightNowSectionProps) {
 }
 
 function DesktopBestRightNowCard({ item }: { item: BestRightNowItem }) {
+  if (!item.locationId) {
+    return (
+      <GlassCard variant="desktop" className="flex h-full items-center gap-4 px-5 py-5">
+        <InsightIconFrame tone="gold">
+          <SunshineIcon className={desktopInsightIconSizeClass} />
+        </InsightIconFrame>
+        <div className="min-w-0 flex-1">
+          <CardLabel>Best Right Now</CardLabel>
+          <p className="mt-1.5 text-lg font-semibold text-white lg:text-xl">
+            {item.locationName}
+          </p>
+          <p className="mt-1 text-sm leading-relaxed text-white/68">{item.detail}</p>
+        </div>
+        {item.score != null ? (
+          <div className="flex shrink-0 items-center gap-2">
+            <SunshineScoreBadge score={item.score} />
+          </div>
+        ) : null}
+      </GlassCard>
+    );
+  }
+
   const href = buildMapHref(item.locationId);
 
   return (
     <Link
       href={href}
       aria-label={`View ${item.locationName} on map`}
-      className="group block rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-karl-gold"
+      className={desktopClickableCardLinkClass}
     >
-      <GlassCard variant="desktop" className="flex h-full items-center gap-4 px-5 py-5 transition-colors group-hover:border-white/14">
+      <GlassCard
+        variant="desktop"
+        className={`flex h-full items-center gap-4 px-5 py-5 ${desktopClickableCardHoverClass}`}
+      >
         <InsightIconFrame tone="gold">
           <SunshineIcon className={desktopInsightIconSizeClass} />
         </InsightIconFrame>

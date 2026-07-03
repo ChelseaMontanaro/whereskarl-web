@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import Link from "next/link";
+
 import {
   FogCoverageIcon,
   KarlStatusIcon,
@@ -7,12 +9,15 @@ import {
   SunshineIcon,
 } from "@/components/home/ConditionIcons";
 import {
+  desktopClickableCardHoverClass,
+  desktopClickableCardLinkClass,
   desktopGoldIconClass,
   desktopMetricIconFrameClass,
   desktopMetricIconSizeClass,
   desktopMistIconClass,
 } from "@/components/home/desktopGlass";
 import { GlassCard } from "@/components/ui/GlassCard";
+import { buildMapHref } from "@/lib/map/routing";
 import type { BestSunshineResponse, CurrentResponse } from "@/lib/schemas/weather";
 
 type DashboardGridProps = {
@@ -38,6 +43,8 @@ function MetricCard({
   icon,
   iconFrameClassName,
   valueClassName = "lg:text-[1.65rem]",
+  mapHref,
+  mapAriaLabel,
 }: {
   label: string;
   value: string;
@@ -46,9 +53,15 @@ function MetricCard({
   icon: ReactNode;
   iconFrameClassName: string;
   valueClassName?: string;
+  mapHref?: string | null;
+  mapAriaLabel?: string | null;
 }) {
-  return (
-    <GlassCard className="border-white/8 bg-karl-navy-glass/55 px-3.5 py-3 backdrop-blur-md lg:border-white/10 lg:bg-black/34 lg:px-4 lg:py-4 lg:shadow-[0_4px_20px_rgba(0,0,0,0.14)] lg:backdrop-blur-md">
+  const cardClassName = `border-white/8 bg-karl-navy-glass/55 px-3.5 py-3 backdrop-blur-md lg:border-white/10 lg:bg-black/34 lg:px-4 lg:py-4 lg:shadow-[0_4px_20px_rgba(0,0,0,0.14)] lg:backdrop-blur-md${
+    mapHref && mapAriaLabel ? ` ${desktopClickableCardHoverClass}` : ""
+  }`;
+
+  const card = (
+    <GlassCard className={cardClassName}>
       <div className="flex items-center gap-3 lg:items-center lg:gap-3.5">
         <div
           className={`order-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/8 bg-white/4 lg:order-1 ${desktopMetricIconFrameClass} ${iconFrameClassName}`}
@@ -71,6 +84,20 @@ function MetricCard({
       </div>
     </GlassCard>
   );
+
+  if (mapHref && mapAriaLabel) {
+    return (
+      <Link
+        href={mapHref}
+        aria-label={mapAriaLabel}
+        className={desktopClickableCardLinkClass}
+      >
+        {card}
+      </Link>
+    );
+  }
+
+  return card;
 }
 
 function brightestSpotLabel(isNightPresentation: boolean): string {
@@ -88,6 +115,15 @@ export function DashboardGrid({
   ) : (
     <SunshineIcon className={desktopMetricIconSizeClass} />
   );
+  const spotLabel = brightestSpotLabel(isNightPresentation);
+  const spotMapHref =
+    !isLoading && bestSunshine?.locationID
+      ? buildMapHref(bestSunshine.locationID)
+      : null;
+  const spotMapAriaLabel =
+    spotMapHref && bestSunshine
+      ? `View ${spotLabel.toLowerCase()} on map: ${bestSunshine.locationName}`
+      : null;
 
   return (
     <div
@@ -120,7 +156,7 @@ export function DashboardGrid({
         iconFrameClassName={desktopGoldIconClass}
       />
       <MetricCard
-        label={brightestSpotLabel(isNightPresentation)}
+        label={spotLabel}
         value={
           isLoading || !bestSunshine ? "--" : `${bestSunshine.sunshineScore}`
         }
@@ -134,6 +170,8 @@ export function DashboardGrid({
         iconFrameClassName={
           isNightPresentation ? desktopMistIconClass : desktopGoldIconClass
         }
+        mapHref={spotMapHref}
+        mapAriaLabel={spotMapAriaLabel}
       />
     </div>
   );

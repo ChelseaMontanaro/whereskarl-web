@@ -15,7 +15,7 @@ describe("DashboardGrid", () => {
     cleanup();
   });
 
-  it("renders minimal line condition icons alongside dashboard metrics", () => {
+  it("renders premium weather icons alongside dashboard metrics", () => {
     const { container } = render(
       <DashboardGrid
         current={{
@@ -83,19 +83,21 @@ describe("DashboardGrid", () => {
     expect(screen.getByText("Karl is lingering")).toBeInTheDocument();
     expect(container.querySelectorAll("svg")).toHaveLength(4);
     expect(
-      container.querySelector("svg[viewBox='0 0 24 24']"),
-    ).toBeInTheDocument();
+      screen.getByRole("link", {
+        name: "View brightest spot on map: Tiburon",
+      }),
+    ).toHaveAttribute("href", "/map?location=tiburon");
   });
 });
 
 describe("ConditionIcons", () => {
-  it("renders refined line icons without illustrated fills", () => {
+  it("renders distinct premium fog, mist, and sun artwork", () => {
     const { container: fog } = render(<FogCoverageIcon />);
     const { container: mist } = render(<FogMistIcon />);
     const { container: sun } = render(<SunshineIcon />);
 
-    expect(fog.querySelector("ellipse")).toBeNull();
-    expect(mist.querySelector("circle[fill='#162636']")).toBeNull();
-    expect(sun.querySelector("path[stroke-linecap='round']")).toBeTruthy();
+    expect(fog.querySelector("ellipse")).toBeTruthy();
+    expect(mist.querySelector("ellipse")).toBeNull();
+    expect(sun.querySelector("circle[fill='currentColor']")).toBeTruthy();
   });
 });
