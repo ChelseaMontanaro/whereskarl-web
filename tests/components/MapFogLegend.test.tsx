@@ -1,9 +1,32 @@
 // @vitest-environment happy-dom
 
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { MapFogLegend } from "@/components/map/MapFogLegend";
+import { toggleIntensityFilter } from "@/lib/map/intensityFilter";
+import type { FogIntensity } from "@/lib/map/conditions";
+
+function ToggleableFogLegend() {
+  const [activeIntensity, setActiveIntensity] = useState<FogIntensity | null>(
+    null,
+  );
+
+  return (
+    <>
+      <MapFogLegend
+        layout="desktop-stack"
+        activeIntensity={activeIntensity}
+        onSelectIntensity={(intensity) =>
+          setActiveIntensity((current) => toggleIntensityFilter(current, intensity))
+        }
+        onClearIntensity={() => setActiveIntensity(null)}
+      />
+      <p data-testid="active-intensity">{activeIntensity ?? "none"}</p>
+    </>
+  );
+}
 
 describe("MapFogLegend", () => {
   afterEach(() => {
@@ -24,6 +47,35 @@ describe("MapFogLegend", () => {
     fireEvent.click(screen.getByRole("button", { name: "Clear" }));
 
     expect(onSelectIntensity).toHaveBeenCalledWith("clear");
+  });
+
+  it("toggles the same intensity off when clicked again", () => {
+    render(<ToggleableFogLegend />);
+
+    const clearButton = screen.getByRole("button", { name: "Clear" });
+
+    fireEvent.click(clearButton);
+    expect(screen.getByTestId("active-intensity")).toHaveTextContent("clear");
+    expect(clearButton).toHaveAttribute("aria-pressed", "true");
+
+    fireEvent.click(clearButton);
+    expect(screen.getByTestId("active-intensity")).toHaveTextContent("none");
+    expect(clearButton).toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("toggles Light Fog, Foggy, and Karl Territory on and off", () => {
+    render(<ToggleableFogLegend />);
+
+    for (const label of ["Light Fog", "Foggy", "Karl Territory"]) {
+      const button = screen.getByRole("button", { name: label });
+
+      fireEvent.click(button);
+      expect(button).toHaveAttribute("aria-pressed", "true");
+
+      fireEvent.click(button);
+      expect(button).toHaveAttribute("aria-pressed", "false");
+      expect(screen.getByTestId("active-intensity")).toHaveTextContent("none");
+    }
   });
 
   it("shows a reset control when an intensity filter is active", () => {

@@ -50,8 +50,24 @@ describe("createMapMarkerElement", () => {
 
     expect(marker.className).toContain("karl-map-marker");
     expect(marker.className).toContain("is-selected");
-    expect(marker.className).toContain("karl-map-marker--neutral");
+    expect(marker.className).toContain("karl-map-marker--karlTerritory");
     expect(marker.getAttribute("aria-pressed")).toBe("true");
+  });
+
+  it("keeps real condition icons when the fog overlay is hidden", () => {
+    const marker = createMapMarkerElement({
+      location: {
+        ...tiburon,
+        fogScore: 10,
+        sunshineScore: 90,
+      },
+      isSelected: false,
+      fogLayerEnabled: false,
+      onSelect: vi.fn(),
+    });
+
+    expect(marker.className).toContain("karl-map-marker--clear");
+    expect(marker.className).not.toContain("karl-map-marker--neutral");
   });
 
   it("uses shared condition language in the marker label", () => {

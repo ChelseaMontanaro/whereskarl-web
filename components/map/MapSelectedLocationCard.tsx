@@ -68,7 +68,7 @@ export function MapSelectedLocationCard({
 
   return (
     <article
-      className={`${desktopGlassCardClass} relative w-[min(100%,22rem)] px-3.5 py-3`}
+      className={`${desktopGlassCardClass} relative w-[min(100%,42rem)] px-4 py-3.5`}
       aria-label={`Selected location: ${location.name}`}
     >
       <button
@@ -80,21 +80,21 @@ export function MapSelectedLocationCard({
         ×
       </button>
 
-      <div className="flex items-start gap-2.5 pr-7">
+      <div className="flex items-start gap-3 pr-8">
         <LocationConditionIcon location={location} />
 
         <div className="min-w-0 flex-1">
-          <h2 className="truncate text-base font-semibold leading-tight text-white">
+          <h2 className="text-lg font-semibold leading-tight text-white">
             {location.name}
           </h2>
-          <p className="mt-0.5 truncate text-sm text-white/72">{location.status}</p>
-          <p className="mt-1 text-[0.68rem] leading-snug text-white/48">
+          <p className="mt-1 text-sm text-white/72">{location.status}</p>
+          <p className="mt-1.5 text-[0.72rem] leading-snug text-white/50">
             {conditionLabel} · {location.temperature}° · {location.windSpeed} mph{" "}
-            {location.windDirection}
+            {location.windDirection} · {location.distanceText}
           </p>
         </div>
 
-        <div className="flex shrink-0 flex-col items-end gap-1.5">
+        <div className="flex shrink-0 flex-col items-end gap-2">
           <div className="rounded-xl border border-karl-gold/25 px-2 py-1 text-center">
             <p className="text-base font-light leading-none text-karl-gold">
               {location.sunshineScore}

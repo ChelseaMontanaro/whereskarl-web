@@ -1,5 +1,5 @@
 export const BAY_AREA_MAP_STYLE =
-  "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
+  "https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json";
 
 /** Matches iOS `KarlMapServiceArea.boundingRegion` — wide enough for all four product regions. */
 export const BAY_AREA_DEFAULT_BOUNDS: [[number, number], [number, number]] = [

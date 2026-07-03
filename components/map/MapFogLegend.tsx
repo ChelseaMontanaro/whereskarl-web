@@ -6,12 +6,12 @@ import {
 
 const LEGEND_ITEMS: Array<{
   intensity: FogIntensity;
-  className: string;
+  swatchClassName: string;
 }> = [
-  { intensity: "clear", className: "bg-karl-gold/85" },
-  { intensity: "lightFog", className: "bg-white/45" },
-  { intensity: "foggy", className: "bg-white/70" },
-  { intensity: "karlTerritory", className: "bg-[rgb(184_214_237)]" },
+  { intensity: "clear", swatchClassName: "bg-karl-gold" },
+  { intensity: "lightFog", swatchClassName: "bg-[#9A9590]" },
+  { intensity: "foggy", swatchClassName: "bg-[#F0F4F8]" },
+  { intensity: "karlTerritory", swatchClassName: "bg-[#B8D4EA]" },
 ];
 
 type MapFogLegendProps = {
@@ -25,7 +25,7 @@ function LegendSwatch({ className }: { className: string }) {
   return (
     <span
       aria-hidden="true"
-      className={`h-2 w-2 shrink-0 rounded-full ${className}`}
+      className={`h-2.5 w-2.5 shrink-0 rounded-full ring-1 ring-white/10 ${className}`}
     />
   );
 }
@@ -78,7 +78,7 @@ export function MapFogLegend({
                         : "text-white/58 hover:bg-white/[0.04] hover:text-white/75"
                     }`}
                   >
-                    <LegendSwatch className={item.className} />
+                    <LegendSwatch className={item.swatchClassName} />
                     <span className="text-[0.62rem]">{label}</span>
                   </button>
                 </li>
@@ -87,7 +87,7 @@ export function MapFogLegend({
 
             return (
               <li key={item.intensity} className="flex items-center gap-1.5">
-                <LegendSwatch className={item.className} />
+                <LegendSwatch className={item.swatchClassName} />
                 <span className="text-[0.62rem] text-white/58">{label}</span>
               </li>
             );
@@ -109,7 +109,7 @@ export function MapFogLegend({
         <ul className="mt-2 space-y-1.5">
           {LEGEND_ITEMS.map((item) => (
             <li key={item.intensity} className="flex items-center gap-2">
-              <LegendSwatch className={item.className} />
+              <LegendSwatch className={item.swatchClassName} />
               <span className="text-[0.68rem] text-white/70">
                 {getFogIntensityLabel(item.intensity)}
               </span>
@@ -131,7 +131,7 @@ export function MapFogLegend({
       <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
         {LEGEND_ITEMS.map((item) => (
           <div key={item.intensity} className="flex items-center gap-2">
-            <LegendSwatch className={item.className} />
+            <LegendSwatch className={item.swatchClassName} />
             <span className="text-[0.68rem] text-white/70">
               {getFogIntensityLabel(item.intensity)}
             </span>

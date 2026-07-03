@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type MutableRefObject } from "react";
 
 import { MapFogLegend } from "@/components/map/MapFogLegend";
 import { MapLayerControls } from "@/components/map/MapLayerControls";
@@ -33,7 +33,7 @@ type BayAreaMapProps = {
   onFogLayerChange: (enabled: boolean) => void;
   isLoading?: boolean;
   layout?: "mobile" | "desktop";
-  preserveViewport?: boolean;
+  suppressViewportUpdateRef?: MutableRefObject<boolean>;
   intensityFilter?: FogIntensity | null;
 };
 
@@ -48,7 +48,7 @@ export function BayAreaMap({
   onFogLayerChange,
   isLoading = false,
   layout = "mobile",
-  preserveViewport = false,
+  suppressViewportUpdateRef,
   intensityFilter = null,
 }: BayAreaMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -216,7 +216,12 @@ export function BayAreaMap({
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !mapReady || preserveViewport) {
+    if (!map || !mapReady) {
+      return;
+    }
+
+    if (suppressViewportUpdateRef?.current) {
+      suppressViewportUpdateRef.current = false;
       return;
     }
 
@@ -235,7 +240,13 @@ export function BayAreaMap({
     }
 
     fitDefaultBayAreaViewport(map);
-  }, [locations, mapReady, preserveViewport, selectedLocationId, selectedRegionId]);
+  }, [
+    locations,
+    mapReady,
+    selectedLocationId,
+    selectedRegionId,
+    suppressViewportUpdateRef,
+  ]);
 
   return (
     <div

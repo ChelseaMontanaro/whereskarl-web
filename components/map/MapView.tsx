@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import type { MutableRefObject } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { BayAreaMap } from "@/components/map/BayAreaMap";
@@ -21,6 +22,11 @@ import {
   type FogIntensity,
 } from "@/lib/map/conditions";
 import { findBayAreaProductRegion, isBayAreaProductRegionId } from "@/lib/map/config";
+import {
+  intensityFilterTrayItems,
+  intensityFilterTrayTitle,
+  toggleIntensityFilter,
+} from "@/lib/map/intensityFilter";
 import { resolveMapLocationFocus } from "@/lib/map/locationSelection";
 import type { MapMarkerLocation } from "@/lib/map/markers";
 import { getProductRegionNameForLocation } from "@/lib/map/regions";
@@ -31,6 +37,14 @@ import {
 } from "@/lib/map/routing";
 import type { KarlMapStyleId } from "@/lib/map/styles";
 import type { LocationWeather } from "@/lib/schemas/weather";
+
+function initialDesktopMapStyle(): KarlMapStyleId {
+  if (typeof window === "undefined") {
+    return "standard";
+  }
+
+  return window.matchMedia("(min-width: 1024px)").matches ? "hybrid" : "standard";
+}
 
 function MapLocationCard({
   location,
@@ -145,13 +159,15 @@ type MapViewModel = {
   activeRegion: ReturnType<typeof findBayAreaProductRegion>;
   markerLocations: MapMarkerLocation[];
   bestRightNowItems: ReturnType<typeof bestRightNowLocationItems>;
+  bottomTrayItems: ReturnType<typeof bestRightNowLocationItems>;
+  bottomTrayTitle: string;
+  suppressViewportUpdateRef: MutableRefObject<boolean>;
   handleSelectLocation: (locationId: string) => void;
   handleSelectRegion: (regionId: string) => void;
   handleClearSelectedLocation: () => void;
   handleSelectIntensity: (intensity: FogIntensity) => void;
   handleClearIntensityFilter: () => void;
   intensityFilter: FogIntensity | null;
-  preserveViewport: boolean;
   statusSentence: string;
 };
 
@@ -159,9 +175,9 @@ function useMapViewState(): MapViewModel {
   const router = useRouter();
   const searchParams = useSearchParams();
   const mapQuery = resolveMapQueryState(searchParams);
-  const [mapStyle, setMapStyle] = useState<KarlMapStyleId>("standard");
+  const suppressViewportUpdateRef = useRef(false);
+  const [mapStyle, setMapStyle] = useState<KarlMapStyleId>(initialDesktopMapStyle);
   const [fogLayerEnabled, setFogLayerEnabled] = useState(true);
-  const [preserveViewport, setPreserveViewport] = useState(false);
   const [intensityFilter, setIntensityFilter] = useState<FogIntensity | null>(
     null,
   );
@@ -216,21 +232,38 @@ function useMapViewState(): MapViewModel {
     [locations, selectedLocation?.id],
   );
 
+  const bottomTrayItems = useMemo(() => {
+    if (intensityFilter) {
+      return intensityFilterTrayItems(
+        locations,
+        intensityFilter,
+        selectedLocation?.id ?? null,
+        4,
+      );
+    }
+
+    return bestRightNow;
+  }, [bestRightNow, intensityFilter, locations, selectedLocation?.id]);
+
+  const bottomTrayTitle = intensityFilter
+    ? intensityFilterTrayTitle(intensityFilter)
+    : "Best Right Now";
+
   const handleSelectLocation = useCallback(
     (locationId: string) => {
-      setPreserveViewport(false);
+      suppressViewportUpdateRef.current = false;
       router.replace(buildMapHref(locationId), { scroll: false });
     },
     [router],
   );
 
   const handleClearSelectedLocation = useCallback(() => {
-    setPreserveViewport(true);
+    suppressViewportUpdateRef.current = true;
     router.replace("/map", { scroll: false });
   }, [router]);
 
   const handleSelectIntensity = useCallback((intensity: FogIntensity) => {
-    setIntensityFilter((current) => (current === intensity ? null : intensity));
+    setIntensityFilter((current) => toggleIntensityFilter(current, intensity));
   }, []);
 
   const handleClearIntensityFilter = useCallback(() => {
@@ -239,7 +272,7 @@ function useMapViewState(): MapViewModel {
 
   const handleSelectRegion = useCallback(
     (regionId: string) => {
-      setPreserveViewport(false);
+      suppressViewportUpdateRef.current = false;
       if (!isBayAreaProductRegionId(regionId)) {
         return;
       }
@@ -273,13 +306,15 @@ function useMapViewState(): MapViewModel {
     activeRegion,
     markerLocations,
     bestRightNowItems: bestRightNow,
+    bottomTrayItems,
+    bottomTrayTitle,
+    suppressViewportUpdateRef,
     handleSelectLocation,
     handleSelectRegion,
     handleClearSelectedLocation,
     handleSelectIntensity,
     handleClearIntensityFilter,
     intensityFilter,
-    preserveViewport,
     statusSentence,
   };
 }
@@ -373,14 +408,15 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
     selectedLocation,
     unknownLocationId,
     markerLocations,
-    bestRightNowItems,
+    bottomTrayItems,
+    bottomTrayTitle,
     handleSelectLocation,
     handleSelectRegion,
     handleClearSelectedLocation,
     handleSelectIntensity,
     handleClearIntensityFilter,
     intensityFilter,
-    preserveViewport,
+    suppressViewportUpdateRef,
     statusSentence,
   } = state;
 
@@ -397,7 +433,7 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
         onFogLayerChange={setFogLayerEnabled}
         isLoading={locationsQuery.isLoading}
         layout="desktop"
-        preserveViewport={preserveViewport}
+        suppressViewportUpdateRef={suppressViewportUpdateRef}
         intensityFilter={intensityFilter}
       />
 
@@ -426,14 +462,15 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
 
         <div className="pointer-events-auto absolute bottom-6 left-6 max-w-xl">
           <MapBestRightNowTray
-            items={bestRightNowItems}
+            items={bottomTrayItems}
+            title={bottomTrayTitle}
             onSelectLocation={handleSelectLocation}
             isLoading={locationsQuery.isLoading}
           />
         </div>
 
         {selectedLocation ? (
-          <div className="pointer-events-auto absolute bottom-6 right-6">
+          <div className="pointer-events-auto absolute bottom-6 left-1/2 w-[min(100%,42rem)] -translate-x-1/2 px-6">
             <MapSelectedLocationCard
               location={selectedLocation}
               onClose={handleClearSelectedLocation}

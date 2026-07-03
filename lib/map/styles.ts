@@ -20,9 +20,20 @@ const ESRI_SATELLITE_TILES = [
   "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
 ];
 
-const CARTO_LABEL_TILES = [
-  "https://basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}.png",
+/** Dark-theme label tiles with softer typography than Voyager-only labels. */
+const CARTO_DARK_LABEL_TILES = [
+  "https://basemaps.cartocdn.com/rastertiles/dark_only_labels/{z}/{x}/{y}.png",
 ];
+
+const satelliteRasterPaint = {
+  "raster-brightness-min": 0.04,
+  "raster-contrast": 0.22,
+  "raster-saturation": 0.08,
+} as const;
+
+const labelRasterPaint = {
+  "raster-opacity": 0.88,
+} as const;
 
 const satelliteStyle = {
   version: 8,
@@ -34,12 +45,25 @@ const satelliteStyle = {
       attribution:
         "Esri, Maxar, Earthstar Geographics, and the GIS User Community",
     },
+    "karl-labels": {
+      type: "raster",
+      tiles: CARTO_DARK_LABEL_TILES,
+      tileSize: 256,
+      attribution: "© OpenStreetMap contributors © CARTO",
+    },
   },
   layers: [
     {
       id: "karl-satellite",
       type: "raster",
       source: "karl-satellite",
+      paint: satelliteRasterPaint,
+    },
+    {
+      id: "karl-labels",
+      type: "raster",
+      source: "karl-labels",
+      paint: labelRasterPaint,
     },
   ],
 } satisfies StyleSpecification;
@@ -56,7 +80,7 @@ const hybridStyle = {
     },
     "karl-labels": {
       type: "raster",
-      tiles: CARTO_LABEL_TILES,
+      tiles: CARTO_DARK_LABEL_TILES,
       tileSize: 256,
       attribution: "© OpenStreetMap contributors © CARTO",
     },
@@ -66,14 +90,13 @@ const hybridStyle = {
       id: "karl-satellite",
       type: "raster",
       source: "karl-satellite",
+      paint: satelliteRasterPaint,
     },
     {
       id: "karl-labels",
       type: "raster",
       source: "karl-labels",
-      paint: {
-        "raster-opacity": 0.92,
-      },
+      paint: labelRasterPaint,
     },
   ],
 } satisfies StyleSpecification;
@@ -89,4 +112,8 @@ export function resolveKarlMapStyle(
     case "hybrid":
       return hybridStyle;
   }
+}
+
+export function karlMapStyleHasLabelLayer(styleId: KarlMapStyleId): boolean {
+  return styleId === "satellite" || styleId === "hybrid";
 }
