@@ -15,8 +15,8 @@ export const METRIC_DETAILS: Record<MetricDetailKey, MetricDetailContent> = {
     body: "Shows Karl's current movement across the Bay, such as lingering, retreating, drifting, or clearing.",
   },
   "sunshine-score": {
-    title: "Sunshine Score",
-    body: "Higher scores mean better chances of finding clear skies. Lower scores mean Karl may still be hanging around.",
+    title: "Clear Skies Score",
+    body: "Higher scores mean better chances of finding clear skies nearby. At night, this reflects clearer conditions and the likelihood of sunshine returning after sunrise.",
   },
 };
 

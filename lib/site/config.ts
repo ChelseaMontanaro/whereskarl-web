@@ -5,13 +5,13 @@ export const SITE_NAME = "Where's Karl?";
 export const SITE_TAGLINE = "Track Karl across the Bay";
 
 export const DEFAULT_DESCRIPTION =
-  "Track Karl the Fog across the San Francisco Bay Area. Real-time fog, sunshine scores, and microclimate conditions for San Francisco, North Bay, East Bay, and South Bay.";
+  "Track Karl the Fog across the San Francisco Bay Area. Real-time fog, clear skies scores, and microclimate conditions for San Francisco, North Bay, East Bay, and South Bay.";
 
 export const DEFAULT_KEYWORDS = [
   "Bay Area fog",
   "Karl the Fog",
   "San Francisco weather",
-  "Bay Area sunshine",
+  "Bay Area clear skies",
   "microclimates",
   "North Bay weather",
   "East Bay weather",

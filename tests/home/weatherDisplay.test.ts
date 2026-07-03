@@ -7,6 +7,7 @@ import {
   heroConfidenceText,
   heroSubheadline,
   movementPhrase,
+  sunshineResultTitle,
 } from "@/lib/home/weatherDisplay";
 import { karlIntelligenceResponseSchema } from "@/lib/schemas/intelligence";
 import type { CurrentResponse } from "@/lib/schemas/weather";
@@ -197,5 +198,14 @@ describe("heroConfidenceText", () => {
         current: currentFixture,
       }),
     ).toContain("confidence");
+  });
+});
+
+describe("sunshineResultTitle", () => {
+  it("uses clear-skies wording for score-based recommendation labels", () => {
+    expect(sunshineResultTitle(82, false)).toBe("BEST CLEAR SKIES");
+    expect(sunshineResultTitle(82, true)).toBe("CLEAREST NIGHT");
+    expect(sunshineResultTitle(30, false)).toBe("BEST BREAK IN THE FOG");
+    expect(sunshineResultTitle(10, false)).toBe("NO CLEAR SKIES NEARBY");
   });
 });

@@ -220,7 +220,7 @@ export function DashboardGrid({
           onOpenDetail={openMetricDetail}
         />
         <MetricCard
-          label="Sunshine Score"
+          label="Clear Skies Score"
           value={isLoading || !current ? "--" : `${current.sunshineScore}`}
           detail={isLoading ? "Checking conditions" : "Bay Area average"}
           isLoading={isLoading}

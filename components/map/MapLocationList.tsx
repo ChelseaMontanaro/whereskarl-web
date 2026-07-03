@@ -94,7 +94,7 @@ function MapLocationRow({
             {conditionLabel}
           </p>
           <p className="mt-1.5 text-xs text-white/45">
-            {location.distanceText} · {location.temperature}° · Sunshine{" "}
+            {location.distanceText} · {location.temperature}° · Clear{" "}
             {location.sunshineScore}
           </p>
         </div>

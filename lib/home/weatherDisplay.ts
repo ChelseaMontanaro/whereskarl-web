@@ -341,14 +341,14 @@ export function sunshineResultTitle(
   isNighttime: boolean,
 ): string {
   if (sunshineScore >= 50) {
-    return isNighttime ? "CLEAREST NIGHT" : "BEST SUNSHINE";
+    return isNighttime ? "CLEAREST NIGHT" : "BEST CLEAR SKIES";
   }
 
   if (sunshineScore >= 25) {
     return "BEST BREAK IN THE FOG";
   }
 
-  return "NO SUNSHINE NEARBY";
+  return "NO CLEAR SKIES NEARBY";
 }
 
 export function isNighttime(hour: number): boolean {

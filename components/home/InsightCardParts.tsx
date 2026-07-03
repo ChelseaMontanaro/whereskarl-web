@@ -30,7 +30,7 @@ export function SunshineScoreBadge({ score }: { score: number }) {
         {score}
       </p>
       <p className="mt-0.5 text-[0.625rem] uppercase tracking-[0.12em] text-white/48">
-        Sunshine
+        Clear
       </p>
     </div>
   );

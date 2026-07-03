@@ -80,13 +80,16 @@ describe("HomeView", () => {
       screen.getAllByText("Karl is picking favorites across the Bay").length,
     ).toBeGreaterThan(0);
     expect(screen.getAllByText("Tiburon").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("BEST SUNSHINE").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("BEST CLEAR SKIES").length).toBeGreaterThan(0);
     expect(
       screen.getByRole("link", { name: "Find Clear Skies" }),
     ).toHaveAttribute("href", "/map?location=tiburon");
     expect(
-      screen.getByRole("link", { name: "View clearest spot on map: Tiburon" }),
-    ).toHaveAttribute("href", "/map?location=tiburon");
+      screen.getAllByRole("link", { name: "View clearest spot on map: Tiburon" }),
+    ).toHaveLength(1);
+    expect(
+      screen.getByRole("link", { name: "View Sausalito on map" }),
+    ).toHaveAttribute("href", "/map?location=sausalito");
     expect(
       screen.getByRole("link", {
         name: "View Karl's read on map: Marin Headlands / Hawk Hill",

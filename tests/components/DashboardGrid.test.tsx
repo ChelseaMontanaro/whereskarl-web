@@ -87,6 +87,7 @@ describe("DashboardGrid", () => {
 
     expect(screen.getByText("Fog Coverage")).toBeInTheDocument();
     expect(screen.getByText("Karl Status")).toBeInTheDocument();
+    expect(screen.getByText("Clear Skies Score")).toBeInTheDocument();
     expect(screen.getByText("Clearest Spot")).toBeInTheDocument();
     expect(screen.queryByText("What does this mean?")).not.toBeInTheDocument();
     expect(container.querySelectorAll("svg")).toHaveLength(4);
@@ -147,6 +148,9 @@ describe("DashboardGrid", () => {
     );
 
     expect(screen.queryByRole("button", { name: "Learn about Fog Coverage" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Learn about Clear Skies Score" }),
+    ).not.toBeInTheDocument();
   });
 });
 

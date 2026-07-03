@@ -62,7 +62,7 @@ function MapLocationCard({
         <div className="rounded-full border border-karl-gold/25 px-2.5 py-1.5 text-center">
           <p className="text-lg font-light text-karl-gold">{location.sunshineScore}</p>
           <p className="text-[0.6rem] uppercase tracking-[0.1em] text-white/40">
-            Sunshine
+            Clear
           </p>
         </div>
       </div>
