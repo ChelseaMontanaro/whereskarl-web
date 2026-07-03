@@ -7,7 +7,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { createElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { MapView } from "@/components/map/MapView";
+import { MapView, initialMapStyle } from "@/components/map/MapView";
 import * as weatherApi from "@/lib/api/weather";
 
 const FIXTURES_DIR = join(process.cwd(), "tests/fixtures");
@@ -19,13 +19,17 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: replaceMock }),
 }));
 
-vi.mock("@/lib/hooks/useMinWidth", () => ({
-  useMinWidth: () => true,
-}));
-
 vi.mock("@/components/map/BayAreaMap", () => ({
   BayAreaMap: () => <div data-testid="bay-area-map" />,
 }));
+
+vi.mock("@/lib/hooks/useMinWidth", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/hooks/useMinWidth")>();
+  return {
+    ...actual,
+    useMinWidth: () => true,
+  };
+});
 
 const tiburon = JSON.parse(
   readFileSync(join(FIXTURES_DIR, "locations.json"), "utf8"),
@@ -53,6 +57,22 @@ describe("MapView desktop", () => {
   afterEach(() => {
     cleanup();
     vi.clearAllMocks();
+    vi.restoreAllMocks();
+  });
+
+  it("defaults desktop map style to hybrid", () => {
+    vi.spyOn(window, "matchMedia").mockReturnValue({
+      matches: true,
+      media: "(min-width: 1024px)",
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+    } as MediaQueryList);
+
+    expect(initialMapStyle()).toBe("hybrid");
   });
 
   beforeEach(() => {

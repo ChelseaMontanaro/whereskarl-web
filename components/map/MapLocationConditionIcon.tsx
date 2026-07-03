@@ -20,14 +20,20 @@ const KARL_LOGO_SRC = "/brand/wheres-karl-logo@2x.png";
 type MapLocationConditionIconProps = {
   location: LocationConditionInput;
   className?: string;
+  variant?: "default" | "prominent";
 };
 
 export function MapLocationConditionIcon({
   location,
   className = "",
+  variant = "default",
 }: MapLocationConditionIconProps) {
   const intensity = getMarkerFogIntensity(location);
-  const frameClass = `${desktopInsightIconFrameClass} ${className}`;
+  const isProminent = variant === "prominent";
+  const frameClass = isProminent
+    ? `flex shrink-0 items-center justify-center rounded-full border lg:h-16 lg:w-16 ${className}`
+    : `${desktopInsightIconFrameClass} ${className}`;
+  const iconClass = isProminent ? "h-9 w-9" : desktopInsightIconSizeClass;
 
   if (intensity === "clear") {
     const isNight = isNighttime(new Date().getHours());
@@ -35,13 +41,15 @@ export function MapLocationConditionIcon({
     return (
       <span
         className={`${frameClass} ${
-          isNight ? desktopMistIconClass : desktopGoldIconClass
+          isNight
+            ? `${desktopMistIconClass} shadow-[0_0_0_1px_rgb(255_255_255_/_0.08)]`
+            : `${desktopGoldIconClass} shadow-[0_0_0_1px_rgb(242_163_38_/_0.18),0_8px_24px_rgb(242_163_38_/_0.12)]`
         }`}
       >
         {isNight ? (
-          <MoonIcon className={desktopInsightIconSizeClass} />
+          <MoonIcon className={iconClass} />
         ) : (
-          <SunshineIcon className={desktopInsightIconSizeClass} />
+          <SunshineIcon className={iconClass} />
         )}
       </span>
     );
@@ -49,11 +57,13 @@ export function MapLocationConditionIcon({
 
   if (intensity === "lightFog") {
     return (
-      <span className={`${frameClass} ${desktopMistIconClass}`}>
+      <span
+        className={`${frameClass} ${desktopMistIconClass} shadow-[0_0_0_1px_rgb(255_255_255_/_0.08)]`}
+      >
         <svg
           viewBox="0 0 24 24"
           aria-hidden="true"
-          className={desktopInsightIconSizeClass}
+          className={iconClass}
           fill="none"
         >
           <ellipse cx="12" cy="11" rx="6.8" ry="4" fill="#D8E8F4" opacity="0.92" />
@@ -68,23 +78,25 @@ export function MapLocationConditionIcon({
   if (intensity === "karlTerritory") {
     return (
       <span
-        className={`${frameClass} border-white/14 bg-white/[0.05]`}
+        className={`${frameClass} border-white/14 bg-white/[0.05] shadow-[0_0_0_1px_rgb(255_255_255_/_0.08)]`}
       >
         <Image
           src={KARL_LOGO_SRC}
           alt=""
           aria-hidden="true"
-          width={32}
-          height={32}
-          className={`${desktopInsightIconSizeClass} object-contain`}
+          width={36}
+          height={36}
+          className={`${iconClass} object-contain`}
         />
       </span>
     );
   }
 
   return (
-    <span className={`${frameClass} ${desktopMistIconClass}`}>
-      <FogCoverageIcon className={desktopInsightIconSizeClass} />
+    <span
+      className={`${frameClass} ${desktopMistIconClass} shadow-[0_0_0_1px_rgb(255_255_255_/_0.08)]`}
+    >
+      <FogCoverageIcon className={iconClass} />
     </span>
   );
 }

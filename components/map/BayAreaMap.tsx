@@ -100,7 +100,7 @@ export function BayAreaMap({
         }
 
         fitDefaultBayAreaViewport(map);
-        syncFogOverlayLayer(map, locations, fogLayerEnabled);
+        syncFogOverlayLayer(map, locations, fogLayerEnabled, intensityFilter);
         setMapReady(true);
       });
 
@@ -130,7 +130,7 @@ export function BayAreaMap({
     const nextStyle = resolveKarlMapStyle(mapStyle);
 
     const applyStyle = () => {
-      syncFogOverlayLayer(map, locations, fogLayerEnabled);
+      syncFogOverlayLayer(map, locations, fogLayerEnabled, intensityFilter);
 
       if (selectedLocationId) {
         const location = locations.find((item) => item.id === selectedLocationId);
@@ -153,6 +153,7 @@ export function BayAreaMap({
     map.setStyle(nextStyle);
   }, [
     fogLayerEnabled,
+    intensityFilter,
     locations,
     mapReady,
     mapStyle,
@@ -212,8 +213,8 @@ export function BayAreaMap({
       return;
     }
 
-    syncFogOverlayLayer(map, locations, fogLayerEnabled);
-  }, [fogLayerEnabled, locations, mapReady]);
+    syncFogOverlayLayer(map, locations, fogLayerEnabled, intensityFilter);
+  }, [fogLayerEnabled, intensityFilter, locations, mapReady]);
 
   useEffect(() => {
     const map = mapRef.current;

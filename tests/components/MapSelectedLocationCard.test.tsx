@@ -52,12 +52,8 @@ describe("MapSelectedLocationCard", () => {
     render(<MapSelectedLocationCard location={location} onClose={vi.fn()} />);
 
     expect(screen.getByText("Tiburon")).toBeInTheDocument();
-    expect(screen.getByText("Mostly Sunny")).toBeInTheDocument();
-    expect(screen.getByText("Clear Skies Score")).toBeInTheDocument();
-    expect(screen.getByText("82")).toBeInTheDocument();
-    expect(screen.getByText("18% fog")).toBeInTheDocument();
-    expect(screen.getByText("8 mph W")).toBeInTheDocument();
-    expect(screen.getByText("68°")).toBeInTheDocument();
+    expect(screen.getByText("Mostly clear across Tiburon.")).toBeInTheDocument();
+    expect(screen.getByText("18% fog · 8 mph W · 68°")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Close selected location" })).toBeInTheDocument();
   });
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo, useRef, useState, useEffect } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import type { MutableRefObject } from "react";
 import { useQuery } from "@tanstack/react-query";
 
@@ -33,6 +33,16 @@ import {
 } from "@/lib/map/routing";
 import type { KarlMapStyleId } from "@/lib/map/styles";
 import type { LocationWeather } from "@/lib/schemas/weather";
+
+function initialMapStyle(): KarlMapStyleId {
+  if (typeof window === "undefined") {
+    return "hybrid";
+  }
+
+  return window.matchMedia("(min-width: 1024px)").matches ? "hybrid" : "standard";
+}
+
+export { initialMapStyle };
 
 function MapLocationCard({
   location,
@@ -157,26 +167,16 @@ type MapViewModel = {
   statusSentence: string;
 };
 
-function useMapViewState(isDesktop: boolean): MapViewModel {
+function useMapViewState(): MapViewModel {
   const router = useRouter();
   const searchParams = useSearchParams();
   const mapQuery = resolveMapQueryState(searchParams);
   const suppressViewportUpdateRef = useRef(false);
-  const [mapStyle, setMapStyle] = useState<KarlMapStyleId>("hybrid");
-  const mobileStandardAppliedRef = useRef(false);
+  const [mapStyle, setMapStyle] = useState<KarlMapStyleId>(initialMapStyle);
   const [fogLayerEnabled, setFogLayerEnabled] = useState(true);
   const [intensityFilter, setIntensityFilter] = useState<FogIntensity | null>(
     null,
   );
-
-  useEffect(() => {
-    if (isDesktop || mobileStandardAppliedRef.current) {
-      return;
-    }
-
-    mobileStandardAppliedRef.current = true;
-    setMapStyle("standard");
-  }, [isDesktop]);
 
   const locationsQuery = useQuery({
     queryKey: ["locations"],
@@ -466,7 +466,7 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
 
 export function MapView() {
   const isDesktop = useMinWidth(1024);
-  const state = useMapViewState(isDesktop);
+  const state = useMapViewState();
 
   if (isDesktop) {
     return <DesktopMapView state={state} />;

@@ -1,7 +1,6 @@
 import {
-  getFogIntensity,
   getLocationConditionLabel,
-  resolveFogScore,
+  resolveLocationFogIntensity,
   type FogIntensity,
   type LocationConditionInput,
 } from "@/lib/map/conditions";
@@ -31,24 +30,12 @@ export function mapMarkerAriaLabel(
   return `${location.name}, ${conditionLabel}`;
 }
 
-function getMarkerDisplayIntensity(
-  location: MapMarkerLocation,
-): FogIntensity | "neutral" {
-  const fogScore = resolveFogScore(location);
-  if (fogScore === null) {
-    return "neutral";
-  }
-
-  return getFogIntensity(fogScore);
+function getMarkerDisplayIntensity(location: MapMarkerLocation): FogIntensity {
+  return resolveLocationFogIntensity(location);
 }
 
 function getMarkerIntensityClass(location: MapMarkerLocation): string {
-  const intensity = getMarkerDisplayIntensity(location);
-  if (intensity === "neutral") {
-    return "karl-map-marker--neutral";
-  }
-
-  return `karl-map-marker--${intensity}`;
+  return `karl-map-marker--${getMarkerDisplayIntensity(location)}`;
 }
 
 function matchesIntensityFilter(
@@ -106,5 +93,5 @@ export function createMapMarkerElement(input: {
 export function getMarkerFogIntensity(
   location: LocationConditionInput,
 ): FogIntensity {
-  return getFogIntensity(resolveFogScore(location));
+  return resolveLocationFogIntensity(location);
 }

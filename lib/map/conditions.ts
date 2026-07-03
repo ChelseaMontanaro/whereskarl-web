@@ -38,6 +38,31 @@ export function getFogIntensity(fogScore: number | null): FogIntensity {
   return "karlTerritory";
 }
 
+/**
+ * Map-facing intensity that treats high Clear Skies Score locations as clear
+ * even when fogScore sits in the light-fog band.
+ */
+export function resolveLocationFogIntensity(
+  location: LocationConditionInput,
+): FogIntensity {
+  const fogScore = resolveFogScore(location);
+  if (fogScore === null) {
+    return "clear";
+  }
+
+  const rawIntensity = getFogIntensity(fogScore);
+
+  if (
+    rawIntensity === "lightFog" &&
+    typeof location.sunshineScore === "number" &&
+    location.sunshineScore >= 75
+  ) {
+    return "clear";
+  }
+
+  return rawIntensity;
+}
+
 export function getFogIntensityLabel(
   intensity: FogIntensity,
   isNighttime = false,
@@ -58,9 +83,11 @@ export function getLocationConditionLabel(
   location: LocationConditionInput,
   isNighttime = false,
 ): string {
+  const intensity = resolveLocationFogIntensity(location);
   const fogScore = resolveFogScore(location);
+
   if (fogScore !== null) {
-    return getFogIntensityLabel(getFogIntensity(fogScore), isNighttime);
+    return getFogIntensityLabel(intensity, isNighttime);
   }
 
   return location.status?.trim() || "Conditions unavailable";
@@ -73,35 +100,45 @@ export type FogOverlayStyle = {
 };
 
 /** Mirrors iOS per-location fog circles; not a backend geographic fog raster. */
-export function getFogOverlayStyle(fogScore: number | null): FogOverlayStyle | null {
-  if (fogScore === null || fogScore < 25) {
+export function getLocationFogOverlayStyle(
+  location: LocationConditionInput,
+): FogOverlayStyle | null {
+  const intensity = resolveLocationFogIntensity(location);
+  const fogScore = resolveFogScore(location);
+
+  if (intensity === "clear" || fogScore === null) {
     return null;
   }
 
-  const radiusMeters = 1800 + fogScore * 58;
-  const opacity = Math.min(0.48, 0.08 + (fogScore / 100) * 0.28);
+  switch (intensity) {
+    case "lightFog":
+      return {
+        color: "rgb(255 255 255)",
+        opacity: Math.min(0.22, 0.06 + (fogScore / 100) * 0.12),
+        radiusMeters: 1400 + fogScore * 18,
+      };
+    case "foggy":
+      return {
+        color: "rgb(255 255 255)",
+        opacity: Math.min(0.36, 0.1 + (fogScore / 100) * 0.22),
+        radiusMeters: 2200 + fogScore * 42,
+      };
+    case "karlTerritory":
+      return {
+        color: "rgb(184 214 237)",
+        opacity: Math.min(0.48, 0.14 + (fogScore / 100) * 0.28),
+        radiusMeters: 2800 + fogScore * 58,
+      };
+  }
+}
 
-  if (fogScore >= 78) {
-    return {
-      color: "rgb(184 214 237)",
-      opacity,
-      radiusMeters,
-    };
+/** @deprecated Prefer getLocationFogOverlayStyle for location-aware overlay rules. */
+export function getFogOverlayStyle(fogScore: number | null): FogOverlayStyle | null {
+  if (fogScore === null) {
+    return null;
   }
 
-  if (fogScore >= 58) {
-    return {
-      color: "rgb(255 255 255)",
-      opacity,
-      radiusMeters,
-    };
-  }
-
-  return {
-    color: "rgb(255 255 255)",
-    opacity: opacity * 0.72,
-    radiusMeters,
-  };
+  return getLocationFogOverlayStyle({ fogScore });
 }
 
 function clampScore(value: number): number {

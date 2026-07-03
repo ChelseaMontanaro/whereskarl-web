@@ -115,7 +115,26 @@ describe("createMapMarkerElement", () => {
     });
 
     expect(marker.className).toContain("karl-map-marker--clear");
-    expect(marker.className).not.toContain("karl-map-marker--neutral");
+    expect(marker.className).not.toContain("karl-map-marker--lightFog");
+  });
+
+  it("classifies high-sunshine locations as clear markers", () => {
+    const marker = createMapMarkerElement({
+      location: {
+        id: "tiburon",
+        name: "Tiburon",
+        latitude: 37.8735,
+        longitude: -122.4566,
+        fogScore: 26,
+        sunshineScore: 82,
+        status: "Mostly Sunny",
+      },
+      isSelected: false,
+      fogLayerEnabled: true,
+      onSelect: vi.fn(),
+    });
+
+    expect(marker.className).toContain("karl-map-marker--clear");
   });
 
   it("uses shared condition language in the marker label", () => {

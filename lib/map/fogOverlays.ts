@@ -1,4 +1,9 @@
-import { getFogOverlayStyle, resolveFogScore, type LocationConditionInput } from "@/lib/map/conditions";
+import {
+  getLocationFogOverlayStyle,
+  resolveLocationFogIntensity,
+  type FogIntensity,
+  type LocationConditionInput,
+} from "@/lib/map/conditions";
 
 export const FOG_OVERLAY_SOURCE_ID = "karl-fog-overlays";
 export const FOG_OVERLAY_LAYER_ID = "karl-fog-overlays-fill";
@@ -44,13 +49,19 @@ export function createCirclePolygon(
  */
 export function buildLocationFogOverlayCollection(
   locations: FogOverlayLocation[],
+  intensityFilter: FogIntensity | null = null,
 ): GeoJSON.FeatureCollection {
   const features: GeoJSON.Feature[] = [];
 
   for (const location of locations) {
-    const fogScore = resolveFogScore(location);
-    const overlayStyle = getFogOverlayStyle(fogScore);
+    const intensity = resolveLocationFogIntensity(location);
+    const overlayStyle = getLocationFogOverlayStyle(location);
+
     if (!overlayStyle) {
+      continue;
+    }
+
+    if (intensityFilter && intensity !== intensityFilter) {
       continue;
     }
 
@@ -65,7 +76,7 @@ export function buildLocationFogOverlayCollection(
       properties: {
         color: overlayStyle.color,
         opacity: overlayStyle.opacity,
-        fogScore,
+        intensity,
       },
     });
   }
@@ -90,6 +101,7 @@ export function syncFogOverlayLayer(
   map: import("maplibre-gl").Map,
   locations: FogOverlayLocation[],
   enabled: boolean,
+  intensityFilter: FogIntensity | null = null,
 ): void {
   removeFogOverlayLayer(map);
 
@@ -97,7 +109,10 @@ export function syncFogOverlayLayer(
     return;
   }
 
-  const collection = buildLocationFogOverlayCollection(locations);
+  const collection = buildLocationFogOverlayCollection(
+    locations,
+    intensityFilter,
+  );
   map.addSource(FOG_OVERLAY_SOURCE_ID, {
     type: "geojson",
     data: collection,

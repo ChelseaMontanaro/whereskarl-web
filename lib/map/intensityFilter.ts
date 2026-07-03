@@ -1,8 +1,6 @@
 import type { MapBounds } from "@/lib/map/config";
 import {
-  getFogIntensity,
   getFogIntensityLabel,
-  resolveFogScore,
   type FogIntensity,
 } from "@/lib/map/conditions";
 import type { BestRightNowItem } from "@/lib/home/weatherDisplay";
@@ -14,7 +12,7 @@ export function locationMatchesIntensity(
   location: LocationWeather,
   intensity: FogIntensity,
 ): boolean {
-  return getFogIntensity(resolveFogScore(location)) === intensity;
+  return getMarkerFogIntensity(location) === intensity;
 }
 
 export function intensityFilterTrayItems(
