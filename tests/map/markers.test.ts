@@ -380,21 +380,78 @@ describe("createMapMarkerElement", () => {
       "is-selected",
     );
   });
+
+  it("shows readable location labels below Karl Territory markers on desktop", () => {
+    const marker = createMapMarkerElement({
+      location: tiburon,
+      isSelected: false,
+      fogLayerEnabled: true,
+      intensityFilter: "karlTerritory",
+      layout: "desktop",
+      onSelect: vi.fn(),
+    });
+
+    expect(marker.className).toContain("karl-map-marker-root--labeled");
+    expect(marker.querySelector(".karl-map-marker__label")?.textContent).toBe(
+      "Tiburon",
+    );
+    expect(marker.querySelector(".karl-map-marker")?.className).toContain(
+      "karl-map-marker--karlTerritory",
+    );
+  });
+
+  it("does not add Karl Territory filter labels on mobile", () => {
+    const marker = createMapMarkerElement({
+      location: tiburon,
+      isSelected: false,
+      fogLayerEnabled: true,
+      intensityFilter: "karlTerritory",
+      layout: "mobile",
+      onSelect: vi.fn(),
+    });
+
+    expect(marker.className).toContain("karl-map-marker--karlTerritory");
+    expect(marker.querySelector(".karl-map-marker__label")).toBeNull();
+  });
+
+  it("preserves selected halo styling on labeled Karl Territory desktop markers", () => {
+    const marker = createMapMarkerElement({
+      location: tiburon,
+      isSelected: true,
+      fogLayerEnabled: true,
+      intensityFilter: "karlTerritory",
+      layout: "desktop",
+      onSelect: vi.fn(),
+    });
+
+    expect(marker.querySelector(".karl-map-marker")?.className).toContain(
+      "is-selected",
+    );
+  });
 });
 
 describe("shouldShowFoggyFilterMarkerLabel", () => {
-  it("only enables labels for visible foggy markers on desktop", () => {
+  it("only enables labels for visible foggy and Karl Territory markers on desktop", () => {
     expect(
       shouldShowFoggyFilterMarkerLabel("desktop", "foggy", false),
     ).toBe(true);
     expect(
+      shouldShowFoggyFilterMarkerLabel("desktop", "karlTerritory", false),
+    ).toBe(true);
+    expect(
       shouldShowFoggyFilterMarkerLabel("mobile", "foggy", false),
+    ).toBe(false);
+    expect(
+      shouldShowFoggyFilterMarkerLabel("mobile", "karlTerritory", false),
     ).toBe(false);
     expect(
       shouldShowFoggyFilterMarkerLabel("desktop", "lightFog", false),
     ).toBe(false);
     expect(
       shouldShowFoggyFilterMarkerLabel("desktop", "foggy", true),
+    ).toBe(false);
+    expect(
+      shouldShowFoggyFilterMarkerLabel("desktop", "karlTerritory", true),
     ).toBe(false);
   });
 });
