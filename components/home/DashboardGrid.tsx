@@ -8,6 +8,8 @@ import {
 } from "@/components/home/ConditionIcons";
 import {
   desktopGoldIconClass,
+  desktopMetricIconFrameClass,
+  desktopMetricIconSizeClass,
   desktopMistIconClass,
 } from "@/components/home/desktopGlass";
 import { GlassCard } from "@/components/ui/GlassCard";
@@ -22,7 +24,7 @@ type DashboardGridProps = {
 
 function CardLabel({ children }: { children: ReactNode }) {
   return (
-    <p className="text-[0.625rem] font-bold uppercase tracking-[0.14em] text-white/38 lg:text-[0.68rem] lg:tracking-[0.16em] lg:text-karl-gold/85">
+    <p className="text-[0.625rem] font-bold uppercase tracking-[0.14em] text-white/38 lg:text-[0.68rem] lg:tracking-[0.16em] lg:text-karl-gold/88">
       {children}
     </p>
   );
@@ -35,6 +37,7 @@ function MetricCard({
   isLoading,
   icon,
   iconFrameClassName,
+  valueClassName = "lg:text-[1.85rem]",
 }: {
   label: string;
   value: string;
@@ -42,25 +45,26 @@ function MetricCard({
   isLoading: boolean;
   icon: ReactNode;
   iconFrameClassName: string;
+  valueClassName?: string;
 }) {
   return (
-    <GlassCard className="border-white/8 bg-karl-navy-glass/55 px-3.5 py-3 backdrop-blur-md lg:border-white/10 lg:bg-black/45 lg:px-4 lg:py-3 lg:shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] lg:backdrop-blur-md">
-      <div className="flex items-center gap-3 lg:gap-3">
+    <GlassCard className="border-white/8 bg-karl-navy-glass/55 px-3.5 py-3 backdrop-blur-md lg:border-white/10 lg:bg-black/58 lg:px-4 lg:py-3 lg:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] lg:ring-1 lg:ring-karl-gold/10 lg:backdrop-blur-md">
+      <div className="flex items-center gap-3 lg:items-center lg:gap-3.5">
         <div
-          className={`order-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/8 bg-white/4 text-white/34 lg:order-1 lg:h-[3.25rem] lg:w-[3.25rem] lg:rounded-2xl lg:border ${iconFrameClassName}`}
+          className={`order-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/8 bg-white/4 lg:order-1 ${desktopMetricIconFrameClass} ${iconFrameClassName}`}
         >
           {icon}
         </div>
         <div className="order-1 min-w-0 flex-1 lg:order-2">
           <CardLabel>{label}</CardLabel>
           <p
-            className={`mt-1 text-[1.35rem] font-light leading-none text-white lg:mt-1.5 lg:text-[1.9rem] lg:font-light ${
-              isLoading ? "opacity-35" : "text-white/95"
+            className={`mt-1 text-[1.35rem] font-light leading-none lg:mt-1.5 lg:font-light ${valueClassName} ${
+              isLoading ? "opacity-35 text-white" : "text-white/96"
             }`}
           >
             {value}
           </p>
-          <p className="mt-1 text-[0.6875rem] font-medium text-white/50 lg:text-xs lg:text-white/55">
+          <p className="mt-1 text-[0.6875rem] font-medium text-white/50 lg:text-xs lg:text-white/58">
             {detail}
           </p>
         </div>
@@ -80,9 +84,9 @@ export function DashboardGrid({
   isNightPresentation = false,
 }: DashboardGridProps) {
   const spotIcon = isNightPresentation ? (
-    <MoonIcon className="h-5 w-5 lg:h-8 lg:w-8" />
+    <MoonIcon className={desktopMetricIconSizeClass} />
   ) : (
-    <SunshineIcon className="h-5 w-5 lg:h-8 lg:w-8" />
+    <SunshineIcon className={desktopMetricIconSizeClass} />
   );
 
   return (
@@ -95,7 +99,7 @@ export function DashboardGrid({
         value={isLoading || !current ? "--" : `${current.fogCoverage}%`}
         detail={isLoading ? "Checking conditions" : "Bay Area"}
         isLoading={isLoading}
-        icon={<FogCoverageIcon className="h-5 w-5 lg:h-8 lg:w-8" />}
+        icon={<FogCoverageIcon className={desktopMetricIconSizeClass} />}
         iconFrameClassName={desktopMistIconClass}
       />
       <MetricCard
@@ -103,15 +107,16 @@ export function DashboardGrid({
         value={isLoading || !current ? "--" : current.status}
         detail={isLoading ? "Checking conditions" : "Across the Bay"}
         isLoading={isLoading}
-        icon={<KarlStatusIcon className="h-5 w-5 lg:h-8 lg:w-8" />}
+        icon={<KarlStatusIcon className={desktopMetricIconSizeClass} />}
         iconFrameClassName={desktopMistIconClass}
+        valueClassName="lg:text-[1.05rem] lg:leading-snug lg:tracking-[-0.01em]"
       />
       <MetricCard
         label="Sunshine Score"
         value={isLoading || !current ? "--" : `${current.sunshineScore}`}
         detail={isLoading ? "Checking conditions" : "Bay Area average"}
         isLoading={isLoading}
-        icon={<SunshineIcon className="h-5 w-5 lg:h-8 lg:w-8" />}
+        icon={<SunshineIcon className={desktopMetricIconSizeClass} />}
         iconFrameClassName={desktopGoldIconClass}
       />
       <MetricCard

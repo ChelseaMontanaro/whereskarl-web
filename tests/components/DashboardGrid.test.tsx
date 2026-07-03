@@ -4,19 +4,24 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { DashboardGrid } from "@/components/home/DashboardGrid";
+import {
+  IllustratedFogCoverage,
+  IllustratedKarlFog,
+  IllustratedSun,
+} from "@/components/home/ConditionIcons";
 
 describe("DashboardGrid", () => {
   afterEach(() => {
     cleanup();
   });
 
-  it("renders condition icons alongside dashboard metrics", () => {
+  it("renders illustrated condition icons alongside dashboard metrics", () => {
     const { container } = render(
       <DashboardGrid
         current={{
           id: "bay-area-current",
           summary: "Foggy",
-          status: "Foggy",
+          status: "Karl is lingering",
           temperature: 58,
           fogCoverage: 56,
           sunshineScore: 44,
@@ -75,6 +80,22 @@ describe("DashboardGrid", () => {
 
     expect(screen.getByText("Fog Coverage")).toBeInTheDocument();
     expect(screen.getByText("Karl Status")).toBeInTheDocument();
+    expect(screen.getByText("Karl is lingering")).toBeInTheDocument();
     expect(container.querySelectorAll("svg")).toHaveLength(4);
+    expect(
+      container.querySelector("svg[viewBox='0 0 48 48']"),
+    ).toBeInTheDocument();
+  });
+});
+
+describe("ConditionIcons illustrations", () => {
+  it("renders custom illustrated fog, Karl, and sun artwork", () => {
+    const { container: fog } = render(<IllustratedFogCoverage />);
+    const { container: karl } = render(<IllustratedKarlFog />);
+    const { container: sun } = render(<IllustratedSun />);
+
+    expect(fog.querySelector("ellipse")).toBeTruthy();
+    expect(karl.querySelector("circle")).toBeTruthy();
+    expect(sun.querySelector("circle[fill='#F2A326']")).toBeTruthy();
   });
 });

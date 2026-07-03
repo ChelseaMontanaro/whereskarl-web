@@ -4,6 +4,7 @@ import {
   InsightCardChevron,
   InsightIconFrame,
 } from "@/components/home/InsightCardParts";
+import { desktopInsightIconSizeClass } from "@/components/home/desktopGlass";
 import { GlassCard } from "@/components/ui/GlassCard";
 import type { KarlIntelligenceResponse } from "@/lib/schemas/intelligence";
 
@@ -63,7 +64,7 @@ function DesktopIntelligenceNarrativeCard({
     return (
       <GlassCard variant="desktop" className="flex items-center gap-4 px-5 py-4">
         <InsightIconFrame>
-          <KarlStatusIcon className="h-8 w-8 lg:h-9 lg:w-9" />
+          <KarlStatusIcon className={desktopInsightIconSizeClass} />
         </InsightIconFrame>
         <div className="min-w-0 flex-1">
           <CardLabel>Karl&apos;s Read</CardLabel>
@@ -87,7 +88,7 @@ function DesktopIntelligenceNarrativeCard({
   return (
     <GlassCard variant="desktop" className="flex items-center gap-4 px-5 py-4">
       <InsightIconFrame>
-        <KarlStatusIcon className="h-8 w-8 lg:h-9 lg:w-9" />
+        <KarlStatusIcon className={desktopInsightIconSizeClass} />
       </InsightIconFrame>
       <div className="min-w-0 flex-1">
         <CardLabel>Karl&apos;s Read</CardLabel>

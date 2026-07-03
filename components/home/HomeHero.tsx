@@ -95,10 +95,10 @@ export function HomeHero({
           </p>
         </div>
 
-        <div className="mt-auto px-5 pb-14 lg:mt-0 lg:min-h-[17rem] lg:px-0 lg:pb-6 lg:pt-32 lg:text-left xl:min-h-[18rem]">
+        <div className="mt-auto px-5 pb-14 lg:mt-0 lg:min-h-[16rem] lg:px-0 lg:pb-5 lg:pt-36 lg:text-left xl:min-h-[17rem] xl:pt-[9.75rem]">
           <HeroPositionBadge isLoading={isLoading} />
           <h1
-            className={`mt-3 max-w-[18ch] font-serif text-[1.75rem] font-semibold leading-[1.12] text-white/[0.98] [text-shadow:0_5px_14px_rgba(0,0,0,0.56)] sm:text-[1.85rem] lg:max-w-[22ch] lg:text-[2.65rem] lg:leading-[1.06] xl:max-w-[24ch] xl:text-[2.85rem] ${
+            className={`mt-3 max-w-[18ch] font-serif text-[1.75rem] font-semibold leading-[1.12] text-white/[0.98] [text-shadow:0_5px_14px_rgba(0,0,0,0.56)] sm:text-[1.85rem] lg:max-w-[22ch] lg:text-[2.35rem] lg:leading-[1.08] xl:max-w-[24ch] xl:text-[2.55rem] ${
               isLoading ? "opacity-70" : ""
             }`}
           >

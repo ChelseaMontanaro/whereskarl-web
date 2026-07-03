@@ -11,7 +11,7 @@ import {
   InsightIconFrame,
   SunshineScoreBadge,
 } from "@/components/home/InsightCardParts";
-import { clearestSpotDesktopLabel } from "@/components/home/desktopGlass";
+import { clearestSpotDesktopLabel, desktopInsightIconSizeClass } from "@/components/home/desktopGlass";
 import { GlassCard } from "@/components/ui/GlassCard";
 import {
   isNighttime,
@@ -150,9 +150,9 @@ function DesktopBestSunshineCard({
     recommendation.status;
   const href = buildMapHref(recommendation.locationID);
   const spotIcon = isNightPresentation ? (
-    <MoonIcon className="h-8 w-8 lg:h-9 lg:w-9" />
+    <MoonIcon className={desktopInsightIconSizeClass} />
   ) : (
-    <SunshineIcon className="h-8 w-8 lg:h-9 lg:w-9" />
+    <SunshineIcon className={desktopInsightIconSizeClass} />
   );
 
   return (

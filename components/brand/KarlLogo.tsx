@@ -2,36 +2,47 @@ type KarlLogoProps = {
   className?: string;
 };
 
-export function KarlLogo({ className = "h-9 w-9" }: KarlLogoProps) {
+export function KarlLogo({ className = "h-11 w-11" }: KarlLogoProps) {
   return (
     <svg
-      viewBox="0 0 40 40"
+      viewBox="0 0 48 48"
       aria-hidden="true"
       className={className}
       fill="none"
     >
-      <ellipse cx="20" cy="17" rx="11" ry="7.5" fill="rgb(210 225 240 / 0.92)" />
-      <ellipse cx="13.5" cy="18.5" rx="5" ry="4.5" fill="rgb(198 218 238 / 0.88)" />
-      <ellipse cx="26.5" cy="18.5" rx="5" ry="4.5" fill="rgb(198 218 238 / 0.88)" />
-      <circle cx="16.5" cy="16.5" r="1.1" fill="rgb(9 27 42)" />
-      <circle cx="23.5" cy="16.5" r="1.1" fill="rgb(9 27 42)" />
+      <ellipse cx="24" cy="18.5" rx="14" ry="9" fill="#C5DDF0" />
+      <ellipse cx="15.5" cy="20.5" rx="7.5" ry="6" fill="#E8F3FA" />
+      <ellipse cx="32.5" cy="20.5" rx="7.5" ry="6" fill="#E8F3FA" />
+      <ellipse cx="24" cy="15.5" rx="10.5" ry="6.5" fill="#F2F8FC" />
+      <circle cx="19" cy="16.5" r="1.6" fill="#162636" />
+      <circle cx="29" cy="16.5" r="1.6" fill="#162636" />
       <path
-        d="M16 19.5c1.2 1.1 2.6 1.6 4 1.6s2.8-.5 4-1.6"
-        stroke="rgb(9 27 42 / 0.72)"
-        strokeWidth="1.1"
+        d="M19 21c1.7 1.5 3.3 2.2 5 2.2s3.3-.7 5-2.2"
+        stroke="#162636"
+        strokeWidth="1.5"
         strokeLinecap="round"
+        opacity="0.78"
       />
       <path
-        d="M8 26.5c2.2 0 3.4-1.1 4.4-2 .9 1 2.1 2 4.4 2s3.5-1 4.4-2c.9 1 2.1 2 4.4 2"
-        stroke="rgb(210 225 240 / 0.55)"
+        d="M8 29.5c2.8 0 4.3-1.2 5.6-2.2 1.2 1 2.8 2.2 5.6 2.2s4.4-1.2 5.6-2.2c1.2 1 2.8 2.2 5.6 2.2s4.4-1.2 5.6-2.2c1.2 1 2.8 2.2 5.6 2.2"
+        stroke="#93B8D8"
+        strokeWidth="2"
+        strokeLinecap="round"
+        opacity="0.9"
+      />
+      <path
+        d="M10 34.5c2.2 0 3.4-1 4.4-1.8.9.8 2.1 1.8 4.4 1.8s3.5-1 4.4-1.8c.9.8 2.1 1.8 4.4 1.8s3.5-1 4.4-1.8c.9.8 2.1 1.8 4.4 1.8"
+        stroke="#B8D4EA"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        opacity="0.72"
+      />
+      <path
+        d="M12 38.5c1.8 0 2.8-.8 3.6-1.5.8.7 1.8 1.5 3.6 1.5s2.8-.8 3.6-1.5c.8.7 1.8 1.5 3.6 1.5s2.8-.8 3.6-1.5c.8.7 1.8 1.5 3.6 1.5"
+        stroke="#C5DDF0"
         strokeWidth="1.2"
         strokeLinecap="round"
-      />
-      <path
-        d="M10 30.5c1.8 0 2.8-.9 3.6-1.7.8.8 1.8 1.7 3.6 1.7s2.8-.9 3.6-1.7c.8.8 1.8 1.7 3.6 1.7"
-        stroke="rgb(210 225 240 / 0.38)"
-        strokeWidth="1.1"
-        strokeLinecap="round"
+        opacity="0.55"
       />
     </svg>
   );

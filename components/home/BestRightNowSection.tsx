@@ -7,6 +7,7 @@ import {
   InsightIconFrame,
   SunshineScoreBadge,
 } from "@/components/home/InsightCardParts";
+import { desktopInsightIconSizeClass } from "@/components/home/desktopGlass";
 import { GlassCard } from "@/components/ui/GlassCard";
 import type { BestRightNowItem } from "@/lib/home/weatherDisplay";
 import { buildMapHref } from "@/lib/map/routing";
@@ -59,7 +60,7 @@ function DesktopBestRightNowCard({ item }: { item: BestRightNowItem }) {
     >
       <GlassCard variant="desktop" className="flex h-full items-center gap-4 px-5 py-4 transition-colors group-hover:border-white/16">
         <InsightIconFrame tone="gold">
-          <SunshineIcon className="h-8 w-8 lg:h-9 lg:w-9" />
+          <SunshineIcon className={desktopInsightIconSizeClass} />
         </InsightIconFrame>
         <div className="min-w-0 flex-1">
           <CardLabel>Best Right Now</CardLabel>
