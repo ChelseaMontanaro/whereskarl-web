@@ -53,7 +53,7 @@ describe("MapSelectedLocationCard", () => {
 
     expect(screen.getByText("Tiburon")).toBeInTheDocument();
     expect(screen.getByText("Mostly clear across Tiburon.")).toBeInTheDocument();
-    expect(screen.getByText("18% fog · 8 mph W · 68°")).toBeInTheDocument();
+    expect(screen.getByText("18% · 8 mph W · 68°")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Close selected location" })).toBeInTheDocument();
   });
 

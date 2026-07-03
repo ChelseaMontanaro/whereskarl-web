@@ -1,5 +1,8 @@
 export type FogIntensity = "clear" | "lightFog" | "foggy" | "karlTerritory";
 
+/** Aligns with Best Right Now / sunshineResultTitle "BEST CLEAR SKIES" threshold. */
+export const CLEAR_SKIES_SCORE_THRESHOLD = 50;
+
 export type LocationConditionInput = {
   fogScore?: number | null;
   sunshineScore?: number | null;
@@ -38,29 +41,45 @@ export function getFogIntensity(fogScore: number | null): FogIntensity {
   return "karlTerritory";
 }
 
+export function locationQualifiesAsClearIntensity(
+  location: LocationConditionInput,
+): boolean {
+  const fogScore = resolveFogScore(location);
+  if (fogScore === null) {
+    return true;
+  }
+
+  if (getFogIntensity(fogScore) === "karlTerritory") {
+    return false;
+  }
+
+  if (
+    typeof location.sunshineScore === "number" &&
+    location.sunshineScore >= CLEAR_SKIES_SCORE_THRESHOLD
+  ) {
+    return true;
+  }
+
+  return getFogIntensity(fogScore) === "clear";
+}
+
 /**
  * Map-facing intensity that treats high Clear Skies Score locations as clear
- * even when fogScore sits in the light-fog band.
+ * even when fogScore sits in a foggier band.
  */
 export function resolveLocationFogIntensity(
   location: LocationConditionInput,
 ): FogIntensity {
+  if (locationQualifiesAsClearIntensity(location)) {
+    return "clear";
+  }
+
   const fogScore = resolveFogScore(location);
   if (fogScore === null) {
     return "clear";
   }
 
-  const rawIntensity = getFogIntensity(fogScore);
-
-  if (
-    rawIntensity === "lightFog" &&
-    typeof location.sunshineScore === "number" &&
-    location.sunshineScore >= 75
-  ) {
-    return "clear";
-  }
-
-  return rawIntensity;
+  return getFogIntensity(fogScore);
 }
 
 export function getFogIntensityLabel(
@@ -99,18 +118,29 @@ export type FogOverlayStyle = {
   radiusMeters: number;
 };
 
+function getFogOverlayIntensity(location: LocationConditionInput): FogIntensity | null {
+  const fogScore = resolveFogScore(location);
+  if (fogScore === null || resolveLocationFogIntensity(location) === "clear") {
+    return null;
+  }
+
+  return getFogIntensity(fogScore);
+}
+
 /** Mirrors iOS per-location fog circles; not a backend geographic fog raster. */
 export function getLocationFogOverlayStyle(
   location: LocationConditionInput,
 ): FogOverlayStyle | null {
-  const intensity = resolveLocationFogIntensity(location);
+  const intensity = getFogOverlayIntensity(location);
   const fogScore = resolveFogScore(location);
 
-  if (intensity === "clear" || fogScore === null) {
+  if (!intensity || fogScore === null) {
     return null;
   }
 
   switch (intensity) {
+    case "clear":
+      return null;
     case "lightFog":
       return {
         color: "rgb(255 255 255)",
@@ -129,6 +159,8 @@ export function getLocationFogOverlayStyle(
         opacity: Math.min(0.48, 0.14 + (fogScore / 100) * 0.28),
         radiusMeters: 2800 + fogScore * 58,
       };
+    default:
+      return null;
   }
 }
 

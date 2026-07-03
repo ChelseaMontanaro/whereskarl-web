@@ -54,14 +54,14 @@ export function buildLocationFogOverlayCollection(
   const features: GeoJSON.Feature[] = [];
 
   for (const location of locations) {
-    const intensity = resolveLocationFogIntensity(location);
+    const markerIntensity = resolveLocationFogIntensity(location);
     const overlayStyle = getLocationFogOverlayStyle(location);
 
     if (!overlayStyle) {
       continue;
     }
 
-    if (intensityFilter && intensity !== intensityFilter) {
+    if (intensityFilter && markerIntensity !== intensityFilter) {
       continue;
     }
 
@@ -76,7 +76,7 @@ export function buildLocationFogOverlayCollection(
       properties: {
         color: overlayStyle.color,
         opacity: overlayStyle.opacity,
-        intensity,
+        intensity: markerIntensity,
       },
     });
   }

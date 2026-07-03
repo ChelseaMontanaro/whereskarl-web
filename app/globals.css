@@ -95,6 +95,11 @@ body {
   pointer-events: none;
 }
 
+.karl-map-marker.is-filtered-hidden {
+  visibility: hidden;
+  opacity: 0;
+}
+
 .karl-map-marker.is-intensity-match {
   transform: scale(1.04);
 }

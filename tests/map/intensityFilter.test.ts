@@ -81,7 +81,15 @@ describe("intensityFilterTrayItems", () => {
         ...baseLocation,
         id: "tiburon",
         name: "Tiburon",
-        fogScore: 82,
+        fogScore: 26,
+        sunshineScore: 82,
+      },
+      {
+        ...baseLocation,
+        id: "sausalito",
+        name: "Sausalito",
+        fogScore: 41,
+        sunshineScore: 74,
       },
       {
         ...baseLocation,
@@ -94,9 +102,12 @@ describe("intensityFilterTrayItems", () => {
 
     const items = intensityFilterTrayItems(locations, "clear", null, 4);
 
-    expect(items).toHaveLength(1);
-    expect(items[0]?.locationId).toBe("san-jose");
-    expect(items[0]?.locationName).toBe("San Jose");
+    expect(items).toHaveLength(3);
+    expect(items.map((item) => item.locationId)).toEqual([
+      "san-jose",
+      "tiburon",
+      "sausalito",
+    ]);
   });
 });
 

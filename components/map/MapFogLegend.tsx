@@ -18,7 +18,6 @@ type MapFogLegendProps = {
   layout?: "mobile" | "desktop" | "desktop-stack";
   activeIntensity?: FogIntensity | null;
   onSelectIntensity?: (intensity: FogIntensity) => void;
-  onClearIntensity?: () => void;
 };
 
 function LegendSwatch({ className }: { className: string }) {
@@ -34,7 +33,6 @@ export function MapFogLegend({
   layout = "mobile",
   activeIntensity = null,
   onSelectIntensity,
-  onClearIntensity,
 }: MapFogLegendProps) {
   if (layout === "desktop-stack") {
     const isInteractive = Boolean(onSelectIntensity);
@@ -48,16 +46,6 @@ export function MapFogLegend({
           <p className="text-[0.58rem] font-bold uppercase tracking-[0.14em] text-white/38">
             Fog Intensity
           </p>
-          {activeIntensity && onClearIntensity ? (
-            <button
-              type="button"
-              onClick={onClearIntensity}
-              aria-label="Clear intensity filter"
-              className="text-[0.56rem] font-medium text-white/35 underline-offset-2 transition-colors hover:text-white/55 hover:underline motion-reduce:transition-none"
-            >
-              reset
-            </button>
-          ) : null}
         </div>
         <ul className="mt-1.5 grid grid-cols-2 gap-x-3 gap-y-1">
           {LEGEND_ITEMS.map((item) => {

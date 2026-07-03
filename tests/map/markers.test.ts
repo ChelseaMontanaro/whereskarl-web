@@ -59,6 +59,7 @@ describe("createMapMarkerElement", () => {
         id: "sausalito",
         name: "Sausalito",
         fogScore: 60,
+        sunshineScore: 40,
       },
       isSelected: false,
       fogLayerEnabled: true,
@@ -148,23 +149,20 @@ describe("createMapMarkerElement", () => {
     expect(marker.getAttribute("aria-label")).toContain("Karl Territory");
   });
 
-  it("dims markers that do not match the active intensity filter", () => {
-    const clearLocation: MapMarkerLocation = {
-      ...tiburon,
-      id: "sausalito",
-      name: "Sausalito",
-      fogScore: 10,
-      sunshineScore: 90,
-    };
-
+  it("hides non-Karl markers when the Karl Territory filter is active", () => {
     const marker = createMapMarkerElement({
-      location: clearLocation,
+      location: {
+        ...tiburon,
+        fogScore: 10,
+        sunshineScore: 90,
+      },
       isSelected: false,
       fogLayerEnabled: true,
       intensityFilter: "karlTerritory",
       onSelect: vi.fn(),
     });
 
+    expect(marker.className).toContain("is-filtered-hidden");
     expect(marker.className).toContain("is-filtered-out");
   });
 });

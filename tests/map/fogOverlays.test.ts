@@ -75,6 +75,26 @@ describe("fog overlays", () => {
     });
   });
 
+  it("renders light fog overlays when the light fog intensity filter is active", () => {
+    const collection = buildLocationFogOverlayCollection(
+      [
+        {
+          id: "sausalito",
+          latitude: 37.8591,
+          longitude: -122.4853,
+          fogScore: 35,
+          sunshineScore: 40,
+        },
+      ],
+      "lightFog",
+    );
+
+    expect(collection.features).toHaveLength(1);
+    expect(collection.features[0]?.properties).toMatchObject({
+      intensity: "lightFog",
+    });
+  });
+
   it("creates a closed polygon for overlay rendering", () => {
     const polygon = createCirclePolygon(-122.45, 37.87, 2500, 8);
     const ring = polygon.coordinates[0];

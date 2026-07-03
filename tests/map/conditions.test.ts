@@ -32,11 +32,23 @@ describe("map conditions", () => {
       resolveLocationFogIntensity({ fogScore: 26, sunshineScore: 82 }),
     ).toBe("clear");
     expect(
+      resolveLocationFogIntensity({ fogScore: 41, sunshineScore: 74 }),
+    ).toBe("clear");
+    expect(
       getLocationFogOverlayStyle({ fogScore: 26, sunshineScore: 82 }),
     ).toBeNull();
     expect(getLocationConditionLabel({ fogScore: 26, sunshineScore: 82 })).toBe(
       "Clear",
     );
+  });
+
+  it("keeps Karl Territory and low-clear-skies locations out of the clear band", () => {
+    expect(
+      resolveLocationFogIntensity({ fogScore: 82, sunshineScore: 74 }),
+    ).toBe("karlTerritory");
+    expect(
+      resolveLocationFogIntensity({ fogScore: 41, sunshineScore: 40 }),
+    ).toBe("lightFog");
   });
 
   it("builds iOS-aligned location fog overlay styling without a new score model", () => {

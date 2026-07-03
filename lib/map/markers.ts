@@ -68,6 +68,9 @@ export function createMapMarkerElement(input: {
     getMarkerIntensityClass(input.location),
     input.isSelected ? "is-selected" : "",
     isFilteredOut ? "is-filtered-out" : "",
+    isFilteredOut && input.intensityFilter === "karlTerritory"
+      ? "is-filtered-hidden"
+      : "",
     input.intensityFilter && !isFilteredOut ? "is-intensity-match" : "",
   ]
     .filter(Boolean)

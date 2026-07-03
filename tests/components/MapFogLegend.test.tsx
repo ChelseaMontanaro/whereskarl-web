@@ -21,7 +21,6 @@ function ToggleableFogLegend() {
         onSelectIntensity={(intensity) =>
           setActiveIntensity((current) => toggleIntensityFilter(current, intensity))
         }
-        onClearIntensity={() => setActiveIntensity(null)}
       />
       <p data-testid="active-intensity">{activeIntensity ?? "none"}</p>
     </>
@@ -40,7 +39,6 @@ describe("MapFogLegend", () => {
       <MapFogLegend
         layout="desktop-stack"
         onSelectIntensity={onSelectIntensity}
-        onClearIntensity={vi.fn()}
       />,
     );
 
@@ -78,20 +76,17 @@ describe("MapFogLegend", () => {
     }
   });
 
-  it("shows a reset control when an intensity filter is active", () => {
-    const onClearIntensity = vi.fn();
-
+  it("does not show a separate reset control", () => {
     render(
       <MapFogLegend
         layout="desktop-stack"
         activeIntensity="foggy"
         onSelectIntensity={vi.fn()}
-        onClearIntensity={onClearIntensity}
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Clear intensity filter" }));
-
-    expect(onClearIntensity).toHaveBeenCalledTimes(1);
+    expect(
+      screen.queryByRole("button", { name: "Clear intensity filter" }),
+    ).not.toBeInTheDocument();
   });
 });

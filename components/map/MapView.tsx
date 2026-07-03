@@ -162,7 +162,6 @@ type MapViewModel = {
   handleSelectRegion: (regionId: string) => void;
   handleClearSelectedLocation: () => void;
   handleSelectIntensity: (intensity: FogIntensity) => void;
-  handleClearIntensityFilter: () => void;
   intensityFilter: FogIntensity | null;
   statusSentence: string;
 };
@@ -245,10 +244,6 @@ function useMapViewState(): MapViewModel {
     setIntensityFilter((current) => toggleIntensityFilter(current, intensity));
   }, []);
 
-  const handleClearIntensityFilter = useCallback(() => {
-    setIntensityFilter(null);
-  }, []);
-
   const handleSelectRegion = useCallback(
     (regionId: string) => {
       suppressViewportUpdateRef.current = false;
@@ -290,7 +285,6 @@ function useMapViewState(): MapViewModel {
     handleSelectRegion,
     handleClearSelectedLocation,
     handleSelectIntensity,
-    handleClearIntensityFilter,
     intensityFilter,
     statusSentence,
   };
@@ -390,7 +384,6 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
     handleSelectRegion,
     handleClearSelectedLocation,
     handleSelectIntensity,
-    handleClearIntensityFilter,
     intensityFilter,
     suppressViewportUpdateRef,
     statusSentence,
@@ -427,7 +420,6 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
             layout="desktop-stack"
             activeIntensity={intensityFilter}
             onSelectIntensity={handleSelectIntensity}
-            onClearIntensity={handleClearIntensityFilter}
           />
           <MapQueryWarnings
             unknownLocationId={unknownLocationId}
@@ -447,7 +439,7 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
           </div>
 
           {selectedLocation ? (
-            <div className="w-[min(100%,44rem)] shrink-0">
+            <div className="shrink-0">
               <MapSelectedLocationCard
                 location={selectedLocation}
                 onClose={handleClearSelectedLocation}
