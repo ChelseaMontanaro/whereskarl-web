@@ -1,7 +1,8 @@
-import type { ReactNode } from "react";
+"use client";
 
-import Link from "next/link";
+import { useEffect, useState, type ReactNode } from "react";
 
+import { FindClearSkiesCta } from "@/components/home/FindClearSkiesCta";
 import { GlassCard } from "@/components/ui/GlassCard";
 import {
   isNighttime,
@@ -12,6 +13,7 @@ import type { BestSunshineResponse } from "@/lib/schemas/weather";
 type BestSunshineCardProps = {
   recommendation: BestSunshineResponse | null;
   isLoading: boolean;
+  isUnavailable?: boolean;
 };
 
 function CardLabel({ children }: { children: ReactNode }) {
@@ -25,17 +27,44 @@ function CardLabel({ children }: { children: ReactNode }) {
 export function BestSunshineCard({
   recommendation,
   isLoading,
+  isUnavailable = false,
 }: BestSunshineCardProps) {
-  const hour = new Date().getHours();
-  const night = isNighttime(hour);
+  const [isNightPresentation, setIsNightPresentation] = useState(false);
 
-  if (isLoading || !recommendation) {
+  useEffect(() => {
+    setIsNightPresentation(isNighttime(new Date().getHours()));
+  }, []);
+
+  if (isLoading) {
     return (
-      <GlassCard className="px-4 py-4">
-        <CardLabel>Best Sunshine</CardLabel>
+      <GlassCard className="border-karl-gold/15 px-4 py-4">
+        <CardLabel>Brightest Spot</CardLabel>
         <p className="mt-3 text-lg font-semibold text-white/50">
           Finding brighter spots…
         </p>
+        <FindClearSkiesCta
+          locationId={null}
+          isLoading
+          variant="secondary"
+          className="mt-4"
+        />
+      </GlassCard>
+    );
+  }
+
+  if (isUnavailable || !recommendation) {
+    return (
+      <GlassCard className="border-karl-gold/15 px-4 py-4">
+        <CardLabel>Brightest Spot</CardLabel>
+        <p className="mt-3 text-sm text-white/60">
+          Brightest spot details are unavailable right now.
+        </p>
+        <FindClearSkiesCta
+          locationId={null}
+          isLoading={false}
+          variant="secondary"
+          className="mt-4"
+        />
       </GlassCard>
     );
   }
@@ -46,27 +75,30 @@ export function BestSunshineCard({
     recommendation.status;
 
   return (
-    <GlassCard className="px-4 py-4">
+    <GlassCard className="border-karl-gold/20 bg-karl-navy-glass/85 px-4 py-4">
       <div className="flex items-start justify-between gap-4">
-        <div>
+        <div className="min-w-0 flex-1">
           <CardLabel>
-            {sunshineResultTitle(recommendation.sunshineScore, night)}
+            {sunshineResultTitle(
+              recommendation.sunshineScore,
+              isNightPresentation,
+            )}
           </CardLabel>
-          <h2 className="mt-3 text-xl font-semibold text-white">
+          <h2 className="mt-2 text-xl font-semibold text-white">
             {recommendation.locationName}
           </h2>
           <p className="mt-2 text-sm font-semibold text-karl-gold">{subtitle}</p>
-          <p className="mt-2 text-sm text-white/60">
+          <p className="mt-1.5 text-sm text-white/60">
             {recommendation.distanceText} · {recommendation.temperature}°
           </p>
-          <Link
-            href={`/map?location=${encodeURIComponent(recommendation.locationID)}`}
-            className="mt-3 inline-flex text-sm font-semibold text-karl-gold underline decoration-karl-gold/30 underline-offset-4"
-          >
-            View on Map +
-          </Link>
+          <FindClearSkiesCta
+            locationId={recommendation.locationID}
+            isLoading={false}
+            variant="secondary"
+            className="mt-4"
+          />
         </div>
-        <div className="rounded-full border border-karl-gold/25 bg-karl-gold/10 px-3 py-2 text-center">
+        <div className="shrink-0 rounded-full border border-karl-gold/30 bg-karl-gold/10 px-3 py-2 text-center">
           <p className="text-2xl font-light text-karl-gold">
             {recommendation.sunshineScore}
           </p>

@@ -81,5 +81,27 @@ describe("HomeView", () => {
     ).toBeInTheDocument();
     expect(screen.getAllByText("Tiburon").length).toBeGreaterThan(0);
     expect(screen.getByText("BEST SUNSHINE")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Find Clear Skies" }),
+    ).toHaveAttribute("href", "/map?location=tiburon");
+    expect(
+      screen.getByRole("link", { name: "View brightest spot on map" }),
+    ).toHaveAttribute("href", "/map?location=tiburon");
+  });
+
+  it("falls back to the general map route when best sunshine is unavailable", async () => {
+    vi.spyOn(weatherApi, "getBestSunshine").mockRejectedValue(
+      new Error("best sunshine unavailable"),
+    );
+
+    renderHome();
+
+    expect(await screen.findByText("56%")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Find Clear Skies" }),
+    ).toHaveAttribute("href", "/map");
+    expect(
+      screen.getByRole("link", { name: "View brightest spot on map" }),
+    ).toHaveAttribute("href", "/map");
   });
 });

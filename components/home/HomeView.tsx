@@ -5,8 +5,8 @@ import { useQuery } from "@tanstack/react-query";
 
 import { BestRightNowSection } from "@/components/home/BestRightNowSection";
 import { BestSunshineCard } from "@/components/home/BestSunshineCard";
-import { CinematicHero } from "@/components/home/CinematicHero";
 import { DashboardGrid } from "@/components/home/DashboardGrid";
+import { HomeHero } from "@/components/home/HomeHero";
 import { IntelligenceNarrativeCard } from "@/components/home/IntelligenceNarrativeCard";
 import { NextHourOutlookCard } from "@/components/home/NextHourOutlookCard";
 import { useConditionsStatus } from "@/components/providers/ConditionsStatusProvider";
@@ -19,7 +19,9 @@ import {
   bestRightNowItems,
   foggiestKarlLocation,
   formatUpdatedAt,
+  heroConfidenceText,
   heroHeadline,
+  heroSubheadline,
   nextHourOutlookSummary,
 } from "@/lib/home/weatherDisplay";
 import {
@@ -80,9 +82,14 @@ export function HomeView() {
     locationsQuery.isLoading ||
     bestSunshineQuery.isLoading;
 
-  const hasLoadedWeather = Boolean(
-    currentQuery.data && locationsQuery.data && bestSunshineQuery.data,
+  const hasLoadedCoreWeather = Boolean(
+    currentQuery.data && locationsQuery.data,
   );
+
+  const hasBestSunshine = Boolean(bestSunshineQuery.data);
+
+  const hasLoadedWeather =
+    hasLoadedCoreWeather && (hasBestSunshine || bestSunshineQuery.isError);
 
   const current = currentQuery.data ?? null;
   const bestSunshine = bestSunshineQuery.data ?? null;
@@ -101,10 +108,23 @@ export function HomeView() {
     hasLoadedWeather,
   });
 
-  const subheadline =
-    intelligence?.narrative.summary ??
-    current?.summary ??
-    "Track Karl across the Bay.";
+  const subheadline = heroSubheadline({
+    current,
+    karlLocation,
+    hasLoadedWeather,
+  });
+
+  const isFindingClearSkies =
+    bestSunshineQuery.isLoading ||
+    (bestSunshineQuery.isFetching && !bestSunshine);
+
+  const clearSkiesLocationId = bestSunshine?.locationID ?? null;
+
+  const confidenceText = heroConfidenceText({
+    intelligence,
+    karlLocation,
+    current,
+  });
 
   useEffect(() => {
     if (initialLastKnown && !currentQuery.isFetchedAfterMount) {
@@ -159,19 +179,29 @@ export function HomeView() {
 
   return (
     <div className="pb-8">
-      <CinematicHero
+      <HomeHero
         presentation={heroPresentation}
         headline={headline}
         subheadline={subheadline}
-        statusLabel={current?.status ?? "Checking conditions"}
-        isLoading={!hasLoadedWeather}
+        confidenceText={confidenceText}
+        isLoading={!hasLoadedCoreWeather}
+        clearSkiesLocationId={clearSkiesLocationId}
+        isFindingClearSkies={isFindingClearSkies}
       />
 
-      <div className="relative z-10 mx-auto -mt-10 flex w-full max-w-[430px] flex-col gap-4 px-4">
+      <div className="relative z-10 mx-auto -mt-12 flex w-full max-w-[430px] flex-col gap-3.5 px-4">
         <DashboardGrid
           current={current}
           bestSunshine={bestSunshine}
-          isLoading={!hasLoadedWeather}
+          isLoading={!hasLoadedCoreWeather}
+        />
+
+        <BestSunshineCard
+          recommendation={bestSunshine}
+          isLoading={
+            bestSunshineQuery.isLoading || bestSunshineQuery.isFetching
+          }
+          isUnavailable={bestSunshineQuery.isError}
         />
 
         <IntelligenceNarrativeCard
@@ -184,16 +214,11 @@ export function HomeView() {
         <NextHourOutlookCard
           summary={nextHourSummary}
           confidenceLabel={nextHourConfidence}
-          isLoading={!hasLoadedWeather}
-        />
-
-        <BestSunshineCard
-          recommendation={bestSunshine}
-          isLoading={!hasLoadedWeather}
+          isLoading={!hasLoadedCoreWeather}
         />
 
         {current ? (
-          <p className="text-center text-xs text-white/40">
+          <p className="text-center text-xs text-white/35">
             Updated {formatUpdatedAt(current.updatedAt)}
           </p>
         ) : null}

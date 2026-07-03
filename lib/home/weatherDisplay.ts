@@ -51,6 +51,30 @@ export function formatUpdatedAt(updatedAt: string): string {
   });
 }
 
+const MOVEMENT_PHRASES = [
+  "advancing into",
+  "retreating toward",
+  "drifting through",
+  "spilling into",
+  "hugging",
+  "lingering over",
+  "rolling into",
+  "gathering near",
+  "settling over",
+  "sliding through",
+] as const;
+
+export function movementPhrase(locationId: string): string {
+  const normalizedKey = locationId.trim();
+  let hash = 0;
+
+  for (let index = 0; index < normalizedKey.length; index += 1) {
+    hash = (hash * 31 + normalizedKey.charCodeAt(index)) | 0;
+  }
+
+  return MOVEMENT_PHRASES[Math.abs(hash) % MOVEMENT_PHRASES.length];
+}
+
 export function heroHeadline(input: {
   current: CurrentResponse | null;
   karlLocation: LocationWeather | null;
@@ -66,14 +90,84 @@ export function heroHeadline(input: {
   }
 
   if (input.intelligenceFocusLocationId) {
-    return `Karl is lingering near ${displayLocationName(input.intelligenceFocusLocationId)}.`;
+    const name = displayLocationName(input.intelligenceFocusLocationId);
+    return `Karl is ${movementPhrase(input.intelligenceFocusLocationId)} ${name}.`;
   }
 
   if (input.karlLocation) {
-    return `Karl is ${input.karlLocation.status.toLowerCase()} near ${input.karlLocation.name}.`;
+    const locationKey =
+      input.karlLocation.id.trim().length > 0
+        ? input.karlLocation.id
+        : input.karlLocation.name;
+    return `Karl is ${movementPhrase(locationKey)} ${input.karlLocation.name}.`;
   }
 
   return input.current.summary;
+}
+
+export function heroSubheadline(input: {
+  current: CurrentResponse | null;
+  karlLocation: LocationWeather | null;
+  hasLoadedWeather: boolean;
+}): string {
+  const preferredReason = trimmedNonEmpty(input.karlLocation?.karlReason);
+  if (preferredReason) {
+    return preferredReason;
+  }
+
+  if (!input.hasLoadedWeather || !input.current) {
+    return "Checking conditions";
+  }
+
+  const { current, karlLocation } = input;
+
+  if (current.windSpeed >= 6) {
+    return `Marine layer nearby with ${Math.round(current.windSpeed)} mph coastal wind.`;
+  }
+
+  if (karlLocation && karlLocation.cloudCover >= 70) {
+    return "Fog is strongest near the shoreline right now.";
+  }
+
+  if (current.fogCoverage < 30) {
+    return "Karl is lighter across most of the Bay.";
+  }
+
+  if (current.sunshineScore >= 55) {
+    return "Clearing skies are developing inland.";
+  }
+
+  return current.status;
+}
+
+export function heroConfidenceText(input: {
+  intelligence: KarlIntelligenceResponse | null;
+  karlLocation: LocationWeather | null;
+  current: CurrentResponse | null;
+}): string | null {
+  const narrativeLabel = trimmedNonEmpty(
+    input.intelligence?.narrative.confidenceLabel,
+  );
+  if (narrativeLabel && narrativeLabel.toLowerCase() !== "unavailable") {
+    return `${narrativeLabel} confidence`;
+  }
+
+  const label =
+    trimmedNonEmpty(input.karlLocation?.confidenceLabel) ??
+    trimmedNonEmpty(input.current?.confidenceLabel);
+  const explanation =
+    trimmedNonEmpty(input.karlLocation?.confidenceExplanation) ??
+    trimmedNonEmpty(input.current?.confidenceExplanation);
+
+  if (label && explanation) {
+    return `${label} · ${explanation}`;
+  }
+
+  if (label && label.toLowerCase() !== "unavailable") {
+    return label;
+  }
+
+  return null;
 }
 
 function trimmedNonEmpty(value: string | null | undefined): string | null {

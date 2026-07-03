@@ -11,7 +11,7 @@ type DashboardGridProps = {
 
 function CardLabel({ children }: { children: ReactNode }) {
   return (
-    <p className="text-[0.68rem] font-bold uppercase tracking-[0.14em] text-white/45">
+    <p className="text-[0.625rem] font-bold uppercase tracking-[0.14em] text-white/38">
       {children}
     </p>
   );
@@ -29,16 +29,16 @@ function MetricCard({
   isLoading: boolean;
 }) {
   return (
-    <GlassCard className="px-4 py-4">
+    <GlassCard className="border-white/8 bg-karl-navy-glass/55 px-3.5 py-3.5 backdrop-blur-md">
       <CardLabel>{label}</CardLabel>
       <p
-        className={`mt-2 text-3xl font-light text-white ${
-          isLoading ? "opacity-40" : "opacity-95"
+        className={`mt-1.5 text-2xl font-light text-white ${
+          isLoading ? "opacity-35" : "opacity-90"
         }`}
       >
         {value}
       </p>
-      <p className="mt-1 text-sm font-semibold text-white/60">{detail}</p>
+      <p className="mt-0.5 text-xs font-medium text-white/50">{detail}</p>
     </GlassCard>
   );
 }
@@ -49,7 +49,10 @@ export function DashboardGrid({
   isLoading,
 }: DashboardGridProps) {
   return (
-    <div className="grid grid-cols-2 gap-2.5">
+    <div
+      aria-label="Bay Area conditions dashboard"
+      className="grid grid-cols-2 gap-2"
+    >
       <MetricCard
         label="Fog Coverage"
         value={isLoading || !current ? "--" : `${current.fogCoverage}%`}
@@ -71,9 +74,7 @@ export function DashboardGrid({
       <MetricCard
         label="Brightest Spot"
         value={
-          isLoading || !bestSunshine
-            ? "--"
-            : `${bestSunshine.sunshineScore}`
+          isLoading || !bestSunshine ? "--" : `${bestSunshine.sunshineScore}`
         }
         detail={
           isLoading || !bestSunshine
