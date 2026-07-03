@@ -10,14 +10,50 @@ export class ApiError extends Error {
   }
 }
 
+export type ApiSearchParams = Record<
+  string,
+  string | number | boolean | undefined | null
+>;
+
+export function buildApiPath(
+  path: string,
+  searchParams?: ApiSearchParams,
+): string {
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+
+  if (!searchParams) {
+    return normalizedPath;
+  }
+
+  const params = new URLSearchParams();
+
+  for (const [key, value] of Object.entries(searchParams)) {
+    if (value === undefined || value === null || value === "") {
+      continue;
+    }
+
+    params.set(key, String(value));
+  }
+
+  const query = params.toString();
+  return query ? `${normalizedPath}?${query}` : normalizedPath;
+}
+
+export function buildApiUrl(
+  path: string,
+  searchParams?: ApiSearchParams,
+): string {
+  return `${getApiBaseUrl()}${buildApiPath(path, searchParams)}`;
+}
+
 export async function apiFetch<T>(
   path: string,
   options?: RequestInit,
+  searchParams?: ApiSearchParams,
 ): Promise<T> {
-  const baseUrl = getApiBaseUrl();
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const requestPath = buildApiPath(path, searchParams);
 
-  const response = await fetch(`${baseUrl}${normalizedPath}`, {
+  const response = await fetch(`${getApiBaseUrl()}${requestPath}`, {
     ...options,
     headers: {
       Accept: "application/json",

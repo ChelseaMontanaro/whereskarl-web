@@ -1,0 +1,26 @@
+{
+  "id": "bay-area-current",
+  "summary": "Karl is karl territory near Ocean Beach.",
+  "status": "Karl is lingering",
+  "temperature": 58,
+  "fogCoverage": 56,
+  "sunshineScore": 44,
+  "windSpeed": 14,
+  "windDirection": "W",
+  "cloudCover": 94,
+  "visibility": 0.8,
+  "humidity": 94,
+  "weatherCode": 45,
+  "iconName": "cloud.fog.fill",
+  "updatedAt": "2026-07-01T16:00:00.000Z",
+  "source": "mock",
+  "confidenceScore": 0,
+  "confidenceLabel": "Unavailable",
+  "confidenceExplanation": "Confidence unavailable for demo or fallback data.",
+  "confidenceComponents": {
+    "freshness": 0,
+    "observationQuality": 0,
+    "fieldCompleteness": 0,
+    "sourceReliability": 0
+  }
+}

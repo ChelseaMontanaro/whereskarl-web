@@ -1,0 +1,83 @@
+{
+  "locations": [
+    {
+      "id": "tiburon",
+      "name": "Tiburon",
+      "latitude": 37.8735,
+      "longitude": -122.4566,
+      "status": "Mostly Sunny",
+      "temperature": 72,
+      "sunshineScore": 82,
+      "distanceText": "9 mi",
+      "cloudCover": 22,
+      "visibility": 9.5,
+      "humidity": 58,
+      "windSpeed": 7,
+      "windDirection": "W",
+      "weatherCode": 1,
+      "iconName": "sun.max.fill",
+      "fogScore": 26,
+      "karlReason": "Patchy conditions near Tiburon — good visibility and low cloud cover.",
+      "primaryDrivers": [
+        "Good visibility",
+        "Low cloud cover",
+        "Comfortable humidity"
+      ],
+      "microclimateFactors": [],
+      "updatedAt": "2026-07-01T16:00:00.000Z",
+      "confidenceScore": 0,
+      "confidenceLabel": "Unavailable",
+      "confidenceExplanation": "Confidence unavailable for demo or fallback data.",
+      "confidenceComponents": {
+        "freshness": 0,
+        "observationQuality": 0,
+        "fieldCompleteness": 0,
+        "sourceReliability": 0
+      },
+      "prediction": {
+        "predictionConfidenceScore": 0,
+        "predictionConfidenceLabel": "Unavailable",
+        "predictionReason": "Prediction is unavailable while Karl is using fallback data."
+      }
+    },
+    {
+      "id": "sausalito",
+      "name": "Sausalito",
+      "latitude": 37.8591,
+      "longitude": -122.4853,
+      "status": "Mostly Sunny",
+      "temperature": 68,
+      "sunshineScore": 74,
+      "distanceText": "7 mi",
+      "cloudCover": 34,
+      "visibility": 8.2,
+      "humidity": 64,
+      "windSpeed": 9,
+      "windDirection": "WSW",
+      "weatherCode": 2,
+      "iconName": "cloud.sun.fill",
+      "fogScore": 41,
+      "karlReason": "Patchy conditions near Sausalito — good visibility and onshore wind feeding marine layer.",
+      "primaryDrivers": [
+        "Good visibility",
+        "Onshore wind feeding marine layer"
+      ],
+      "microclimateFactors": [],
+      "updatedAt": "2026-07-01T16:00:00.000Z",
+      "confidenceScore": 0,
+      "confidenceLabel": "Unavailable",
+      "confidenceExplanation": "Confidence unavailable for demo or fallback data.",
+      "confidenceComponents": {
+        "freshness": 0,
+        "observationQuality": 0,
+        "fieldCompleteness": 0,
+        "sourceReliability": 0
+      },
+      "prediction": {
+        "predictionConfidenceScore": 0,
+        "predictionConfidenceLabel": "Unavailable",
+        "predictionReason": "Prediction is unavailable while Karl is using fallback data."
+      }
+    }
+  ]
+}

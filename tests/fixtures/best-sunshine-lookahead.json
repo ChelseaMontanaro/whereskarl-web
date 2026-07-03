@@ -1,0 +1,30 @@
+{
+  "id": "best-tiburon",
+  "locationID": "tiburon",
+  "locationName": "Tiburon",
+  "latitude": 37.8735,
+  "longitude": -122.4566,
+  "status": "Mostly Sunny",
+  "temperature": 72,
+  "sunshineScore": 82,
+  "fogScore": 26,
+  "distanceText": "9 mi",
+  "reason": "Tiburon has the clearest conditions nearby right now.",
+  "iconName": "sun.max.fill",
+  "updatedAt": "2026-07-01T16:00:00.000Z",
+  "source": "mock",
+  "confidenceScore": 0,
+  "confidenceLabel": "Unavailable",
+  "confidenceExplanation": "Confidence unavailable for demo or fallback data.",
+  "confidenceComponents": {
+    "freshness": 0,
+    "observationQuality": 0,
+    "fieldCompleteness": 0,
+    "sourceReliability": 0
+  },
+  "recommendationMode": "lookahead",
+  "lookaheadMinutes": 60,
+  "recommendationScore": 82,
+  "projectedSunshineScore1h": null,
+  "recommendationReason": "Tiburon has the clearest conditions nearby right now."
+}

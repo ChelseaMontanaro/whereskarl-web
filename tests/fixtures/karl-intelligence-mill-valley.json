@@ -1,0 +1,2409 @@
+{
+  "narrative": {
+    "headline": "Karl is picking favorites across the Bay",
+    "summary": "Karl is shifting unevenly, with some corridors clearing while others stay gray. Berkeley should brighten around 30–45 minutes.",
+    "movementNarrative": "Karl is shifting unevenly, with some corridors clearing while others stay gray.",
+    "regionalNarratives": [
+      {
+        "regionId": "north-bay",
+        "regionName": "North Bay",
+        "trendLabel": "mixed",
+        "narrative": "North Bay is split between sunshine and fog, from Tiburon to Stinson Beach."
+      },
+      {
+        "regionId": "san-francisco",
+        "regionName": "San Francisco",
+        "trendLabel": "mixed",
+        "narrative": "San Francisco is split between sunshine and fog, from San Francisco to Ocean Beach."
+      },
+      {
+        "regionId": "east-bay",
+        "regionName": "East Bay",
+        "trendLabel": "mostly-clear",
+        "narrative": "East Bay is mostly bright, with only light fog in a few spots."
+      },
+      {
+        "regionId": "south-bay",
+        "regionName": "South Bay",
+        "trendLabel": "mixed",
+        "narrative": "South Bay is split between sunshine and fog, from San Jose to Half Moon Bay."
+      }
+    ],
+    "clearingNarratives": [
+      {
+        "locationId": "berkeley",
+        "locationName": "Berkeley",
+        "clearingStatus": "clearing-soon",
+        "estimatedClearingWindow": "30–45 minutes",
+        "narrative": "Berkeley should brighten around 30–45 minutes."
+      },
+      {
+        "locationId": "golden-gate-park",
+        "locationName": "Golden Gate Park",
+        "clearingStatus": "likely-stable",
+        "estimatedClearingWindow": null,
+        "narrative": "Golden Gate Park may stay gray for a while with fog holding steady."
+      },
+      {
+        "locationId": "half-moon-bay",
+        "locationName": "Half Moon Bay",
+        "clearingStatus": "likely-stable",
+        "estimatedClearingWindow": null,
+        "narrative": "Half Moon Bay may stay gray for a while with fog holding steady."
+      },
+      {
+        "locationId": "mill-valley",
+        "locationName": "Mill Valley",
+        "clearingStatus": "likely-stable",
+        "estimatedClearingWindow": null,
+        "narrative": "Mill Valley may stay gray for a while with fog holding steady."
+      },
+      {
+        "locationId": "mountain-view",
+        "locationName": "Mountain View",
+        "clearingStatus": "clearing-soon",
+        "estimatedClearingWindow": "1–2 hours",
+        "narrative": "Mountain View should brighten around 1–2 hours."
+      },
+      {
+        "locationId": "oakland",
+        "locationName": "Oakland",
+        "clearingStatus": "clearing-soon",
+        "estimatedClearingWindow": "30–45 minutes",
+        "narrative": "Oakland should brighten around 30–45 minutes."
+      },
+      {
+        "locationId": "ocean-beach",
+        "locationName": "Ocean Beach",
+        "clearingStatus": "likely-stable",
+        "estimatedClearingWindow": null,
+        "narrative": "Ocean Beach may stay gray for a while with fog holding steady."
+      },
+      {
+        "locationId": "palo-alto",
+        "locationName": "Palo Alto",
+        "clearingStatus": "clearing-soon",
+        "estimatedClearingWindow": "1–2 hours",
+        "narrative": "Palo Alto should brighten around 1–2 hours."
+      },
+      {
+        "locationId": "presidio",
+        "locationName": "Presidio",
+        "clearingStatus": "likely-stable",
+        "estimatedClearingWindow": null,
+        "narrative": "Presidio may stay gray for a while with fog holding steady."
+      },
+      {
+        "locationId": "san-jose",
+        "locationName": "San Jose",
+        "clearingStatus": "clearing-soon",
+        "estimatedClearingWindow": "30–45 minutes",
+        "narrative": "San Jose should brighten around 30–45 minutes."
+      },
+      {
+        "locationId": "sausalito",
+        "locationName": "Sausalito",
+        "clearingStatus": "clearing-soon",
+        "estimatedClearingWindow": "1–2 hours",
+        "narrative": "Sausalito should brighten around 1–2 hours."
+      },
+      {
+        "locationId": "stinson-beach",
+        "locationName": "Stinson Beach",
+        "clearingStatus": "likely-stable",
+        "estimatedClearingWindow": null,
+        "narrative": "Stinson Beach may stay gray for a while with fog holding steady."
+      },
+      {
+        "locationId": "tiburon",
+        "locationName": "Tiburon",
+        "clearingStatus": "clearing-soon",
+        "estimatedClearingWindow": "30–45 minutes",
+        "narrative": "Tiburon should brighten around 30–45 minutes."
+      }
+    ],
+    "confidence": 52,
+    "confidenceLabel": "Medium"
+  },
+  "regionalTrends": {
+    "regions": [
+      {
+        "regionId": "north-bay",
+        "regionName": "North Bay",
+        "averageFogScore": 56,
+        "averageSunshineScore": 58,
+        "clearestLocation": {
+          "locationId": "tiburon",
+          "fogScore": 26,
+          "sunshineScore": 82
+        },
+        "foggiestLocation": {
+          "locationId": "stinson-beach",
+          "fogScore": 85,
+          "sunshineScore": 28
+        },
+        "locationCount": 4,
+        "monitoredLocationCount": 4,
+        "trendLabel": "mixed",
+        "confidence": 75,
+        "confidenceLabel": "High",
+        "explanation": "North Bay is mixed, ranging from tiburon at 26 fog to stinson-beach at 85."
+      },
+      {
+        "regionId": "san-francisco",
+        "regionName": "San Francisco",
+        "averageFogScore": 75,
+        "averageSunshineScore": 39,
+        "clearestLocation": {
+          "locationId": "san-francisco",
+          "fogScore": 50,
+          "sunshineScore": 58
+        },
+        "foggiestLocation": {
+          "locationId": "ocean-beach",
+          "fogScore": 96,
+          "sunshineScore": 18
+        },
+        "locationCount": 4,
+        "monitoredLocationCount": 4,
+        "trendLabel": "mixed",
+        "confidence": 75,
+        "confidenceLabel": "High",
+        "explanation": "San Francisco is mixed, ranging from san-francisco at 50 fog to ocean-beach at 96."
+      },
+      {
+        "regionId": "peninsula",
+        "regionName": "Peninsula",
+        "averageFogScore": null,
+        "averageSunshineScore": null,
+        "clearestLocation": null,
+        "foggiestLocation": null,
+        "locationCount": 0,
+        "monitoredLocationCount": 0,
+        "trendLabel": "insufficient-data",
+        "confidence": 0,
+        "confidenceLabel": "Unavailable",
+        "explanation": "Peninsula has no monitored locations yet, so regional trend data is unavailable."
+      },
+      {
+        "regionId": "east-bay",
+        "regionName": "East Bay",
+        "averageFogScore": 29,
+        "averageSunshineScore": 71,
+        "clearestLocation": {
+          "locationId": "oakland",
+          "fogScore": 28,
+          "sunshineScore": 72
+        },
+        "foggiestLocation": {
+          "locationId": "berkeley",
+          "fogScore": 29,
+          "sunshineScore": 70
+        },
+        "locationCount": 2,
+        "monitoredLocationCount": 2,
+        "trendLabel": "mostly-clear",
+        "confidence": 74,
+        "confidenceLabel": "Medium",
+        "explanation": "East Bay is mostly clear, though a few spots still carry light fog around 29 on average."
+      },
+      {
+        "regionId": "south-bay",
+        "regionName": "South Bay",
+        "averageFogScore": 51,
+        "averageSunshineScore": 59,
+        "clearestLocation": {
+          "locationId": "san-jose",
+          "fogScore": 26,
+          "sunshineScore": 76
+        },
+        "foggiestLocation": {
+          "locationId": "half-moon-bay",
+          "fogScore": 82,
+          "sunshineScore": 32
+        },
+        "locationCount": 4,
+        "monitoredLocationCount": 4,
+        "trendLabel": "mixed",
+        "confidence": 75,
+        "confidenceLabel": "High",
+        "explanation": "South Bay is mixed, ranging from san-jose at 26 fog to half-moon-bay at 82."
+      }
+    ],
+    "movementContext": {
+      "movementType": "mixed",
+      "confidence": 0,
+      "confidenceLabel": "Unavailable",
+      "affectedLocations": [
+        "berkeley",
+        "golden-gate-park",
+        "half-moon-bay",
+        "mill-valley",
+        "mountain-view",
+        "oakland",
+        "ocean-beach",
+        "palo-alto",
+        "presidio",
+        "san-francisco",
+        "san-jose",
+        "sausalito",
+        "stinson-beach",
+        "tiburon"
+      ],
+      "explanation": "Connected locations show conflicting fog gradients, so movement direction is inconsistent across the Bay Area graph."
+    },
+    "validLocationCount": 14
+  },
+  "movementAssessment": {
+    "movementType": "mixed",
+    "confidence": 0,
+    "confidenceLabel": "Unavailable",
+    "evidence": [
+      {
+        "type": "directional-gradient",
+        "fromLocationId": "sausalito",
+        "toLocationId": "tiburon",
+        "fromFogScore": 41,
+        "toFogScore": 26,
+        "gradient": 15,
+        "signal": "coastal-retreat"
+      },
+      {
+        "type": "directional-gradient",
+        "fromLocationId": "mill-valley",
+        "toLocationId": "sausalito",
+        "fromFogScore": 70,
+        "toFogScore": 41,
+        "gradient": 29,
+        "signal": "inland-advance"
+      },
+      {
+        "type": "directional-gradient",
+        "fromLocationId": "mill-valley",
+        "toLocationId": "tiburon",
+        "fromFogScore": 70,
+        "toFogScore": 26,
+        "gradient": 44,
+        "signal": "coastal-retreat"
+      },
+      {
+        "type": "directional-gradient",
+        "fromLocationId": "stinson-beach",
+        "toLocationId": "mill-valley",
+        "fromFogScore": 85,
+        "toFogScore": 70,
+        "gradient": 15,
+        "signal": "inland-advance"
+      },
+      {
+        "type": "directional-gradient",
+        "fromLocationId": "ocean-beach",
+        "toLocationId": "golden-gate-park",
+        "fromFogScore": 96,
+        "toFogScore": 72,
+        "gradient": 24,
+        "signal": "inland-advance"
+      },
+      {
+        "type": "directional-gradient",
+        "fromLocationId": "ocean-beach",
+        "toLocationId": "presidio",
+        "fromFogScore": 96,
+        "toFogScore": 80,
+        "gradient": 16,
+        "signal": "inland-advance"
+      },
+      {
+        "type": "directional-gradient",
+        "fromLocationId": "ocean-beach",
+        "toLocationId": "stinson-beach",
+        "fromFogScore": 96,
+        "toFogScore": 85,
+        "gradient": 11,
+        "signal": "stable"
+      },
+      {
+        "type": "directional-gradient",
+        "fromLocationId": "san-francisco",
+        "toLocationId": "oakland",
+        "fromFogScore": 50,
+        "toFogScore": 28,
+        "gradient": 22,
+        "signal": "coastal-retreat"
+      },
+      {
+        "type": "directional-gradient",
+        "fromLocationId": "san-francisco",
+        "toLocationId": "berkeley",
+        "fromFogScore": 50,
+        "toFogScore": 29,
+        "gradient": 21,
+        "signal": "coastal-retreat"
+      },
+      {
+        "type": "directional-gradient",
+        "fromLocationId": "presidio",
+        "toLocationId": "mill-valley",
+        "fromFogScore": 80,
+        "toFogScore": 70,
+        "gradient": 10,
+        "signal": "stable"
+      },
+      {
+        "type": "directional-gradient",
+        "fromLocationId": "presidio",
+        "toLocationId": "sausalito",
+        "fromFogScore": 80,
+        "toFogScore": 41,
+        "gradient": 39,
+        "signal": "inland-advance"
+      },
+      {
+        "type": "directional-gradient",
+        "fromLocationId": "golden-gate-park",
+        "toLocationId": "presidio",
+        "fromFogScore": 72,
+        "toFogScore": 80,
+        "gradient": -8,
+        "signal": "stable"
+      },
+      {
+        "type": "directional-gradient",
+        "fromLocationId": "golden-gate-park",
+        "toLocationId": "mill-valley",
+        "fromFogScore": 72,
+        "toFogScore": 70,
+        "gradient": 2,
+        "signal": "stable"
+      },
+      {
+        "type": "directional-gradient",
+        "fromLocationId": "golden-gate-park",
+        "toLocationId": "sausalito",
+        "fromFogScore": 72,
+        "toFogScore": 41,
+        "gradient": 31,
+        "signal": "inland-advance"
+      },
+      {
+        "type": "directional-gradient",
+        "fromLocationId": "oakland",
+        "toLocationId": "berkeley",
+        "fromFogScore": 28,
+        "toFogScore": 29,
+        "gradient": -1,
+        "signal": "stable"
+      },
+      {
+        "type": "directional-gradient",
+        "fromLocationId": "half-moon-bay",
+        "toLocationId": "palo-alto",
+        "fromFogScore": 82,
+        "toFogScore": 48,
+        "gradient": 34,
+        "signal": "inland-advance"
+      },
+      {
+        "type": "directional-gradient",
+        "fromLocationId": "half-moon-bay",
+        "toLocationId": "mountain-view",
+        "fromFogScore": 82,
+        "toFogScore": 46,
+        "gradient": 36,
+        "signal": "inland-advance"
+      },
+      {
+        "type": "directional-gradient",
+        "fromLocationId": "palo-alto",
+        "toLocationId": "san-jose",
+        "fromFogScore": 48,
+        "toFogScore": 26,
+        "gradient": 22,
+        "signal": "coastal-retreat"
+      },
+      {
+        "type": "directional-gradient",
+        "fromLocationId": "palo-alto",
+        "toLocationId": "mountain-view",
+        "fromFogScore": 48,
+        "toFogScore": 46,
+        "gradient": 2,
+        "signal": "stable"
+      },
+      {
+        "type": "directional-gradient",
+        "fromLocationId": "mountain-view",
+        "toLocationId": "san-jose",
+        "fromFogScore": 46,
+        "toFogScore": 26,
+        "gradient": 20,
+        "signal": "coastal-retreat"
+      },
+      {
+        "type": "directional-gradient",
+        "fromLocationId": "mountain-view",
+        "toLocationId": "palo-alto",
+        "fromFogScore": 46,
+        "toFogScore": 48,
+        "gradient": -2,
+        "signal": "stable"
+      },
+      {
+        "type": "regional-gradient",
+        "pathId": "north-bay-to-san-francisco",
+        "fromRegionId": "north-bay",
+        "toRegionId": "san-francisco",
+        "expectedMovementType": "spillover",
+        "fromAverageFogScore": 56,
+        "toAverageFogScore": 75,
+        "gradient": -19,
+        "signal": "mixed"
+      },
+      {
+        "type": "regional-gradient",
+        "pathId": "north-bay-to-east-bay",
+        "fromRegionId": "north-bay",
+        "toRegionId": "east-bay",
+        "expectedMovementType": "inland-advance",
+        "fromAverageFogScore": 56,
+        "toAverageFogScore": 29,
+        "gradient": 27,
+        "signal": "coastal-retreat"
+      },
+      {
+        "type": "regional-gradient",
+        "pathId": "san-francisco-to-north-bay",
+        "fromRegionId": "san-francisco",
+        "toRegionId": "north-bay",
+        "expectedMovementType": "coastal-retreat",
+        "fromAverageFogScore": 75,
+        "toAverageFogScore": 56,
+        "gradient": 19,
+        "signal": "inland-advance"
+      },
+      {
+        "type": "regional-gradient",
+        "pathId": "san-francisco-to-east-bay",
+        "fromRegionId": "san-francisco",
+        "toRegionId": "east-bay",
+        "expectedMovementType": "inland-advance",
+        "fromAverageFogScore": 75,
+        "toAverageFogScore": 29,
+        "gradient": 46,
+        "signal": "coastal-retreat"
+      },
+      {
+        "type": "regional-gradient",
+        "pathId": "east-bay-to-san-francisco",
+        "fromRegionId": "east-bay",
+        "toRegionId": "san-francisco",
+        "expectedMovementType": "clearing",
+        "fromAverageFogScore": 29,
+        "toAverageFogScore": 75,
+        "gradient": -46,
+        "signal": "mixed"
+      },
+      {
+        "type": "regional-gradient",
+        "pathId": "east-bay-to-north-bay",
+        "fromRegionId": "east-bay",
+        "toRegionId": "north-bay",
+        "expectedMovementType": "coastal-retreat",
+        "fromAverageFogScore": 29,
+        "toAverageFogScore": 56,
+        "gradient": -27,
+        "signal": "mixed"
+      },
+      {
+        "type": "regional-gradient",
+        "pathId": "east-bay-to-south-bay",
+        "fromRegionId": "east-bay",
+        "toRegionId": "south-bay",
+        "expectedMovementType": "regional-shift",
+        "fromAverageFogScore": 29,
+        "toAverageFogScore": 51,
+        "gradient": -22,
+        "signal": "mixed"
+      },
+      {
+        "type": "lateral-gradient",
+        "locationIds": [
+          "sausalito",
+          "tiburon"
+        ],
+        "fogScores": [
+          41,
+          26
+        ],
+        "gradient": 15,
+        "signal": "mixed"
+      },
+      {
+        "type": "lateral-gradient",
+        "locationIds": [
+          "mill-valley",
+          "presidio"
+        ],
+        "fogScores": [
+          70,
+          80
+        ],
+        "gradient": 10,
+        "signal": "mixed"
+      },
+      {
+        "type": "lateral-gradient",
+        "locationIds": [
+          "mill-valley",
+          "stinson-beach"
+        ],
+        "fogScores": [
+          70,
+          85
+        ],
+        "gradient": 15,
+        "signal": "mixed"
+      },
+      {
+        "type": "lateral-gradient",
+        "locationIds": [
+          "mill-valley",
+          "sausalito"
+        ],
+        "fogScores": [
+          70,
+          41
+        ],
+        "gradient": 29,
+        "signal": "mixed"
+      },
+      {
+        "type": "lateral-gradient",
+        "locationIds": [
+          "mill-valley",
+          "tiburon"
+        ],
+        "fogScores": [
+          70,
+          26
+        ],
+        "gradient": 44,
+        "signal": "mixed"
+      },
+      {
+        "type": "lateral-gradient",
+        "locationIds": [
+          "ocean-beach",
+          "presidio"
+        ],
+        "fogScores": [
+          96,
+          80
+        ],
+        "gradient": 16,
+        "signal": "mixed"
+      },
+      {
+        "type": "lateral-gradient",
+        "locationIds": [
+          "ocean-beach",
+          "stinson-beach"
+        ],
+        "fogScores": [
+          96,
+          85
+        ],
+        "gradient": 11,
+        "signal": "mixed"
+      },
+      {
+        "type": "lateral-gradient",
+        "locationIds": [
+          "presidio",
+          "sausalito"
+        ],
+        "fogScores": [
+          80,
+          41
+        ],
+        "gradient": 39,
+        "signal": "mixed"
+      },
+      {
+        "type": "lateral-gradient",
+        "locationIds": [
+          "presidio",
+          "san-francisco"
+        ],
+        "fogScores": [
+          80,
+          50
+        ],
+        "gradient": 30,
+        "signal": "mixed"
+      },
+      {
+        "type": "lateral-gradient",
+        "locationIds": [
+          "golden-gate-park",
+          "ocean-beach"
+        ],
+        "fogScores": [
+          72,
+          96
+        ],
+        "gradient": 24,
+        "signal": "mixed"
+      },
+      {
+        "type": "lateral-gradient",
+        "locationIds": [
+          "golden-gate-park",
+          "presidio"
+        ],
+        "fogScores": [
+          72,
+          80
+        ],
+        "gradient": 8,
+        "signal": "stable"
+      },
+      {
+        "type": "lateral-gradient",
+        "locationIds": [
+          "golden-gate-park",
+          "mill-valley"
+        ],
+        "fogScores": [
+          72,
+          70
+        ],
+        "gradient": 2,
+        "signal": "stable"
+      },
+      {
+        "type": "lateral-gradient",
+        "locationIds": [
+          "golden-gate-park",
+          "sausalito"
+        ],
+        "fogScores": [
+          72,
+          41
+        ],
+        "gradient": 31,
+        "signal": "mixed"
+      },
+      {
+        "type": "lateral-gradient",
+        "locationIds": [
+          "golden-gate-park",
+          "san-francisco"
+        ],
+        "fogScores": [
+          72,
+          50
+        ],
+        "gradient": 22,
+        "signal": "mixed"
+      },
+      {
+        "type": "lateral-gradient",
+        "locationIds": [
+          "berkeley",
+          "san-francisco"
+        ],
+        "fogScores": [
+          29,
+          50
+        ],
+        "gradient": 21,
+        "signal": "mixed"
+      },
+      {
+        "type": "lateral-gradient",
+        "locationIds": [
+          "berkeley",
+          "oakland"
+        ],
+        "fogScores": [
+          29,
+          28
+        ],
+        "gradient": 1,
+        "signal": "stable"
+      },
+      {
+        "type": "lateral-gradient",
+        "locationIds": [
+          "oakland",
+          "san-francisco"
+        ],
+        "fogScores": [
+          28,
+          50
+        ],
+        "gradient": 22,
+        "signal": "mixed"
+      },
+      {
+        "type": "lateral-gradient",
+        "locationIds": [
+          "palo-alto",
+          "san-jose"
+        ],
+        "fogScores": [
+          48,
+          26
+        ],
+        "gradient": 22,
+        "signal": "mixed"
+      },
+      {
+        "type": "lateral-gradient",
+        "locationIds": [
+          "mountain-view",
+          "palo-alto"
+        ],
+        "fogScores": [
+          46,
+          48
+        ],
+        "gradient": 2,
+        "signal": "stable"
+      },
+      {
+        "type": "lateral-gradient",
+        "locationIds": [
+          "mountain-view",
+          "san-jose"
+        ],
+        "fogScores": [
+          46,
+          26
+        ],
+        "gradient": 20,
+        "signal": "mixed"
+      },
+      {
+        "type": "lateral-gradient",
+        "locationIds": [
+          "half-moon-bay",
+          "palo-alto"
+        ],
+        "fogScores": [
+          82,
+          48
+        ],
+        "gradient": 34,
+        "signal": "mixed"
+      },
+      {
+        "type": "lateral-gradient",
+        "locationIds": [
+          "half-moon-bay",
+          "mountain-view"
+        ],
+        "fogScores": [
+          82,
+          46
+        ],
+        "gradient": 36,
+        "signal": "mixed"
+      }
+    ],
+    "affectedLocations": [
+      "berkeley",
+      "golden-gate-park",
+      "half-moon-bay",
+      "mill-valley",
+      "mountain-view",
+      "oakland",
+      "ocean-beach",
+      "palo-alto",
+      "presidio",
+      "san-francisco",
+      "san-jose",
+      "sausalito",
+      "stinson-beach",
+      "tiburon"
+    ],
+    "explanation": "Connected locations show conflicting fog gradients, so movement direction is inconsistent across the Bay Area graph."
+  },
+  "clearingPredictions": {
+    "locations": [
+      {
+        "locationId": "berkeley",
+        "clearingStatus": "clearing-soon",
+        "estimatedClearingWindow": "30–45 minutes",
+        "confidence": 44,
+        "confidenceLabel": "Low",
+        "evidence": [
+          {
+            "type": "current-fog-score",
+            "fogScore": 29,
+            "sunshineScore": 70,
+            "signal": "marginal"
+          },
+          {
+            "type": "score-trend",
+            "trend": "steady",
+            "fogChange": 0,
+            "sunshineChange": 0,
+            "observationCount": 3
+          },
+          {
+            "type": "regional-trend",
+            "regionId": "east-bay",
+            "trendLabel": "mostly-clear",
+            "averageFogScore": 29
+          },
+          {
+            "type": "movement-context",
+            "movementType": "mixed",
+            "affectedLocations": [
+              "berkeley",
+              "golden-gate-park",
+              "half-moon-bay",
+              "mill-valley",
+              "mountain-view",
+              "oakland",
+              "ocean-beach",
+              "palo-alto",
+              "presidio",
+              "san-francisco",
+              "san-jose",
+              "sausalito",
+              "stinson-beach",
+              "tiburon"
+            ]
+          },
+          {
+            "type": "graph-context",
+            "upstreamAverageFogScore": 39,
+            "downstreamAverageFogScore": null,
+            "upstreamFoggierBy": 10,
+            "downstreamFoggierBy": null
+          },
+          {
+            "type": "location-profile",
+            "fogPersistence": "low",
+            "typicalBurnOffHourLocal": 11
+          },
+          {
+            "type": "marine-layer-signals",
+            "pressure": 0,
+            "strongClearingBlock": false,
+            "weakAfternoonSupport": true
+          }
+        ],
+        "explanation": "berkeley is showing improving fog and sunshine signals, so clearing is likely nearby."
+      },
+      {
+        "locationId": "golden-gate-park",
+        "clearingStatus": "likely-stable",
+        "estimatedClearingWindow": null,
+        "confidence": 54,
+        "confidenceLabel": "Medium",
+        "evidence": [
+          {
+            "type": "current-fog-score",
+            "fogScore": 72,
+            "sunshineScore": 44,
+            "signal": "foggy"
+          },
+          {
+            "type": "score-trend",
+            "trend": "steady",
+            "fogChange": 0,
+            "sunshineChange": 0,
+            "observationCount": 3
+          },
+          {
+            "type": "regional-trend",
+            "regionId": "san-francisco",
+            "trendLabel": "mixed",
+            "averageFogScore": 75
+          },
+          {
+            "type": "movement-context",
+            "movementType": "mixed",
+            "affectedLocations": [
+              "berkeley",
+              "golden-gate-park",
+              "half-moon-bay",
+              "mill-valley",
+              "mountain-view",
+              "oakland",
+              "ocean-beach",
+              "palo-alto",
+              "presidio",
+              "san-francisco",
+              "san-jose",
+              "sausalito",
+              "stinson-beach",
+              "tiburon"
+            ]
+          },
+          {
+            "type": "graph-context",
+            "upstreamAverageFogScore": 96,
+            "downstreamAverageFogScore": 64,
+            "upstreamFoggierBy": 24,
+            "downstreamFoggierBy": 8
+          },
+          {
+            "type": "location-profile",
+            "fogPersistence": "high",
+            "typicalBurnOffHourLocal": 14
+          },
+          {
+            "type": "marine-layer-signals",
+            "pressure": 0,
+            "strongClearingBlock": false,
+            "weakAfternoonSupport": true
+          }
+        ],
+        "explanation": "golden-gate-park is socked in with steady or building fog and limited signs of near-term clearing."
+      },
+      {
+        "locationId": "half-moon-bay",
+        "clearingStatus": "likely-stable",
+        "estimatedClearingWindow": null,
+        "confidence": 54,
+        "confidenceLabel": "Medium",
+        "evidence": [
+          {
+            "type": "current-fog-score",
+            "fogScore": 82,
+            "sunshineScore": 32,
+            "signal": "foggy"
+          },
+          {
+            "type": "score-trend",
+            "trend": "steady",
+            "fogChange": 0,
+            "sunshineChange": 0,
+            "observationCount": 3
+          },
+          {
+            "type": "regional-trend",
+            "regionId": "south-bay",
+            "trendLabel": "mixed",
+            "averageFogScore": 51
+          },
+          {
+            "type": "movement-context",
+            "movementType": "mixed",
+            "affectedLocations": [
+              "berkeley",
+              "golden-gate-park",
+              "half-moon-bay",
+              "mill-valley",
+              "mountain-view",
+              "oakland",
+              "ocean-beach",
+              "palo-alto",
+              "presidio",
+              "san-francisco",
+              "san-jose",
+              "sausalito",
+              "stinson-beach",
+              "tiburon"
+            ]
+          },
+          {
+            "type": "graph-context",
+            "upstreamAverageFogScore": null,
+            "downstreamAverageFogScore": 47,
+            "upstreamFoggierBy": null,
+            "downstreamFoggierBy": 35
+          },
+          {
+            "type": "location-profile",
+            "fogPersistence": "high",
+            "typicalBurnOffHourLocal": 16
+          },
+          {
+            "type": "marine-layer-signals",
+            "pressure": 16,
+            "strongClearingBlock": false,
+            "weakAfternoonSupport": true
+          }
+        ],
+        "explanation": "half-moon-bay is socked in with steady or building fog and limited signs of near-term clearing."
+      },
+      {
+        "locationId": "mill-valley",
+        "clearingStatus": "likely-stable",
+        "estimatedClearingWindow": null,
+        "confidence": 54,
+        "confidenceLabel": "Medium",
+        "evidence": [
+          {
+            "type": "current-fog-score",
+            "fogScore": 70,
+            "sunshineScore": 48,
+            "signal": "foggy"
+          },
+          {
+            "type": "score-trend",
+            "trend": "steady",
+            "fogChange": 0,
+            "sunshineChange": 0,
+            "observationCount": 3
+          },
+          {
+            "type": "regional-trend",
+            "regionId": "north-bay",
+            "trendLabel": "mixed",
+            "averageFogScore": 56
+          },
+          {
+            "type": "movement-context",
+            "movementType": "mixed",
+            "affectedLocations": [
+              "berkeley",
+              "golden-gate-park",
+              "half-moon-bay",
+              "mill-valley",
+              "mountain-view",
+              "oakland",
+              "ocean-beach",
+              "palo-alto",
+              "presidio",
+              "san-francisco",
+              "san-jose",
+              "sausalito",
+              "stinson-beach",
+              "tiburon"
+            ]
+          },
+          {
+            "type": "graph-context",
+            "upstreamAverageFogScore": 79,
+            "downstreamAverageFogScore": 34,
+            "upstreamFoggierBy": 9,
+            "downstreamFoggierBy": 37
+          },
+          {
+            "type": "location-profile",
+            "fogPersistence": "high",
+            "typicalBurnOffHourLocal": 14
+          },
+          {
+            "type": "marine-layer-signals",
+            "pressure": 0,
+            "strongClearingBlock": false,
+            "weakAfternoonSupport": true
+          }
+        ],
+        "explanation": "mill-valley is socked in with steady or building fog and limited signs of near-term clearing."
+      },
+      {
+        "locationId": "mountain-view",
+        "clearingStatus": "clearing-soon",
+        "estimatedClearingWindow": "1–2 hours",
+        "confidence": 44,
+        "confidenceLabel": "Low",
+        "evidence": [
+          {
+            "type": "current-fog-score",
+            "fogScore": 46,
+            "sunshineScore": 64,
+            "signal": "marginal"
+          },
+          {
+            "type": "score-trend",
+            "trend": "steady",
+            "fogChange": 0,
+            "sunshineChange": 0,
+            "observationCount": 3
+          },
+          {
+            "type": "regional-trend",
+            "regionId": "south-bay",
+            "trendLabel": "mixed",
+            "averageFogScore": 51
+          },
+          {
+            "type": "movement-context",
+            "movementType": "mixed",
+            "affectedLocations": [
+              "berkeley",
+              "golden-gate-park",
+              "half-moon-bay",
+              "mill-valley",
+              "mountain-view",
+              "oakland",
+              "ocean-beach",
+              "palo-alto",
+              "presidio",
+              "san-francisco",
+              "san-jose",
+              "sausalito",
+              "stinson-beach",
+              "tiburon"
+            ]
+          },
+          {
+            "type": "graph-context",
+            "upstreamAverageFogScore": 65,
+            "downstreamAverageFogScore": 37,
+            "upstreamFoggierBy": 19,
+            "downstreamFoggierBy": 9
+          },
+          {
+            "type": "location-profile",
+            "fogPersistence": "medium",
+            "typicalBurnOffHourLocal": 12
+          },
+          {
+            "type": "marine-layer-signals",
+            "pressure": 0,
+            "strongClearingBlock": false,
+            "weakAfternoonSupport": true
+          }
+        ],
+        "explanation": "mountain-view is showing improving fog and sunshine signals, so clearing is likely nearby."
+      },
+      {
+        "locationId": "oakland",
+        "clearingStatus": "clearing-soon",
+        "estimatedClearingWindow": "30–45 minutes",
+        "confidence": 44,
+        "confidenceLabel": "Low",
+        "evidence": [
+          {
+            "type": "current-fog-score",
+            "fogScore": 28,
+            "sunshineScore": 72,
+            "signal": "marginal"
+          },
+          {
+            "type": "score-trend",
+            "trend": "steady",
+            "fogChange": 0,
+            "sunshineChange": 0,
+            "observationCount": 3
+          },
+          {
+            "type": "regional-trend",
+            "regionId": "east-bay",
+            "trendLabel": "mostly-clear",
+            "averageFogScore": 29
+          },
+          {
+            "type": "movement-context",
+            "movementType": "mixed",
+            "affectedLocations": [
+              "berkeley",
+              "golden-gate-park",
+              "half-moon-bay",
+              "mill-valley",
+              "mountain-view",
+              "oakland",
+              "ocean-beach",
+              "palo-alto",
+              "presidio",
+              "san-francisco",
+              "san-jose",
+              "sausalito",
+              "stinson-beach",
+              "tiburon"
+            ]
+          },
+          {
+            "type": "graph-context",
+            "upstreamAverageFogScore": 50,
+            "downstreamAverageFogScore": 29,
+            "upstreamFoggierBy": 22,
+            "downstreamFoggierBy": 0
+          },
+          {
+            "type": "location-profile",
+            "fogPersistence": "low",
+            "typicalBurnOffHourLocal": 11
+          },
+          {
+            "type": "marine-layer-signals",
+            "pressure": 0,
+            "strongClearingBlock": false,
+            "weakAfternoonSupport": true
+          }
+        ],
+        "explanation": "oakland is showing improving fog and sunshine signals, so clearing is likely nearby."
+      },
+      {
+        "locationId": "ocean-beach",
+        "clearingStatus": "likely-stable",
+        "estimatedClearingWindow": null,
+        "confidence": 54,
+        "confidenceLabel": "Medium",
+        "evidence": [
+          {
+            "type": "current-fog-score",
+            "fogScore": 96,
+            "sunshineScore": 18,
+            "signal": "foggy"
+          },
+          {
+            "type": "score-trend",
+            "trend": "steady",
+            "fogChange": 0,
+            "sunshineChange": 0,
+            "observationCount": 3
+          },
+          {
+            "type": "regional-trend",
+            "regionId": "san-francisco",
+            "trendLabel": "mixed",
+            "averageFogScore": 75
+          },
+          {
+            "type": "movement-context",
+            "movementType": "mixed",
+            "affectedLocations": [
+              "berkeley",
+              "golden-gate-park",
+              "half-moon-bay",
+              "mill-valley",
+              "mountain-view",
+              "oakland",
+              "ocean-beach",
+              "palo-alto",
+              "presidio",
+              "san-francisco",
+              "san-jose",
+              "sausalito",
+              "stinson-beach",
+              "tiburon"
+            ]
+          },
+          {
+            "type": "graph-context",
+            "upstreamAverageFogScore": null,
+            "downstreamAverageFogScore": 79,
+            "upstreamFoggierBy": null,
+            "downstreamFoggierBy": 17
+          },
+          {
+            "type": "location-profile",
+            "fogPersistence": "high",
+            "typicalBurnOffHourLocal": 16
+          },
+          {
+            "type": "marine-layer-signals",
+            "pressure": 42,
+            "strongClearingBlock": true,
+            "weakAfternoonSupport": false
+          }
+        ],
+        "explanation": "ocean-beach is socked in with steady or building fog and limited signs of near-term clearing."
+      },
+      {
+        "locationId": "palo-alto",
+        "clearingStatus": "clearing-soon",
+        "estimatedClearingWindow": "1–2 hours",
+        "confidence": 44,
+        "confidenceLabel": "Low",
+        "evidence": [
+          {
+            "type": "current-fog-score",
+            "fogScore": 48,
+            "sunshineScore": 62,
+            "signal": "marginal"
+          },
+          {
+            "type": "score-trend",
+            "trend": "steady",
+            "fogChange": 0,
+            "sunshineChange": 0,
+            "observationCount": 3
+          },
+          {
+            "type": "regional-trend",
+            "regionId": "south-bay",
+            "trendLabel": "mixed",
+            "averageFogScore": 51
+          },
+          {
+            "type": "movement-context",
+            "movementType": "mixed",
+            "affectedLocations": [
+              "berkeley",
+              "golden-gate-park",
+              "half-moon-bay",
+              "mill-valley",
+              "mountain-view",
+              "oakland",
+              "ocean-beach",
+              "palo-alto",
+              "presidio",
+              "san-francisco",
+              "san-jose",
+              "sausalito",
+              "stinson-beach",
+              "tiburon"
+            ]
+          },
+          {
+            "type": "graph-context",
+            "upstreamAverageFogScore": 64,
+            "downstreamAverageFogScore": 36,
+            "upstreamFoggierBy": 16,
+            "downstreamFoggierBy": 12
+          },
+          {
+            "type": "location-profile",
+            "fogPersistence": "medium",
+            "typicalBurnOffHourLocal": 12
+          },
+          {
+            "type": "marine-layer-signals",
+            "pressure": 0,
+            "strongClearingBlock": false,
+            "weakAfternoonSupport": true
+          }
+        ],
+        "explanation": "palo-alto is showing improving fog and sunshine signals, so clearing is likely nearby."
+      },
+      {
+        "locationId": "presidio",
+        "clearingStatus": "likely-stable",
+        "estimatedClearingWindow": null,
+        "confidence": 54,
+        "confidenceLabel": "Medium",
+        "evidence": [
+          {
+            "type": "current-fog-score",
+            "fogScore": 80,
+            "sunshineScore": 34,
+            "signal": "foggy"
+          },
+          {
+            "type": "score-trend",
+            "trend": "steady",
+            "fogChange": 0,
+            "sunshineChange": 0,
+            "observationCount": 3
+          },
+          {
+            "type": "regional-trend",
+            "regionId": "san-francisco",
+            "trendLabel": "mixed",
+            "averageFogScore": 75
+          },
+          {
+            "type": "movement-context",
+            "movementType": "mixed",
+            "affectedLocations": [
+              "berkeley",
+              "golden-gate-park",
+              "half-moon-bay",
+              "mill-valley",
+              "mountain-view",
+              "oakland",
+              "ocean-beach",
+              "palo-alto",
+              "presidio",
+              "san-francisco",
+              "san-jose",
+              "sausalito",
+              "stinson-beach",
+              "tiburon"
+            ]
+          },
+          {
+            "type": "graph-context",
+            "upstreamAverageFogScore": 84,
+            "downstreamAverageFogScore": 56,
+            "upstreamFoggierBy": 4,
+            "downstreamFoggierBy": 25
+          },
+          {
+            "type": "location-profile",
+            "fogPersistence": "high",
+            "typicalBurnOffHourLocal": 15
+          },
+          {
+            "type": "marine-layer-signals",
+            "pressure": 16,
+            "strongClearingBlock": false,
+            "weakAfternoonSupport": true
+          }
+        ],
+        "explanation": "presidio is socked in with steady or building fog and limited signs of near-term clearing."
+      },
+      {
+        "locationId": "san-francisco",
+        "clearingStatus": "insufficient-data",
+        "estimatedClearingWindow": null,
+        "confidence": 0,
+        "confidenceLabel": "Unavailable",
+        "evidence": [
+          {
+            "type": "current-fog-score",
+            "fogScore": 50,
+            "sunshineScore": 58,
+            "signal": "marginal"
+          },
+          {
+            "type": "score-trend",
+            "trend": "steady",
+            "fogChange": 0,
+            "sunshineChange": 0,
+            "observationCount": 3
+          },
+          {
+            "type": "regional-trend",
+            "regionId": "san-francisco",
+            "trendLabel": "mixed",
+            "averageFogScore": 75
+          },
+          {
+            "type": "movement-context",
+            "movementType": "mixed",
+            "affectedLocations": [
+              "berkeley",
+              "golden-gate-park",
+              "half-moon-bay",
+              "mill-valley",
+              "mountain-view",
+              "oakland",
+              "ocean-beach",
+              "palo-alto",
+              "presidio",
+              "san-francisco",
+              "san-jose",
+              "sausalito",
+              "stinson-beach",
+              "tiburon"
+            ]
+          },
+          {
+            "type": "graph-context",
+            "upstreamAverageFogScore": 76,
+            "downstreamAverageFogScore": 29,
+            "upstreamFoggierBy": 26,
+            "downstreamFoggierBy": 22
+          },
+          {
+            "type": "location-profile",
+            "fogPersistence": "medium",
+            "typicalBurnOffHourLocal": 13
+          },
+          {
+            "type": "marine-layer-signals",
+            "pressure": 0,
+            "strongClearingBlock": false,
+            "weakAfternoonSupport": false
+          }
+        ],
+        "explanation": "Not enough reliable trend or graph context to estimate clearing for san-francisco."
+      },
+      {
+        "locationId": "san-jose",
+        "clearingStatus": "clearing-soon",
+        "estimatedClearingWindow": "30–45 minutes",
+        "confidence": 44,
+        "confidenceLabel": "Low",
+        "evidence": [
+          {
+            "type": "current-fog-score",
+            "fogScore": 26,
+            "sunshineScore": 76,
+            "signal": "marginal"
+          },
+          {
+            "type": "score-trend",
+            "trend": "steady",
+            "fogChange": 0,
+            "sunshineChange": 0,
+            "observationCount": 3
+          },
+          {
+            "type": "regional-trend",
+            "regionId": "south-bay",
+            "trendLabel": "mixed",
+            "averageFogScore": 51
+          },
+          {
+            "type": "movement-context",
+            "movementType": "mixed",
+            "affectedLocations": [
+              "berkeley",
+              "golden-gate-park",
+              "half-moon-bay",
+              "mill-valley",
+              "mountain-view",
+              "oakland",
+              "ocean-beach",
+              "palo-alto",
+              "presidio",
+              "san-francisco",
+              "san-jose",
+              "sausalito",
+              "stinson-beach",
+              "tiburon"
+            ]
+          },
+          {
+            "type": "graph-context",
+            "upstreamAverageFogScore": 47,
+            "downstreamAverageFogScore": null,
+            "upstreamFoggierBy": 21,
+            "downstreamFoggierBy": null
+          },
+          {
+            "type": "location-profile",
+            "fogPersistence": "low",
+            "typicalBurnOffHourLocal": 11
+          },
+          {
+            "type": "marine-layer-signals",
+            "pressure": 0,
+            "strongClearingBlock": false,
+            "weakAfternoonSupport": true
+          }
+        ],
+        "explanation": "san-jose is showing improving fog and sunshine signals, so clearing is likely nearby."
+      },
+      {
+        "locationId": "sausalito",
+        "clearingStatus": "clearing-soon",
+        "estimatedClearingWindow": "1–2 hours",
+        "confidence": 44,
+        "confidenceLabel": "Low",
+        "evidence": [
+          {
+            "type": "current-fog-score",
+            "fogScore": 41,
+            "sunshineScore": 74,
+            "signal": "marginal"
+          },
+          {
+            "type": "score-trend",
+            "trend": "steady",
+            "fogChange": 0,
+            "sunshineChange": 0,
+            "observationCount": 3
+          },
+          {
+            "type": "regional-trend",
+            "regionId": "north-bay",
+            "trendLabel": "mixed",
+            "averageFogScore": 56
+          },
+          {
+            "type": "movement-context",
+            "movementType": "mixed",
+            "affectedLocations": [
+              "berkeley",
+              "golden-gate-park",
+              "half-moon-bay",
+              "mill-valley",
+              "mountain-view",
+              "oakland",
+              "ocean-beach",
+              "palo-alto",
+              "presidio",
+              "san-francisco",
+              "san-jose",
+              "sausalito",
+              "stinson-beach",
+              "tiburon"
+            ]
+          },
+          {
+            "type": "graph-context",
+            "upstreamAverageFogScore": 71,
+            "downstreamAverageFogScore": 26,
+            "upstreamFoggierBy": 30,
+            "downstreamFoggierBy": 15
+          },
+          {
+            "type": "location-profile",
+            "fogPersistence": "medium",
+            "typicalBurnOffHourLocal": 12
+          },
+          {
+            "type": "marine-layer-signals",
+            "pressure": 0,
+            "strongClearingBlock": false,
+            "weakAfternoonSupport": true
+          }
+        ],
+        "explanation": "sausalito is showing improving fog and sunshine signals, so clearing is likely nearby."
+      },
+      {
+        "locationId": "stinson-beach",
+        "clearingStatus": "likely-stable",
+        "estimatedClearingWindow": null,
+        "confidence": 54,
+        "confidenceLabel": "Medium",
+        "evidence": [
+          {
+            "type": "current-fog-score",
+            "fogScore": 85,
+            "sunshineScore": 28,
+            "signal": "foggy"
+          },
+          {
+            "type": "score-trend",
+            "trend": "steady",
+            "fogChange": 0,
+            "sunshineChange": 0,
+            "observationCount": 3
+          },
+          {
+            "type": "regional-trend",
+            "regionId": "north-bay",
+            "trendLabel": "mixed",
+            "averageFogScore": 56
+          },
+          {
+            "type": "movement-context",
+            "movementType": "mixed",
+            "affectedLocations": [
+              "berkeley",
+              "golden-gate-park",
+              "half-moon-bay",
+              "mill-valley",
+              "mountain-view",
+              "oakland",
+              "ocean-beach",
+              "palo-alto",
+              "presidio",
+              "san-francisco",
+              "san-jose",
+              "sausalito",
+              "stinson-beach",
+              "tiburon"
+            ]
+          },
+          {
+            "type": "graph-context",
+            "upstreamAverageFogScore": 96,
+            "downstreamAverageFogScore": 70,
+            "upstreamFoggierBy": 11,
+            "downstreamFoggierBy": 15
+          },
+          {
+            "type": "location-profile",
+            "fogPersistence": "high",
+            "typicalBurnOffHourLocal": 15
+          },
+          {
+            "type": "marine-layer-signals",
+            "pressure": 30,
+            "strongClearingBlock": false,
+            "weakAfternoonSupport": false
+          }
+        ],
+        "explanation": "stinson-beach is socked in with steady or building fog and limited signs of near-term clearing."
+      },
+      {
+        "locationId": "tiburon",
+        "clearingStatus": "clearing-soon",
+        "estimatedClearingWindow": "30–45 minutes",
+        "confidence": 44,
+        "confidenceLabel": "Low",
+        "evidence": [
+          {
+            "type": "current-fog-score",
+            "fogScore": 26,
+            "sunshineScore": 82,
+            "signal": "marginal"
+          },
+          {
+            "type": "score-trend",
+            "trend": "steady",
+            "fogChange": 0,
+            "sunshineChange": 0,
+            "observationCount": 3
+          },
+          {
+            "type": "regional-trend",
+            "regionId": "north-bay",
+            "trendLabel": "mixed",
+            "averageFogScore": 56
+          },
+          {
+            "type": "movement-context",
+            "movementType": "mixed",
+            "affectedLocations": [
+              "berkeley",
+              "golden-gate-park",
+              "half-moon-bay",
+              "mill-valley",
+              "mountain-view",
+              "oakland",
+              "ocean-beach",
+              "palo-alto",
+              "presidio",
+              "san-francisco",
+              "san-jose",
+              "sausalito",
+              "stinson-beach",
+              "tiburon"
+            ]
+          },
+          {
+            "type": "graph-context",
+            "upstreamAverageFogScore": 56,
+            "downstreamAverageFogScore": null,
+            "upstreamFoggierBy": 30,
+            "downstreamFoggierBy": null
+          },
+          {
+            "type": "location-profile",
+            "fogPersistence": "low",
+            "typicalBurnOffHourLocal": 11
+          },
+          {
+            "type": "marine-layer-signals",
+            "pressure": 0,
+            "strongClearingBlock": false,
+            "weakAfternoonSupport": true
+          }
+        ],
+        "explanation": "tiburon is showing improving fog and sunshine signals, so clearing is likely nearby."
+      }
+    ],
+    "validLocationCount": 14
+  },
+  "bestDestinations": {
+    "destinations": [
+      {
+        "locationId": "oakland",
+        "locationName": "Oakland",
+        "regionId": "east-bay",
+        "recommendationType": "improving-fast",
+        "score": 72,
+        "confidence": 39,
+        "confidenceLabel": "Low",
+        "reasons": [
+          "Expected to clear soon",
+          "Region is mostly bright",
+          "Uneven fog movement nearby",
+          "Low data confidence"
+        ],
+        "explanation": "Oakland is improving quickly and may be a smart near-term move.",
+        "rank": 1
+      },
+      {
+        "locationId": "berkeley",
+        "locationName": "Berkeley",
+        "regionId": "east-bay",
+        "recommendationType": "improving-fast",
+        "score": 70,
+        "confidence": 39,
+        "confidenceLabel": "Low",
+        "reasons": [
+          "Expected to clear soon",
+          "Region is mostly bright",
+          "Uneven fog movement nearby",
+          "Low data confidence"
+        ],
+        "explanation": "Berkeley is improving quickly and may be a smart near-term move.",
+        "rank": 2
+      },
+      {
+        "locationId": "tiburon",
+        "locationName": "Tiburon",
+        "regionId": "north-bay",
+        "recommendationType": "improving-fast",
+        "score": 66,
+        "confidence": 40,
+        "confidenceLabel": "Low",
+        "reasons": [
+          "Expected to clear soon",
+          "Mixed regional conditions",
+          "Uneven fog movement nearby",
+          "Low data confidence"
+        ],
+        "explanation": "Tiburon is improving quickly and may be a smart near-term move.",
+        "rank": 3
+      },
+      {
+        "locationId": "san-jose",
+        "locationName": "San Jose",
+        "regionId": "south-bay",
+        "recommendationType": "improving-fast",
+        "score": 60,
+        "confidence": 40,
+        "confidenceLabel": "Low",
+        "reasons": [
+          "Expected to clear soon",
+          "Mixed regional conditions",
+          "Uneven fog movement nearby",
+          "Low data confidence"
+        ],
+        "explanation": "San Jose is improving quickly and may be a smart near-term move.",
+        "rank": 4
+      },
+      {
+        "locationId": "sausalito",
+        "locationName": "Sausalito",
+        "regionId": "north-bay",
+        "recommendationType": "clearing-soon",
+        "score": 58,
+        "confidence": 40,
+        "confidenceLabel": "Low",
+        "reasons": [
+          "Expected to clear soon",
+          "Mixed regional conditions",
+          "Uneven fog movement nearby",
+          "Low data confidence"
+        ],
+        "explanation": "Sausalito should brighten soon, around 1–2 hours.",
+        "rank": 5
+      },
+      {
+        "locationId": "mountain-view",
+        "locationName": "Mountain View",
+        "regionId": "south-bay",
+        "recommendationType": "clearing-soon",
+        "score": 48,
+        "confidence": 40,
+        "confidenceLabel": "Low",
+        "reasons": [
+          "Expected to clear soon",
+          "Mixed regional conditions",
+          "Uneven fog movement nearby",
+          "Low data confidence"
+        ],
+        "explanation": "Mountain View should brighten soon, around 1–2 hours.",
+        "rank": 6
+      },
+      {
+        "locationId": "palo-alto",
+        "locationName": "Palo Alto",
+        "regionId": "south-bay",
+        "recommendationType": "clearing-soon",
+        "score": 46,
+        "confidence": 40,
+        "confidenceLabel": "Low",
+        "reasons": [
+          "Expected to clear soon",
+          "Mixed regional conditions",
+          "Uneven fog movement nearby",
+          "Low data confidence"
+        ],
+        "explanation": "Palo Alto should brighten soon, around 1–2 hours.",
+        "rank": 7
+      },
+      {
+        "locationId": "san-francisco",
+        "locationName": "San Francisco",
+        "regionId": "san-francisco",
+        "recommendationType": "watch",
+        "score": 26,
+        "confidence": 38,
+        "confidenceLabel": "Low",
+        "reasons": [
+          "Limited clearing signal",
+          "Mixed regional conditions",
+          "Uneven fog movement nearby",
+          "Low data confidence"
+        ],
+        "explanation": "San Francisco is worth watching, but the signal is mixed: limited clearing signal.",
+        "rank": 8
+      },
+      {
+        "locationId": "presidio",
+        "locationName": "Presidio",
+        "regionId": "san-francisco",
+        "recommendationType": "avoid",
+        "score": 0,
+        "confidence": 43,
+        "confidenceLabel": "Low",
+        "reasons": [
+          "Fog likely to hold",
+          "Mixed regional conditions",
+          "Uneven fog movement nearby",
+          "Heavy fog now",
+          "Low data confidence"
+        ],
+        "explanation": "Presidio is socked in or trending foggier — better to look elsewhere for sunshine.",
+        "rank": 9
+      },
+      {
+        "locationId": "golden-gate-park",
+        "locationName": "Golden Gate Park",
+        "regionId": "san-francisco",
+        "recommendationType": "avoid",
+        "score": 0,
+        "confidence": 43,
+        "confidenceLabel": "Low",
+        "reasons": [
+          "Fog likely to hold",
+          "Mixed regional conditions",
+          "Uneven fog movement nearby",
+          "Moderate fog now",
+          "Low data confidence"
+        ],
+        "explanation": "Golden Gate Park is socked in or trending foggier — better to look elsewhere for sunshine.",
+        "rank": 10
+      },
+      {
+        "locationId": "mill-valley",
+        "locationName": "Mill Valley",
+        "regionId": "north-bay",
+        "recommendationType": "avoid",
+        "score": 0,
+        "confidence": 43,
+        "confidenceLabel": "Low",
+        "reasons": [
+          "Fog likely to hold",
+          "Mixed regional conditions",
+          "Uneven fog movement nearby",
+          "Moderate fog now",
+          "Low data confidence"
+        ],
+        "explanation": "Mill Valley is socked in or trending foggier — better to look elsewhere for sunshine.",
+        "rank": 11
+      },
+      {
+        "locationId": "ocean-beach",
+        "locationName": "Ocean Beach",
+        "regionId": "san-francisco",
+        "recommendationType": "avoid",
+        "score": 0,
+        "confidence": 43,
+        "confidenceLabel": "Low",
+        "reasons": [
+          "Fog likely to hold",
+          "Mixed regional conditions",
+          "Uneven fog movement nearby",
+          "Heavy fog now",
+          "Low data confidence"
+        ],
+        "explanation": "Ocean Beach is socked in or trending foggier — better to look elsewhere for sunshine.",
+        "rank": 12
+      },
+      {
+        "locationId": "stinson-beach",
+        "locationName": "Stinson Beach",
+        "regionId": "north-bay",
+        "recommendationType": "avoid",
+        "score": 0,
+        "confidence": 43,
+        "confidenceLabel": "Low",
+        "reasons": [
+          "Fog likely to hold",
+          "Mixed regional conditions",
+          "Uneven fog movement nearby",
+          "Heavy fog now",
+          "Low data confidence"
+        ],
+        "explanation": "Stinson Beach is socked in or trending foggier — better to look elsewhere for sunshine.",
+        "rank": 13
+      },
+      {
+        "locationId": "half-moon-bay",
+        "locationName": "Half Moon Bay",
+        "regionId": "south-bay",
+        "recommendationType": "avoid",
+        "score": 0,
+        "confidence": 43,
+        "confidenceLabel": "Low",
+        "reasons": [
+          "Fog likely to hold",
+          "Mixed regional conditions",
+          "Uneven fog movement nearby",
+          "Heavy fog now",
+          "Low data confidence"
+        ],
+        "explanation": "Half Moon Bay is socked in or trending foggier — better to look elsewhere for sunshine.",
+        "rank": 14
+      }
+    ],
+    "validLocationCount": 14
+  },
+  "multiRegionRanking": {
+    "bestRightNow": [],
+    "clearingSoon": [
+      {
+        "locationId": "sausalito",
+        "locationName": "Sausalito",
+        "regionId": "north-bay",
+        "rank": 1,
+        "score": 58,
+        "confidence": 40,
+        "confidenceLabel": "Low",
+        "reasons": [
+          "Expected to clear soon",
+          "Mixed regional conditions",
+          "Uneven fog movement nearby",
+          "Low data confidence"
+        ],
+        "explanation": "Sausalito should brighten soon, around 1–2 hours."
+      },
+      {
+        "locationId": "mountain-view",
+        "locationName": "Mountain View",
+        "regionId": "south-bay",
+        "rank": 2,
+        "score": 48,
+        "confidence": 40,
+        "confidenceLabel": "Low",
+        "reasons": [
+          "Expected to clear soon",
+          "Mixed regional conditions",
+          "Uneven fog movement nearby",
+          "Low data confidence"
+        ],
+        "explanation": "Mountain View should brighten soon, around 1–2 hours."
+      },
+      {
+        "locationId": "palo-alto",
+        "locationName": "Palo Alto",
+        "regionId": "south-bay",
+        "rank": 3,
+        "score": 46,
+        "confidence": 40,
+        "confidenceLabel": "Low",
+        "reasons": [
+          "Expected to clear soon",
+          "Mixed regional conditions",
+          "Uneven fog movement nearby",
+          "Low data confidence"
+        ],
+        "explanation": "Palo Alto should brighten soon, around 1–2 hours."
+      }
+    ],
+    "improvingFastest": [
+      {
+        "locationId": "oakland",
+        "locationName": "Oakland",
+        "regionId": "east-bay",
+        "rank": 1,
+        "score": 72,
+        "confidence": 39,
+        "confidenceLabel": "Low",
+        "reasons": [
+          "Expected to clear soon",
+          "Region is mostly bright",
+          "Uneven fog movement nearby",
+          "Low data confidence"
+        ],
+        "explanation": "Oakland is improving quickly and may be a smart near-term move."
+      },
+      {
+        "locationId": "berkeley",
+        "locationName": "Berkeley",
+        "regionId": "east-bay",
+        "rank": 2,
+        "score": 70,
+        "confidence": 39,
+        "confidenceLabel": "Low",
+        "reasons": [
+          "Expected to clear soon",
+          "Region is mostly bright",
+          "Uneven fog movement nearby",
+          "Low data confidence"
+        ],
+        "explanation": "Berkeley is improving quickly and may be a smart near-term move."
+      },
+      {
+        "locationId": "tiburon",
+        "locationName": "Tiburon",
+        "regionId": "north-bay",
+        "rank": 3,
+        "score": 66,
+        "confidence": 40,
+        "confidenceLabel": "Low",
+        "reasons": [
+          "Expected to clear soon",
+          "Mixed regional conditions",
+          "Uneven fog movement nearby",
+          "Low data confidence"
+        ],
+        "explanation": "Tiburon is improving quickly and may be a smart near-term move."
+      },
+      {
+        "locationId": "san-jose",
+        "locationName": "San Jose",
+        "regionId": "south-bay",
+        "rank": 4,
+        "score": 60,
+        "confidence": 40,
+        "confidenceLabel": "Low",
+        "reasons": [
+          "Expected to clear soon",
+          "Mixed regional conditions",
+          "Uneven fog movement nearby",
+          "Low data confidence"
+        ],
+        "explanation": "San Jose is improving quickly and may be a smart near-term move."
+      }
+    ],
+    "avoidForNow": [
+      {
+        "locationId": "presidio",
+        "locationName": "Presidio",
+        "regionId": "san-francisco",
+        "rank": 1,
+        "score": 0,
+        "confidence": 43,
+        "confidenceLabel": "Low",
+        "reasons": [
+          "Fog likely to hold",
+          "Mixed regional conditions",
+          "Uneven fog movement nearby",
+          "Heavy fog now",
+          "Low data confidence"
+        ],
+        "explanation": "Presidio is socked in or trending foggier — better to look elsewhere for sunshine."
+      },
+      {
+        "locationId": "golden-gate-park",
+        "locationName": "Golden Gate Park",
+        "regionId": "san-francisco",
+        "rank": 2,
+        "score": 0,
+        "confidence": 43,
+        "confidenceLabel": "Low",
+        "reasons": [
+          "Fog likely to hold",
+          "Mixed regional conditions",
+          "Uneven fog movement nearby",
+          "Moderate fog now",
+          "Low data confidence"
+        ],
+        "explanation": "Golden Gate Park is socked in or trending foggier — better to look elsewhere for sunshine."
+      },
+      {
+        "locationId": "mill-valley",
+        "locationName": "Mill Valley",
+        "regionId": "north-bay",
+        "rank": 3,
+        "score": 0,
+        "confidence": 43,
+        "confidenceLabel": "Low",
+        "reasons": [
+          "Fog likely to hold",
+          "Mixed regional conditions",
+          "Uneven fog movement nearby",
+          "Moderate fog now",
+          "Low data confidence"
+        ],
+        "explanation": "Mill Valley is socked in or trending foggier — better to look elsewhere for sunshine."
+      },
+      {
+        "locationId": "ocean-beach",
+        "locationName": "Ocean Beach",
+        "regionId": "san-francisco",
+        "rank": 4,
+        "score": 0,
+        "confidence": 43,
+        "confidenceLabel": "Low",
+        "reasons": [
+          "Fog likely to hold",
+          "Mixed regional conditions",
+          "Uneven fog movement nearby",
+          "Heavy fog now",
+          "Low data confidence"
+        ],
+        "explanation": "Ocean Beach is socked in or trending foggier — better to look elsewhere for sunshine."
+      },
+      {
+        "locationId": "stinson-beach",
+        "locationName": "Stinson Beach",
+        "regionId": "north-bay",
+        "rank": 5,
+        "score": 0,
+        "confidence": 43,
+        "confidenceLabel": "Low",
+        "reasons": [
+          "Fog likely to hold",
+          "Mixed regional conditions",
+          "Uneven fog movement nearby",
+          "Heavy fog now",
+          "Low data confidence"
+        ],
+        "explanation": "Stinson Beach is socked in or trending foggier — better to look elsewhere for sunshine."
+      }
+    ],
+    "watchList": [
+      {
+        "locationId": "san-francisco",
+        "locationName": "San Francisco",
+        "regionId": "san-francisco",
+        "rank": 1,
+        "score": 26,
+        "confidence": 38,
+        "confidenceLabel": "Low",
+        "reasons": [
+          "Limited clearing signal",
+          "Mixed regional conditions",
+          "Uneven fog movement nearby",
+          "Low data confidence"
+        ],
+        "explanation": "San Francisco is worth watching, but the signal is mixed: limited clearing signal."
+      }
+    ],
+    "regionSummaries": [
+      {
+        "regionId": "north-bay",
+        "regionName": "North Bay",
+        "trendLabel": "mixed",
+        "averageFogScore": 56,
+        "averageSunshineScore": 58,
+        "clearestLocation": {
+          "locationId": "tiburon",
+          "fogScore": 26,
+          "sunshineScore": 82
+        },
+        "foggiestLocation": {
+          "locationId": "stinson-beach",
+          "fogScore": 85,
+          "sunshineScore": 28
+        },
+        "locationCount": 4,
+        "monitoredLocationCount": 4,
+        "confidence": 75,
+        "confidenceLabel": "High",
+        "summary": "North Bay is mixed, ranging from tiburon at 26 fog to stinson-beach at 85."
+      },
+      {
+        "regionId": "san-francisco",
+        "regionName": "San Francisco",
+        "trendLabel": "mixed",
+        "averageFogScore": 75,
+        "averageSunshineScore": 39,
+        "clearestLocation": {
+          "locationId": "san-francisco",
+          "fogScore": 50,
+          "sunshineScore": 58
+        },
+        "foggiestLocation": {
+          "locationId": "ocean-beach",
+          "fogScore": 96,
+          "sunshineScore": 18
+        },
+        "locationCount": 4,
+        "monitoredLocationCount": 4,
+        "confidence": 75,
+        "confidenceLabel": "High",
+        "summary": "San Francisco is mixed, ranging from san-francisco at 50 fog to ocean-beach at 96."
+      },
+      {
+        "regionId": "peninsula",
+        "regionName": "Peninsula",
+        "trendLabel": "insufficient-data",
+        "averageFogScore": null,
+        "averageSunshineScore": null,
+        "clearestLocation": null,
+        "foggiestLocation": null,
+        "locationCount": 0,
+        "monitoredLocationCount": 0,
+        "confidence": 0,
+        "confidenceLabel": "Unavailable",
+        "summary": "Peninsula has no monitored locations yet, so regional trend data is unavailable."
+      },
+      {
+        "regionId": "east-bay",
+        "regionName": "East Bay",
+        "trendLabel": "mostly-clear",
+        "averageFogScore": 29,
+        "averageSunshineScore": 71,
+        "clearestLocation": {
+          "locationId": "oakland",
+          "fogScore": 28,
+          "sunshineScore": 72
+        },
+        "foggiestLocation": {
+          "locationId": "berkeley",
+          "fogScore": 29,
+          "sunshineScore": 70
+        },
+        "locationCount": 2,
+        "monitoredLocationCount": 2,
+        "confidence": 74,
+        "confidenceLabel": "Medium",
+        "summary": "East Bay is mostly clear, though a few spots still carry light fog around 29 on average."
+      },
+      {
+        "regionId": "south-bay",
+        "regionName": "South Bay",
+        "trendLabel": "mixed",
+        "averageFogScore": 51,
+        "averageSunshineScore": 59,
+        "clearestLocation": {
+          "locationId": "san-jose",
+          "fogScore": 26,
+          "sunshineScore": 76
+        },
+        "foggiestLocation": {
+          "locationId": "half-moon-bay",
+          "fogScore": 82,
+          "sunshineScore": 32
+        },
+        "locationCount": 4,
+        "monitoredLocationCount": 4,
+        "confidence": 75,
+        "confidenceLabel": "High",
+        "summary": "South Bay is mixed, ranging from san-jose at 26 fog to half-moon-bay at 82."
+      }
+    ],
+    "movementContext": {
+      "movementType": "mixed",
+      "confidence": 0,
+      "confidenceLabel": "Unavailable",
+      "affectedLocations": [
+        "berkeley",
+        "golden-gate-park",
+        "half-moon-bay",
+        "mill-valley",
+        "mountain-view",
+        "oakland",
+        "ocean-beach",
+        "palo-alto",
+        "presidio",
+        "san-francisco",
+        "san-jose",
+        "sausalito",
+        "stinson-beach",
+        "tiburon"
+      ],
+      "explanation": "Connected locations show conflicting fog gradients, so movement direction is inconsistent across the Bay Area graph."
+    },
+    "validLocationCount": 14
+  },
+  "generatedAt": "2026-07-01T16:00:00.000Z",
+  "validLocationCount": 14,
+  "heroImagery": {
+    "conditionState": "mixed-bay",
+    "stabilityKey": "mixed-bay|marin-headlands|day|morning|hero/mill-valley/day.png",
+    "imageUrl": "https://cdn.example.com/assets/hero/mill-valley/day.png",
+    "localFallbackAsset": "hero_mixed",
+    "presentation": {
+      "style": "hero",
+      "conditionState": "mixed-bay",
+      "timeOfDay": "day",
+      "daypart": "morning",
+      "colorGrade": "morning-clear",
+      "baseVariant": "day",
+      "sceneId": "marin-headlands",
+      "sceneName": "Marin Headlands / Hawk Hill",
+      "usesRemoteAsset": true,
+      "localFallbackAsset": "hero_mixed"
+    },
+    "source": "cdn",
+    "confidenceLabel": "Medium",
+    "imageKey": "hero/mill-valley/day.png",
+    "focusLocationId": "mill-valley",
+    "sceneId": "marin-headlands",
+    "sceneName": "Marin Headlands / Hawk Hill",
+    "timeOfDay": "day",
+    "baseVariant": "day",
+    "daypart": "morning",
+    "colorGrade": "morning-clear",
+    "fallbackReason": null,
+    "altText": "Sun and fog split across the Bay Area skyline."
+  },
+  "source": "live"
+}
