@@ -7,7 +7,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { BayAreaMap } from "@/components/map/BayAreaMap";
 import type { MapMarkerLocation } from "@/lib/map/markers";
-import { mockFitBounds, mockFlyTo } from "../mocks/maplibre-gl";
+import {
+  mockAddLayer,
+  mockAddSource,
+  mockFitBounds,
+  mockFlyTo,
+  mockSetStyle,
+} from "../mocks/maplibre-gl";
 
 const locations: MapMarkerLocation[] = [
   {
@@ -16,6 +22,8 @@ const locations: MapMarkerLocation[] = [
     latitude: 37.8735,
     longitude: -122.4566,
     sunshineScore: 82,
+    fogScore: 82,
+    status: "Karl Territory",
   },
   {
     id: "sausalito",
@@ -23,14 +31,26 @@ const locations: MapMarkerLocation[] = [
     latitude: 37.8591,
     longitude: -122.4853,
     sunshineScore: 74,
+    fogScore: 41,
+    status: "Patchy Fog",
   },
 ];
+
+const defaultProps = {
+  mapStyle: "standard" as const,
+  fogLayerEnabled: true,
+  onMapStyleChange: vi.fn(),
+  onFogLayerChange: vi.fn(),
+};
 
 describe("BayAreaMap", () => {
   afterEach(() => {
     cleanup();
     mockFlyTo.mockClear();
     mockFitBounds.mockClear();
+    mockSetStyle.mockClear();
+    mockAddSource.mockClear();
+    mockAddLayer.mockClear();
   });
 
   beforeEach(() => {
@@ -44,10 +64,12 @@ describe("BayAreaMap", () => {
         selectedLocationId={null}
         selectedRegionId={null}
         onSelectLocation={vi.fn()}
+        {...defaultProps}
       />,
     );
 
     expect(await screen.findByTestId("bay-area-map")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Map Layers" })).toBeInTheDocument();
   });
 
   it("frames the default four-region Bay Area viewport when no location is selected", async () => {
@@ -57,6 +79,7 @@ describe("BayAreaMap", () => {
         selectedLocationId={null}
         selectedRegionId={null}
         onSelectLocation={vi.fn()}
+        {...defaultProps}
       />,
     );
 
@@ -73,6 +96,7 @@ describe("BayAreaMap", () => {
         selectedLocationId="tiburon"
         selectedRegionId={null}
         onSelectLocation={vi.fn()}
+        {...defaultProps}
       />,
     );
 
@@ -94,6 +118,7 @@ describe("BayAreaMap", () => {
         selectedLocationId="tiburon"
         selectedRegionId={null}
         onSelectLocation={onSelectLocation}
+        {...defaultProps}
       />,
     );
 
@@ -101,5 +126,75 @@ describe("BayAreaMap", () => {
     fireEvent.click(sausalitoMarker);
 
     expect(onSelectLocation).toHaveBeenCalledWith("sausalito");
+  });
+
+  it("adds location-based fog overlays when the fog layer is enabled", async () => {
+    render(
+      <BayAreaMap
+        locations={locations}
+        selectedLocationId={null}
+        selectedRegionId={null}
+        onSelectLocation={vi.fn()}
+        {...defaultProps}
+        fogLayerEnabled
+      />,
+    );
+
+    await waitFor(() => {
+      expect(mockAddSource).toHaveBeenCalled();
+      expect(mockAddLayer).toHaveBeenCalled();
+    });
+  });
+
+  it("removes fog overlays when the fog layer is disabled", async () => {
+    const { rerender } = render(
+      <BayAreaMap
+        locations={locations}
+        selectedLocationId={null}
+        selectedRegionId={null}
+        onSelectLocation={vi.fn()}
+        {...defaultProps}
+        fogLayerEnabled
+      />,
+    );
+
+    await waitFor(() => {
+      expect(mockAddSource).toHaveBeenCalled();
+    });
+
+    rerender(
+      <BayAreaMap
+        locations={locations}
+        selectedLocationId={null}
+        selectedRegionId={null}
+        onSelectLocation={vi.fn()}
+        {...defaultProps}
+        fogLayerEnabled={false}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByLabelText("Fog intensity legend")).not.toBeInTheDocument();
+    });
+  });
+
+  it("changes the base map style safely", async () => {
+    const onMapStyleChange = vi.fn();
+
+    render(
+      <BayAreaMap
+        locations={locations}
+        selectedLocationId={null}
+        selectedRegionId={null}
+        onSelectLocation={vi.fn()}
+        {...defaultProps}
+        onMapStyleChange={onMapStyleChange}
+      />,
+    );
+
+    fireEvent.click(await screen.findByRole("button", { name: "Map Layers" }));
+    fireEvent.click(screen.getByRole("button", { name: "Satellite" }));
+
+    expect(onMapStyleChange).toHaveBeenCalledWith("satellite");
   });
 });

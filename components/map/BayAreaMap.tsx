@@ -2,16 +2,19 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { MapFogLegend } from "@/components/map/MapFogLegend";
+import { MapLayerControls } from "@/components/map/MapLayerControls";
 import {
   BAY_AREA_CENTER,
-  BAY_AREA_MAP_STYLE,
   BAY_AREA_MAX_BOUNDS,
   findBayAreaProductRegion,
 } from "@/lib/map/config";
+import { syncFogOverlayLayer } from "@/lib/map/fogOverlays";
 import {
   createMapMarkerElement,
   type MapMarkerLocation,
 } from "@/lib/map/markers";
+import { resolveKarlMapStyle, type KarlMapStyleId } from "@/lib/map/styles";
 import {
   fitDefaultBayAreaViewport,
   fitMapToBounds,
@@ -23,6 +26,10 @@ type BayAreaMapProps = {
   selectedLocationId: string | null;
   selectedRegionId: string | null;
   onSelectLocation: (locationId: string) => void;
+  mapStyle: KarlMapStyleId;
+  fogLayerEnabled: boolean;
+  onMapStyleChange: (styleId: KarlMapStyleId) => void;
+  onFogLayerChange: (enabled: boolean) => void;
   isLoading?: boolean;
 };
 
@@ -31,6 +38,10 @@ export function BayAreaMap({
   selectedLocationId,
   selectedRegionId,
   onSelectLocation,
+  mapStyle,
+  fogLayerEnabled,
+  onMapStyleChange,
+  onFogLayerChange,
   isLoading = false,
 }: BayAreaMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -52,7 +63,7 @@ export function BayAreaMap({
 
       const map = new maplibregl.Map({
         container: containerRef.current,
-        style: BAY_AREA_MAP_STYLE,
+        style: resolveKarlMapStyle(mapStyle),
         center: BAY_AREA_CENTER,
         zoom: 8,
         maxBounds: BAY_AREA_MAX_BOUNDS,
@@ -70,6 +81,7 @@ export function BayAreaMap({
         }
 
         fitDefaultBayAreaViewport(map);
+        syncFogOverlayLayer(map, locations, fogLayerEnabled);
         setMapReady(true);
       });
 
@@ -84,7 +96,50 @@ export function BayAreaMap({
       mapRef.current = null;
       setMapReady(false);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- map initializes once
   }, []);
+
+  const appliedStyleRef = useRef(mapStyle);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady || appliedStyleRef.current === mapStyle) {
+      return;
+    }
+
+    appliedStyleRef.current = mapStyle;
+    const nextStyle = resolveKarlMapStyle(mapStyle);
+
+    const applyStyle = () => {
+      syncFogOverlayLayer(map, locations, fogLayerEnabled);
+
+      if (selectedLocationId) {
+        const location = locations.find((item) => item.id === selectedLocationId);
+        if (location) {
+          focusMapOnLocation(map, location.longitude, location.latitude);
+        }
+        return;
+      }
+
+      const region = findBayAreaProductRegion(selectedRegionId);
+      if (region) {
+        fitMapToBounds(map, region.bounds);
+        return;
+      }
+
+      fitDefaultBayAreaViewport(map);
+    };
+
+    map.once("style.load", applyStyle);
+    map.setStyle(nextStyle);
+  }, [
+    fogLayerEnabled,
+    locations,
+    mapReady,
+    mapStyle,
+    selectedLocationId,
+    selectedRegionId,
+  ]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -107,6 +162,7 @@ export function BayAreaMap({
         const element = createMapMarkerElement({
           location,
           isSelected: location.id === selectedLocationId,
+          fogLayerEnabled,
           onSelect: (locationId) => onSelectRef.current(locationId),
         });
 
@@ -128,7 +184,16 @@ export function BayAreaMap({
       markers.forEach((marker) => marker.remove());
       markers.clear();
     };
-  }, [locations, mapReady, selectedLocationId]);
+  }, [fogLayerEnabled, locations, mapReady, selectedLocationId]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) {
+      return;
+    }
+
+    syncFogOverlayLayer(map, locations, fogLayerEnabled);
+  }, [fogLayerEnabled, locations, mapReady]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -160,6 +225,13 @@ export function BayAreaMap({
         data-testid="bay-area-map"
         className="karl-map-canvas h-full min-h-[360px] w-full"
       />
+      <MapLayerControls
+        mapStyle={mapStyle}
+        fogLayerEnabled={fogLayerEnabled}
+        onMapStyleChange={onMapStyleChange}
+        onFogLayerChange={onFogLayerChange}
+      />
+      {fogLayerEnabled ? <MapFogLegend /> : null}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-karl-navy/70 to-transparent"

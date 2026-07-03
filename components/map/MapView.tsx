@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { BayAreaMap } from "@/components/map/BayAreaMap";
@@ -10,31 +10,28 @@ import { MapRegionChips } from "@/components/map/MapRegionChips";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { getLocations } from "@/lib/api/weather";
 import { WEATHER_STALE_TIME_MS } from "@/lib/constants/config";
+import { getLocationConditionLabel } from "@/lib/map/conditions";
 import { findBayAreaProductRegion, isBayAreaProductRegionId } from "@/lib/map/config";
 import { resolveMapLocationFocus } from "@/lib/map/locationSelection";
-import { getProductRegionNameForLocation } from "@/lib/map/regions";
 import type { MapMarkerLocation } from "@/lib/map/markers";
+import { getProductRegionNameForLocation } from "@/lib/map/regions";
 import {
   buildMapHref,
   buildMapRegionHref,
   resolveMapQueryState,
 } from "@/lib/map/routing";
+import type { KarlMapStyleId } from "@/lib/map/styles";
+import type { LocationWeather } from "@/lib/schemas/weather";
 
 function MapLocationCard({
   location,
   isSelected,
 }: {
-  location: {
-    id: string;
-    name: string;
-    status: string;
-    sunshineScore: number;
-    temperature: number;
-    distanceText: string;
-  };
+  location: LocationWeather;
   isSelected: boolean;
 }) {
   const regionName = getProductRegionNameForLocation(location.id);
+  const conditionLabel = getLocationConditionLabel(location);
 
   return (
     <GlassCard
@@ -55,6 +52,9 @@ function MapLocationCard({
           ) : null}
           <h2 className="mt-2 text-lg font-semibold text-white">{location.name}</h2>
           <p className="mt-1 text-sm text-white/65">{location.status}</p>
+          <p className="mt-1 text-xs font-medium uppercase tracking-[0.1em] text-white/45">
+            {conditionLabel}
+          </p>
           <p className="mt-2 text-sm text-white/50">
             {location.distanceText} · {location.temperature}°
           </p>
@@ -74,6 +74,8 @@ export function MapView() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const mapQuery = resolveMapQueryState(searchParams);
+  const [mapStyle, setMapStyle] = useState<KarlMapStyleId>("standard");
+  const [fogLayerEnabled, setFogLayerEnabled] = useState(true);
 
   const locationsQuery = useQuery({
     queryKey: ["locations"],
@@ -103,6 +105,8 @@ export function MapView() {
         latitude: location.latitude,
         longitude: location.longitude,
         sunshineScore: location.sunshineScore,
+        fogScore: location.fogScore,
+        status: location.status,
       })),
     [locations],
   );
@@ -157,6 +161,10 @@ export function MapView() {
           selectedLocationId={selectedLocation?.id ?? null}
           selectedRegionId={selectedLocation ? null : mapQuery.activeRegionId}
           onSelectLocation={handleSelectLocation}
+          mapStyle={mapStyle}
+          fogLayerEnabled={fogLayerEnabled}
+          onMapStyleChange={setMapStyle}
+          onFogLayerChange={setFogLayerEnabled}
           isLoading={locationsQuery.isLoading}
         />
       </GlassCard>

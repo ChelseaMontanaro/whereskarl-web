@@ -1,4 +1,5 @@
 import { GlassCard } from "@/components/ui/GlassCard";
+import { getLocationConditionLabel } from "@/lib/map/conditions";
 import { findBayAreaProductRegion, type BayAreaProductRegion } from "@/lib/map/config";
 import {
   filterLocationsByProductRegion,
@@ -76,6 +77,7 @@ function MapLocationRow({
   onSelect: () => void;
 }) {
   const regionName = getProductRegionNameForLocation(location.id) ?? "Bay Area";
+  const conditionLabel = getLocationConditionLabel(location);
 
   return (
     <GlassCard className="px-4 py-3.5">
@@ -88,6 +90,9 @@ function MapLocationRow({
             {location.name}
           </h2>
           <p className="mt-1 text-sm text-white/65">{location.status}</p>
+          <p className="mt-1 text-xs font-medium uppercase tracking-[0.1em] text-white/45">
+            {conditionLabel}
+          </p>
           <p className="mt-1.5 text-xs text-white/45">
             {location.distanceText} · {location.temperature}° · Sunshine{" "}
             {location.sunshineScore}

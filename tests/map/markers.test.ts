@@ -15,6 +15,8 @@ const tiburon: MapMarkerLocation = {
   latitude: 37.8735,
   longitude: -122.4566,
   sunshineScore: 82,
+  fogScore: 82,
+  status: "Karl Territory",
 };
 
 describe("createMapMarkerElement", () => {
@@ -28,23 +30,38 @@ describe("createMapMarkerElement", () => {
     const marker = createMapMarkerElement({
       location: tiburon,
       isSelected: false,
+      fogLayerEnabled: true,
       onSelect,
     });
 
     fireEvent.click(marker);
 
     expect(onSelect).toHaveBeenCalledWith("tiburon");
-    expect(marker.className).toBe("karl-map-marker");
+    expect(marker.className).toContain("karl-map-marker--karlTerritory");
   });
 
   it("marks the selected marker as pressed", () => {
     const marker = createMapMarkerElement({
       location: tiburon,
       isSelected: true,
+      fogLayerEnabled: false,
       onSelect: vi.fn(),
     });
 
-    expect(marker.className).toBe("karl-map-marker is-selected");
+    expect(marker.className).toContain("karl-map-marker");
+    expect(marker.className).toContain("is-selected");
+    expect(marker.className).toContain("karl-map-marker--neutral");
     expect(marker.getAttribute("aria-pressed")).toBe("true");
+  });
+
+  it("uses shared condition language in the marker label", () => {
+    const marker = createMapMarkerElement({
+      location: tiburon,
+      isSelected: false,
+      fogLayerEnabled: true,
+      onSelect: vi.fn(),
+    });
+
+    expect(marker.getAttribute("aria-label")).toContain("Karl Territory");
   });
 });
