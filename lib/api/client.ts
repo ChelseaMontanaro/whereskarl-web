@@ -52,21 +52,33 @@ export async function apiFetch<T>(
   searchParams?: ApiSearchParams,
 ): Promise<T> {
   const requestPath = buildApiPath(path, searchParams);
+  const requestUrl = `${getApiBaseUrl()}${requestPath}`;
 
-  const response = await fetch(`${getApiBaseUrl()}${requestPath}`, {
-    ...options,
-    headers: {
-      Accept: "application/json",
-      ...options?.headers,
-    },
-  });
+  try {
+    const response = await fetch(requestUrl, {
+      ...options,
+      headers: {
+        Accept: "application/json",
+        ...options?.headers,
+      },
+    });
 
-  if (!response.ok) {
-    throw new ApiError(
-      `API request failed with status ${response.status}`,
-      response.status,
-    );
+    if (!response.ok) {
+      console.error(
+        `[Where's Karl API] ${requestUrl} failed with status ${response.status}`,
+      );
+      throw new ApiError(
+        `API request failed with status ${response.status}`,
+        response.status,
+      );
+    }
+
+    return response.json() as Promise<T>;
+  } catch (error) {
+    if (!(error instanceof ApiError)) {
+      console.error(`[Where's Karl API] ${requestUrl} request failed`, error);
+    }
+
+    throw error;
   }
-
-  return response.json() as Promise<T>;
 }

@@ -38,7 +38,8 @@ export function HomeView() {
     queryKey: ["current"],
     queryFn: getCurrent,
     staleTime: WEATHER_STALE_TIME_MS,
-    initialData: initialLastKnown?.current,
+    placeholderData: initialLastKnown?.current,
+    refetchOnMount: "always",
     meta: { restored: Boolean(initialLastKnown?.current) },
   });
 
@@ -46,14 +47,16 @@ export function HomeView() {
     queryKey: ["locations"],
     queryFn: getLocations,
     staleTime: WEATHER_STALE_TIME_MS,
-    initialData: initialLastKnown?.locations,
+    placeholderData: initialLastKnown?.locations,
+    refetchOnMount: "always",
   });
 
   const bestSunshineQuery = useQuery({
     queryKey: ["best-sunshine"],
     queryFn: () => getBestSunshine(),
     staleTime: WEATHER_STALE_TIME_MS,
-    initialData: initialLastKnown?.bestSunshine,
+    placeholderData: initialLastKnown?.bestSunshine,
+    refetchOnMount: "always",
   });
 
   const karlLocation = useMemo(
@@ -75,12 +78,17 @@ export function HomeView() {
     staleTime: WEATHER_STALE_TIME_MS,
     enabled: Boolean(locationsQuery.data),
     initialData: initialLastKnown?.intelligence,
+    refetchOnMount: "always",
   });
 
+  const coreWeatherErrored =
+    currentQuery.isError || locationsQuery.isError || bestSunshineQuery.isError;
+
   const isLoadingWeather =
-    currentQuery.isLoading ||
-    locationsQuery.isLoading ||
-    bestSunshineQuery.isLoading;
+    !coreWeatherErrored &&
+    (currentQuery.isPending ||
+      locationsQuery.isPending ||
+      bestSunshineQuery.isPending);
 
   const hasLoadedCoreWeather = Boolean(
     currentQuery.data && locationsQuery.data,
