@@ -1,6 +1,14 @@
 import { Suspense } from "react";
 
 import { MapView } from "@/components/map/MapView";
+import { createPageMetadata } from "@/lib/site/metadata";
+
+export const metadata = createPageMetadata({
+  title: "Map",
+  path: "/map",
+  description:
+    "Explore Bay Area fog and sunshine on the Where's Karl map. Filter San Francisco, North Bay, East Bay, and South Bay, then focus clear-sky locations across the Bay.",
+});
 
 function MapLoadingFallback() {
   return (

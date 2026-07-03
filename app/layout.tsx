@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { AppShell } from "@/components/layout/AppShell";
 import { ConditionsStatusProvider } from "@/components/providers/ConditionsStatusProvider";
 import { QueryProvider } from "@/components/providers/QueryProvider";
+import { rootMetadata } from "@/lib/site/metadata";
 
 import "./globals.css";
 
@@ -17,10 +18,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Where's Karl?",
-  description: "Track Karl across the Bay",
-};
+export const metadata: Metadata = rootMetadata;
 
 export default function RootLayout({
   children,
