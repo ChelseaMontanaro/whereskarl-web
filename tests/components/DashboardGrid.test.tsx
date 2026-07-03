@@ -109,6 +109,9 @@ describe("DashboardGrid", () => {
     fireEvent.click(screen.getByRole("button", { name: "Learn about Fog Coverage" }));
 
     const dialog = screen.getByRole("dialog");
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Fog Coverage" }),
+    ).toBeInTheDocument();
     expect(dialog).toHaveTextContent("Fog Coverage");
     expect(dialog).toHaveTextContent(METRIC_DETAILS["fog-coverage"].body);
     expect(within(dialog).queryByText("What does this mean?")).not.toBeInTheDocument();
@@ -160,7 +163,14 @@ describe("MetricDetailSheet", () => {
     const dialog = screen.getByRole("dialog");
     expect(dialog).toHaveAttribute("aria-labelledby");
     expect(dialog).toHaveAttribute("aria-describedby");
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: METRIC_DETAILS["sunshine-score"].title,
+      }),
+    ).toBeInTheDocument();
     expect(dialog).toHaveTextContent(METRIC_DETAILS["sunshine-score"].body);
+    expect(screen.queryByText("What does this mean?")).not.toBeInTheDocument();
 
     fireEvent.keyDown(document, { key: "Escape" });
     expect(onClose).toHaveBeenCalledTimes(1);

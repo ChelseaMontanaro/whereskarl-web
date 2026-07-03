@@ -60,17 +60,12 @@ export function MetricDetailSheet({ metricKey, onClose }: MetricDetailSheetProps
       >
         <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-white/18 lg:hidden" />
         <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0 flex-1">
-            <p className="text-[0.625rem] font-bold uppercase tracking-[0.14em] text-karl-gold/82 lg:text-[0.68rem] lg:tracking-[0.16em]">
-              {detail.title}
-            </p>
-            <h2
-              id={titleId}
-              className="mt-2 text-lg font-semibold leading-snug text-white lg:text-xl"
-            >
-              What does this mean?
-            </h2>
-          </div>
+          <h2
+            id={titleId}
+            className="min-w-0 flex-1 text-lg font-semibold leading-snug text-white lg:text-xl"
+          >
+            {detail.title}
+          </h2>
           <button
             ref={closeButtonRef}
             type="button"
