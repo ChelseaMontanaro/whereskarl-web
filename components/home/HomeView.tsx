@@ -9,6 +9,10 @@ import { DashboardGrid } from "@/components/home/DashboardGrid";
 import { HomeHero } from "@/components/home/HomeHero";
 import { IntelligenceNarrativeCard } from "@/components/home/IntelligenceNarrativeCard";
 import { NextHourOutlookCard } from "@/components/home/NextHourOutlookCard";
+import {
+  defaultClearSkiesNavState,
+  useClearSkiesNav,
+} from "@/components/providers/ClearSkiesNavProvider";
 import { useConditionsStatus } from "@/components/providers/ConditionsStatusProvider";
 import { getKarlIntelligence } from "@/lib/api/intelligence";
 import { getBestSunshine, getCurrent, getLocations } from "@/lib/api/weather";
@@ -22,6 +26,7 @@ import {
   heroConfidenceText,
   heroHeadline,
   heroSubheadline,
+  isNighttime,
   nextHourOutlookSummary,
 } from "@/lib/home/weatherDisplay";
 import {
@@ -31,8 +36,14 @@ import {
 
 export function HomeView() {
   const { setPresentation } = useConditionsStatus();
+  const { setClearSkiesNav } = useClearSkiesNav();
   const [loadedFromLastKnown, setLoadedFromLastKnown] = useState(false);
   const [initialLastKnown] = useState(() => loadLastKnownWeather());
+  const [isNightPresentation, setIsNightPresentation] = useState(false);
+
+  useEffect(() => {
+    setIsNightPresentation(isNighttime(new Date().getHours()));
+  }, []);
 
   const currentQuery = useQuery({
     queryKey: ["current"],
@@ -169,6 +180,17 @@ export function HomeView() {
   ]);
 
   useEffect(() => {
+    setClearSkiesNav({
+      locationId: clearSkiesLocationId,
+      isLoading: isFindingClearSkies,
+    });
+
+    return () => {
+      setClearSkiesNav(defaultClearSkiesNavState);
+    };
+  }, [clearSkiesLocationId, isFindingClearSkies, setClearSkiesNav]);
+
+  useEffect(() => {
     setPresentation(
       resolveConditionsPresentation({
         isLoading: isLoadingWeather,
@@ -197,11 +219,12 @@ export function HomeView() {
         isFindingClearSkies={isFindingClearSkies}
       />
 
-      <div className="relative z-10 mx-auto -mt-12 flex w-full max-w-[430px] flex-col gap-3.5 px-4">
+      <div className="relative z-10 mx-auto -mt-12 flex w-full max-w-[430px] flex-col gap-3.5 px-4 lg:-mt-16 lg:max-w-6xl lg:gap-5 lg:px-8 xl:max-w-7xl">
         <DashboardGrid
           current={current}
           bestSunshine={bestSunshine}
           isLoading={!hasLoadedCoreWeather}
+          isNightPresentation={isNightPresentation}
         />
 
         <BestSunshineCard

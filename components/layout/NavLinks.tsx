@@ -45,34 +45,32 @@ export function NavIcon({ name }: { name: PrimaryNavItem["href"] }) {
 
 function primaryNavClassName(
   isActive: boolean,
-  layout: "drawer" | "bottom",
+  layout: "bottom" | "top",
 ): string {
   const base =
-    "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors motion-reduce:transition-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-karl-gold";
+    "rounded-full text-sm font-medium transition-colors motion-reduce:transition-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-karl-gold";
 
   if (layout === "bottom") {
-    return `${base} flex-1 flex-col gap-1 py-2 text-xs ${
+    return `${base} flex flex-1 flex-col items-center gap-1 px-3 py-2 text-xs ${
       isActive
         ? "text-karl-gold"
         : "text-white/55 hover:text-white/80"
     }`;
   }
 
-  return `${base} ${
+  return `${base} px-3.5 py-1.5 ${
     isActive
       ? "border border-karl-gold/25 bg-karl-gold/12 text-karl-gold"
-      : "text-white/70 hover:bg-karl-navy-glass/70 hover:text-white"
+      : "text-white/72 hover:bg-white/6 hover:text-white"
   }`;
 }
 
 export function PrimaryNavLink({
   item,
   layout,
-  onNavigate,
 }: {
   item: PrimaryNavItem;
-  layout: "drawer" | "bottom";
-  onNavigate?: () => void;
+  layout: "bottom" | "top";
 }) {
   const pathname = usePathname();
   const isActive = isPrimaryNavActive(pathname, item.href);
@@ -82,21 +80,20 @@ export function PrimaryNavLink({
       href={item.href}
       aria-current={isActive ? "page" : undefined}
       className={primaryNavClassName(isActive, layout)}
-      onClick={onNavigate}
     >
-      <NavIcon name={item.href} />
-      <span>{layout === "bottom" ? item.shortLabel : item.label}</span>
+      {layout === "bottom" ? (
+        <>
+          <NavIcon name={item.href} />
+          <span>{item.shortLabel}</span>
+        </>
+      ) : (
+        <span>{item.label}</span>
+      )}
     </Link>
   );
 }
 
-export function SecondaryNavLink({
-  item,
-  onNavigate,
-}: {
-  item: SecondaryNavItem;
-  onNavigate?: () => void;
-}) {
+export function SecondaryNavLink({ item }: { item: SecondaryNavItem }) {
   const pathname = usePathname();
   const isActive = isSecondaryNavActive(pathname, item.href);
 
@@ -107,39 +104,27 @@ export function SecondaryNavLink({
       className={`text-sm transition-colors motion-reduce:transition-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-karl-gold ${
         isActive ? "text-karl-gold" : "text-white/45 hover:text-white/70"
       }`}
-      onClick={onNavigate}
     >
       {item.label}
     </Link>
   );
 }
 
-export function PrimaryNavList({
-  layout,
-  onNavigate,
-}: {
-  layout: "drawer" | "bottom";
-  onNavigate?: () => void;
-}) {
+export function PrimaryNavList({ layout }: { layout: "bottom" | "top" }) {
   return (
     <>
       {primaryNavItems.map((item) => (
-        <PrimaryNavLink
-          key={item.href}
-          item={item}
-          layout={layout}
-          onNavigate={onNavigate}
-        />
+        <PrimaryNavLink key={item.href} item={item} layout={layout} />
       ))}
     </>
   );
 }
 
-export function SecondaryNavList({ onNavigate }: { onNavigate?: () => void }) {
+export function SecondaryNavList() {
   return (
     <>
       {secondaryNavItems.map((item) => (
-        <SecondaryNavLink key={item.href} item={item} onNavigate={onNavigate} />
+        <SecondaryNavLink key={item.href} item={item} />
       ))}
     </>
   );

@@ -3,12 +3,13 @@
 import type { ReactNode } from "react";
 
 import { ConditionsFooter } from "@/components/layout/ConditionsFooter";
-import { DesktopNavDrawer } from "@/components/layout/DesktopNavDrawer";
+import { DesktopTopNav } from "@/components/layout/DesktopTopNav";
 import { DevStatusFooter } from "@/components/layout/DevStatusFooter";
 import {
   PrimaryNavList,
   SecondaryNavList,
 } from "@/components/layout/NavLinks";
+import { ClearSkiesNavProvider } from "@/components/providers/ClearSkiesNavProvider";
 
 function BottomNav() {
   return (
@@ -36,15 +37,17 @@ function MobileSecondaryLinks() {
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-karl-navy">
-      <DesktopNavDrawer />
-      <div className="flex min-h-screen flex-col">
-        <main className="flex-1 pb-24 lg:pb-0">{children}</main>
-        <ConditionsFooter />
-        <MobileSecondaryLinks />
-        <DevStatusFooter />
-        <BottomNav />
+    <ClearSkiesNavProvider>
+      <div className="min-h-screen bg-karl-navy">
+        <DesktopTopNav />
+        <div className="flex min-h-screen flex-col">
+          <main className="flex-1 pb-24 lg:pb-0">{children}</main>
+          <ConditionsFooter />
+          <MobileSecondaryLinks />
+          <DevStatusFooter />
+          <BottomNav />
+        </div>
       </div>
-    </div>
+    </ClearSkiesNavProvider>
   );
 }

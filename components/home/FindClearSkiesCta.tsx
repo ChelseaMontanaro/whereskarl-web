@@ -5,7 +5,7 @@ import { buildMapHref } from "@/lib/map/routing";
 type FindClearSkiesCtaProps = {
   locationId: string | null;
   isLoading: boolean;
-  variant?: "primary" | "secondary";
+  variant?: "primary" | "secondary" | "header";
   className?: string;
 };
 
@@ -22,6 +22,29 @@ export function FindClearSkiesCta({
   const href = buildMapHref(locationId);
   const label =
     variant === "secondary" ? "View brightest spot on map" : undefined;
+
+  if (variant === "header") {
+    if (isLoading) {
+      return (
+        <span
+          aria-busy="true"
+          className={`inline-flex min-h-10 items-center rounded-full border border-karl-gold/25 bg-karl-gold/12 px-4 text-xs font-semibold uppercase tracking-[0.1em] text-karl-gold/80 ${className}`}
+        >
+          Finding clear skies…
+        </span>
+      );
+    }
+
+    return (
+      <Link
+        href={href}
+        aria-label="Find Clear Skies"
+        className={`inline-flex min-h-10 items-center rounded-full border border-karl-gold/35 bg-karl-gold/14 px-4 text-xs font-semibold uppercase tracking-[0.1em] text-karl-gold transition-colors hover:border-karl-gold/50 hover:bg-karl-gold/20 motion-reduce:transition-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-karl-gold ${className}`}
+      >
+        Find Clear Skies
+      </Link>
+    );
+  }
 
   if (variant === "secondary") {
     return (

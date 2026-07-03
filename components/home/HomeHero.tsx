@@ -46,7 +46,7 @@ export function HomeHero({
   return (
     <section
       aria-label="Karl conditions hero"
-      className="relative min-h-[min(540px,70vh)] w-full overflow-hidden lg:min-h-[70vh]"
+      className="relative min-h-[min(540px,70vh)] w-full overflow-hidden lg:min-h-[78vh]"
     >
       {imageSource === "remote" && presentation.imageUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
@@ -83,8 +83,8 @@ export function HomeHero({
         className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/70 via-black/35 to-transparent"
       />
 
-      <div className="relative mx-auto flex min-h-[min(540px,70vh)] w-full max-w-[430px] flex-col lg:min-h-[70vh]">
-        <div className="flex flex-col items-center px-5 pt-6 text-center sm:pt-8">
+      <div className="relative mx-auto flex min-h-[min(540px,70vh)] w-full max-w-[430px] flex-col lg:min-h-[78vh] lg:max-w-5xl lg:px-8 xl:max-w-6xl">
+        <div className="flex flex-col items-center px-5 pt-6 text-center sm:pt-8 lg:hidden">
           <h2 className="font-serif text-[2rem] font-semibold leading-none tracking-[0.01em] text-white/[0.96] [text-shadow:0_7px_16px_rgba(0,0,0,0.52)] sm:text-[2.15rem]">
             Where&apos;s Karl?
           </h2>
@@ -93,27 +93,27 @@ export function HomeHero({
           </p>
         </div>
 
-        <div className="mt-auto px-5 pb-14">
+        <div className="mt-auto px-5 pb-14 lg:pb-20 lg:pt-28">
           <HeroPositionBadge isLoading={isLoading} />
           <h1
-            className={`mt-2 max-w-[18ch] font-serif text-[1.75rem] font-semibold leading-[1.12] text-white/[0.98] [text-shadow:0_5px_14px_rgba(0,0,0,0.56)] sm:text-[1.85rem] ${
+            className={`mt-2 max-w-[18ch] font-serif text-[1.75rem] font-semibold leading-[1.12] text-white/[0.98] [text-shadow:0_5px_14px_rgba(0,0,0,0.56)] sm:text-[1.85rem] lg:max-w-[22ch] lg:text-[2.5rem] lg:leading-[1.08] xl:max-w-[24ch] xl:text-[2.75rem] ${
               isLoading ? "opacity-70" : ""
             }`}
           >
             {headline}
           </h1>
-          <p className="mt-2 max-w-[34ch] text-[0.9375rem] font-medium leading-snug text-white/[0.76] [text-shadow:0_4px_10px_rgba(0,0,0,0.46)]">
+          <p className="mt-2 max-w-[34ch] text-[0.9375rem] font-medium leading-snug text-white/[0.76] [text-shadow:0_4px_10px_rgba(0,0,0,0.46)] lg:max-w-[48ch] lg:text-base lg:leading-relaxed xl:max-w-[52ch]">
             {subheadline}
           </p>
           {confidenceText ? (
-            <p className="mt-2 max-w-[34ch] text-[0.6875rem] font-medium text-white/44 [text-shadow:0_3px_8px_rgba(0,0,0,0.36)]">
+            <p className="mt-2 max-w-[34ch] text-[0.6875rem] font-medium text-white/44 [text-shadow:0_3px_8px_rgba(0,0,0,0.36)] lg:max-w-[48ch] lg:text-xs">
               {confidenceText}
             </p>
           ) : null}
           <FindClearSkiesCta
             locationId={clearSkiesLocationId}
             isLoading={isFindingClearSkies}
-            className="mt-5"
+            className="mt-5 lg:hidden"
           />
         </div>
       </div>

@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import { createElement, type ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -61,56 +61,32 @@ describe("AppShell", () => {
   it("renders mobile bottom navigation with the four primary tabs", () => {
     renderShell("/");
 
-    const bottomNav = screen.getByRole("navigation", { name: "Primary" });
+    const bottomNav = screen.getAllByRole("navigation", { name: "Primary" })[1];
     for (const label of ["Home", "Map", "Favorites", "Settings"]) {
       expect(within(bottomNav).getByRole("link", { name: label })).toBeInTheDocument();
     }
   });
 
-  it("opens the desktop drawer from the hamburger menu", () => {
+  it("renders the desktop top navigation with primary links and Find Clear Skies", () => {
     renderShell("/");
 
-    fireEvent.click(screen.getByRole("button", { name: "Open navigation menu" }));
-
-    const drawer = screen.getByRole("dialog", { name: "Navigation menu" });
-    expect(within(drawer).getByRole("link", { name: "Home" })).toBeInTheDocument();
-    expect(within(drawer).getByRole("link", { name: "Map" })).toBeInTheDocument();
-    expect(within(drawer).getByRole("link", { name: "Privacy" })).toBeInTheDocument();
+    const topNav = screen.getAllByRole("navigation", { name: "Primary" })[0];
+    expect(within(topNav).getByRole("link", { name: "Home" })).toBeInTheDocument();
+    expect(within(topNav).getByRole("link", { name: "Map" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Find Clear Skies" })).toBeInTheDocument();
   });
 
-  it("highlights the active primary route in the drawer", () => {
+  it("highlights the active primary route in the desktop top navigation", () => {
     renderShell("/favorites");
 
-    fireEvent.click(screen.getByRole("button", { name: "Open navigation menu" }));
-
-    const drawer = screen.getByRole("dialog", { name: "Navigation menu" });
-    expect(within(drawer).getByRole("link", { name: "Favorites" })).toHaveAttribute(
+    const topNav = screen.getAllByRole("navigation", { name: "Primary" })[0];
+    expect(within(topNav).getByRole("link", { name: "Favorites" })).toHaveAttribute(
       "aria-current",
       "page",
     );
-    expect(within(drawer).getByRole("link", { name: "Home" })).not.toHaveAttribute(
+    expect(within(topNav).getByRole("link", { name: "Home" })).not.toHaveAttribute(
       "aria-current",
     );
-  });
-
-  it("closes the desktop drawer when the backdrop is clicked", () => {
-    renderShell("/");
-
-    fireEvent.click(screen.getByRole("button", { name: "Open navigation menu" }));
-    expect(screen.getByRole("dialog", { name: "Navigation menu" })).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: "Close navigation menu" }));
-    expect(screen.queryByRole("dialog", { name: "Navigation menu" })).not.toBeInTheDocument();
-  });
-
-  it("closes the desktop drawer when Escape is pressed", () => {
-    renderShell("/");
-
-    fireEvent.click(screen.getByRole("button", { name: "Open navigation menu" }));
-    expect(screen.getByRole("dialog", { name: "Navigation menu" })).toBeInTheDocument();
-
-    fireEvent.keyDown(document, { key: "Escape" });
-    expect(screen.queryByRole("dialog", { name: "Navigation menu" })).not.toBeInTheDocument();
   });
 
   it("renders Privacy and Support links in the mobile footer", () => {
