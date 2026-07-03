@@ -2,9 +2,15 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import {
+  FogCoverageIcon,
+  SunshineIcon,
+} from "@/components/home/ConditionIcons";
 import { desktopGlassCardClass } from "@/components/home/desktopGlass";
-import { getLocationConditionLabel } from "@/lib/map/conditions";
-import { getProductRegionNameForLocation } from "@/lib/map/regions";
+import {
+  getLocationConditionLabel,
+} from "@/lib/map/conditions";
+import { getMarkerFogIntensity } from "@/lib/map/markers";
 import {
   isFavoriteLocation,
   toggleFavoriteLocation,
@@ -16,11 +22,28 @@ type MapSelectedLocationCardProps = {
   onClose: () => void;
 };
 
+function LocationConditionIcon({ location }: { location: LocationWeather }) {
+  const intensity = getMarkerFogIntensity(location);
+
+  if (intensity === "clear") {
+    return (
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-karl-gold/22 bg-karl-gold/8 text-karl-gold">
+        <SunshineIcon className="h-5 w-5" />
+      </span>
+    );
+  }
+
+  return (
+    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/14 bg-white/[0.05]">
+      <FogCoverageIcon className="h-5 w-5" />
+    </span>
+  );
+}
+
 export function MapSelectedLocationCard({
   location,
   onClose,
 }: MapSelectedLocationCardProps) {
-  const regionName = getProductRegionNameForLocation(location.id);
   const conditionLabel = getLocationConditionLabel(location);
   const [isFavorite, setIsFavorite] = useState(() =>
     isFavoriteLocation(location.id),
@@ -45,38 +68,41 @@ export function MapSelectedLocationCard({
 
   return (
     <article
-      className={`${desktopGlassCardClass} relative w-full max-w-[580px] px-4 py-3.5`}
+      className={`${desktopGlassCardClass} relative w-[min(100%,22rem)] px-3.5 py-3`}
       aria-label={`Selected location: ${location.name}`}
     >
       <button
         type="button"
         onClick={onClose}
         aria-label="Close selected location"
-        className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full border border-white/12 bg-black/30 text-base leading-none text-white/70 transition-colors hover:border-white/22 hover:text-white motion-reduce:transition-none"
+        className="absolute right-2.5 top-2.5 flex h-6 w-6 items-center justify-center rounded-full border border-white/12 bg-black/30 text-sm leading-none text-white/70 transition-colors hover:border-white/22 hover:text-white motion-reduce:transition-none"
       >
         ×
       </button>
 
-      <div className="flex items-start gap-3 pr-8">
+      <div className="flex items-start gap-2.5 pr-7">
+        <LocationConditionIcon location={location} />
+
         <div className="min-w-0 flex-1">
-          {regionName ? (
-            <p className="text-[0.625rem] font-bold uppercase tracking-[0.14em] text-karl-gold/85">
-              {regionName}
-            </p>
-          ) : null}
-          <h2 className="mt-0.5 text-lg font-semibold text-white">
+          <h2 className="truncate text-base font-semibold leading-tight text-white">
             {location.name}
           </h2>
-          <p className="mt-1 text-sm text-white/70">{location.status}</p>
-          <p className="mt-0.5 text-[0.68rem] font-medium uppercase tracking-[0.1em] text-white/45">
-            {conditionLabel}
-          </p>
-          <p className="mt-1.5 text-sm text-white/55">
-            {location.temperature}° · {location.distanceText}
+          <p className="mt-0.5 truncate text-sm text-white/72">{location.status}</p>
+          <p className="mt-1 text-[0.68rem] leading-snug text-white/48">
+            {conditionLabel} · {location.temperature}° · {location.windSpeed} mph{" "}
+            {location.windDirection}
           </p>
         </div>
 
-        <div className="flex shrink-0 flex-col items-end gap-2">
+        <div className="flex shrink-0 flex-col items-end gap-1.5">
+          <div className="rounded-xl border border-karl-gold/25 px-2 py-1 text-center">
+            <p className="text-base font-light leading-none text-karl-gold">
+              {location.sunshineScore}
+            </p>
+            <p className="mt-0.5 text-[0.5rem] uppercase tracking-[0.08em] text-white/40">
+              Clear
+            </p>
+          </div>
           <button
             type="button"
             onClick={handleToggleFavorite}
@@ -86,23 +112,14 @@ export function MapSelectedLocationCard({
                 ? `Remove ${location.name} from favorites`
                 : `Add ${location.name} to favorites`
             }
-            className={`rounded-full border px-2.5 py-1 text-[0.68rem] font-semibold transition-colors motion-reduce:transition-none ${
+            className={`rounded-full border px-2 py-0.5 text-[0.62rem] font-semibold transition-colors motion-reduce:transition-none ${
               isFavorite
                 ? "border-karl-gold/40 bg-karl-gold/12 text-karl-gold"
-                : "border-white/12 bg-white/[0.04] text-white/70 hover:border-karl-gold/30 hover:text-karl-gold"
+                : "border-white/12 bg-white/[0.04] text-white/65 hover:border-karl-gold/30 hover:text-karl-gold"
             }`}
           >
-            {isFavorite ? "Favorited" : "Favorite"}
+            {isFavorite ? "Saved" : "Save"}
           </button>
-
-          <div className="rounded-full border border-karl-gold/25 px-2.5 py-1.5 text-center">
-            <p className="text-lg font-light leading-none text-karl-gold">
-              {location.sunshineScore}
-            </p>
-            <p className="mt-0.5 text-[0.55rem] uppercase tracking-[0.1em] text-white/40">
-              Clear Skies
-            </p>
-          </div>
         </div>
       </div>
     </article>

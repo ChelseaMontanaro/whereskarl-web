@@ -52,43 +52,88 @@ function LayersIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
+function RadioIndicator({ checked }: { checked: boolean }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border ${
+        checked ? "border-karl-gold" : "border-white/30"
+      }`}
+    >
+      {checked ? (
+        <span className="h-1.5 w-1.5 rounded-full bg-karl-gold" />
+      ) : null}
+    </span>
+  );
+}
+
 function LayerPanelContent({
   mapStyle,
   fogLayerEnabled,
   onMapStyleChange,
   onFogLayerChange,
-  compact = false,
+  vertical = false,
 }: Pick<
   MapLayerControlsProps,
   "mapStyle" | "fogLayerEnabled" | "onMapStyleChange" | "onFogLayerChange"
-> & { compact?: boolean }) {
+> & { vertical?: boolean }) {
   return (
-    <div className={compact ? "space-y-3" : "mt-4 space-y-4"}>
+    <div className={vertical ? "space-y-3" : "mt-4 space-y-4"}>
       <section aria-label="Map style">
         <p className="text-[0.625rem] font-bold uppercase tracking-[0.14em] text-white/45">
           Map Style
         </p>
-        <div className={`mt-2 grid gap-2 ${compact ? "grid-cols-3" : "grid-cols-3"}`}>
-          {KARL_MAP_STYLE_OPTIONS.map((option) => {
-            const isSelected = mapStyle === option.id;
+        {vertical ? (
+          <div
+            role="radiogroup"
+            aria-label="Map style"
+            className="mt-2 space-y-1.5"
+          >
+            {KARL_MAP_STYLE_OPTIONS.map((option) => {
+              const isSelected = mapStyle === option.id;
 
-            return (
-              <button
-                key={option.id}
-                type="button"
-                aria-pressed={isSelected}
-                onClick={() => onMapStyleChange(option.id)}
-                className={`rounded-xl border px-2 py-2 text-xs font-semibold transition-colors motion-reduce:transition-none ${
-                  isSelected
-                    ? "border-karl-gold/35 bg-karl-gold/12 text-karl-gold"
-                    : "border-white/10 bg-karl-navy-glass/70 text-white/70 hover:border-white/20 hover:text-white"
-                }`}
-              >
-                {option.label}
-              </button>
-            );
-          })}
-        </div>
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={isSelected}
+                  onClick={() => onMapStyleChange(option.id)}
+                  className={`flex w-full items-center gap-2.5 rounded-xl border px-3 py-2.5 text-left text-sm font-medium transition-colors motion-reduce:transition-none ${
+                    isSelected
+                      ? "border-karl-gold/35 bg-karl-gold/10 text-karl-gold"
+                      : "border-white/10 bg-karl-navy-glass/70 text-white/75 hover:border-white/20 hover:text-white"
+                  }`}
+                >
+                  <RadioIndicator checked={isSelected} />
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="mt-2 grid grid-cols-3 gap-2">
+            {KARL_MAP_STYLE_OPTIONS.map((option) => {
+              const isSelected = mapStyle === option.id;
+
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  aria-pressed={isSelected}
+                  onClick={() => onMapStyleChange(option.id)}
+                  className={`rounded-xl border px-2 py-2 text-xs font-semibold transition-colors motion-reduce:transition-none ${
+                    isSelected
+                      ? "border-karl-gold/35 bg-karl-gold/12 text-karl-gold"
+                      : "border-white/10 bg-karl-navy-glass/70 text-white/70 hover:border-white/20 hover:text-white"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       <section aria-label="Overlays">
@@ -168,7 +213,7 @@ export function MapLayerControls({
               fogLayerEnabled={fogLayerEnabled}
               onMapStyleChange={onMapStyleChange}
               onFogLayerChange={onFogLayerChange}
-              compact
+              vertical
             />
           </div>
         )}

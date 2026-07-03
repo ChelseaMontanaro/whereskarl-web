@@ -56,19 +56,37 @@ function getMarkerIntensityClass(
   return `karl-map-marker--${intensity}`;
 }
 
+function matchesIntensityFilter(
+  location: MapMarkerLocation,
+  intensityFilter: FogIntensity | null | undefined,
+): boolean {
+  if (!intensityFilter) {
+    return true;
+  }
+
+  return getMarkerFogIntensity(location) === intensityFilter;
+}
+
 export function createMapMarkerElement(input: {
   location: MapMarkerLocation;
   isSelected: boolean;
   fogLayerEnabled: boolean;
+  intensityFilter?: FogIntensity | null;
   onSelect: (locationId: string) => void;
 }): HTMLButtonElement {
   const intensity = getMarkerIntensity(input.location, input.fogLayerEnabled);
+  const isFilteredOut = !matchesIntensityFilter(
+    input.location,
+    input.intensityFilter,
+  );
   const button = document.createElement("button");
   button.type = "button";
   button.className = [
     "karl-map-marker",
     getMarkerIntensityClass(input.location, input.fogLayerEnabled),
     input.isSelected ? "is-selected" : "",
+    isFilteredOut ? "is-filtered-out" : "",
+    input.intensityFilter && !isFilteredOut ? "is-intensity-match" : "",
   ]
     .filter(Boolean)
     .join(" ");

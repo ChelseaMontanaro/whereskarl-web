@@ -60,7 +60,7 @@ describe("MapLayerControls", () => {
     );
 
     expect(screen.getByText("Map Layers")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Satellite" })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "Satellite" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Collapse layers panel" })).toBeInTheDocument();
   });
 
@@ -77,11 +77,11 @@ describe("MapLayerControls", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Collapse layers panel" }));
 
-    expect(screen.queryByRole("button", { name: "Satellite" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("radio", { name: "Satellite" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Layers" })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Layers" }));
 
-    expect(screen.getByRole("button", { name: "Satellite" })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "Satellite" })).toBeInTheDocument();
   });
 });

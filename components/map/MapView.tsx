@@ -16,7 +16,10 @@ import { getCurrent, getLocations } from "@/lib/api/weather";
 import { WEATHER_STALE_TIME_MS } from "@/lib/constants/config";
 import { bestRightNowLocationItems } from "@/lib/home/weatherDisplay";
 import { useMinWidth } from "@/lib/hooks/useMinWidth";
-import { getLocationConditionLabel } from "@/lib/map/conditions";
+import {
+  getLocationConditionLabel,
+  type FogIntensity,
+} from "@/lib/map/conditions";
 import { findBayAreaProductRegion, isBayAreaProductRegionId } from "@/lib/map/config";
 import { resolveMapLocationFocus } from "@/lib/map/locationSelection";
 import type { MapMarkerLocation } from "@/lib/map/markers";
@@ -145,6 +148,9 @@ type MapViewModel = {
   handleSelectLocation: (locationId: string) => void;
   handleSelectRegion: (regionId: string) => void;
   handleClearSelectedLocation: () => void;
+  handleSelectIntensity: (intensity: FogIntensity) => void;
+  handleClearIntensityFilter: () => void;
+  intensityFilter: FogIntensity | null;
   preserveViewport: boolean;
   statusSentence: string;
 };
@@ -156,6 +162,9 @@ function useMapViewState(): MapViewModel {
   const [mapStyle, setMapStyle] = useState<KarlMapStyleId>("standard");
   const [fogLayerEnabled, setFogLayerEnabled] = useState(true);
   const [preserveViewport, setPreserveViewport] = useState(false);
+  const [intensityFilter, setIntensityFilter] = useState<FogIntensity | null>(
+    null,
+  );
 
   const locationsQuery = useQuery({
     queryKey: ["locations"],
@@ -220,6 +229,14 @@ function useMapViewState(): MapViewModel {
     router.replace("/map", { scroll: false });
   }, [router]);
 
+  const handleSelectIntensity = useCallback((intensity: FogIntensity) => {
+    setIntensityFilter((current) => (current === intensity ? null : intensity));
+  }, []);
+
+  const handleClearIntensityFilter = useCallback(() => {
+    setIntensityFilter(null);
+  }, []);
+
   const handleSelectRegion = useCallback(
     (regionId: string) => {
       setPreserveViewport(false);
@@ -259,6 +276,9 @@ function useMapViewState(): MapViewModel {
     handleSelectLocation,
     handleSelectRegion,
     handleClearSelectedLocation,
+    handleSelectIntensity,
+    handleClearIntensityFilter,
+    intensityFilter,
     preserveViewport,
     statusSentence,
   };
@@ -355,7 +375,11 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
     markerLocations,
     bestRightNowItems,
     handleSelectLocation,
+    handleSelectRegion,
     handleClearSelectedLocation,
+    handleSelectIntensity,
+    handleClearIntensityFilter,
+    intensityFilter,
     preserveViewport,
     statusSentence,
   } = state;
@@ -374,6 +398,7 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
         isLoading={locationsQuery.isLoading}
         layout="desktop"
         preserveViewport={preserveViewport}
+        intensityFilter={intensityFilter}
       />
 
       <div className="pointer-events-none absolute inset-0 z-20">
@@ -381,8 +406,17 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
           <MapConditionsPanel
             statusSentence={statusSentence}
             isLoading={currentQuery.isLoading && !currentQuery.data}
+            selectedRegionId={
+              selectedLocation ? null : mapQuery.activeRegionId
+            }
+            onSelectRegion={handleSelectRegion}
           />
-          <MapFogLegend layout="desktop-stack" />
+          <MapFogLegend
+            layout="desktop-stack"
+            activeIntensity={intensityFilter}
+            onSelectIntensity={handleSelectIntensity}
+            onClearIntensity={handleClearIntensityFilter}
+          />
           <MapQueryWarnings
             unknownLocationId={unknownLocationId}
             unknownRegionId={mapQuery.unknownRegionId}
@@ -390,24 +424,22 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
           />
         </div>
 
-        <div className="absolute inset-x-0 bottom-6 flex flex-col items-center gap-3 px-6">
-          <div className="pointer-events-auto flex w-full max-w-5xl items-end justify-start">
-            <MapBestRightNowTray
-              items={bestRightNowItems}
-              onSelectLocation={handleSelectLocation}
-              isLoading={locationsQuery.isLoading}
+        <div className="pointer-events-auto absolute bottom-6 left-6 max-w-xl">
+          <MapBestRightNowTray
+            items={bestRightNowItems}
+            onSelectLocation={handleSelectLocation}
+            isLoading={locationsQuery.isLoading}
+          />
+        </div>
+
+        {selectedLocation ? (
+          <div className="pointer-events-auto absolute bottom-6 right-6">
+            <MapSelectedLocationCard
+              location={selectedLocation}
+              onClose={handleClearSelectedLocation}
             />
           </div>
-
-          {selectedLocation ? (
-            <div className="pointer-events-auto flex w-full justify-center px-4">
-              <MapSelectedLocationCard
-                location={selectedLocation}
-                onClose={handleClearSelectedLocation}
-              />
-            </div>
-          ) : null}
-        </div>
+        ) : null}
       </div>
 
       <p className="pointer-events-none absolute bottom-2 right-4 z-20 text-[0.6rem] text-white/25">

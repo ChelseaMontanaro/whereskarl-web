@@ -14,6 +14,7 @@ import {
   createMapMarkerElement,
   type MapMarkerLocation,
 } from "@/lib/map/markers";
+import type { FogIntensity } from "@/lib/map/conditions";
 import { resolveKarlMapStyle, type KarlMapStyleId } from "@/lib/map/styles";
 import {
   fitDefaultBayAreaViewport,
@@ -33,6 +34,7 @@ type BayAreaMapProps = {
   isLoading?: boolean;
   layout?: "mobile" | "desktop";
   preserveViewport?: boolean;
+  intensityFilter?: FogIntensity | null;
 };
 
 export function BayAreaMap({
@@ -47,6 +49,7 @@ export function BayAreaMap({
   isLoading = false,
   layout = "mobile",
   preserveViewport = false,
+  intensityFilter = null,
 }: BayAreaMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<import("maplibre-gl").Map | null>(null);
@@ -178,6 +181,7 @@ export function BayAreaMap({
           location,
           isSelected: location.id === selectedLocationId,
           fogLayerEnabled,
+          intensityFilter,
           onSelect: (locationId) => onSelectRef.current(locationId),
         });
 
@@ -199,7 +203,7 @@ export function BayAreaMap({
       markers.forEach((marker) => marker.remove());
       markers.clear();
     };
-  }, [fogLayerEnabled, locations, mapReady, selectedLocationId]);
+  }, [fogLayerEnabled, intensityFilter, locations, mapReady, selectedLocationId]);
 
   useEffect(() => {
     const map = mapRef.current;

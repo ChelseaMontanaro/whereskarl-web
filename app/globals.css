@@ -78,9 +78,24 @@ body {
   filter: drop-shadow(0 1px 4px rgb(0 0 0 / 0.4));
 }
 
+.karl-map-marker.is-filtered-out {
+  opacity: 0.24;
+  transform: scale(0.9);
+  pointer-events: none;
+}
+
+.karl-map-marker.is-intensity-match {
+  transform: scale(1.04);
+}
+
 .karl-map-marker.is-selected {
   transform: scale(1.08);
   box-shadow: 0 0 0 2px rgb(242 163 38 / 0.95), 0 0 0 6px rgb(242 163 38 / 0.22);
+}
+
+.karl-map-marker.is-selected.is-filtered-out {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .karl-map-marker:focus-visible {
