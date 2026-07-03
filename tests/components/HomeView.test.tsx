@@ -79,6 +79,12 @@ describe("HomeView", () => {
     expect(
       screen.getAllByText("Karl is picking favorites across the Bay").length,
     ).toBeGreaterThan(0);
+    expect(
+      screen.getAllByText(
+        "Tiburon has the clearest conditions nearby right now.",
+      ).length,
+    ).toBeGreaterThan(0);
+    expect(screen.queryByText(/Berkeley should brighten/i)).not.toBeInTheDocument();
     expect(screen.getAllByText("Tiburon").length).toBeGreaterThan(0);
     expect(screen.getAllByText("BEST CLEAR SKIES").length).toBeGreaterThan(0);
     expect(

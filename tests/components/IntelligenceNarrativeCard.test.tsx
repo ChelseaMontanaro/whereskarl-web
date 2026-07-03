@@ -39,6 +39,30 @@ describe("IntelligenceNarrativeCard", () => {
     ).toHaveAttribute("href", "/map?location=mill-valley");
   });
 
+  it("renders resolved Karl's Read copy when presentation is provided", () => {
+    const intelligence = readFixture<KarlIntelligenceResponse>(
+      "karl-intelligence-mill-valley.json",
+    );
+
+    render(
+      <IntelligenceNarrativeCard
+        intelligence={intelligence}
+        karlReadPresentation={{
+          headline: intelligence.narrative.headline,
+          summary:
+            "Karl is shifting unevenly, with some corridors clearing while others stay gray. Tiburon has the clearest conditions nearby right now.",
+        }}
+        isLoading={false}
+        layout="desktop"
+      />,
+    );
+
+    expect(
+      screen.getByText(/Tiburon has the clearest conditions nearby right now\./i),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Berkeley should brighten/i)).not.toBeInTheDocument();
+  });
+
   it("omits the chevron when Karl's Read has no map destination", () => {
     const intelligence = readFixture<KarlIntelligenceResponse>(
       "karl-intelligence-mill-valley.json",

@@ -7,10 +7,11 @@ import {
   heroConfidenceText,
   heroSubheadline,
   movementPhrase,
+  resolveKarlReadPresentation,
   sunshineResultTitle,
 } from "@/lib/home/weatherDisplay";
 import { karlIntelligenceResponseSchema } from "@/lib/schemas/intelligence";
-import type { CurrentResponse } from "@/lib/schemas/weather";
+import type { BestSunshineResponse, CurrentResponse } from "@/lib/schemas/weather";
 
 const FIXTURES_DIR = join(process.cwd(), "tests/fixtures");
 
@@ -207,5 +208,71 @@ describe("sunshineResultTitle", () => {
     expect(sunshineResultTitle(82, true)).toBe("CLEAREST NIGHT");
     expect(sunshineResultTitle(30, false)).toBe("BEST BREAK IN THE FOG");
     expect(sunshineResultTitle(10, false)).toBe("NO CLEAR SKIES NEARBY");
+  });
+});
+
+describe("resolveKarlReadPresentation", () => {
+  const intelligence = karlIntelligenceResponseSchema.parse(
+    JSON.parse(
+      readFileSync(
+        join(FIXTURES_DIR, "karl-intelligence-mill-valley.json"),
+        "utf8",
+      ),
+    ),
+  );
+  const bestSunshine = JSON.parse(
+    readFileSync(join(FIXTURES_DIR, "best-sunshine.json"), "utf8"),
+  ) as BestSunshineResponse;
+  const locations = JSON.parse(
+    readFileSync(join(FIXTURES_DIR, "locations.json"), "utf8"),
+  ).locations;
+
+  it("replaces a lower-ranked clearing location with the current clearest spot", () => {
+    const presentation = resolveKarlReadPresentation({
+      intelligence,
+      bestSunshine,
+      locations,
+      bestRightNow: bestRightNowLocationItems(locations, bestSunshine.locationID),
+    });
+
+    expect(presentation?.summary).toContain(
+      "Karl is shifting unevenly, with some corridors clearing while others stay gray.",
+    );
+    expect(presentation?.summary).toContain(
+      "Tiburon has the clearest conditions nearby right now.",
+    );
+    expect(presentation?.summary).not.toContain("Berkeley should brighten");
+  });
+
+  it("keeps the backend narrative when the clearing location matches the clearest spot", () => {
+    const alignedIntelligence = {
+      ...intelligence,
+      narrative: {
+        ...intelligence.narrative,
+        summary:
+          "Karl is shifting unevenly, with some corridors clearing while others stay gray. Tiburon has the clearest conditions nearby right now.",
+        clearingNarratives: intelligence.narrative.clearingNarratives.map(
+          (entry) =>
+            entry.locationId === "berkeley"
+              ? {
+                  ...entry,
+                  locationId: "tiburon",
+                  locationName: "Tiburon",
+                  clearingStatus: "clear-now",
+                  narrative:
+                    "Tiburon has the clearest conditions nearby right now.",
+                }
+              : entry,
+        ),
+      },
+    };
+
+    const presentation = resolveKarlReadPresentation({
+      intelligence: alignedIntelligence,
+      bestSunshine,
+      locations,
+    });
+
+    expect(presentation?.summary).toBe(alignedIntelligence.narrative.summary);
   });
 });

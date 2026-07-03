@@ -13,16 +13,19 @@ import {
 } from "@/components/home/desktopGlass";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { buildMapHref } from "@/lib/map/routing";
+import type { KarlReadPresentation } from "@/lib/home/weatherDisplay";
 import type { KarlIntelligenceResponse } from "@/lib/schemas/intelligence";
 
 type IntelligenceNarrativeCardProps = {
   intelligence: KarlIntelligenceResponse | null;
+  karlReadPresentation?: KarlReadPresentation | null;
   isLoading: boolean;
   layout?: "both" | "mobile" | "desktop";
 };
 
 function MobileIntelligenceNarrativeCard({
   intelligence,
+  karlReadPresentation,
   isLoading,
 }: Omit<IntelligenceNarrativeCardProps, "layout">) {
   if (isLoading) {
@@ -44,15 +47,19 @@ function MobileIntelligenceNarrativeCard({
     intelligence.narrative.confidenceLabel.toLowerCase() === "unavailable"
       ? null
       : intelligence.narrative.confidenceLabel;
+  const headline =
+    karlReadPresentation?.headline ?? intelligence.narrative.headline;
+  const summary =
+    karlReadPresentation?.summary ?? intelligence.narrative.summary;
 
   return (
     <GlassCard className="border-white/8 bg-karl-navy-glass/55 px-4 py-4 backdrop-blur-md">
       <CardLabel>Karl&apos;s Read</CardLabel>
       <h2 className="mt-3 text-lg font-semibold leading-snug text-white">
-        {intelligence.narrative.headline}
+        {headline}
       </h2>
       <p className="mt-2 text-sm leading-relaxed text-white/70">
-        {intelligence.narrative.summary}
+        {summary}
       </p>
       {confidenceLabel ? (
         <p className="mt-3 text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-white/40">
@@ -65,6 +72,7 @@ function MobileIntelligenceNarrativeCard({
 
 function DesktopIntelligenceNarrativeCard({
   intelligence,
+  karlReadPresentation,
   isLoading,
 }: Omit<IntelligenceNarrativeCardProps, "layout">) {
   if (isLoading) {
@@ -91,6 +99,10 @@ function DesktopIntelligenceNarrativeCard({
     intelligence.narrative.confidenceLabel.toLowerCase() === "unavailable"
       ? null
       : intelligence.narrative.confidenceLabel;
+  const headline =
+    karlReadPresentation?.headline ?? intelligence.narrative.headline;
+  const summary =
+    karlReadPresentation?.summary ?? intelligence.narrative.summary;
   const focusLocationId = intelligence.heroImagery?.focusLocationId ?? null;
   const mapHref = focusLocationId ? buildMapHref(focusLocationId) : null;
   const mapLabel = intelligence.heroImagery?.sceneName?.trim()
@@ -107,10 +119,10 @@ function DesktopIntelligenceNarrativeCard({
       <div className="min-w-0 flex-1">
         <CardLabel>Karl&apos;s Read</CardLabel>
         <h2 className="mt-1.5 text-lg font-semibold leading-snug text-white lg:text-xl">
-          {intelligence.narrative.headline}
+          {headline}
         </h2>
         <p className="mt-1.5 text-sm leading-relaxed text-white/72">
-          {intelligence.narrative.summary}
+          {summary}
         </p>
         {confidenceLabel ? (
           <p className="mt-2 text-xs font-medium text-white/48">
@@ -144,6 +156,7 @@ function DesktopIntelligenceNarrativeCard({
 
 export function IntelligenceNarrativeCard({
   intelligence,
+  karlReadPresentation,
   isLoading,
   layout = "both",
 }: IntelligenceNarrativeCardProps) {
@@ -151,6 +164,7 @@ export function IntelligenceNarrativeCard({
     return (
       <MobileIntelligenceNarrativeCard
         intelligence={intelligence}
+        karlReadPresentation={karlReadPresentation}
         isLoading={isLoading}
       />
     );
@@ -160,6 +174,7 @@ export function IntelligenceNarrativeCard({
     return (
       <DesktopIntelligenceNarrativeCard
         intelligence={intelligence}
+        karlReadPresentation={karlReadPresentation}
         isLoading={isLoading}
       />
     );
@@ -170,12 +185,14 @@ export function IntelligenceNarrativeCard({
       <div className="lg:hidden">
         <MobileIntelligenceNarrativeCard
           intelligence={intelligence}
+          karlReadPresentation={karlReadPresentation}
           isLoading={isLoading}
         />
       </div>
       <div className="hidden lg:block">
         <DesktopIntelligenceNarrativeCard
           intelligence={intelligence}
+          karlReadPresentation={karlReadPresentation}
           isLoading={isLoading}
         />
       </div>

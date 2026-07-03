@@ -33,6 +33,7 @@ import {
   heroSubheadline,
   isNighttime,
   nextHourOutlookSummary,
+  resolveKarlReadPresentation,
 } from "@/lib/home/weatherDisplay";
 import {
   lastKnownIntelligenceForHydration,
@@ -136,6 +137,21 @@ export function HomeView() {
         primaryClearestLocationId,
       ),
     [locationsQuery.data?.locations, primaryClearestLocationId],
+  );
+  const karlReadPresentation = useMemo(
+    () =>
+      resolveKarlReadPresentation({
+        intelligence,
+        bestSunshine,
+        locations: locationsQuery.data?.locations,
+        bestRightNow: desktopBestRightNow,
+      }),
+    [
+      intelligence,
+      bestSunshine,
+      locationsQuery.data?.locations,
+      desktopBestRightNow,
+    ],
   );
   const nextHourSummary = nextHourOutlookSummary(karlLocation?.prediction);
   const nextHourConfidence =
@@ -262,6 +278,7 @@ export function HomeView() {
 
           <IntelligenceNarrativeCard
             intelligence={intelligence}
+            karlReadPresentation={karlReadPresentation}
             isLoading={intelligenceQuery.isLoading && !intelligence}
             layout="mobile"
           />
@@ -278,6 +295,7 @@ export function HomeView() {
         <div className="mt-5 hidden flex-col gap-5 lg:flex">
           <IntelligenceNarrativeCard
             intelligence={intelligence}
+            karlReadPresentation={karlReadPresentation}
             isLoading={intelligenceQuery.isLoading && !intelligence}
             layout="desktop"
           />

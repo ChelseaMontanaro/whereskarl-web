@@ -14,6 +14,14 @@ export type BestRightNowItem = {
   rank: number | null;
 };
 
+export type KarlReadPresentation = {
+  headline: string;
+  summary: string;
+};
+
+export const KARL_READ_GENERIC_CLEARING =
+  "Some inland corridors are clearing while Karl lingers closer to the coast.";
+
 function normalizeLocationId(locationId: string | null | undefined): string | null {
   const normalized = locationId?.trim().toLowerCase() ?? "";
   return normalized.length > 0 ? normalized : null;
@@ -334,6 +342,172 @@ export function bestRightNowItems(
   }
 
   return [];
+}
+
+function isPositiveClearingStatus(clearingStatus: string): boolean {
+  return clearingStatus === "clear-now" || clearingStatus === "clearing-soon";
+}
+
+function locationScoreFromWeather(
+  locationId: string,
+  locations: LocationWeather[] | undefined,
+): number | null {
+  const normalizedId = normalizeLocationId(locationId);
+  if (!normalizedId || !locations?.length) {
+    return null;
+  }
+
+  const match = locations.find(
+    (location) => normalizeLocationId(location.id) === normalizedId,
+  );
+
+  return match?.sunshineScore ?? null;
+}
+
+function clearestSpotNarrativeLine(
+  bestSunshine: BestSunshineResponse,
+): string {
+  return (
+    trimmedNonEmpty(bestSunshine.recommendationReason) ??
+    trimmedNonEmpty(bestSunshine.reason) ??
+    `${bestSunshine.locationName} has the clearest conditions nearby right now.`
+  );
+}
+
+function stripClearingNarrativeFromSummary(
+  summary: string,
+  clearingNarrative: string,
+): string {
+  const trimmedNarrative = clearingNarrative.trim();
+  if (!trimmedNarrative) {
+    return summary.trim();
+  }
+
+  if (summary.includes(trimmedNarrative)) {
+    return summary.replace(trimmedNarrative, "").replace(/\s+/g, " ").trim();
+  }
+
+  return summary.trim();
+}
+
+function findSummaryClearingNarrative(intelligence: KarlIntelligenceResponse) {
+  const summary = intelligence.narrative.summary;
+
+  return intelligence.narrative.clearingNarratives.find((entry) => {
+    const narrative = entry.narrative.trim();
+    return narrative.length > 0 && summary.includes(narrative);
+  });
+}
+
+function shouldReplaceClearingLocation(input: {
+  mentionedLocationId: string;
+  clearestLocationId: string;
+  clearestScore: number;
+  locations: LocationWeather[] | undefined;
+  bestRightNow: BestRightNowItem[] | undefined;
+}): boolean {
+  if (
+    normalizeLocationId(input.mentionedLocationId) ===
+    normalizeLocationId(input.clearestLocationId)
+  ) {
+    return false;
+  }
+
+  const mentionedScore = locationScoreFromWeather(
+    input.mentionedLocationId,
+    input.locations,
+  );
+
+  if (mentionedScore != null && mentionedScore >= input.clearestScore) {
+    return false;
+  }
+
+  const clearestId = normalizeLocationId(input.clearestLocationId);
+  const rankedItems = input.bestRightNow ?? [];
+  const mentionedRank = rankedItems.find(
+    (item) => normalizeLocationId(item.locationId) === normalizeLocationId(input.mentionedLocationId),
+  );
+  const clearestRank = rankedItems.find(
+    (item) => normalizeLocationId(item.locationId) === clearestId,
+  );
+
+  if (
+    mentionedRank?.score != null &&
+    clearestRank?.score != null &&
+    mentionedRank.score >= clearestRank.score
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+export function resolveKarlReadPresentation(input: {
+  intelligence: KarlIntelligenceResponse | null | undefined;
+  bestSunshine: BestSunshineResponse | null | undefined;
+  locations?: LocationWeather[];
+  bestRightNow?: BestRightNowItem[];
+}): KarlReadPresentation | null {
+  if (!input.intelligence) {
+    return null;
+  }
+
+  const { narrative } = input.intelligence;
+  const headline = narrative.headline;
+  const matchedClearing = findSummaryClearingNarrative(input.intelligence);
+  const clearestLocationId = normalizeLocationId(input.bestSunshine?.locationID);
+
+  if (!matchedClearing) {
+    return {
+      headline,
+      summary: narrative.summary,
+    };
+  }
+
+  const baseSummary = stripClearingNarrativeFromSummary(
+    narrative.summary,
+    matchedClearing.narrative,
+  );
+
+  if (!isPositiveClearingStatus(matchedClearing.clearingStatus)) {
+    const summary =
+      baseSummary.length > 0
+        ? `${baseSummary} ${KARL_READ_GENERIC_CLEARING}`.trim()
+        : KARL_READ_GENERIC_CLEARING;
+
+    return { headline, summary };
+  }
+
+  if (!clearestLocationId || !input.bestSunshine) {
+    const summary =
+      baseSummary.length > 0
+        ? `${baseSummary} ${KARL_READ_GENERIC_CLEARING}`.trim()
+        : narrative.summary;
+
+    return { headline, summary };
+  }
+
+  if (
+    !shouldReplaceClearingLocation({
+      mentionedLocationId: matchedClearing.locationId,
+      clearestLocationId,
+      clearestScore: input.bestSunshine.sunshineScore,
+      locations: input.locations,
+      bestRightNow: input.bestRightNow,
+    })
+  ) {
+    return {
+      headline,
+      summary: narrative.summary,
+    };
+  }
+
+  const summary = `${baseSummary} ${clearestSpotNarrativeLine(input.bestSunshine)}`.trim();
+
+  return {
+    headline,
+    summary,
+  };
 }
 
 export function sunshineResultTitle(
