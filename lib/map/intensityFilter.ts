@@ -1,3 +1,4 @@
+import type { MapBounds } from "@/lib/map/config";
 import {
   getFogIntensity,
   getFogIntensityLabel,
@@ -5,6 +6,8 @@ import {
   type FogIntensity,
 } from "@/lib/map/conditions";
 import type { BestRightNowItem } from "@/lib/home/weatherDisplay";
+import type { MapMarkerLocation } from "@/lib/map/markers";
+import { getMarkerFogIntensity } from "@/lib/map/markers";
 import type { LocationWeather } from "@/lib/schemas/weather";
 
 export function locationMatchesIntensity(
@@ -51,4 +54,34 @@ export function toggleIntensityFilter(
   next: FogIntensity,
 ): FogIntensity | null {
   return current === next ? null : next;
+}
+
+export function boundsForIntensityLocations(
+  locations: MapMarkerLocation[],
+  intensity: FogIntensity,
+): MapBounds | null {
+  const matching = locations.filter(
+    (location) => getMarkerFogIntensity(location) === intensity,
+  );
+
+  if (matching.length === 0) {
+    return null;
+  }
+
+  let minLongitude = matching[0].longitude;
+  let minLatitude = matching[0].latitude;
+  let maxLongitude = matching[0].longitude;
+  let maxLatitude = matching[0].latitude;
+
+  for (const location of matching.slice(1)) {
+    minLongitude = Math.min(minLongitude, location.longitude);
+    minLatitude = Math.min(minLatitude, location.latitude);
+    maxLongitude = Math.max(maxLongitude, location.longitude);
+    maxLatitude = Math.max(maxLatitude, location.latitude);
+  }
+
+  return [
+    [minLongitude, minLatitude],
+    [maxLongitude, maxLatitude],
+  ];
 }

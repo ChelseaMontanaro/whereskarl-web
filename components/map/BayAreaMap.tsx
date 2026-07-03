@@ -10,6 +10,7 @@ import {
   findBayAreaProductRegion,
 } from "@/lib/map/config";
 import { syncFogOverlayLayer } from "@/lib/map/fogOverlays";
+import { boundsForIntensityLocations } from "@/lib/map/intensityFilter";
 import {
   createMapMarkerElement,
   type MapMarkerLocation,
@@ -233,6 +234,14 @@ export function BayAreaMap({
       return;
     }
 
+    if (intensityFilter) {
+      const bounds = boundsForIntensityLocations(locations, intensityFilter);
+      if (bounds) {
+        fitMapToBounds(map, bounds, { padding: 80, maxZoom: 10.4 });
+        return;
+      }
+    }
+
     const region = findBayAreaProductRegion(selectedRegionId);
     if (region) {
       fitMapToBounds(map, region.bounds);
@@ -241,6 +250,7 @@ export function BayAreaMap({
 
     fitDefaultBayAreaViewport(map);
   }, [
+    intensityFilter,
     locations,
     mapReady,
     selectedLocationId,

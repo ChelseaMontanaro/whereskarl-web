@@ -20,19 +20,21 @@ const ESRI_SATELLITE_TILES = [
   "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
 ];
 
-/** Dark-theme label tiles with softer typography than Voyager-only labels. */
+/** Dark-theme label tiles for cinematic satellite/hybrid basemaps. */
 const CARTO_DARK_LABEL_TILES = [
   "https://basemaps.cartocdn.com/rastertiles/dark_only_labels/{z}/{x}/{y}.png",
 ];
 
-const satelliteRasterPaint = {
-  "raster-brightness-min": 0.04,
-  "raster-contrast": 0.22,
-  "raster-saturation": 0.08,
+/** Pull imagery darker with stronger land/ocean contrast for the desktop map. */
+const cinematicSatellitePaint = {
+  "raster-brightness-min": 0,
+  "raster-brightness-max": 0.68,
+  "raster-contrast": 0.32,
+  "raster-saturation": -0.08,
 } as const;
 
-const labelRasterPaint = {
-  "raster-opacity": 0.88,
+const cinematicLabelPaint = {
+  "raster-opacity": 0.8,
 } as const;
 
 const satelliteStyle = {
@@ -57,13 +59,13 @@ const satelliteStyle = {
       id: "karl-satellite",
       type: "raster",
       source: "karl-satellite",
-      paint: satelliteRasterPaint,
+      paint: cinematicSatellitePaint,
     },
     {
       id: "karl-labels",
       type: "raster",
       source: "karl-labels",
-      paint: labelRasterPaint,
+      paint: cinematicLabelPaint,
     },
   ],
 } satisfies StyleSpecification;
@@ -90,13 +92,13 @@ const hybridStyle = {
       id: "karl-satellite",
       type: "raster",
       source: "karl-satellite",
-      paint: satelliteRasterPaint,
+      paint: cinematicSatellitePaint,
     },
     {
       id: "karl-labels",
       type: "raster",
       source: "karl-labels",
-      paint: labelRasterPaint,
+      paint: cinematicLabelPaint,
     },
   ],
 } satisfies StyleSpecification;

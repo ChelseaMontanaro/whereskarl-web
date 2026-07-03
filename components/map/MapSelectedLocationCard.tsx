@@ -68,7 +68,7 @@ export function MapSelectedLocationCard({
 
   return (
     <article
-      className={`${desktopGlassCardClass} relative w-[min(100%,42rem)] px-4 py-3.5`}
+      className={`${desktopGlassCardClass} relative w-full px-4 py-3.5`}
       aria-label={`Selected location: ${location.name}`}
     >
       <button

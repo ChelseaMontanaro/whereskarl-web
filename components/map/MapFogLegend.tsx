@@ -53,9 +53,9 @@ export function MapFogLegend({
               type="button"
               onClick={onClearIntensity}
               aria-label="Clear intensity filter"
-              className="text-[0.58rem] font-semibold text-karl-gold/85 transition-colors hover:text-karl-gold motion-reduce:transition-none"
+              className="text-[0.56rem] font-medium text-white/35 underline-offset-2 transition-colors hover:text-white/55 hover:underline motion-reduce:transition-none"
             >
-              Reset
+              reset
             </button>
           ) : null}
         </div>

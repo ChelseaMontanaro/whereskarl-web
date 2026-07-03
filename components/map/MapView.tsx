@@ -22,11 +22,7 @@ import {
   type FogIntensity,
 } from "@/lib/map/conditions";
 import { findBayAreaProductRegion, isBayAreaProductRegionId } from "@/lib/map/config";
-import {
-  intensityFilterTrayItems,
-  intensityFilterTrayTitle,
-  toggleIntensityFilter,
-} from "@/lib/map/intensityFilter";
+import { toggleIntensityFilter } from "@/lib/map/intensityFilter";
 import { resolveMapLocationFocus } from "@/lib/map/locationSelection";
 import type { MapMarkerLocation } from "@/lib/map/markers";
 import { getProductRegionNameForLocation } from "@/lib/map/regions";
@@ -159,8 +155,6 @@ type MapViewModel = {
   activeRegion: ReturnType<typeof findBayAreaProductRegion>;
   markerLocations: MapMarkerLocation[];
   bestRightNowItems: ReturnType<typeof bestRightNowLocationItems>;
-  bottomTrayItems: ReturnType<typeof bestRightNowLocationItems>;
-  bottomTrayTitle: string;
   suppressViewportUpdateRef: MutableRefObject<boolean>;
   handleSelectLocation: (locationId: string) => void;
   handleSelectRegion: (regionId: string) => void;
@@ -232,23 +226,6 @@ function useMapViewState(): MapViewModel {
     [locations, selectedLocation?.id],
   );
 
-  const bottomTrayItems = useMemo(() => {
-    if (intensityFilter) {
-      return intensityFilterTrayItems(
-        locations,
-        intensityFilter,
-        selectedLocation?.id ?? null,
-        4,
-      );
-    }
-
-    return bestRightNow;
-  }, [bestRightNow, intensityFilter, locations, selectedLocation?.id]);
-
-  const bottomTrayTitle = intensityFilter
-    ? intensityFilterTrayTitle(intensityFilter)
-    : "Best Right Now";
-
   const handleSelectLocation = useCallback(
     (locationId: string) => {
       suppressViewportUpdateRef.current = false;
@@ -306,8 +283,6 @@ function useMapViewState(): MapViewModel {
     activeRegion,
     markerLocations,
     bestRightNowItems: bestRightNow,
-    bottomTrayItems,
-    bottomTrayTitle,
     suppressViewportUpdateRef,
     handleSelectLocation,
     handleSelectRegion,
@@ -408,8 +383,7 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
     selectedLocation,
     unknownLocationId,
     markerLocations,
-    bottomTrayItems,
-    bottomTrayTitle,
+    bestRightNowItems,
     handleSelectLocation,
     handleSelectRegion,
     handleClearSelectedLocation,
@@ -460,23 +434,25 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
           />
         </div>
 
-        <div className="pointer-events-auto absolute bottom-6 left-6 max-w-xl">
-          <MapBestRightNowTray
-            items={bottomTrayItems}
-            title={bottomTrayTitle}
-            onSelectLocation={handleSelectLocation}
-            isLoading={locationsQuery.isLoading}
-          />
-        </div>
-
-        {selectedLocation ? (
-          <div className="pointer-events-auto absolute bottom-6 left-1/2 w-[min(100%,42rem)] -translate-x-1/2 px-6">
-            <MapSelectedLocationCard
-              location={selectedLocation}
-              onClose={handleClearSelectedLocation}
+        <div className="pointer-events-auto absolute inset-x-6 bottom-6 flex items-end justify-between gap-6">
+          <div className="max-w-xl shrink-0">
+            <MapBestRightNowTray
+              items={bestRightNowItems}
+              title="Best Right Now"
+              onSelectLocation={handleSelectLocation}
+              isLoading={locationsQuery.isLoading}
             />
           </div>
-        ) : null}
+
+          {selectedLocation ? (
+            <div className="w-[min(100%,38rem)] shrink-0">
+              <MapSelectedLocationCard
+                location={selectedLocation}
+                onClose={handleClearSelectedLocation}
+              />
+            </div>
+          ) : null}
+        </div>
       </div>
 
       <p className="pointer-events-none absolute bottom-2 right-4 z-20 text-[0.6rem] text-white/25">

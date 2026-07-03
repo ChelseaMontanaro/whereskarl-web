@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { FogIntensity } from "@/lib/map/conditions";
 import {
+  boundsForIntensityLocations,
   intensityFilterTrayItems,
   toggleIntensityFilter,
 } from "@/lib/map/intensityFilter";
@@ -40,6 +41,38 @@ const baseLocation = {
     predictionReason: "Prediction is unavailable while Karl is using fallback data.",
   },
 } satisfies Omit<LocationWeather, "id" | "name" | "fogScore">;
+
+describe("boundsForIntensityLocations", () => {
+  it("returns bounds that cover matching marker locations", () => {
+    const locations = [
+      {
+        id: "tiburon",
+        name: "Tiburon",
+        latitude: 37.8735,
+        longitude: -122.4566,
+        sunshineScore: 82,
+        fogScore: 82,
+        status: "Mostly Sunny",
+      },
+      {
+        id: "san-jose",
+        name: "San Jose",
+        latitude: 37.3382,
+        longitude: -121.8863,
+        sunshineScore: 90,
+        fogScore: 10,
+        status: "Clear",
+      },
+    ];
+
+    const bounds = boundsForIntensityLocations(locations, "clear");
+
+    expect(bounds).toEqual([
+      [-121.8863, 37.3382],
+      [-121.8863, 37.3382],
+    ]);
+  });
+});
 
 describe("intensityFilterTrayItems", () => {
   it("returns matching locations for the selected intensity", () => {
