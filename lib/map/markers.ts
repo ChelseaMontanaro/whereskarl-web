@@ -65,13 +65,60 @@ function shouldHideFilteredMarker(
   );
 }
 
+export function shouldShowFoggyFilterMarkerLabel(
+  layout: "mobile" | "desktop" | undefined,
+  intensityFilter: FogIntensity | null | undefined,
+  isFilteredOut: boolean,
+): boolean {
+  return (
+    layout === "desktop" &&
+    intensityFilter === "foggy" &&
+    !isFilteredOut
+  );
+}
+
+/** Keeps the icon centered on the coordinate while the label sits below. */
+export const FOGGY_FILTER_MARKER_OFFSET: [number, number] = [0, -11];
+
+export function getMapMarkerPlacementOptions(showLocationLabel: boolean): {
+  anchor: "center";
+  offset?: [number, number];
+} {
+  if (!showLocationLabel) {
+    return { anchor: "center" };
+  }
+
+  return {
+    anchor: "center",
+    offset: FOGGY_FILTER_MARKER_OFFSET,
+  };
+}
+
+function wrapMarkerWithLocationLabel(
+  button: HTMLButtonElement,
+  locationName: string,
+): HTMLDivElement {
+  const root = document.createElement("div");
+  root.className = "karl-map-marker-root karl-map-marker-root--labeled";
+  root.dataset.locationId = button.dataset.locationId ?? "";
+
+  const label = document.createElement("span");
+  label.className = "karl-map-marker__label";
+  label.textContent = locationName;
+  label.setAttribute("aria-hidden", "true");
+
+  root.append(button, label);
+  return root;
+}
+
 export function createMapMarkerElement(input: {
   location: MapMarkerLocation;
   isSelected: boolean;
   fogLayerEnabled: boolean;
   intensityFilter?: FogIntensity | null;
+  layout?: "mobile" | "desktop";
   onSelect: (locationId: string) => void;
-}): HTMLButtonElement {
+}): HTMLElement {
   const intensity = getMarkerDisplayIntensity(input.location);
   const isFilteredOut = !matchesIntensityFilter(
     input.location,
@@ -105,6 +152,16 @@ export function createMapMarkerElement(input: {
     event.stopPropagation();
     input.onSelect(input.location.id);
   });
+
+  if (
+    shouldShowFoggyFilterMarkerLabel(
+      input.layout,
+      input.intensityFilter,
+      isFilteredOut,
+    )
+  ) {
+    return wrapMarkerWithLocationLabel(button, input.location.name);
+  }
 
   return button;
 }

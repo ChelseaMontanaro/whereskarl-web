@@ -13,6 +13,9 @@ import { syncFogOverlayLayer } from "@/lib/map/fogOverlays";
 import { boundsForIntensityLocations } from "@/lib/map/intensityFilter";
 import {
   createMapMarkerElement,
+  getMapMarkerPlacementOptions,
+  getMarkerFogIntensity,
+  shouldShowFoggyFilterMarkerLabel,
   type MapMarkerLocation,
 } from "@/lib/map/markers";
 import type { FogIntensity } from "@/lib/map/conditions";
@@ -179,15 +182,30 @@ export function BayAreaMap({
       markersRef.current.clear();
 
       for (const location of locations) {
+        const isFilteredOut =
+          intensityFilter !== null &&
+          intensityFilter !== undefined &&
+          getMarkerFogIntensity(location) !== intensityFilter;
+        const showLocationLabel = shouldShowFoggyFilterMarkerLabel(
+          layout,
+          intensityFilter,
+          isFilteredOut,
+        );
         const element = createMapMarkerElement({
           location,
           isSelected: location.id === selectedLocationId,
           fogLayerEnabled,
           intensityFilter,
+          layout,
           onSelect: (locationId) => onSelectRef.current(locationId),
         });
+        const placement = getMapMarkerPlacementOptions(showLocationLabel);
 
-        const marker = new maplibregl.Marker({ element, anchor: "center" })
+        const marker = new maplibregl.Marker({
+          element,
+          anchor: placement.anchor,
+          offset: placement.offset,
+        })
           .setLngLat([location.longitude, location.latitude])
           .addTo(mapRef.current);
 
@@ -205,7 +223,7 @@ export function BayAreaMap({
       markers.forEach((marker) => marker.remove());
       markers.clear();
     };
-  }, [fogLayerEnabled, intensityFilter, locations, mapReady, selectedLocationId]);
+  }, [fogLayerEnabled, intensityFilter, layout, locations, mapReady, selectedLocationId]);
 
   useEffect(() => {
     const map = mapRef.current;

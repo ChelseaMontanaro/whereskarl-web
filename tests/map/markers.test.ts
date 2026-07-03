@@ -5,6 +5,8 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
   createMapMarkerElement,
+  getMapMarkerPlacementOptions,
+  shouldShowFoggyFilterMarkerLabel,
   type MapMarkerLocation,
 } from "@/lib/map/markers";
 import { buildMapHref } from "@/lib/map/routing";
@@ -281,5 +283,105 @@ describe("createMapMarkerElement", () => {
     expect(marker.innerHTML).toContain('stroke="#93B8D8"');
     expect(marker.innerHTML).not.toContain("/brand/wheres-karl-logo@2x.png");
     expect(marker.innerHTML).not.toContain('circle cx="12" cy="12"');
+    expect(marker.querySelector(".karl-map-marker__label")).toBeNull();
+  });
+
+  it("shows readable location labels below foggy markers on desktop", () => {
+    const marker = createMapMarkerElement({
+      location: {
+        id: "sausalito",
+        name: "Sausalito",
+        latitude: 37.8591,
+        longitude: -122.4853,
+        fogScore: 60,
+        sunshineScore: 40,
+        status: "Foggy",
+      },
+      isSelected: false,
+      fogLayerEnabled: true,
+      intensityFilter: "foggy",
+      layout: "desktop",
+      onSelect: vi.fn(),
+    });
+
+    expect(marker.className).toContain("karl-map-marker-root--labeled");
+    expect(marker.querySelector(".karl-map-marker__label")?.textContent).toBe(
+      "Sausalito",
+    );
+    expect(marker.querySelector(".karl-map-marker")?.className).toContain(
+      "karl-map-marker--foggy",
+    );
+  });
+
+  it("does not add foggy filter labels on mobile", () => {
+    const marker = createMapMarkerElement({
+      location: {
+        id: "sausalito",
+        name: "Sausalito",
+        latitude: 37.8591,
+        longitude: -122.4853,
+        fogScore: 60,
+        sunshineScore: 40,
+        status: "Foggy",
+      },
+      isSelected: false,
+      fogLayerEnabled: true,
+      intensityFilter: "foggy",
+      layout: "mobile",
+      onSelect: vi.fn(),
+    });
+
+    expect(marker.className).toContain("karl-map-marker--foggy");
+    expect(marker.querySelector(".karl-map-marker__label")).toBeNull();
+  });
+
+  it("preserves selected halo styling on labeled foggy desktop markers", () => {
+    const marker = createMapMarkerElement({
+      location: {
+        id: "sausalito",
+        name: "Sausalito",
+        latitude: 37.8591,
+        longitude: -122.4853,
+        fogScore: 60,
+        sunshineScore: 40,
+        status: "Foggy",
+      },
+      isSelected: true,
+      fogLayerEnabled: true,
+      intensityFilter: "foggy",
+      layout: "desktop",
+      onSelect: vi.fn(),
+    });
+
+    expect(marker.querySelector(".karl-map-marker")?.className).toContain(
+      "is-selected",
+    );
+  });
+});
+
+describe("shouldShowFoggyFilterMarkerLabel", () => {
+  it("only enables labels for visible foggy markers on desktop", () => {
+    expect(
+      shouldShowFoggyFilterMarkerLabel("desktop", "foggy", false),
+    ).toBe(true);
+    expect(
+      shouldShowFoggyFilterMarkerLabel("mobile", "foggy", false),
+    ).toBe(false);
+    expect(
+      shouldShowFoggyFilterMarkerLabel("desktop", "lightFog", false),
+    ).toBe(false);
+    expect(
+      shouldShowFoggyFilterMarkerLabel("desktop", "foggy", true),
+    ).toBe(false);
+  });
+});
+
+describe("getMapMarkerPlacementOptions", () => {
+  it("offsets labeled foggy markers so icons sit above names", () => {
+    expect(getMapMarkerPlacementOptions(false)).toEqual({ anchor: "center" });
+    expect(getMapMarkerPlacementOptions(true)).toEqual({
+      anchor: "center",
+      offset: [0, -11],
+    });
   });
 });
