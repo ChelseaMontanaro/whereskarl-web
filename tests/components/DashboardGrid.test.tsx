@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 
-import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   FogCoverageIcon,
@@ -9,6 +9,67 @@ import {
   SunshineIcon,
 } from "@/components/home/ConditionIcons";
 import { DashboardGrid } from "@/components/home/DashboardGrid";
+import { MetricDetailSheet } from "@/components/home/MetricDetailSheet";
+import { METRIC_DETAILS } from "@/lib/home/metricDetails";
+import type { BestSunshineResponse, CurrentResponse } from "@/lib/schemas/weather";
+
+const currentFixture: CurrentResponse = {
+  id: "bay-area-current",
+  summary: "Foggy",
+  status: "Karl is lingering",
+  temperature: 58,
+  fogCoverage: 56,
+  sunshineScore: 44,
+  windSpeed: 8,
+  windDirection: "W",
+  cloudCover: 70,
+  visibility: 6,
+  humidity: 82,
+  weatherCode: 45,
+  iconName: "cloud.fog.fill",
+  updatedAt: "2026-07-01T16:00:00.000Z",
+  source: "live",
+  confidenceScore: 0.8,
+  confidenceLabel: "High confidence",
+  confidenceExplanation: "Live data",
+  confidenceComponents: {
+    freshness: 0.8,
+    observationQuality: 0.8,
+    fieldCompleteness: 0.8,
+    sourceReliability: 0.8,
+  },
+};
+
+const bestSunshineFixture: BestSunshineResponse = {
+  id: "best-sunshine",
+  locationID: "tiburon",
+  locationName: "Tiburon",
+  latitude: 37.8735,
+  longitude: -122.4566,
+  status: "Mostly Sunny",
+  temperature: 68,
+  sunshineScore: 82,
+  fogScore: 26,
+  distanceText: "8 mi",
+  reason: "Clear skies",
+  iconName: "sun.max.fill",
+  updatedAt: "2026-07-01T16:00:00.000Z",
+  source: "live",
+  recommendationMode: "current",
+  lookaheadMinutes: 0,
+  recommendationScore: 82,
+  projectedSunshineScore1h: null,
+  recommendationReason: "Clear skies",
+  confidenceScore: 0.8,
+  confidenceLabel: "High confidence",
+  confidenceExplanation: "Live data",
+  confidenceComponents: {
+    freshness: 0.8,
+    observationQuality: 0.8,
+    fieldCompleteness: 0.8,
+    sourceReliability: 0.8,
+  },
+};
 
 describe("DashboardGrid", () => {
   afterEach(() => {
@@ -18,62 +79,8 @@ describe("DashboardGrid", () => {
   it("renders premium weather icons alongside dashboard metrics", () => {
     const { container } = render(
       <DashboardGrid
-        current={{
-          id: "bay-area-current",
-          summary: "Foggy",
-          status: "Karl is lingering",
-          temperature: 58,
-          fogCoverage: 56,
-          sunshineScore: 44,
-          windSpeed: 8,
-          windDirection: "W",
-          cloudCover: 70,
-          visibility: 6,
-          humidity: 82,
-          weatherCode: 45,
-          iconName: "cloud.fog.fill",
-          updatedAt: "2026-07-01T16:00:00.000Z",
-          source: "live",
-          confidenceScore: 0.8,
-          confidenceLabel: "High confidence",
-          confidenceExplanation: "Live data",
-          confidenceComponents: {
-            freshness: 0.8,
-            observationQuality: 0.8,
-            fieldCompleteness: 0.8,
-            sourceReliability: 0.8,
-          },
-        }}
-        bestSunshine={{
-          id: "best-sunshine",
-          locationID: "tiburon",
-          locationName: "Tiburon",
-          latitude: 37.8735,
-          longitude: -122.4566,
-          status: "Mostly Sunny",
-          temperature: 68,
-          sunshineScore: 82,
-          fogScore: 26,
-          distanceText: "8 mi",
-          reason: "Clear skies",
-          iconName: "sun.max.fill",
-          updatedAt: "2026-07-01T16:00:00.000Z",
-          source: "live",
-          recommendationMode: "current",
-          lookaheadMinutes: 0,
-          recommendationScore: 82,
-          projectedSunshineScore1h: null,
-          recommendationReason: "Clear skies",
-          confidenceScore: 0.8,
-          confidenceLabel: "High confidence",
-          confidenceExplanation: "Live data",
-          confidenceComponents: {
-            freshness: 0.8,
-            observationQuality: 0.8,
-            fieldCompleteness: 0.8,
-            sourceReliability: 0.8,
-          },
-        }}
+        current={currentFixture}
+        bestSunshine={bestSunshineFixture}
         isLoading={false}
       />,
     );
@@ -88,9 +95,65 @@ describe("DashboardGrid", () => {
       }),
     ).toHaveAttribute("href", "/map?location=tiburon");
   });
+
+  it("opens a metric detail sheet for explanatory cards without routing to map", () => {
+    render(
+      <DashboardGrid
+        current={currentFixture}
+        bestSunshine={bestSunshineFixture}
+        isLoading={false}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Learn about Fog Coverage" }));
+
+    const dialog = screen.getByRole("dialog");
+    expect(dialog).toBeInTheDocument();
+    expect(dialog).toHaveTextContent(METRIC_DETAILS["fog-coverage"].body);
+    expect(screen.queryByRole("link", { name: /Learn about Fog Coverage/i })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Close metric details" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("does not open detail sheets while metrics are loading", () => {
+    render(
+      <DashboardGrid
+        current={null}
+        bestSunshine={null}
+        isLoading
+      />,
+    );
+
+    expect(screen.queryByRole("button", { name: "Learn about Fog Coverage" })).not.toBeInTheDocument();
+  });
+});
+
+describe("MetricDetailSheet", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it("closes on Escape and exposes accessible dialog semantics", () => {
+    const onClose = vi.fn();
+
+    render(<MetricDetailSheet metricKey="sunshine-score" onClose={onClose} />);
+
+    const dialog = screen.getByRole("dialog");
+    expect(dialog).toHaveAttribute("aria-labelledby");
+    expect(dialog).toHaveAttribute("aria-describedby");
+    expect(dialog).toHaveTextContent(METRIC_DETAILS["sunshine-score"].body);
+
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("ConditionIcons", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   it("renders distinct premium fog, mist, and sun artwork", () => {
     const { container: fog } = render(<FogCoverageIcon />);
     const { container: mist } = render(<FogMistIcon />);
