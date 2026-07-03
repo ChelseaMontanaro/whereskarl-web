@@ -313,6 +313,29 @@ describe("createMapMarkerElement", () => {
     );
   });
 
+  it("shows the full Golden Gate Park label on desktop foggy markers", () => {
+    const marker = createMapMarkerElement({
+      location: {
+        id: "golden-gate-park",
+        name: "Golden Gate Park",
+        latitude: 37.7694,
+        longitude: -122.4862,
+        fogScore: 60,
+        sunshineScore: 40,
+        status: "Foggy",
+      },
+      isSelected: false,
+      fogLayerEnabled: true,
+      intensityFilter: "foggy",
+      layout: "desktop",
+      onSelect: vi.fn(),
+    });
+
+    expect(marker.querySelector(".karl-map-marker__label")?.textContent).toBe(
+      "Golden Gate Park",
+    );
+  });
+
   it("does not add foggy filter labels on mobile", () => {
     const marker = createMapMarkerElement({
       location: {
