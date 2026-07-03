@@ -17,7 +17,10 @@ import {
 import { useConditionsStatus } from "@/components/providers/ConditionsStatusProvider";
 import { getKarlIntelligence } from "@/lib/api/intelligence";
 import { getBestSunshine, getCurrent, getLocations } from "@/lib/api/weather";
-import { WEATHER_STALE_TIME_MS } from "@/lib/constants/config";
+import {
+  INTELLIGENCE_STALE_TIME_MS,
+  WEATHER_STALE_TIME_MS,
+} from "@/lib/constants/config";
 import { resolveConditionsPresentation } from "@/lib/home/conditionsStatus";
 import { resolveHeroPresentation } from "@/lib/home/heroPresentation";
 import {
@@ -32,6 +35,7 @@ import {
   nextHourOutlookSummary,
 } from "@/lib/home/weatherDisplay";
 import {
+  lastKnownIntelligenceForHydration,
   loadLastKnownWeather,
   saveLastKnownWeather,
 } from "@/lib/storage/lastKnownWeather";
@@ -82,15 +86,21 @@ export function HomeView() {
 
   const focusLocationId = karlLocation?.id ?? null;
 
+  const intelligencePlaceholder = useMemo(
+    () =>
+      lastKnownIntelligenceForHydration(initialLastKnown?.intelligence),
+    [initialLastKnown],
+  );
+
   const intelligenceQuery = useQuery({
     queryKey: ["karl-intelligence", focusLocationId],
     queryFn: () =>
       getKarlIntelligence(
         focusLocationId ? { locationId: focusLocationId } : undefined,
       ),
-    staleTime: WEATHER_STALE_TIME_MS,
+    staleTime: INTELLIGENCE_STALE_TIME_MS,
     enabled: Boolean(locationsQuery.data),
-    initialData: initialLastKnown?.intelligence,
+    placeholderData: intelligencePlaceholder,
     refetchOnMount: "always",
   });
 

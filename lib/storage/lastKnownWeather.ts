@@ -1,5 +1,8 @@
 import { STORAGE_KEYS } from "@/lib/constants/config";
-import type { KarlIntelligenceResponse } from "@/lib/schemas/intelligence";
+import type {
+  KarlHeroImageryMetadata,
+  KarlIntelligenceResponse,
+} from "@/lib/schemas/intelligence";
 import type {
   BestSunshineResponse,
   CurrentResponse,
@@ -14,14 +17,55 @@ export type LastKnownWeather = {
   savedAt: string;
 };
 
+const PENDING_HERO_IMAGERY: KarlHeroImageryMetadata = {
+  conditionState: "unavailable",
+  stabilityKey: "pending|refresh",
+  imageUrl: null,
+  localFallbackAsset: null,
+  presentation: null,
+  source: null,
+  confidenceLabel: null,
+  imageKey: null,
+  focusLocationId: null,
+  fallbackReason: "pending-refresh",
+  altText: null,
+};
+
+/** Removes cached hero URLs so narrative can hydrate without stale hero imagery. */
+export function stripHeroImageryFromIntelligence(
+  intelligence: KarlIntelligenceResponse,
+): KarlIntelligenceResponse {
+  return {
+    ...intelligence,
+    heroImagery: PENDING_HERO_IMAGERY,
+  };
+}
+
+export function lastKnownIntelligenceForHydration(
+  intelligence: KarlIntelligenceResponse | undefined,
+): KarlIntelligenceResponse | undefined {
+  if (!intelligence) {
+    return undefined;
+  }
+
+  return stripHeroImageryFromIntelligence(intelligence);
+}
+
 export function saveLastKnownWeather(data: LastKnownWeather): void {
   if (typeof window === "undefined") {
     return;
   }
 
+  const payload: LastKnownWeather = {
+    ...data,
+    intelligence: data.intelligence
+      ? stripHeroImageryFromIntelligence(data.intelligence)
+      : undefined,
+  };
+
   window.localStorage.setItem(
     STORAGE_KEYS.lastKnownWeather,
-    JSON.stringify(data),
+    JSON.stringify(payload),
   );
 }
 
