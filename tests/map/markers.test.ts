@@ -165,4 +165,55 @@ describe("createMapMarkerElement", () => {
     expect(marker.className).toContain("is-filtered-hidden");
     expect(marker.className).toContain("is-filtered-out");
   });
+
+  it("hides non-clear markers when the Clear filter is active", () => {
+    const marker = createMapMarkerElement({
+      location: tiburon,
+      isSelected: false,
+      fogLayerEnabled: true,
+      intensityFilter: "clear",
+      onSelect: vi.fn(),
+    });
+
+    expect(marker.className).toContain("is-filtered-hidden");
+    expect(marker.className).toContain("is-filtered-out");
+    expect(marker.className).toContain("karl-map-marker--karlTerritory");
+  });
+
+  it("shows sun icons for clear locations when the Clear filter is active", () => {
+    const marker = createMapMarkerElement({
+      location: {
+        id: "san-jose",
+        name: "San Jose",
+        latitude: 37.3382,
+        longitude: -121.8863,
+        fogScore: 10,
+        sunshineScore: 90,
+        status: "Clear",
+      },
+      isSelected: false,
+      fogLayerEnabled: true,
+      intensityFilter: "clear",
+      onSelect: vi.fn(),
+    });
+
+    expect(marker.className).toContain("karl-map-marker--clear");
+    expect(marker.className).toContain("is-intensity-match");
+    expect(marker.className).not.toContain("is-filtered-out");
+    expect(marker.innerHTML).toContain('circle cx="12" cy="12"');
+    expect(marker.innerHTML).not.toContain("/brand/wheres-karl-logo@2x.png");
+  });
+
+  it("dims but does not hide non-matching markers for light fog filter", () => {
+    const marker = createMapMarkerElement({
+      location: tiburon,
+      isSelected: false,
+      fogLayerEnabled: true,
+      intensityFilter: "lightFog",
+      onSelect: vi.fn(),
+    });
+
+    expect(marker.className).toContain("is-filtered-out");
+    expect(marker.className).not.toContain("is-filtered-hidden");
+  });
 });

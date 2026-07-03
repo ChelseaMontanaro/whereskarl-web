@@ -49,6 +49,17 @@ function matchesIntensityFilter(
   return getMarkerFogIntensity(location) === intensityFilter;
 }
 
+function shouldHideFilteredMarker(
+  intensityFilter: FogIntensity | null | undefined,
+  isFilteredOut: boolean,
+): boolean {
+  if (!isFilteredOut || !intensityFilter) {
+    return false;
+  }
+
+  return intensityFilter === "clear" || intensityFilter === "karlTerritory";
+}
+
 export function createMapMarkerElement(input: {
   location: MapMarkerLocation;
   isSelected: boolean;
@@ -68,7 +79,7 @@ export function createMapMarkerElement(input: {
     getMarkerIntensityClass(input.location),
     input.isSelected ? "is-selected" : "",
     isFilteredOut ? "is-filtered-out" : "",
-    isFilteredOut && input.intensityFilter === "karlTerritory"
+    shouldHideFilteredMarker(input.intensityFilter, isFilteredOut)
       ? "is-filtered-hidden"
       : "",
     input.intensityFilter && !isFilteredOut ? "is-intensity-match" : "",

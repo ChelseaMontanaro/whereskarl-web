@@ -75,6 +75,30 @@ describe("fog overlays", () => {
     });
   });
 
+  it("suppresses all fog circles when the clear intensity filter is active", () => {
+    const collection = buildLocationFogOverlayCollection(
+      [
+        {
+          id: "tiburon",
+          latitude: 37.8735,
+          longitude: -122.4566,
+          fogScore: 82,
+          sunshineScore: 18,
+        },
+        {
+          id: "sausalito",
+          latitude: 37.8591,
+          longitude: -122.4853,
+          fogScore: 60,
+          sunshineScore: 40,
+        },
+      ],
+      "clear",
+    );
+
+    expect(collection.features).toHaveLength(0);
+  });
+
   it("renders light fog overlays when the light fog intensity filter is active", () => {
     const collection = buildLocationFogOverlayCollection(
       [

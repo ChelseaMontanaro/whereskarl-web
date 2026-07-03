@@ -105,7 +105,7 @@ export function syncFogOverlayLayer(
 ): void {
   removeFogOverlayLayer(map);
 
-  if (!enabled) {
+  if (!enabled || intensityFilter === "clear") {
     return;
   }
 
