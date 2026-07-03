@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState, useEffect } from "react";
 import type { MutableRefObject } from "react";
 import { useQuery } from "@tanstack/react-query";
 
@@ -33,14 +33,6 @@ import {
 } from "@/lib/map/routing";
 import type { KarlMapStyleId } from "@/lib/map/styles";
 import type { LocationWeather } from "@/lib/schemas/weather";
-
-function initialDesktopMapStyle(): KarlMapStyleId {
-  if (typeof window === "undefined") {
-    return "standard";
-  }
-
-  return window.matchMedia("(min-width: 1024px)").matches ? "hybrid" : "standard";
-}
 
 function MapLocationCard({
   location,
@@ -165,16 +157,26 @@ type MapViewModel = {
   statusSentence: string;
 };
 
-function useMapViewState(): MapViewModel {
+function useMapViewState(isDesktop: boolean): MapViewModel {
   const router = useRouter();
   const searchParams = useSearchParams();
   const mapQuery = resolveMapQueryState(searchParams);
   const suppressViewportUpdateRef = useRef(false);
-  const [mapStyle, setMapStyle] = useState<KarlMapStyleId>(initialDesktopMapStyle);
+  const [mapStyle, setMapStyle] = useState<KarlMapStyleId>("hybrid");
+  const mobileStandardAppliedRef = useRef(false);
   const [fogLayerEnabled, setFogLayerEnabled] = useState(true);
   const [intensityFilter, setIntensityFilter] = useState<FogIntensity | null>(
     null,
   );
+
+  useEffect(() => {
+    if (isDesktop || mobileStandardAppliedRef.current) {
+      return;
+    }
+
+    mobileStandardAppliedRef.current = true;
+    setMapStyle("standard");
+  }, [isDesktop]);
 
   const locationsQuery = useQuery({
     queryKey: ["locations"],
@@ -445,7 +447,7 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
           </div>
 
           {selectedLocation ? (
-            <div className="w-[min(100%,38rem)] shrink-0">
+            <div className="w-[min(100%,44rem)] shrink-0">
               <MapSelectedLocationCard
                 location={selectedLocation}
                 onClose={handleClearSelectedLocation}
@@ -463,8 +465,8 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
 }
 
 export function MapView() {
-  const state = useMapViewState();
   const isDesktop = useMinWidth(1024);
+  const state = useMapViewState(isDesktop);
 
   if (isDesktop) {
     return <DesktopMapView state={state} />;

@@ -3,8 +3,10 @@ import {
   getLocationConditionLabel,
   resolveFogScore,
   type FogIntensity,
+  type LocationConditionInput,
 } from "@/lib/map/conditions";
 import { getMarkerIconMarkup } from "@/lib/map/markerIcons";
+import { isNighttime } from "@/lib/home/weatherDisplay";
 
 export type MapMarkerLocation = {
   id: string;
@@ -85,7 +87,9 @@ export function createMapMarkerElement(input: {
     .join(" ");
   button.dataset.locationId = input.location.id;
   button.dataset.testid = `map-marker-${input.location.id}`;
-  button.innerHTML = getMarkerIconMarkup(intensity);
+  button.innerHTML = getMarkerIconMarkup(intensity, {
+    isNighttime: isNighttime(new Date().getHours()),
+  });
   button.setAttribute(
     "aria-label",
     mapMarkerAriaLabel(input.location, input.isSelected),
@@ -99,6 +103,8 @@ export function createMapMarkerElement(input: {
   return button;
 }
 
-export function getMarkerFogIntensity(location: MapMarkerLocation): FogIntensity {
+export function getMarkerFogIntensity(
+  location: LocationConditionInput,
+): FogIntensity {
   return getFogIntensity(resolveFogScore(location));
 }

@@ -28,13 +28,13 @@ const CARTO_DARK_LABEL_TILES = [
 /** Pull imagery darker with stronger land/ocean contrast for the desktop map. */
 const cinematicSatellitePaint = {
   "raster-brightness-min": 0,
-  "raster-brightness-max": 0.68,
-  "raster-contrast": 0.32,
-  "raster-saturation": -0.08,
+  "raster-brightness-max": 0.62,
+  "raster-contrast": 0.36,
+  "raster-saturation": -0.12,
 } as const;
 
 const cinematicLabelPaint = {
-  "raster-opacity": 0.8,
+  "raster-opacity": 0.84,
 } as const;
 
 const satelliteStyle = {

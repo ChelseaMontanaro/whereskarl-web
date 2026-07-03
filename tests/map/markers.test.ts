@@ -40,6 +40,54 @@ describe("createMapMarkerElement", () => {
     expect(marker.className).toContain("karl-map-marker--karlTerritory");
   });
 
+  it("uses the Karl brand logo for Karl Territory markers", () => {
+    const marker = createMapMarkerElement({
+      location: tiburon,
+      isSelected: false,
+      fogLayerEnabled: true,
+      onSelect: vi.fn(),
+    });
+
+    expect(marker.innerHTML).toContain("/brand/wheres-karl-logo@2x.png");
+    expect(marker.innerHTML).not.toContain("stroke=\"#93B8D8\"");
+  });
+
+  it("uses a foggy cloud icon for foggy conditions", () => {
+    const marker = createMapMarkerElement({
+      location: {
+        ...tiburon,
+        id: "sausalito",
+        name: "Sausalito",
+        fogScore: 60,
+      },
+      isSelected: false,
+      fogLayerEnabled: true,
+      onSelect: vi.fn(),
+    });
+
+    expect(marker.className).toContain("karl-map-marker--foggy");
+    expect(marker.innerHTML).toContain("stroke=\"#93B8D8\"");
+    expect(marker.innerHTML).not.toContain("/brand/wheres-karl-logo@2x.png");
+  });
+
+  it("keeps condition-specific icons when an intensity filter is active", () => {
+    const marker = createMapMarkerElement({
+      location: {
+        ...tiburon,
+        fogScore: 10,
+        sunshineScore: 90,
+      },
+      isSelected: false,
+      fogLayerEnabled: true,
+      intensityFilter: "karlTerritory",
+      onSelect: vi.fn(),
+    });
+
+    expect(marker.className).toContain("is-filtered-out");
+    expect(marker.className).toContain("karl-map-marker--clear");
+    expect(marker.innerHTML).not.toContain("/brand/wheres-karl-logo@2x.png");
+  });
+
   it("marks the selected marker as pressed", () => {
     const marker = createMapMarkerElement({
       location: tiburon,
