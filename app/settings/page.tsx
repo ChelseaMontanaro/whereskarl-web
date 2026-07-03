@@ -1,16 +1,16 @@
 import { GlassCard } from "@/components/ui/GlassCard";
 import { PlaceholderPage } from "@/components/layout/PlaceholderPage";
 
-export default function HomePage() {
+export default function SettingsPage() {
   return (
     <PlaceholderPage
-      title="Home"
-      description="The cinematic Karl dashboard, hero imagery, and sunshine recommendations will live here."
+      title="Settings"
+      description="Lightweight web preferences and favorites management will live here."
     >
       <GlassCard className="px-5 py-4">
         <p className="text-sm text-white/70">
-          Placeholder screen for the iOS Home experience. Weather intelligence and hero
-          content arrive in a later Phase 14 step.
+          Push notifications stay iOS-only. Web settings will focus on forecast preference
+          and saved locations.
         </p>
       </GlassCard>
     </PlaceholderPage>
