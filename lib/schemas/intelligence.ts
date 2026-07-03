@@ -227,6 +227,7 @@ export const karlIntelligenceResponseSchema = z.object({
   source: apiSourceSchema,
 });
 
+export type KarlHeroImageryMetadata = z.infer<typeof karlHeroImagerySchema>;
 export type KarlIntelligenceResponse = z.infer<
   typeof karlIntelligenceResponseSchema
 >;

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import { AppShell } from "@/components/layout/AppShell";
+import { ConditionsStatusProvider } from "@/components/providers/ConditionsStatusProvider";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 
 import "./globals.css";
@@ -33,7 +34,9 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-karl-navy text-foreground">
         <QueryProvider>
-          <AppShell>{children}</AppShell>
+          <ConditionsStatusProvider>
+            <AppShell>{children}</AppShell>
+          </ConditionsStatusProvider>
         </QueryProvider>
       </body>
     </html>
