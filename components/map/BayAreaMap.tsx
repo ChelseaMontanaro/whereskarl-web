@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { MapFogLegend } from "@/components/map/MapFogLegend";
 import { MapLayerControls } from "@/components/map/MapLayerControls";
@@ -31,6 +31,7 @@ type BayAreaMapProps = {
   onMapStyleChange: (styleId: KarlMapStyleId) => void;
   onFogLayerChange: (enabled: boolean) => void;
   isLoading?: boolean;
+  layout?: "mobile" | "desktop";
 };
 
 export function BayAreaMap({
@@ -43,14 +44,24 @@ export function BayAreaMap({
   onMapStyleChange,
   onFogLayerChange,
   isLoading = false,
+  layout = "mobile",
 }: BayAreaMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<import("maplibre-gl").Map | null>(null);
   const markersRef = useRef<Map<string, import("maplibre-gl").Marker>>(new Map());
   const onSelectRef = useRef(onSelectLocation);
   const [mapReady, setMapReady] = useState(false);
+  const isDesktop = layout === "desktop";
 
   onSelectRef.current = onSelectLocation;
+
+  const handleZoomIn = useCallback(() => {
+    mapRef.current?.zoomIn({ duration: 250 });
+  }, []);
+
+  const handleZoomOut = useCallback(() => {
+    mapRef.current?.zoomOut({ duration: 250 });
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -70,10 +81,12 @@ export function BayAreaMap({
         attributionControl: { compact: true },
       });
 
-      map.addControl(
-        new maplibregl.NavigationControl({ showCompass: false }),
-        "top-right",
-      );
+      if (!isDesktop) {
+        map.addControl(
+          new maplibregl.NavigationControl({ showCompass: false }),
+          "top-right",
+        );
+      }
 
       map.on("load", () => {
         if (cancelled) {
@@ -219,27 +232,40 @@ export function BayAreaMap({
   }, [locations, mapReady, selectedLocationId, selectedRegionId]);
 
   return (
-    <div className="relative h-full min-h-[360px] w-full">
+    <div
+      className={`relative w-full ${
+        isDesktop ? "h-full min-h-screen" : "h-full min-h-[360px]"
+      }`}
+    >
       <div
         ref={containerRef}
         data-testid="bay-area-map"
-        className="karl-map-canvas h-full min-h-[360px] w-full"
+        className={`karl-map-canvas w-full ${
+          isDesktop ? "h-full min-h-screen" : "h-full min-h-[360px]"
+        }`}
       />
       <MapLayerControls
+        layout={layout}
         mapStyle={mapStyle}
         fogLayerEnabled={fogLayerEnabled}
         onMapStyleChange={onMapStyleChange}
         onFogLayerChange={onFogLayerChange}
+        onZoomIn={handleZoomIn}
+        onZoomOut={handleZoomOut}
       />
-      {fogLayerEnabled ? <MapFogLegend /> : null}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-karl-navy/70 to-transparent"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-karl-navy/80 to-transparent"
-      />
+      {!isDesktop && fogLayerEnabled ? <MapFogLegend layout="mobile" /> : null}
+      {!isDesktop ? (
+        <>
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-karl-navy/70 to-transparent"
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-karl-navy/80 to-transparent"
+          />
+        </>
+      ) : null}
       {isLoading || !mapReady ? (
         <div className="absolute inset-0 flex items-center justify-center bg-karl-navy/55 px-6 text-center text-sm text-white/60 backdrop-blur-[1px]">
           {isLoading ? "Loading Bay Area locations…" : "Preparing Bay Area map…"}

@@ -1,3 +1,4 @@
+import { desktopGlassCardClass } from "@/components/home/desktopGlass";
 import {
   getFogIntensityLabel,
   type FogIntensity,
@@ -13,7 +14,37 @@ const LEGEND_ITEMS: Array<{
   { intensity: "karlTerritory", className: "bg-[rgb(184_214_237)]" },
 ];
 
-export function MapFogLegend() {
+type MapFogLegendProps = {
+  layout?: "mobile" | "desktop";
+};
+
+export function MapFogLegend({ layout = "mobile" }: MapFogLegendProps) {
+  if (layout === "desktop") {
+    return (
+      <div
+        aria-label="Fog intensity legend"
+        className={`${desktopGlassCardClass} w-44 px-3 py-2.5`}
+      >
+        <p className="text-[0.625rem] font-bold uppercase tracking-[0.14em] text-white/45">
+          Fog Intensity
+        </p>
+        <ul className="mt-2 space-y-1.5">
+          {LEGEND_ITEMS.map((item) => (
+            <li key={item.intensity} className="flex items-center gap-2">
+              <span
+                aria-hidden="true"
+                className={`h-2.5 w-2.5 shrink-0 rounded-full ${item.className}`}
+              />
+              <span className="text-[0.68rem] text-white/70">
+                {getFogIntensityLabel(item.intensity)}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+
   return (
     <div
       aria-label="Fog intensity legend"

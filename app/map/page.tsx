@@ -12,16 +12,23 @@ export const metadata = createPageMetadata({
 
 function MapLoadingFallback() {
   return (
-    <div className="mx-auto flex w-full max-w-[430px] flex-col gap-4 px-4 py-8">
-      <p className="text-sm text-white/55">Loading map…</p>
-    </div>
+    <>
+      <div className="mx-auto flex w-full max-w-[430px] flex-col gap-4 px-4 py-8 lg:hidden">
+        <p className="text-sm text-white/55">Loading map…</p>
+      </div>
+      <div className="fixed inset-0 hidden items-center justify-center bg-karl-navy lg:flex">
+        <p className="text-sm text-white/55">Loading map…</p>
+      </div>
+    </>
   );
 }
 
 export default function MapPage() {
   return (
-    <Suspense fallback={<MapLoadingFallback />}>
-      <MapView />
-    </Suspense>
+    <div className="lg:h-screen lg:overflow-hidden">
+      <Suspense fallback={<MapLoadingFallback />}>
+        <MapView />
+      </Suspense>
+    </div>
   );
 }

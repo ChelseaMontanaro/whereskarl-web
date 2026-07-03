@@ -20,6 +20,10 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: replaceMock }),
 }));
 
+vi.mock("@/lib/hooks/useMinWidth", () => ({
+  useMinWidth: () => false,
+}));
+
 vi.mock("@/components/map/BayAreaMap", () => ({
   BayAreaMap: ({
     onSelectLocation,

@@ -5,11 +5,16 @@ import { useCallback, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { BayAreaMap } from "@/components/map/BayAreaMap";
+import { MapBestRightNowTray } from "@/components/map/MapBestRightNowTray";
+import { MapConditionsPanel } from "@/components/map/MapConditionsPanel";
 import { MapLocationList } from "@/components/map/MapLocationList";
 import { MapRegionChips } from "@/components/map/MapRegionChips";
+import { MapSelectedLocationCard } from "@/components/map/MapSelectedLocationCard";
 import { GlassCard } from "@/components/ui/GlassCard";
-import { getLocations } from "@/lib/api/weather";
+import { getCurrent, getLocations } from "@/lib/api/weather";
 import { WEATHER_STALE_TIME_MS } from "@/lib/constants/config";
+import { bestRightNowLocationItems } from "@/lib/home/weatherDisplay";
+import { useMinWidth } from "@/lib/hooks/useMinWidth";
 import { getLocationConditionLabel } from "@/lib/map/conditions";
 import { findBayAreaProductRegion, isBayAreaProductRegionId } from "@/lib/map/config";
 import { resolveMapLocationFocus } from "@/lib/map/locationSelection";
@@ -70,7 +75,78 @@ function MapLocationCard({
   );
 }
 
-export function MapView() {
+function MapQueryWarnings({
+  unknownLocationId,
+  unknownRegionId,
+  variant = "mobile",
+}: {
+  unknownLocationId: string | null;
+  unknownRegionId: string | null;
+  variant?: "mobile" | "desktop";
+}) {
+  if (!unknownLocationId && !unknownRegionId) {
+    return null;
+  }
+
+  const wrapperClass =
+    variant === "desktop"
+      ? "pointer-events-auto absolute left-6 top-[11.5rem] z-20 max-w-xs"
+      : undefined;
+
+  return (
+    <div className={wrapperClass}>
+      {unknownLocationId ? (
+        <GlassCard className="px-4 py-3">
+          <p className="text-sm text-white/70">
+            Couldn&apos;t find{" "}
+            <span className="font-semibold text-white">
+              {unknownLocationId.replaceAll("-", " ")}
+            </span>
+            . Showing the Bay Area map instead.
+          </p>
+        </GlassCard>
+      ) : null}
+      {unknownRegionId ? (
+        <GlassCard className={`px-4 py-3 ${unknownLocationId ? "mt-2" : ""}`}>
+          <p className="text-sm text-white/70">
+            Couldn&apos;t find region{" "}
+            <span className="font-semibold text-white">
+              {unknownRegionId.replaceAll("-", " ")}
+            </span>
+            . Showing the full Bay Area map instead.
+          </p>
+        </GlassCard>
+      ) : null}
+    </div>
+  );
+}
+
+type MapViewModel = {
+  mapQuery: ReturnType<typeof resolveMapQueryState>;
+  mapStyle: KarlMapStyleId;
+  setMapStyle: (styleId: KarlMapStyleId) => void;
+  fogLayerEnabled: boolean;
+  setFogLayerEnabled: (enabled: boolean) => void;
+  locationsQuery: {
+    isLoading: boolean;
+    data?: Awaited<ReturnType<typeof getLocations>>;
+  };
+  currentQuery: {
+    isLoading: boolean;
+    data?: Awaited<ReturnType<typeof getCurrent>>;
+  };
+  locations: LocationWeather[];
+  selectedLocation: LocationWeather | null;
+  unknownLocationId: string | null;
+  activeRegion: ReturnType<typeof findBayAreaProductRegion>;
+  markerLocations: MapMarkerLocation[];
+  bestRightNowItems: ReturnType<typeof bestRightNowLocationItems>;
+  handleSelectLocation: (locationId: string) => void;
+  handleSelectRegion: (regionId: string) => void;
+  statusSentence: string;
+};
+
+function useMapViewState(): MapViewModel {
   const router = useRouter();
   const searchParams = useSearchParams();
   const mapQuery = resolveMapQueryState(searchParams);
@@ -80,6 +156,12 @@ export function MapView() {
   const locationsQuery = useQuery({
     queryKey: ["locations"],
     queryFn: getLocations,
+    staleTime: WEATHER_STALE_TIME_MS,
+  });
+
+  const currentQuery = useQuery({
+    queryKey: ["current"],
+    queryFn: getCurrent,
     staleTime: WEATHER_STALE_TIME_MS,
   });
 
@@ -111,6 +193,16 @@ export function MapView() {
     [locations],
   );
 
+  const bestRightNow = useMemo(
+    () =>
+      bestRightNowLocationItems(
+        locations,
+        selectedLocation?.id ?? null,
+        4,
+      ),
+    [locations, selectedLocation?.id],
+  );
+
   const handleSelectLocation = useCallback(
     (locationId: string) => {
       router.replace(buildMapHref(locationId), { scroll: false });
@@ -133,6 +225,48 @@ export function MapView() {
     },
     [mapQuery.activeRegionId, router],
   );
+
+  const statusSentence =
+    currentQuery.data?.summary?.trim() ||
+    currentQuery.data?.status?.trim() ||
+    "Explore live fog and sunshine across the Bay.";
+
+  return {
+    mapQuery,
+    mapStyle,
+    setMapStyle,
+    fogLayerEnabled,
+    setFogLayerEnabled,
+    locationsQuery,
+    currentQuery,
+    locations,
+    selectedLocation,
+    unknownLocationId,
+    activeRegion,
+    markerLocations,
+    bestRightNowItems: bestRightNow,
+    handleSelectLocation,
+    handleSelectRegion,
+    statusSentence,
+  };
+}
+
+function MobileMapView({ state }: { state: MapViewModel }) {
+  const {
+    mapQuery,
+    mapStyle,
+    setMapStyle,
+    fogLayerEnabled,
+    setFogLayerEnabled,
+    locationsQuery,
+    locations,
+    selectedLocation,
+    unknownLocationId,
+    activeRegion,
+    markerLocations,
+    handleSelectLocation,
+    handleSelectRegion,
+  } = state;
 
   const headerCopy = selectedLocation
     ? `Focused on ${selectedLocation.name}.`
@@ -166,32 +300,14 @@ export function MapView() {
           onMapStyleChange={setMapStyle}
           onFogLayerChange={setFogLayerEnabled}
           isLoading={locationsQuery.isLoading}
+          layout="mobile"
         />
       </GlassCard>
 
-      {unknownLocationId ? (
-        <GlassCard className="px-4 py-3">
-          <p className="text-sm text-white/70">
-            Couldn&apos;t find{" "}
-            <span className="font-semibold text-white">
-              {unknownLocationId.replaceAll("-", " ")}
-            </span>
-            . Showing the Bay Area map instead.
-          </p>
-        </GlassCard>
-      ) : null}
-
-      {mapQuery.unknownRegionId ? (
-        <GlassCard className="px-4 py-3">
-          <p className="text-sm text-white/70">
-            Couldn&apos;t find region{" "}
-            <span className="font-semibold text-white">
-              {mapQuery.unknownRegionId.replaceAll("-", " ")}
-            </span>
-            . Showing the full Bay Area map instead.
-          </p>
-        </GlassCard>
-      ) : null}
+      <MapQueryWarnings
+        unknownLocationId={unknownLocationId}
+        unknownRegionId={mapQuery.unknownRegionId}
+      />
 
       {selectedLocation ? (
         <MapLocationCard location={selectedLocation} isSelected />
@@ -210,4 +326,85 @@ export function MapView() {
       </p>
     </div>
   );
+}
+
+function DesktopMapView({ state }: { state: MapViewModel }) {
+  const {
+    mapQuery,
+    mapStyle,
+    setMapStyle,
+    fogLayerEnabled,
+    setFogLayerEnabled,
+    locationsQuery,
+    currentQuery,
+    selectedLocation,
+    unknownLocationId,
+    markerLocations,
+    bestRightNowItems,
+    handleSelectLocation,
+    statusSentence,
+  } = state;
+
+  return (
+    <div className="fixed inset-0 z-10">
+      <BayAreaMap
+        locations={markerLocations}
+        selectedLocationId={selectedLocation?.id ?? null}
+        selectedRegionId={selectedLocation ? null : mapQuery.activeRegionId}
+        onSelectLocation={handleSelectLocation}
+        mapStyle={mapStyle}
+        fogLayerEnabled={fogLayerEnabled}
+        onMapStyleChange={setMapStyle}
+        onFogLayerChange={setFogLayerEnabled}
+        isLoading={locationsQuery.isLoading}
+        layout="desktop"
+      />
+
+      <div className="pointer-events-none absolute inset-0 z-20">
+        <div className="pointer-events-auto absolute left-6 top-[5.5rem]">
+          <MapConditionsPanel
+            statusSentence={statusSentence}
+            isLoading={currentQuery.isLoading && !currentQuery.data}
+          />
+        </div>
+
+        <MapQueryWarnings
+          unknownLocationId={unknownLocationId}
+          unknownRegionId={mapQuery.unknownRegionId}
+          variant="desktop"
+        />
+
+        <div className="absolute inset-x-0 bottom-6 flex flex-col items-center gap-3 px-6">
+          <div className="pointer-events-auto flex w-full max-w-5xl items-end justify-start">
+            <MapBestRightNowTray
+              items={bestRightNowItems}
+              onSelectLocation={handleSelectLocation}
+              isLoading={locationsQuery.isLoading}
+            />
+          </div>
+
+          {selectedLocation ? (
+            <div className="pointer-events-auto w-full max-w-2xl">
+              <MapSelectedLocationCard location={selectedLocation} />
+            </div>
+          ) : null}
+        </div>
+      </div>
+
+      <p className="pointer-events-none absolute bottom-2 right-4 z-20 text-[0.6rem] text-white/25">
+        Map data © OpenStreetMap contributors · CARTO
+      </p>
+    </div>
+  );
+}
+
+export function MapView() {
+  const state = useMapViewState();
+  const isDesktop = useMinWidth(1024);
+
+  if (isDesktop) {
+    return <DesktopMapView state={state} />;
+  }
+
+  return <MobileMapView state={state} />;
 }

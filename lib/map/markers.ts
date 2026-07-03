@@ -4,6 +4,7 @@ import {
   resolveFogScore,
   type FogIntensity,
 } from "@/lib/map/conditions";
+import { getMarkerIconMarkup } from "@/lib/map/markerIcons";
 
 export type MapMarkerLocation = {
   id: string;
@@ -31,16 +32,27 @@ export function mapMarkerAriaLabel(
   return `${location.name}, ${conditionLabel}`;
 }
 
+function getMarkerIntensity(
+  location: MapMarkerLocation,
+  fogLayerEnabled: boolean,
+): FogIntensity | "neutral" {
+  if (!fogLayerEnabled) {
+    return "neutral";
+  }
+
+  const fogScore = resolveFogScore(location);
+  return getFogIntensity(fogScore);
+}
+
 function getMarkerIntensityClass(
   location: MapMarkerLocation,
   fogLayerEnabled: boolean,
 ): string {
-  if (!fogLayerEnabled) {
+  const intensity = getMarkerIntensity(location, fogLayerEnabled);
+  if (intensity === "neutral") {
     return "karl-map-marker--neutral";
   }
 
-  const fogScore = resolveFogScore(location);
-  const intensity = getFogIntensity(fogScore);
   return `karl-map-marker--${intensity}`;
 }
 
@@ -50,6 +62,7 @@ export function createMapMarkerElement(input: {
   fogLayerEnabled: boolean;
   onSelect: (locationId: string) => void;
 }): HTMLButtonElement {
+  const intensity = getMarkerIntensity(input.location, input.fogLayerEnabled);
   const button = document.createElement("button");
   button.type = "button";
   button.className = [
@@ -61,6 +74,7 @@ export function createMapMarkerElement(input: {
     .join(" ");
   button.dataset.locationId = input.location.id;
   button.dataset.testid = `map-marker-${input.location.id}`;
+  button.innerHTML = getMarkerIconMarkup(intensity);
   button.setAttribute(
     "aria-label",
     mapMarkerAriaLabel(input.location, input.isSelected, input.fogLayerEnabled),
