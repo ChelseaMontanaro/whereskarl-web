@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { createElement, type ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -58,36 +58,67 @@ describe("AppShell", () => {
     );
   });
 
-  it("renders the four primary product tabs", () => {
+  it("renders mobile bottom navigation with the four primary tabs", () => {
     renderShell("/");
 
-    const primaryNavs = screen.getAllByRole("navigation", { name: "Primary" });
-    expect(primaryNavs).toHaveLength(2);
-
+    const bottomNav = screen.getByRole("navigation", { name: "Primary" });
     for (const label of ["Home", "Map", "Favorites", "Settings"]) {
-      expect(screen.getAllByRole("link", { name: label })).not.toHaveLength(0);
+      expect(within(bottomNav).getByRole("link", { name: label })).toBeInTheDocument();
     }
   });
 
-  it("highlights the active primary route", () => {
+  it("opens the desktop drawer from the hamburger menu", () => {
+    renderShell("/");
+
+    fireEvent.click(screen.getByRole("button", { name: "Open navigation menu" }));
+
+    const drawer = screen.getByRole("dialog", { name: "Navigation menu" });
+    expect(within(drawer).getByRole("link", { name: "Home" })).toBeInTheDocument();
+    expect(within(drawer).getByRole("link", { name: "Map" })).toBeInTheDocument();
+    expect(within(drawer).getByRole("link", { name: "Privacy" })).toBeInTheDocument();
+  });
+
+  it("highlights the active primary route in the drawer", () => {
     renderShell("/favorites");
 
-    const favoritesLinks = screen.getAllByRole("link", { name: "Favorites" });
-    for (const link of favoritesLinks) {
-      expect(link).toHaveAttribute("aria-current", "page");
-    }
+    fireEvent.click(screen.getByRole("button", { name: "Open navigation menu" }));
 
-    const homeLinks = screen.getAllByRole("link", { name: "Home" });
-    for (const link of homeLinks) {
-      expect(link).not.toHaveAttribute("aria-current");
-    }
+    const drawer = screen.getByRole("dialog", { name: "Navigation menu" });
+    expect(within(drawer).getByRole("link", { name: "Favorites" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(within(drawer).getByRole("link", { name: "Home" })).not.toHaveAttribute(
+      "aria-current",
+    );
   });
 
-  it("renders Privacy and Support links outside the tab bar", () => {
+  it("closes the desktop drawer when the backdrop is clicked", () => {
     renderShell("/");
 
-    expect(screen.getAllByRole("link", { name: "Privacy" }).length).toBeGreaterThan(0);
-    expect(screen.getAllByRole("link", { name: "Support" }).length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByRole("button", { name: "Open navigation menu" }));
+    expect(screen.getByRole("dialog", { name: "Navigation menu" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Close navigation menu" }));
+    expect(screen.queryByRole("dialog", { name: "Navigation menu" })).not.toBeInTheDocument();
+  });
+
+  it("closes the desktop drawer when Escape is pressed", () => {
+    renderShell("/");
+
+    fireEvent.click(screen.getByRole("button", { name: "Open navigation menu" }));
+    expect(screen.getByRole("dialog", { name: "Navigation menu" })).toBeInTheDocument();
+
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(screen.queryByRole("dialog", { name: "Navigation menu" })).not.toBeInTheDocument();
+  });
+
+  it("renders Privacy and Support links in the mobile footer", () => {
+    renderShell("/");
+
+    const legalNav = screen.getByRole("navigation", { name: "Legal and support" });
+    expect(within(legalNav).getByRole("link", { name: "Privacy" })).toBeInTheDocument();
+    expect(within(legalNav).getByRole("link", { name: "Support" })).toBeInTheDocument();
   });
 
   it("renders placeholder content and conditions footer without API data", () => {
