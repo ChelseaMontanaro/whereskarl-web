@@ -72,7 +72,7 @@ export function shouldShowFoggyFilterMarkerLabel(
 ): boolean {
   return (
     layout === "desktop" &&
-    (intensityFilter === "foggy" || intensityFilter === "karlTerritory") &&
+    intensityFilter != null &&
     !isFilteredOut
   );
 }

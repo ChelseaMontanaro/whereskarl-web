@@ -252,4 +252,108 @@ describe("BayAreaMap", () => {
       )?.closest(".karl-map-marker-root--labeled"),
     ).toBeNull();
   });
+
+  it("shows glass-pill labels for visible Clear markers on desktop", async () => {
+    render(
+      <BayAreaMap
+        locations={[
+          {
+            id: "san-jose",
+            name: "San Jose",
+            latitude: 37.3382,
+            longitude: -121.8863,
+            sunshineScore: 90,
+            fogScore: 10,
+            status: "Clear",
+          },
+          {
+            id: "sausalito",
+            name: "Sausalito",
+            latitude: 37.8591,
+            longitude: -122.4853,
+            sunshineScore: 40,
+            fogScore: 35,
+            status: "Light Fog",
+          },
+        ]}
+        selectedLocationId={null}
+        selectedRegionId={null}
+        onSelectLocation={vi.fn()}
+        {...defaultProps}
+        layout="desktop"
+        intensityFilter="clear"
+      />,
+    );
+
+    await waitFor(() => {
+      expect(
+        document.querySelector(
+          '[data-location-id="san-jose"] .karl-map-marker__label',
+        )?.textContent,
+      ).toBe("San Jose");
+    });
+
+    expect(
+      document.querySelector(
+        '[data-testid="map-marker-san-jose"]',
+      )?.closest(".karl-map-marker-root--labeled"),
+    ).not.toBeNull();
+    expect(
+      document.querySelector(
+        '[data-testid="map-marker-sausalito"]',
+      )?.closest(".karl-map-marker-root--labeled"),
+    ).toBeNull();
+  });
+
+  it("shows glass-pill labels for visible Light Fog markers on desktop", async () => {
+    render(
+      <BayAreaMap
+        locations={[
+          {
+            id: "sausalito",
+            name: "Sausalito",
+            latitude: 37.8591,
+            longitude: -122.4853,
+            sunshineScore: 40,
+            fogScore: 35,
+            status: "Light Fog",
+          },
+          {
+            id: "san-jose",
+            name: "San Jose",
+            latitude: 37.3382,
+            longitude: -121.8863,
+            sunshineScore: 90,
+            fogScore: 10,
+            status: "Clear",
+          },
+        ]}
+        selectedLocationId={null}
+        selectedRegionId={null}
+        onSelectLocation={vi.fn()}
+        {...defaultProps}
+        layout="desktop"
+        intensityFilter="lightFog"
+      />,
+    );
+
+    await waitFor(() => {
+      expect(
+        document.querySelector(
+          '[data-location-id="sausalito"] .karl-map-marker__label',
+        )?.textContent,
+      ).toBe("Sausalito");
+    });
+
+    expect(
+      document.querySelector(
+        '[data-testid="map-marker-sausalito"]',
+      )?.closest(".karl-map-marker-root--labeled"),
+    ).not.toBeNull();
+    expect(
+      document.querySelector(
+        '[data-testid="map-marker-san-jose"]',
+      )?.closest(".karl-map-marker-root--labeled"),
+    ).toBeNull();
+  });
 });

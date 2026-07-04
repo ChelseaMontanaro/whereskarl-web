@@ -445,40 +445,126 @@ describe("createMapMarkerElement", () => {
     );
     expect(marker.querySelector(".karl-map-marker__logo")).not.toBeNull();
   });
+
+  it("shows readable location labels below clear markers on desktop", () => {
+    const marker = createMapMarkerElement({
+      location: {
+        id: "san-jose",
+        name: "San Jose",
+        latitude: 37.3382,
+        longitude: -121.8863,
+        fogScore: 10,
+        sunshineScore: 90,
+        status: "Clear",
+      },
+      isSelected: false,
+      fogLayerEnabled: true,
+      intensityFilter: "clear",
+      layout: "desktop",
+      onSelect: vi.fn(),
+    });
+
+    expect(marker.className).toContain("karl-map-marker-root--labeled");
+    expect(marker.querySelector(".karl-map-marker__label")?.textContent).toBe(
+      "San Jose",
+    );
+    expect(marker.querySelector(".karl-map-marker")?.className).toContain(
+      "karl-map-marker--clear",
+    );
+  });
+
+  it("shows readable location labels below light fog markers on desktop", () => {
+    const marker = createMapMarkerElement({
+      location: {
+        id: "sausalito",
+        name: "Sausalito",
+        latitude: 37.8591,
+        longitude: -122.4853,
+        fogScore: 35,
+        sunshineScore: 40,
+        status: "Light Fog",
+      },
+      isSelected: false,
+      fogLayerEnabled: true,
+      intensityFilter: "lightFog",
+      layout: "desktop",
+      onSelect: vi.fn(),
+    });
+
+    expect(marker.className).toContain("karl-map-marker-root--labeled");
+    expect(marker.querySelector(".karl-map-marker__label")?.textContent).toBe(
+      "Sausalito",
+    );
+    expect(marker.querySelector(".karl-map-marker")?.className).toContain(
+      "karl-map-marker--lightFog",
+    );
+  });
 });
 
 describe("shouldShowFoggyFilterMarkerLabel", () => {
-  it("only enables labels for visible foggy and Karl Territory markers on desktop", () => {
-    expect(
-      shouldShowFoggyFilterMarkerLabel("desktop", "foggy", false),
-    ).toBe(true);
-    expect(
-      shouldShowFoggyFilterMarkerLabel("desktop", "karlTerritory", false),
-    ).toBe(true);
-    expect(
-      shouldShowFoggyFilterMarkerLabel("mobile", "foggy", false),
-    ).toBe(false);
-    expect(
-      shouldShowFoggyFilterMarkerLabel("mobile", "karlTerritory", false),
-    ).toBe(false);
-    expect(
-      shouldShowFoggyFilterMarkerLabel("desktop", "lightFog", false),
-    ).toBe(false);
-    expect(
-      shouldShowFoggyFilterMarkerLabel("desktop", "foggy", true),
-    ).toBe(false);
-    expect(
-      shouldShowFoggyFilterMarkerLabel("desktop", "karlTerritory", true),
-    ).toBe(false);
+  it("enables labels for visible matching markers on desktop for every intensity filter", () => {
+    for (const intensity of [
+      "clear",
+      "lightFog",
+      "foggy",
+      "karlTerritory",
+    ] as const) {
+      expect(
+        shouldShowFoggyFilterMarkerLabel("desktop", intensity, false),
+      ).toBe(true);
+      expect(
+        shouldShowFoggyFilterMarkerLabel("mobile", intensity, false),
+      ).toBe(false);
+      expect(
+        shouldShowFoggyFilterMarkerLabel("desktop", intensity, true),
+      ).toBe(false);
+    }
+
+    expect(shouldShowFoggyFilterMarkerLabel("desktop", null, false)).toBe(
+      false,
+    );
   });
 });
 
 describe("getMapMarkerPlacementOptions", () => {
-  it("offsets labeled foggy markers so icons sit above names", () => {
+  it("offsets labeled markers so icons sit above names", () => {
     expect(getMapMarkerPlacementOptions(false)).toEqual({ anchor: "center" });
     expect(getMapMarkerPlacementOptions(true)).toEqual({
       anchor: "center",
       offset: [0, -11],
     });
+  });
+
+  it("uses the same showLocationLabel boolean for wrapper and placement offset", () => {
+    const location = {
+      id: "san-jose",
+      name: "San Jose",
+      latitude: 37.3382,
+      longitude: -121.8863,
+      fogScore: 10,
+      sunshineScore: 90,
+      status: "Clear",
+    };
+    const isFilteredOut = false;
+    const showLocationLabel = shouldShowFoggyFilterMarkerLabel(
+      "desktop",
+      "clear",
+      isFilteredOut,
+    );
+
+    const marker = createMapMarkerElement({
+      location,
+      isSelected: false,
+      fogLayerEnabled: true,
+      intensityFilter: "clear",
+      layout: "desktop",
+      showLocationLabel,
+      onSelect: vi.fn(),
+    });
+    const placement = getMapMarkerPlacementOptions(showLocationLabel);
+
+    expect(showLocationLabel).toBe(true);
+    expect(marker.className).toContain("karl-map-marker-root--labeled");
+    expect(placement.offset).toEqual([0, -11]);
   });
 });
