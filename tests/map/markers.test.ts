@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 
 import { fireEvent } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   createMapMarkerElement,
@@ -23,6 +23,10 @@ const tiburon: MapMarkerLocation = {
 };
 
 describe("createMapMarkerElement", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("creates a marker href target through map routing helpers", () => {
     expect(buildMapHref(tiburon.id)).toBe("/map?location=tiburon");
   });
@@ -184,6 +188,9 @@ describe("createMapMarkerElement", () => {
   });
 
   it("shows sun icons for clear locations when the Clear filter is active", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-03T12:00:00"));
+
     const marker = createMapMarkerElement({
       location: {
         id: "san-jose",

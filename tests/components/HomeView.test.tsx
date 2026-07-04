@@ -39,6 +39,7 @@ function renderHome() {
 describe("HomeView", () => {
   afterEach(() => {
     cleanup();
+    vi.useRealTimers();
     vi.restoreAllMocks();
     window.localStorage.clear();
   });
@@ -72,6 +73,9 @@ describe("HomeView", () => {
   });
 
   it("renders loaded Home content from fixtures", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.setSystemTime(new Date("2026-07-03T12:00:00"));
+
     renderHome();
 
     expect(await screen.findByText("56%")).toBeInTheDocument();
