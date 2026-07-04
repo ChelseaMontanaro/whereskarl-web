@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   BAY_AREA_DEFAULT_BOUNDS,
+  BAY_AREA_IMMERSIVE_VIEWPORT_PADDING,
   BAY_AREA_PRODUCT_REGIONS,
   findBayAreaProductRegion,
   isBayAreaBackendRegionId,
@@ -92,6 +93,7 @@ describe("Bay Area product regions", () => {
         bottom: 128,
         left: 360,
       },
+      immersivePadding: BAY_AREA_IMMERSIVE_VIEWPORT_PADDING,
       maxZoom: 11.3,
     });
   });
@@ -136,6 +138,7 @@ describe("Bay Area product regions", () => {
         bottom: 128,
         left: 360,
       },
+      immersivePadding: BAY_AREA_IMMERSIVE_VIEWPORT_PADDING,
       maxZoom: 10.6,
     });
   });
@@ -174,6 +177,7 @@ describe("Bay Area product regions", () => {
         bottom: 128,
         left: 360,
       },
+      immersivePadding: BAY_AREA_IMMERSIVE_VIEWPORT_PADDING,
       maxZoom: 10.5,
     });
   });
@@ -205,6 +209,7 @@ describe("Bay Area product regions", () => {
         bottom: 128,
         left: 280,
       },
+      immersivePadding: BAY_AREA_IMMERSIVE_VIEWPORT_PADDING,
       maxZoom: 11,
     });
     expect(southBay?.viewport?.desktopPadding).not.toEqual(

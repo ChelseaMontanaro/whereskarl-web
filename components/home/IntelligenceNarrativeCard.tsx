@@ -30,7 +30,7 @@ function MobileIntelligenceNarrativeCard({
 }: Omit<IntelligenceNarrativeCardProps, "layout">) {
   if (isLoading) {
     return (
-      <GlassCard className="border-white/8 bg-karl-navy-glass/55 px-4 py-4 backdrop-blur-md">
+      <GlassCard variant="desktop" className="px-4 py-4">
         <CardLabel>Karl&apos;s Read</CardLabel>
         <p className="mt-3 text-lg font-semibold text-white/50">
           Reading Karl intelligence…
@@ -53,7 +53,7 @@ function MobileIntelligenceNarrativeCard({
     karlReadPresentation?.summary ?? intelligence.narrative.summary;
 
   return (
-    <GlassCard className="border-white/8 bg-karl-navy-glass/55 px-4 py-4 backdrop-blur-md">
+    <GlassCard variant="desktop" className="px-4 py-4">
       <CardLabel>Karl&apos;s Read</CardLabel>
       <h2 className="mt-3 text-lg font-semibold leading-snug text-white">
         {headline}

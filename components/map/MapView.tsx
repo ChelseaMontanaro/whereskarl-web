@@ -9,18 +9,13 @@ import { BayAreaMap } from "@/components/map/BayAreaMap";
 import { MapBestRightNowTray } from "@/components/map/MapBestRightNowTray";
 import { MapConditionsPanel } from "@/components/map/MapConditionsPanel";
 import { MapFogLegend } from "@/components/map/MapFogLegend";
-import { MapLocationList } from "@/components/map/MapLocationList";
-import { MapRegionChips } from "@/components/map/MapRegionChips";
 import { MapSelectedLocationCard } from "@/components/map/MapSelectedLocationCard";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { getCurrent, getLocations } from "@/lib/api/weather";
 import { WEATHER_STALE_TIME_MS } from "@/lib/constants/config";
 import { bestRightNowLocationItems } from "@/lib/home/weatherDisplay";
 import { useMinWidth } from "@/lib/hooks/useMinWidth";
-import {
-  getLocationConditionLabel,
-  type FogIntensity,
-} from "@/lib/map/conditions";
+import type { FogIntensity } from "@/lib/map/conditions";
 import { findBayAreaProductRegion, isBayAreaProductRegionId } from "@/lib/map/config";
 import {
   intensityFilterTrayItems,
@@ -29,7 +24,6 @@ import {
 } from "@/lib/map/intensityFilter";
 import { resolveMapLocationFocus } from "@/lib/map/locationSelection";
 import type { MapMarkerLocation } from "@/lib/map/markers";
-import { getProductRegionNameForLocation } from "@/lib/map/regions";
 import {
   buildMapHref,
   buildMapRegionHref,
@@ -43,57 +37,10 @@ function initialMapStyle(): KarlMapStyleId {
     return "hybrid";
   }
 
-  return window.matchMedia("(min-width: 1024px)").matches ? "hybrid" : "standard";
+  return "hybrid";
 }
 
 export { initialMapStyle };
-
-function MapLocationCard({
-  location,
-  isSelected,
-}: {
-  location: LocationWeather;
-  isSelected: boolean;
-}) {
-  const regionName = getProductRegionNameForLocation(location);
-  const conditionLabel = getLocationConditionLabel(location);
-
-  return (
-    <GlassCard
-      className={`px-4 py-4 ${
-        isSelected ? "border-karl-gold/35 bg-karl-navy-glass/90" : ""
-      }`}
-      data-selected={isSelected ? "true" : "false"}
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-[0.68rem] font-bold uppercase tracking-[0.14em] text-white/45">
-            {isSelected ? "Selected Location" : "Location"}
-          </p>
-          {regionName ? (
-            <p className="mt-1 text-[0.625rem] font-semibold uppercase tracking-[0.12em] text-karl-gold/80">
-              {regionName}
-            </p>
-          ) : null}
-          <h2 className="mt-2 text-lg font-semibold text-white">{location.name}</h2>
-          <p className="mt-1 text-sm text-white/65">{location.status}</p>
-          <p className="mt-1 text-xs font-medium uppercase tracking-[0.1em] text-white/45">
-            {conditionLabel}
-          </p>
-          <p className="mt-2 text-sm text-white/50">
-            {location.distanceText} · {location.temperature}°
-          </p>
-        </div>
-        <div className="rounded-full border border-karl-gold/25 px-2.5 py-1.5 text-center">
-          <p className="text-lg font-light text-karl-gold">{location.sunshineScore}</p>
-          <p className="text-[0.6rem] uppercase tracking-[0.1em] text-white/40">
-            Clear
-          </p>
-        </div>
-      </div>
-    </GlassCard>
-  );
-}
 
 function MapQueryWarnings({
   unknownLocationId,
@@ -310,69 +257,77 @@ function MobileMapView({ state }: { state: MapViewModel }) {
     fogLayerEnabled,
     setFogLayerEnabled,
     locationsQuery,
-    locations,
+    currentQuery,
     selectedLocation,
     unknownLocationId,
-    activeRegion,
     markerLocations,
+    bestRightNowItems,
     handleSelectLocation,
     handleSelectRegion,
+    handleClearSelectedLocation,
+    handleSelectIntensity,
+    intensityFilter,
+    suppressViewportUpdateRef,
   } = state;
 
-  const headerCopy = selectedLocation
-    ? `Focused on ${selectedLocation.name}.`
-    : activeRegion
-      ? `Framing ${activeRegion.name} across the Bay.`
-      : "Explore conditions across San Francisco, North Bay, East Bay, and South Bay.";
-
   return (
-    <div className="mx-auto flex w-full max-w-[430px] flex-col gap-4 px-4 py-6 sm:py-8">
-      <header className="space-y-2">
-        <p className="text-sm font-medium uppercase tracking-[0.18em] text-karl-gold">
-          Where&apos;s Karl?
-        </p>
-        <h1 className="text-3xl font-semibold tracking-tight text-white">Map</h1>
-        <p className="text-base text-white/70">{headerCopy}</p>
-      </header>
-
-      <MapRegionChips
-        selectedRegionId={selectedLocation ? null : mapQuery.activeRegionId}
-        onSelectRegion={handleSelectRegion}
-      />
-
-      <GlassCard className="relative aspect-[4/5] overflow-hidden px-0 py-0">
-        <BayAreaMap
-          locations={markerLocations}
-          selectedLocationId={selectedLocation?.id ?? null}
-          selectedRegionId={selectedLocation ? null : mapQuery.activeRegionId}
-          onSelectLocation={handleSelectLocation}
-          mapStyle={mapStyle}
-          fogLayerEnabled={fogLayerEnabled}
-          onMapStyleChange={setMapStyle}
-          onFogLayerChange={setFogLayerEnabled}
-          isLoading={locationsQuery.isLoading}
-          layout="mobile"
-        />
-      </GlassCard>
-
-      <MapQueryWarnings
-        unknownLocationId={unknownLocationId}
-        unknownRegionId={mapQuery.unknownRegionId}
-      />
-
-      {selectedLocation ? (
-        <MapLocationCard location={selectedLocation} isSelected />
-      ) : null}
-
-      <MapLocationList
-        locations={locations}
+    <div className="fixed inset-0 z-10">
+      <BayAreaMap
+        locations={markerLocations}
         selectedLocationId={selectedLocation?.id ?? null}
-        activeRegionId={selectedLocation ? null : mapQuery.activeRegionId}
+        selectedRegionId={selectedLocation ? null : mapQuery.activeRegionId}
         onSelectLocation={handleSelectLocation}
+        mapStyle={mapStyle}
+        fogLayerEnabled={fogLayerEnabled}
+        onMapStyleChange={setMapStyle}
+        onFogLayerChange={setFogLayerEnabled}
         isLoading={locationsQuery.isLoading}
+        layout="immersive"
+        suppressViewportUpdateRef={suppressViewportUpdateRef}
+        intensityFilter={intensityFilter}
       />
 
-      <p className="text-center text-[0.65rem] text-white/30">
+      <div className="pointer-events-none absolute inset-0 z-20">
+        <div className="pointer-events-auto absolute left-3 right-16 top-3 flex max-w-xs flex-col gap-2 sm:left-4 sm:top-4 md:top-[4.5rem] md:right-auto">
+          <MapConditionsPanel
+            isLoading={currentQuery.isLoading && !currentQuery.data}
+            selectedRegionId={
+              selectedLocation ? null : mapQuery.activeRegionId
+            }
+            onSelectRegion={handleSelectRegion}
+          />
+          <MapFogLegend
+            layout="desktop-stack"
+            activeIntensity={intensityFilter}
+            onSelectIntensity={handleSelectIntensity}
+          />
+          <MapQueryWarnings
+            unknownLocationId={unknownLocationId}
+            unknownRegionId={mapQuery.unknownRegionId}
+            variant="desktop"
+          />
+        </div>
+
+        <div className="pointer-events-auto absolute inset-x-3 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] flex flex-col items-stretch gap-2 sm:inset-x-4">
+          {shouldShowDesktopBestRightNowTray(intensityFilter) ? (
+            <MapBestRightNowTray
+              items={bestRightNowItems}
+              selectedLocationId={selectedLocation?.id ?? null}
+              onSelectLocation={handleSelectLocation}
+              isLoading={locationsQuery.isLoading}
+            />
+          ) : null}
+
+          {selectedLocation ? (
+            <MapSelectedLocationCard
+              location={selectedLocation}
+              onClose={handleClearSelectedLocation}
+            />
+          ) : null}
+        </div>
+      </div>
+
+      <p className="pointer-events-none absolute bottom-[calc(4.25rem+env(safe-area-inset-bottom))] right-3 z-20 text-[0.6rem] text-white/25 sm:right-4">
         Map data © OpenStreetMap contributors · CARTO
       </p>
     </div>

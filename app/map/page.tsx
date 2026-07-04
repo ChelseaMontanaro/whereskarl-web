@@ -13,10 +13,7 @@ export const metadata = createPageMetadata({
 function MapLoadingFallback() {
   return (
     <>
-      <div className="mx-auto flex w-full max-w-[430px] flex-col gap-4 px-4 py-8 lg:hidden">
-        <p className="text-sm text-white/55">Loading map…</p>
-      </div>
-      <div className="fixed inset-0 hidden items-center justify-center bg-karl-navy lg:flex">
+      <div className="fixed inset-0 flex items-center justify-center bg-karl-navy">
         <p className="text-sm text-white/55">Loading map…</p>
       </div>
     </>
@@ -25,7 +22,7 @@ function MapLoadingFallback() {
 
 export default function MapPage() {
   return (
-    <div className="lg:h-screen lg:overflow-hidden">
+    <div className="h-screen overflow-hidden">
       <Suspense fallback={<MapLoadingFallback />}>
         <MapView />
       </Suspense>

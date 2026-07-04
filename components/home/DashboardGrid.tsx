@@ -32,7 +32,7 @@ type DashboardGridProps = {
 };
 
 const metricCardSurfaceClass =
-  "h-full min-h-[5.75rem] border-white/8 bg-karl-navy-glass/55 px-3.5 py-3 backdrop-blur-md lg:min-h-[7rem] lg:border-white/10 lg:bg-black/34 lg:px-4 lg:py-4 lg:shadow-[0_4px_20px_rgba(0,0,0,0.14)] lg:backdrop-blur-md";
+  "h-full min-h-[5.75rem] border-white/10 bg-black/34 px-3.5 py-3 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.14)] lg:min-h-[7rem] lg:px-4 lg:py-4";
 
 function CardLabel({ children }: { children: ReactNode }) {
   return (

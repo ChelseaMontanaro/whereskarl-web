@@ -11,7 +11,16 @@ export const BAY_AREA_CENTER: [number, number] = [-122.27, 37.62];
 
 export const BAY_AREA_LOCATION_ZOOM = 11.4;
 
+const immersiveViewportPadding = {
+  top: 112,
+  right: 40,
+  bottom: 168,
+  left: 40,
+};
+
 export const BAY_AREA_DEFAULT_VIEWPORT_PADDING = 36;
+
+export const BAY_AREA_IMMERSIVE_VIEWPORT_PADDING = immersiveViewportPadding;
 
 export const BAY_AREA_DEFAULT_MAX_ZOOM = 10.2;
 
@@ -35,6 +44,7 @@ export type ViewportPadding =
 export type BayAreaProductRegionViewport = {
   padding?: ViewportPadding;
   desktopPadding?: ViewportPadding;
+  immersivePadding?: ViewportPadding;
   maxZoom?: number;
 };
 
@@ -77,6 +87,7 @@ export const BAY_AREA_PRODUCT_REGIONS: BayAreaProductRegion[] = [
     ],
     viewport: {
       padding: 36,
+      immersivePadding: immersiveViewportPadding,
       desktopPadding: {
         top: 80,
         right: 80,
@@ -95,6 +106,7 @@ export const BAY_AREA_PRODUCT_REGIONS: BayAreaProductRegion[] = [
     ],
     viewport: {
       padding: 36,
+      immersivePadding: immersiveViewportPadding,
       desktopPadding: {
         top: 80,
         right: 80,
@@ -113,6 +125,7 @@ export const BAY_AREA_PRODUCT_REGIONS: BayAreaProductRegion[] = [
     ],
     viewport: {
       padding: 36,
+      immersivePadding: immersiveViewportPadding,
       desktopPadding: {
         top: 80,
         right: 80,
@@ -131,6 +144,7 @@ export const BAY_AREA_PRODUCT_REGIONS: BayAreaProductRegion[] = [
     ],
     viewport: {
       padding: 36,
+      immersivePadding: immersiveViewportPadding,
       desktopPadding: {
         top: 80,
         right: 80,

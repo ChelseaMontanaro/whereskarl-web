@@ -1,16 +1,9 @@
 // @vitest-environment happy-dom
 
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { HomeHero } from "@/components/home/HomeHero";
-import { resolveHeroPresentation } from "@/lib/home/heroPresentation";
-import { karlIntelligenceResponseSchema } from "@/lib/schemas/intelligence";
-
-const FIXTURES_DIR = join(process.cwd(), "tests/fixtures");
-const fallbackPresentation = resolveHeroPresentation(null);
 
 const heroDefaults = {
   clearSkiesLocationId: null as string | null,
@@ -26,7 +19,6 @@ describe("HomeHero", () => {
     render(
       <HomeHero
         {...heroDefaults}
-        presentation={fallbackPresentation}
         headline="Reading Karl intelligence"
         subheadline="Checking conditions"
         confidenceText={null}
@@ -43,21 +35,10 @@ describe("HomeHero", () => {
     );
   });
 
-  it("uses remote hero alt text and loaded position badge", () => {
-    const fixture = karlIntelligenceResponseSchema.parse(
-      JSON.parse(
-        readFileSync(
-          join(FIXTURES_DIR, "karl-intelligence-mill-valley.json"),
-          "utf8",
-        ),
-      ),
-    );
-    const presentation = resolveHeroPresentation(fixture.heroImagery);
-
+  it("uses loaded position badge and clear skies CTA", () => {
     render(
       <HomeHero
         {...heroDefaults}
-        presentation={presentation}
         headline="Karl is lingering over Mill Valley."
         subheadline="Fog is strongest near the shoreline right now."
         confidenceText="High confidence"
@@ -66,9 +47,6 @@ describe("HomeHero", () => {
       />,
     );
 
-    expect(
-      screen.getByAltText(fixture.heroImagery.altText ?? ""),
-    ).toBeInTheDocument();
     expect(screen.getByText("Karl's current position")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Find Clear Skies" })).toHaveAttribute(
       "href",
@@ -76,11 +54,10 @@ describe("HomeHero", () => {
     );
   });
 
-  it("falls back to gradient when imageUrl is unavailable", () => {
+  it("does not render a duplicate inline hero image", () => {
     render(
       <HomeHero
         {...heroDefaults}
-        presentation={fallbackPresentation}
         headline="Karl is hanging offshore."
         subheadline="Karl is lighter across most of the Bay."
         confidenceText={null}

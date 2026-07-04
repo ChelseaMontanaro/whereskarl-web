@@ -249,7 +249,6 @@ export function HomeView() {
       <HomeDesktopBackground presentation={heroPresentation} />
 
       <HomeHero
-        presentation={heroPresentation}
         headline={headline}
         subheadline={subheadline}
         confidenceText={confidenceText}
@@ -258,7 +257,7 @@ export function HomeView() {
         isFindingClearSkies={isFindingClearSkies}
       />
 
-      <div className="relative z-10 mx-auto -mt-12 flex w-full max-w-[430px] flex-col px-4 lg:-mt-2 lg:max-w-6xl lg:px-8 lg:pt-4 xl:max-w-7xl">
+      <div className="relative z-10 mx-auto -mt-16 flex w-full max-w-[430px] flex-col px-4 sm:max-w-xl sm:px-5 md:max-w-2xl lg:-mt-2 lg:max-w-6xl lg:px-8 lg:pt-4 xl:max-w-7xl">
         <DashboardGrid
           current={current}
           bestSunshine={bestSunshine}

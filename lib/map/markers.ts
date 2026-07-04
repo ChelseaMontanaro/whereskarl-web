@@ -119,12 +119,12 @@ export function isMapMarkerVisible(
 }
 
 export function shouldShowFoggyFilterMarkerLabel(
-  layout: "mobile" | "desktop" | undefined,
+  layout: "mobile" | "desktop" | "immersive" | undefined,
   intensityFilter: FogIntensity | null | undefined,
   isFilteredOut: boolean,
 ): boolean {
   return (
-    layout === "desktop" &&
+    (layout === "desktop" || layout === "immersive") &&
     intensityFilter != null &&
     !isFilteredOut
   );
@@ -182,7 +182,7 @@ export function createMapMarkerElement(input: {
   fogLayerEnabled: boolean;
   intensityFilter?: FogIntensity | null;
   selectedRegionId?: string | null;
-  layout?: "mobile" | "desktop";
+  layout?: "mobile" | "desktop" | "immersive";
   showLocationLabel?: boolean;
   onSelect: (locationId: string) => void;
 }): HTMLElement {

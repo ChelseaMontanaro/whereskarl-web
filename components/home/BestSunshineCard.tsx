@@ -44,7 +44,7 @@ function MobileBestSunshineCard({
 
   if (isLoading) {
     return (
-      <GlassCard className="border-karl-gold/15 px-4 py-4">
+      <GlassCard variant="desktop" className="border-karl-gold/15 px-4 py-4">
         <CardLabel className="text-white/45 lg:text-white/45">
           Brightest Spot
         </CardLabel>
@@ -63,7 +63,7 @@ function MobileBestSunshineCard({
 
   if (isUnavailable || !recommendation) {
     return (
-      <GlassCard className="border-karl-gold/15 px-4 py-4">
+      <GlassCard variant="desktop" className="border-karl-gold/15 px-4 py-4">
         <CardLabel className="text-white/45 lg:text-white/45">
           Brightest Spot
         </CardLabel>
@@ -86,7 +86,7 @@ function MobileBestSunshineCard({
     recommendation.status;
 
   return (
-    <GlassCard className="border-karl-gold/20 bg-karl-navy-glass/85 px-4 py-4">
+    <GlassCard variant="desktop" className="border-karl-gold/20 px-4 py-4">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           <CardLabel className="text-white/45 lg:text-white/45">

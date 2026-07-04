@@ -13,7 +13,7 @@ type MapLayerControlsProps = {
   fogLayerEnabled: boolean;
   onMapStyleChange: (styleId: KarlMapStyleId) => void;
   onFogLayerChange: (enabled: boolean) => void;
-  layout?: "mobile" | "desktop";
+  layout?: "mobile" | "desktop" | "immersive";
   onZoomIn?: () => void;
   onZoomOut?: () => void;
 };
@@ -166,9 +166,20 @@ export function MapLayerControls({
   const [isOpen, setIsOpen] = useState(false);
   const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false);
 
-  if (layout === "desktop") {
+  if (layout === "desktop" || layout === "immersive") {
+    const panelId =
+      layout === "immersive"
+        ? "map-layer-panel-immersive"
+        : "map-layer-panel-desktop";
+
     return (
-      <div className="absolute right-5 top-[5.5rem] z-10 flex w-[min(100%,17rem)] flex-col items-end gap-2">
+      <div
+        className={`absolute z-10 flex flex-col items-end gap-2 ${
+          layout === "immersive"
+            ? "right-3 top-3 w-[min(100%,15rem)] sm:right-4 sm:top-4 md:top-[4.5rem]"
+            : "right-5 top-[5.5rem] w-[min(100%,17rem)]"
+        }`}
+      >
         <div
           className={`${desktopGlassCardClass} flex flex-col items-center p-1`}
           aria-label="Map zoom controls"
@@ -182,7 +193,7 @@ export function MapLayerControls({
           <button
             type="button"
             aria-expanded={false}
-            aria-controls="map-layer-panel-desktop"
+            aria-controls={panelId}
             onClick={() => setIsDesktopCollapsed(false)}
             className={`${desktopGlassCardClass} flex items-center gap-2 px-3 py-2 text-xs font-semibold text-white/80 transition-colors hover:text-karl-gold motion-reduce:transition-none`}
           >
@@ -191,7 +202,7 @@ export function MapLayerControls({
           </button>
         ) : (
           <div
-            id="map-layer-panel-desktop"
+            id={panelId}
             className={`${desktopGlassCardClass} w-full p-3 shadow-xl`}
           >
             <div className="flex items-start justify-between gap-3">

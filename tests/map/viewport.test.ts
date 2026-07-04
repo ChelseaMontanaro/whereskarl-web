@@ -27,6 +27,20 @@ describe("resolveRegionViewportOptions", () => {
     });
   });
 
+  it("uses immersive padding for North Bay on immersive layout", () => {
+    const northBay = findBayAreaProductRegion("north-bay");
+
+    expect(resolveRegionViewportOptions(northBay?.viewport, "immersive")).toEqual({
+      padding: {
+        top: 112,
+        right: 40,
+        bottom: 168,
+        left: 40,
+      },
+      maxZoom: 11.3,
+    });
+  });
+
   it("uses mobile padding for South Bay on mobile layout", () => {
     const southBay = findBayAreaProductRegion("south-bay");
 

@@ -25,6 +25,7 @@ import {
   fitMapToBounds,
   focusMapOnLocation,
   resolveRegionViewportOptions,
+  BAY_AREA_IMMERSIVE_VIEWPORT_PADDING,
 } from "@/lib/map/viewport";
 
 type BayAreaMapProps = {
@@ -37,7 +38,7 @@ type BayAreaMapProps = {
   onMapStyleChange: (styleId: KarlMapStyleId) => void;
   onFogLayerChange: (enabled: boolean) => void;
   isLoading?: boolean;
-  layout?: "mobile" | "desktop";
+  layout?: "mobile" | "desktop" | "immersive";
   suppressViewportUpdateRef?: MutableRefObject<boolean>;
   intensityFilter?: FogIntensity | null;
 };
@@ -62,6 +63,8 @@ export function BayAreaMap({
   const onSelectRef = useRef(onSelectLocation);
   const [mapReady, setMapReady] = useState(false);
   const isDesktop = layout === "desktop";
+  const isImmersive = layout === "immersive";
+  const isFullBleed = isDesktop || isImmersive;
 
   onSelectRef.current = onSelectLocation;
 
@@ -91,7 +94,7 @@ export function BayAreaMap({
         attributionControl: { compact: true },
       });
 
-      if (!isDesktop) {
+      if (!isFullBleed) {
         map.addControl(
           new maplibregl.NavigationControl({ showCompass: false }),
           "top-right",
@@ -103,7 +106,10 @@ export function BayAreaMap({
           return;
         }
 
-        fitDefaultBayAreaViewport(map);
+        fitDefaultBayAreaViewport(
+          map,
+          isImmersive ? BAY_AREA_IMMERSIVE_VIEWPORT_PADDING : undefined,
+        );
         syncFogOverlayLayer(map, locations, fogLayerEnabled, intensityFilter);
         setMapReady(true);
       });
@@ -154,7 +160,10 @@ export function BayAreaMap({
         return;
       }
 
-      fitDefaultBayAreaViewport(map);
+      fitDefaultBayAreaViewport(
+        map,
+        isImmersive ? BAY_AREA_IMMERSIVE_VIEWPORT_PADDING : undefined,
+      );
     };
 
     map.once("style.load", applyStyle);
@@ -162,6 +171,7 @@ export function BayAreaMap({
   }, [
     fogLayerEnabled,
     intensityFilter,
+    isImmersive,
     layout,
     locations,
     mapReady,
@@ -279,9 +289,13 @@ export function BayAreaMap({
       }
     }
 
-    fitDefaultBayAreaViewport(map);
+    fitDefaultBayAreaViewport(
+      map,
+      isImmersive ? BAY_AREA_IMMERSIVE_VIEWPORT_PADDING : undefined,
+    );
   }, [
     intensityFilter,
+    isImmersive,
     layout,
     locations,
     mapReady,
@@ -293,14 +307,14 @@ export function BayAreaMap({
   return (
     <div
       className={`relative w-full ${
-        isDesktop ? "h-full min-h-screen" : "h-full min-h-[360px]"
+        isFullBleed ? "h-full min-h-screen" : "h-full min-h-[360px]"
       }`}
     >
       <div
         ref={containerRef}
         data-testid="bay-area-map"
         className={`karl-map-canvas w-full ${
-          isDesktop ? "h-full min-h-screen" : "h-full min-h-[360px]"
+          isFullBleed ? "h-full min-h-screen" : "h-full min-h-[360px]"
         }`}
       />
       <MapLayerControls
@@ -312,8 +326,8 @@ export function BayAreaMap({
         onZoomIn={handleZoomIn}
         onZoomOut={handleZoomOut}
       />
-      {!isDesktop && fogLayerEnabled ? <MapFogLegend layout="mobile" /> : null}
-      {!isDesktop ? (
+      {!isFullBleed && fogLayerEnabled ? <MapFogLegend layout="mobile" /> : null}
+      {!isFullBleed ? (
         <>
           <div
             aria-hidden="true"

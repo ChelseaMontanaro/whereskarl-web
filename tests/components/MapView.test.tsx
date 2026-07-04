@@ -119,10 +119,11 @@ describe("MapView", () => {
   it("reads the selected location query param and shows the focused location", async () => {
     renderMap();
 
-    expect(await screen.findByText("Focused on Tiburon.")).toBeInTheDocument();
-    expect(screen.getByText("Selected Location")).toBeInTheDocument();
+    expect(
+      await screen.findByLabelText("Selected location: Tiburon"),
+    ).toBeInTheDocument();
     expect(screen.getByTestId("bay-area-map")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "San Francisco" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "SF" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "North Bay" })).toBeInTheDocument();
   });
 
@@ -135,7 +136,9 @@ describe("MapView", () => {
 
     expect(await screen.findByText(/Couldn't find/i)).toBeInTheDocument();
     expect(screen.getByText(/unknown spot/i)).toBeInTheDocument();
-    expect(screen.queryByText("Selected Location")).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText(/Selected location:/i),
+    ).not.toBeInTheDocument();
     expect(screen.getByTestId("bay-area-map")).toBeInTheDocument();
   });
 
@@ -149,17 +152,17 @@ describe("MapView", () => {
     });
   });
 
-  it("filters the location list when a region param is active", async () => {
+  it("activates the matching region chip when a region param is present", async () => {
     useSearchParamsMock.mockReturnValue(
       new URLSearchParams("region=north-bay"),
     );
 
     renderMap();
 
-    expect(await screen.findByText("North Bay Locations")).toBeInTheDocument();
-    expect(screen.getByText("Tiburon")).toBeInTheDocument();
-    expect(screen.getByText("Sausalito")).toBeInTheDocument();
-    expect(screen.queryByText("Oakland")).not.toBeInTheDocument();
+    expect(
+      await screen.findByRole("button", { name: "North Bay" }),
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(await screen.findByLabelText("Best Right Now")).toBeInTheDocument();
   });
 
   it("prioritizes location over region in the UI", async () => {
@@ -169,8 +172,10 @@ describe("MapView", () => {
 
     renderMap();
 
-    expect(await screen.findByText("Focused on Tiburon.")).toBeInTheDocument();
-    expect(screen.getByText("Bay Area Locations")).toBeInTheDocument();
+    expect(
+      await screen.findByLabelText("Selected location: Tiburon"),
+    ).toBeInTheDocument();
+    expect(await screen.findByLabelText("Best Right Now")).toBeInTheDocument();
     expect(screen.queryByText("South Bay Locations")).not.toBeInTheDocument();
   });
 
@@ -182,7 +187,7 @@ describe("MapView", () => {
     renderMap();
 
     expect(await screen.findByText(/Couldn't find region/i)).toBeInTheDocument();
-    expect(await screen.findByText("Bay Area Locations")).toBeInTheDocument();
+    expect(await screen.findByLabelText("Best Right Now")).toBeInTheDocument();
   });
 
   it("normalizes peninsula region params to San Francisco", async () => {
@@ -190,22 +195,22 @@ describe("MapView", () => {
 
     renderMap();
 
-    expect(
-      await screen.findByText("Framing San Francisco across the Bay."),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "SF" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
     expect(screen.queryByText(/Couldn't find region/i)).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Peninsula" })).not.toBeInTheDocument();
   });
 
-  it("selects a location from the list and updates routing", async () => {
+  it("selects a location from the Best Right Now tray and updates routing", async () => {
     useSearchParamsMock.mockReturnValue(new URLSearchParams("region=north-bay"));
 
     renderMap();
 
-    const viewButtons = await screen.findAllByRole("button", {
-      name: "View on map",
-    });
-    fireEvent.click(viewButtons[0]);
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Select Tiburon on map" }),
+    );
 
     expect(replaceMock).toHaveBeenCalledWith("/map?location=tiburon", {
       scroll: false,

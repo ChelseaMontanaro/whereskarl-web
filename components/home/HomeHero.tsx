@@ -1,16 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
 import { FindClearSkiesCta } from "@/components/home/FindClearSkiesCta";
-import type { HeroPresentation } from "@/lib/home/heroPresentation";
-import {
-  activeHeroImageUrl,
-  selectHeroImageSource,
-} from "@/lib/home/heroPresentation";
 
 type HomeHeroProps = {
-  presentation: HeroPresentation;
   headline: string;
   subheadline: string;
   confidenceText: string | null;
@@ -28,7 +20,6 @@ function HeroPositionBadge({ isLoading }: { isLoading: boolean }) {
 }
 
 export function HomeHero({
-  presentation,
   headline,
   subheadline,
   confidenceText,
@@ -36,71 +27,12 @@ export function HomeHero({
   clearSkiesLocationId,
   isFindingClearSkies,
 }: HomeHeroProps) {
-  const [remoteLoadFailed, setRemoteLoadFailed] = useState(false);
-  const [fallbackLoadFailed, setFallbackLoadFailed] = useState(false);
-  const imageSource = selectHeroImageSource({
-    imageUrl: presentation.imageUrl,
-    fallbackImageUrl: presentation.fallbackImageUrl,
-    remoteLoadFailed,
-    fallbackLoadFailed,
-  });
-  const heroImageUrl = activeHeroImageUrl(presentation, imageSource);
-
-  useEffect(() => {
-    setRemoteLoadFailed(false);
-    setFallbackLoadFailed(false);
-  }, [presentation.stabilityKey]);
-
   return (
     <section
       aria-label="Karl conditions hero"
-      className="relative min-h-[min(540px,70vh)] w-full overflow-hidden lg:min-h-0 lg:overflow-visible"
+      className="relative min-h-[min(620px,78vh)] w-full overflow-hidden lg:min-h-0 lg:overflow-visible"
     >
-      <div className="lg:hidden">
-        {heroImageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            key={`${presentation.stabilityKey}|${imageSource}`}
-            src={heroImageUrl}
-            alt={presentation.altText ?? "Bay Area weather hero image"}
-            className="absolute inset-0 h-full w-full scale-[1.02] object-cover motion-reduce:scale-100 motion-reduce:transition-none"
-            onError={() => {
-              if (imageSource === "remote") {
-                setRemoteLoadFailed(true);
-                return;
-              }
-
-              setFallbackLoadFailed(true);
-            }}
-          />
-        ) : (
-          <div
-            aria-hidden="true"
-            className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(242,163,38,0.22),transparent_38%),radial-gradient(circle_at_82%_18%,rgba(148,92,20,0.14),transparent_34%),linear-gradient(180deg,rgb(7_22_35)_0%,rgb(3_11_20)_52%,rgb(0_0_0)_100%)]"
-          />
-        )}
-
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 mix-blend-multiply"
-          style={{
-            background: `linear-gradient(180deg, rgba(3,11,20,${presentation.atmosphereTopOpacity}) 0%, rgba(3,11,20,0) 38%, rgba(3,11,20,${presentation.atmosphereBottomOpacity}) 100%)`,
-          }}
-        />
-        <div
-          aria-hidden="true"
-          className="absolute inset-0"
-          style={{
-            background: `linear-gradient(0deg, rgba(0,0,0,${presentation.bottomGradientLeadOpacity}) 0%, rgba(0,0,0,${presentation.bottomGradientMidOpacity}) 34%, rgba(0,0,0,0.22) 62%, rgba(0,0,0,0.12) 100%)`,
-          }}
-        />
-        <div
-          aria-hidden="true"
-          className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/70 via-black/35 to-transparent"
-        />
-      </div>
-
-      <div className="relative mx-auto flex min-h-[min(540px,70vh)] w-full max-w-[430px] flex-col lg:min-h-0 lg:max-w-6xl lg:px-8 xl:max-w-7xl">
+      <div className="relative z-10 mx-auto flex min-h-[min(620px,78vh)] w-full max-w-[430px] flex-col sm:max-w-xl md:max-w-2xl lg:min-h-0 lg:max-w-6xl lg:px-8 xl:max-w-7xl">
         <div className="flex flex-col items-center px-5 pt-6 text-center sm:pt-8 lg:hidden">
           <h2 className="font-serif text-[2rem] font-semibold leading-none tracking-[0.01em] text-white/[0.96] [text-shadow:0_7px_16px_rgba(0,0,0,0.52)] sm:text-[2.15rem]">
             Where&apos;s Karl?

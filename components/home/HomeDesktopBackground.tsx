@@ -33,7 +33,7 @@ export function HomeDesktopBackground({
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0 z-0 hidden lg:block"
+      className="pointer-events-none fixed inset-0 z-0"
     >
       {heroImageUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
@@ -56,18 +56,31 @@ export function HomeDesktopBackground({
       )}
 
       <div
-        className="absolute inset-0 mix-blend-multiply"
+        className="absolute inset-0 mix-blend-multiply lg:hidden"
+        style={{
+          background: `linear-gradient(180deg, rgba(3,11,20,${presentation.atmosphereTopOpacity * 0.72}) 0%, rgba(3,11,20,0.04) 42%, rgba(3,11,20,${presentation.atmosphereBottomOpacity * 0.48}) 100%)`,
+        }}
+      />
+      <div
+        className="absolute inset-0 lg:hidden"
+        style={{
+          background: `linear-gradient(0deg, rgba(0,0,0,${presentation.bottomGradientLeadOpacity * 0.42}) 0%, rgba(0,0,0,${presentation.bottomGradientMidOpacity * 0.22}) 38%, rgba(0,0,0,0.14) 68%, rgba(0,0,0,0.06) 100%)`,
+        }}
+      />
+      <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/55 via-black/22 to-transparent lg:hidden" />
+      <div
+        className="absolute inset-0 hidden mix-blend-multiply lg:block"
         style={{
           background: `linear-gradient(180deg, rgba(3,11,20,${presentation.atmosphereTopOpacity * 0.55}) 0%, rgba(3,11,20,0.02) 48%, rgba(3,11,20,${presentation.atmosphereBottomOpacity * 0.32}) 100%)`,
         }}
       />
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 hidden lg:block"
         style={{
           background: `linear-gradient(0deg, rgba(0,0,0,${presentation.bottomGradientLeadOpacity * 0.28}) 0%, rgba(0,0,0,${presentation.bottomGradientMidOpacity * 0.16}) 45%, rgba(0,0,0,0.06) 80%, transparent 100%)`,
         }}
       />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/28 via-transparent to-black/18" />
+      <div className="absolute inset-0 hidden bg-gradient-to-r from-black/28 via-transparent to-black/18 md:block" />
     </div>
   );
 }
