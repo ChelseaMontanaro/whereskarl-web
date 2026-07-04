@@ -14,13 +14,12 @@ import { MapSelectedLocationCard } from "@/components/map/MapSelectedLocationCar
 import { GlassCard } from "@/components/ui/GlassCard";
 import { getCurrent, getLocations } from "@/lib/api/weather";
 import { WEATHER_STALE_TIME_MS } from "@/lib/constants/config";
-import { bestRightNowLocationItems } from "@/lib/home/weatherDisplay";
 import { useMinWidth } from "@/lib/hooks/useMinWidth";
 import { usePhonePortrait } from "@/lib/hooks/usePhonePortrait";
 import type { FogIntensity } from "@/lib/map/conditions";
 import { findBayAreaProductRegion, isBayAreaProductRegionId } from "@/lib/map/config";
 import {
-  intensityFilterTrayItems,
+  mapBestRightNowTrayItems,
   shouldShowDesktopBestRightNowTray,
   toggleIntensityFilter,
 } from "@/lib/map/intensityFilter";
@@ -109,7 +108,7 @@ type MapViewModel = {
   unknownLocationId: string | null;
   activeRegion: ReturnType<typeof findBayAreaProductRegion>;
   markerLocations: MapMarkerLocation[];
-  bestRightNowItems: ReturnType<typeof bestRightNowLocationItems>;
+  bestRightNowItems: ReturnType<typeof mapBestRightNowTrayItems>;
   suppressViewportUpdateRef: MutableRefObject<boolean>;
   handleSelectLocation: (locationId: string) => void;
   handleSelectRegion: (regionId: string) => void;
@@ -171,28 +170,17 @@ function useMapViewState(): MapViewModel {
     [locations],
   );
 
-  const bestRightNow = useMemo(
-    () => bestRightNowLocationItems(locations, null, 4),
-    [locations],
-  );
-
-  const bestRightNowItems = useMemo(() => {
-    if (!intensityFilter) {
-      return bestRightNow;
-    }
-
-    if (intensityFilter === "clear") {
-      return intensityFilterTrayItems(
+  const bestRightNowItems = useMemo(
+    () =>
+      mapBestRightNowTrayItems(
         locations,
-        "clear",
+        intensityFilter,
+        mapQuery.activeRegionId,
         null,
         4,
-        mapQuery.activeRegionId,
-      );
-    }
-
-    return bestRightNow;
-  }, [bestRightNow, intensityFilter, locations, mapQuery.activeRegionId]);
+      ),
+    [intensityFilter, locations, mapQuery.activeRegionId],
+  );
 
   const handleSelectLocation = useCallback(
     (locationId: string) => {

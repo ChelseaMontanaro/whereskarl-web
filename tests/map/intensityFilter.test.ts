@@ -4,6 +4,7 @@ import type { FogIntensity } from "@/lib/map/conditions";
 import {
   boundsForIntensityLocations,
   intensityFilterTrayItems,
+  mapBestRightNowTrayItems,
   shouldShowDesktopBestRightNowTray,
   toggleIntensityFilter,
 } from "@/lib/map/intensityFilter";
@@ -151,6 +152,59 @@ describe("intensityFilterTrayItems", () => {
     expect(items).toHaveLength(1);
     expect(items.map((item) => item.locationId)).toEqual(["moderate-fog"]);
     expect(items[0]?.scoreLabel).toBe("55 sunshine");
+  });
+});
+
+describe("mapBestRightNowTrayItems", () => {
+  const locations: LocationWeather[] = [
+    {
+      ...baseLocation,
+      id: "ocean-beach",
+      name: "Ocean Beach",
+      region: "san-francisco",
+      fogScore: 20,
+      sunshineScore: 85,
+    },
+    {
+      ...baseLocation,
+      id: "tiburon",
+      name: "Tiburon",
+      region: "north-bay",
+      fogScore: 26,
+      sunshineScore: 82,
+    },
+    {
+      ...baseLocation,
+      id: "oakland",
+      name: "Oakland",
+      region: "east-bay",
+      fogScore: 30,
+      sunshineScore: 72,
+    },
+    {
+      ...baseLocation,
+      id: "san-jose",
+      name: "San Jose",
+      region: "south-bay",
+      fogScore: 12,
+      sunshineScore: 91,
+    },
+  ];
+
+  it("scopes Best Right Now items to the active region", () => {
+    expect(
+      mapBestRightNowTrayItems(locations, null, "north-bay").map(
+        (item) => item.locationId,
+      ),
+    ).toEqual(["tiburon"]);
+  });
+
+  it("scopes clear-filter tray items to the active region", () => {
+    expect(
+      mapBestRightNowTrayItems(locations, "clear", "san-francisco").map(
+        (item) => item.locationId,
+      ),
+    ).toEqual(["ocean-beach"]);
   });
 });
 

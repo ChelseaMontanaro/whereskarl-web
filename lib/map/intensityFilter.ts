@@ -5,7 +5,10 @@ import {
   locationMatchesFogIntensityFilter,
   type FogIntensity,
 } from "@/lib/map/conditions";
-import type { BestRightNowItem } from "@/lib/home/weatherDisplay";
+import {
+  bestRightNowLocationItems,
+  type BestRightNowItem,
+} from "@/lib/home/weatherDisplay";
 import type { MapMarkerLocation } from "@/lib/map/markers";
 import { filterLocationsByProductRegion } from "@/lib/map/regions";
 import type { LocationWeather } from "@/lib/schemas/weather";
@@ -49,6 +52,28 @@ export function intensityFilterTrayItems(
       rank: index + 1,
       isDegraded: isLocationDataDegraded(location.dataStatus),
     }));
+}
+
+/** Score-ranked tray items for the map, scoped to the active region and intensity filter. */
+export function mapBestRightNowTrayItems(
+  locations: LocationWeather[],
+  intensityFilter: FogIntensity | null,
+  regionId: BayAreaProductRegionId | null,
+  excludeLocationId: string | null = null,
+  limit = 4,
+): BestRightNowItem[] {
+  if (intensityFilter === "clear") {
+    return intensityFilterTrayItems(
+      locations,
+      "clear",
+      excludeLocationId,
+      limit,
+      regionId,
+    );
+  }
+
+  const scopedLocations = filterLocationsByProductRegion(locations, regionId);
+  return bestRightNowLocationItems(scopedLocations, excludeLocationId, limit);
 }
 
 export function intensityFilterTrayTitle(intensity: FogIntensity): string {
