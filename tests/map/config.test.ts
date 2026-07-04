@@ -86,4 +86,41 @@ describe("Bay Area product regions", () => {
       maxZoom: 11.3,
     });
   });
+
+  it("frames East Bay wide enough for core cities and inland context", () => {
+    const eastBay = findBayAreaProductRegion("east-bay");
+    expect(eastBay).toBeDefined();
+
+    const [[west, south], [east, north]] = eastBay!.bounds;
+
+    expect(pointInBounds(37.8716, -122.2727, eastBay!.bounds)).toBe(true);
+    expect(pointInBounds(37.8044, -122.2712, eastBay!.bounds)).toBe(true);
+    expect(pointInBounds(37.9103, -122.0652, eastBay!.bounds)).toBe(true);
+    expect(pointInBounds(37.8858, -122.118, eastBay!.bounds)).toBe(true);
+    expect(pointInBounds(37.8771, -122.1797, eastBay!.bounds)).toBe(true);
+    expect(pointInBounds(37.8502, -122.0322, eastBay!.bounds)).toBe(true);
+    expect(pointInBounds(37.8216, -122.0322, eastBay!.bounds)).toBe(true);
+    expect(pointInBounds(37.978, -122.0311, eastBay!.bounds)).toBe(true);
+    expect(pointInBounds(38.0049, -121.8058, eastBay!.bounds)).toBe(true);
+    expect(pointInBounds(37.6819, -121.768, eastBay!.bounds)).toBe(true);
+
+    expect(pointInBounds(37.7749, -122.4194, eastBay!.bounds)).toBe(false);
+    expect(pointInBounds(37.8735, -122.4566, eastBay!.bounds)).toBe(false);
+
+    expect(west).toBeGreaterThanOrEqual(-122.42);
+    expect(east).toBeLessThanOrEqual(-121.55);
+    expect(south).toBeLessThanOrEqual(37.6);
+    expect(north).toBeGreaterThanOrEqual(38.0);
+
+    expect(eastBay?.viewport).toEqual({
+      padding: 36,
+      desktopPadding: {
+        top: 80,
+        right: 80,
+        bottom: 128,
+        left: 360,
+      },
+      maxZoom: 10.0,
+    });
+  });
 });

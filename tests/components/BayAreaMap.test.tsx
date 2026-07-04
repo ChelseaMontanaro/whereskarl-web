@@ -148,6 +148,101 @@ describe("BayAreaMap", () => {
     });
   });
 
+  it("frames a wide East Bay viewport when the East Bay region is selected", async () => {
+    const eastBay = findBayAreaProductRegion("east-bay");
+    expect(eastBay).toBeDefined();
+
+    render(
+      <BayAreaMap
+        locations={locations}
+        selectedLocationId={null}
+        selectedRegionId="east-bay"
+        onSelectLocation={vi.fn()}
+        {...defaultProps}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(mockFitBounds).toHaveBeenCalledWith(
+        eastBay!.bounds,
+        expect.objectContaining({
+          padding: 36,
+          maxZoom: 10.0,
+          essential: true,
+        }),
+      );
+    });
+  });
+
+  it("offsets the East Bay desktop viewport to clear the left overlay panels", async () => {
+    const eastBay = findBayAreaProductRegion("east-bay");
+    expect(eastBay).toBeDefined();
+
+    render(
+      <BayAreaMap
+        locations={locations}
+        selectedLocationId={null}
+        selectedRegionId="east-bay"
+        onSelectLocation={vi.fn()}
+        {...defaultProps}
+        layout="desktop"
+      />,
+    );
+
+    await waitFor(() => {
+      expect(mockFitBounds).toHaveBeenCalledWith(
+        eastBay!.bounds,
+        expect.objectContaining({
+          padding: {
+            top: 80,
+            right: 80,
+            bottom: 128,
+            left: 360,
+          },
+          maxZoom: 10.0,
+          essential: true,
+        }),
+      );
+    });
+  });
+
+  it("keeps the East Bay viewport stable when an intensity filter has no matching markers", async () => {
+    const eastBay = findBayAreaProductRegion("east-bay");
+    expect(eastBay).toBeDefined();
+
+    render(
+      <BayAreaMap
+        locations={[
+          {
+            id: "berkeley",
+            name: "Berkeley",
+            latitude: 37.8716,
+            longitude: -122.2727,
+            sunshineScore: 18,
+            fogScore: 96,
+            status: "Karl Territory",
+          },
+        ]}
+        selectedLocationId={null}
+        selectedRegionId="east-bay"
+        onSelectLocation={vi.fn()}
+        {...defaultProps}
+        layout="desktop"
+        intensityFilter="clear"
+      />,
+    );
+
+    await waitFor(() => {
+      expect(mockFitBounds).toHaveBeenCalledWith(
+        eastBay!.bounds,
+        expect.objectContaining({
+          maxZoom: 10.0,
+          essential: true,
+        }),
+      );
+    });
+  });
+
   it("keeps the San Francisco region viewport unchanged", async () => {
     const sanFrancisco = findBayAreaProductRegion("san-francisco");
     expect(sanFrancisco).toBeDefined();

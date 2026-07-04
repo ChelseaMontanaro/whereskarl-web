@@ -32,4 +32,27 @@ describe("resolveRegionViewportOptions", () => {
 
     expect(resolveRegionViewportOptions(sanFrancisco?.viewport, "desktop")).toBeUndefined();
   });
+
+  it("uses mobile padding for East Bay on mobile layout", () => {
+    const eastBay = findBayAreaProductRegion("east-bay");
+
+    expect(resolveRegionViewportOptions(eastBay?.viewport, "mobile")).toEqual({
+      padding: 36,
+      maxZoom: 10.0,
+    });
+  });
+
+  it("uses desktop padding for East Bay on desktop layout", () => {
+    const eastBay = findBayAreaProductRegion("east-bay");
+
+    expect(resolveRegionViewportOptions(eastBay?.viewport, "desktop")).toEqual({
+      padding: {
+        top: 80,
+        right: 80,
+        bottom: 128,
+        left: 360,
+      },
+      maxZoom: 10.0,
+    });
+  });
 });
