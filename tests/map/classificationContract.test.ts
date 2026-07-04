@@ -47,8 +47,8 @@ const baseLocation = {
 } satisfies Omit<LocationWeather, "id" | "name" | "fogScore" | "sunshineScore">;
 
 /**
- * Live-style mismatch: high sunshineScore with fogScore in the 25–49 band.
- * Mirrors Tiburon (82/26), Sausalito (74/41), San Jose (76/24), Oakland (72/28).
+ * Live-style data: high sunshineScore with fogScore in the 25–49 band.
+ * Mirrors Tiburon (82/26), Sausalito (74/41), San Jose (76/26), Oakland (72/28).
  */
 const liveMapScenario: LocationWeather[] = [
   {
@@ -64,7 +64,7 @@ const liveMapScenario: LocationWeather[] = [
     name: "San Jose",
     latitude: 37.3382,
     longitude: -121.8863,
-    fogScore: 24,
+    fogScore: 26,
     sunshineScore: 76,
   },
   {
@@ -87,6 +87,15 @@ const liveMapScenario: LocationWeather[] = [
   },
   {
     ...baseLocation,
+    id: "moderate-fog",
+    name: "Moderate Fog",
+    latitude: 37.5,
+    longitude: -122.2,
+    fogScore: 35,
+    sunshineScore: 55,
+  },
+  {
+    ...baseLocation,
     id: "ocean-beach",
     name: "Ocean Beach",
     latitude: 37.7594,
@@ -98,12 +107,17 @@ const liveMapScenario: LocationWeather[] = [
 ];
 
 describe("classification contract regression", () => {
-  it("shows at least one Clear marker when clear-band locations exist in live-style data", () => {
+  it("shows Clear markers for strong clear-sky locations in live-style data", () => {
     const clearMarkers = liveMapScenario.filter((location) =>
       locationMatchesFogIntensityFilter(location, "clear"),
     );
 
-    expect(clearMarkers.map((location) => location.id)).toEqual(["san-jose"]);
+    expect(clearMarkers.map((location) => location.id)).toEqual([
+      "tiburon",
+      "san-jose",
+      "sausalito",
+      "oakland",
+    ]);
 
     for (const location of clearMarkers) {
       expect(
@@ -123,22 +137,22 @@ describe("classification contract regression", () => {
     }
   });
 
-  it("keeps fogScore 25–49 locations in Light Fog rather than Clear", () => {
-    for (const locationId of ["tiburon", "sausalito", "oakland"]) {
-      const location = liveMapScenario.find((entry) => entry.id === locationId);
+  it("keeps moderate fog locations in Light Fog rather than Clear", () => {
+    const moderateFog = liveMapScenario.find(
+      (entry) => entry.id === "moderate-fog",
+    );
 
-      expect(location).toBeDefined();
-      expect(
-        locationMatchesFogIntensityFilter(location!, "lightFog"),
-      ).toBe(true);
-      expect(
-        locationMatchesFogIntensityFilter(location!, "clear"),
-      ).toBe(false);
-      expect(getBestRightNowScoreLabel(location!)).not.toContain("clear");
-    }
+    expect(moderateFog).toBeDefined();
+    expect(
+      locationMatchesFogIntensityFilter(moderateFog!, "lightFog"),
+    ).toBe(true);
+    expect(
+      locationMatchesFogIntensityFilter(moderateFog!, "clear"),
+    ).toBe(false);
+    expect(getBestRightNowScoreLabel(moderateFog!)).toBe("55 sunshine");
   });
 
-  it("aligns Clear filter tray items with visible clear-band markers", () => {
+  it("aligns Clear filter tray items with visible clear-sky markers", () => {
     const trayItems = intensityFilterTrayItems(
       liveMapScenario,
       "clear",
@@ -146,11 +160,19 @@ describe("classification contract regression", () => {
       4,
     );
 
-    expect(trayItems.map((item) => item.locationId)).toEqual(["san-jose"]);
-    expect(trayItems[0]?.scoreLabel).toBe("76 clear");
+    expect(trayItems.map((item) => item.locationId)).toEqual([
+      "tiburon",
+      "san-jose",
+      "sausalito",
+      "oakland",
+    ]);
+    expect(trayItems[0]?.scoreLabel).toBe("82 clear");
+    expect(trayItems[1]?.scoreLabel).toBe("76 clear");
+    expect(trayItems[2]?.scoreLabel).toBe("74 clear");
+    expect(trayItems[3]?.scoreLabel).toBe("72 clear");
   });
 
-  it("aligns Light Fog filter tray with fogScore 25–49 locations", () => {
+  it("aligns Light Fog filter tray with moderate fog locations only", () => {
     const trayItems = intensityFilterTrayItems(
       liveMapScenario,
       "lightFog",
@@ -158,11 +180,24 @@ describe("classification contract regression", () => {
       4,
     );
 
-    expect(trayItems.map((item) => item.locationId)).toEqual([
-      "tiburon",
-      "sausalito",
-      "oakland",
-    ]);
-    expect(trayItems[0]?.scoreLabel).toBe("82 sunshine");
+    expect(trayItems.map((item) => item.locationId)).toEqual(["moderate-fog"]);
+    expect(trayItems[0]?.scoreLabel).toBe("55 sunshine");
+  });
+
+  it("keeps Foggy and Karl Territory filters raw fogScore-based", () => {
+    const oceanBeach = liveMapScenario.find(
+      (entry) => entry.id === "ocean-beach",
+    );
+
+    expect(oceanBeach).toBeDefined();
+    expect(
+      locationMatchesFogIntensityFilter(oceanBeach!, "karlTerritory"),
+    ).toBe(true);
+    expect(
+      locationMatchesFogIntensityFilter(oceanBeach!, "clear"),
+    ).toBe(false);
+    expect(
+      locationMatchesFogIntensityFilter(oceanBeach!, "lightFog"),
+    ).toBe(false);
   });
 });

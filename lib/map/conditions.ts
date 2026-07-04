@@ -3,6 +3,9 @@ export type FogIntensity = "clear" | "lightFog" | "foggy" | "karlTerritory";
 /** Aligns with Best Right Now / sunshineResultTitle "BEST CLEAR SKIES" threshold. */
 export const CLEAR_SKIES_SCORE_THRESHOLD = 50;
 
+/** Strong clear-sky locations qualify for the Clear intensity filter. */
+export const CLEAR_INTENSITY_SUNSHINE_THRESHOLD = 70;
+
 export type LocationConditionInput = {
   fogScore?: number | null;
   sunshineScore?: number | null;
@@ -43,13 +46,26 @@ export function getFogIntensity(fogScore: number | null): FogIntensity {
 
 /**
  * True when a location belongs in the Clear intensity filter.
- * Uses the raw fogScore clear band (< 25) only — high sunshineScore does not
- * override Light Fog evidence in the 25–49 band.
+ * Strong clear-sky scores or the raw fogScore clear band (< 25).
  */
 export function locationQualifiesAsClearIntensity(
   location: LocationConditionInput,
 ): boolean {
-  return resolveLocationFogIntensity(location) === "clear";
+  const fogScore = resolveFogScore(location);
+
+  if (fogScore !== null && fogScore < 25) {
+    return true;
+  }
+
+  if (
+    typeof location.sunshineScore === "number" &&
+    Number.isFinite(location.sunshineScore) &&
+    location.sunshineScore >= CLEAR_INTENSITY_SUNSHINE_THRESHOLD
+  ) {
+    return true;
+  }
+
+  return false;
 }
 
 /**
@@ -64,7 +80,7 @@ export function resolveLocationFogIntensity(
 
 /**
  * Canonical intensity filter matching for map markers, trays, and overlays.
- * Clear uses the clear-band rule; other intensities use display intensity.
+ * Clear uses clear-sky qualification; Light Fog excludes strong clear-sky locations.
  */
 export function locationMatchesFogIntensityFilter(
   location: LocationConditionInput,
@@ -72,6 +88,13 @@ export function locationMatchesFogIntensityFilter(
 ): boolean {
   if (intensity === "clear") {
     return locationQualifiesAsClearIntensity(location);
+  }
+
+  if (intensity === "lightFog") {
+    return (
+      resolveLocationFogIntensity(location) === "lightFog" &&
+      !locationQualifiesAsClearIntensity(location)
+    );
   }
 
   return resolveLocationFogIntensity(location) === intensity;
@@ -87,6 +110,10 @@ export function getBestRightNowScoreLabel(
 
   if (typeof score !== "number" || !Number.isFinite(score)) {
     return "";
+  }
+
+  if (locationQualifiesAsClearIntensity(location)) {
+    return `${score} clear`;
   }
 
   switch (resolveLocationFogIntensity(location)) {

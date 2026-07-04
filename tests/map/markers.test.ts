@@ -176,7 +176,11 @@ describe("createMapMarkerElement", () => {
 
   it("hides non-clear markers when the Clear filter is active", () => {
     const marker = createMapMarkerElement({
-      location: tiburon,
+      location: {
+        ...tiburon,
+        fogScore: 82,
+        sunshineScore: 40,
+      },
       isSelected: false,
       fogLayerEnabled: true,
       intensityFilter: "clear",

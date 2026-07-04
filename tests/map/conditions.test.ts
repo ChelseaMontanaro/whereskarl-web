@@ -78,18 +78,34 @@ describe("map conditions", () => {
     ).toBe("lightFog");
   });
 
-  it("does not treat high sunshineScore as Clear when fogScore is in the Light Fog band", () => {
+  it("treats strong clear-sky scores as Clear even when fogScore is in the Light Fog band", () => {
     const tiburonLike = { fogScore: 26, sunshineScore: 82 };
+    const sanJoseLike = { fogScore: 26, sunshineScore: 76 };
 
-    expect(locationQualifiesAsClearIntensity(tiburonLike)).toBe(false);
-    expect(locationMatchesFogIntensityFilter(tiburonLike, "clear")).toBe(false);
+    expect(locationQualifiesAsClearIntensity(tiburonLike)).toBe(true);
+    expect(locationMatchesFogIntensityFilter(tiburonLike, "clear")).toBe(true);
     expect(locationMatchesFogIntensityFilter(tiburonLike, "lightFog")).toBe(
-      true,
+      false,
     );
-    expect(getBestRightNowScoreLabel(tiburonLike)).toBe("82 sunshine");
+    expect(getBestRightNowScoreLabel(tiburonLike)).toBe("82 clear");
+
+    expect(locationQualifiesAsClearIntensity(sanJoseLike)).toBe(true);
+    expect(locationMatchesFogIntensityFilter(sanJoseLike, "clear")).toBe(true);
+    expect(getBestRightNowScoreLabel(sanJoseLike)).toBe("76 clear");
   });
 
-  it("treats fogScore below 25 as Clear even when sunshineScore is high", () => {
+  it("keeps moderate fog in Light Fog when sunshineScore is below the Clear threshold", () => {
+    const moderateFog = { fogScore: 35, sunshineScore: 55 };
+
+    expect(locationQualifiesAsClearIntensity(moderateFog)).toBe(false);
+    expect(locationMatchesFogIntensityFilter(moderateFog, "clear")).toBe(false);
+    expect(locationMatchesFogIntensityFilter(moderateFog, "lightFog")).toBe(
+      true,
+    );
+    expect(getBestRightNowScoreLabel(moderateFog)).toBe("55 sunshine");
+  });
+
+  it("treats fogScore below 25 as Clear even when sunshineScore is below 70", () => {
     const sanJoseLike = { fogScore: 24, sunshineScore: 76 };
 
     expect(locationQualifiesAsClearIntensity(sanJoseLike)).toBe(true);

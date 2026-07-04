@@ -68,8 +68,8 @@ describe("boundsForIntensityLocations", () => {
     const bounds = boundsForIntensityLocations(locations, "clear");
 
     expect(bounds).toEqual([
-      [-121.8863, 37.3382],
-      [-121.8863, 37.3382],
+      [-122.4566, 37.3382],
+      [-121.8863, 37.8735],
     ]);
   });
 });
@@ -102,11 +102,18 @@ describe("intensityFilterTrayItems", () => {
 
     const items = intensityFilterTrayItems(locations, "clear", null, 4);
 
-    expect(items).toHaveLength(1);
-    expect(items.map((item) => item.locationId)).toEqual(["san-jose"]);
+    expect(items).toHaveLength(3);
+    expect(items.map((item) => item.locationId)).toEqual([
+      "san-jose",
+      "tiburon",
+      "sausalito",
+    ]);
+    expect(items[0]?.scoreLabel).toBe("90 clear");
+    expect(items[1]?.scoreLabel).toBe("82 clear");
+    expect(items[2]?.scoreLabel).toBe("74 clear");
   });
 
-  it("returns light fog locations when fogScore is 25–49 even with sunshineScore >= 50", () => {
+  it("returns moderate light fog locations that are not strong clear-sky spots", () => {
     const locations: LocationWeather[] = [
       {
         ...baseLocation,
@@ -124,6 +131,13 @@ describe("intensityFilterTrayItems", () => {
       },
       {
         ...baseLocation,
+        id: "moderate-fog",
+        name: "Moderate Fog",
+        fogScore: 35,
+        sunshineScore: 55,
+      },
+      {
+        ...baseLocation,
         id: "san-jose",
         name: "San Jose",
         fogScore: 10,
@@ -133,8 +147,9 @@ describe("intensityFilterTrayItems", () => {
 
     const items = intensityFilterTrayItems(locations, "lightFog", null, 4);
 
-    expect(items).toHaveLength(2);
-    expect(items.map((item) => item.locationId)).toEqual(["tiburon", "sausalito"]);
+    expect(items).toHaveLength(1);
+    expect(items.map((item) => item.locationId)).toEqual(["moderate-fog"]);
+    expect(items[0]?.scoreLabel).toBe("55 sunshine");
   });
 });
 
