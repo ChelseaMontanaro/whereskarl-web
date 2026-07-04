@@ -25,12 +25,13 @@ const CARTO_DARK_LABEL_TILES = [
   "https://basemaps.cartocdn.com/rastertiles/dark_only_labels/{z}/{x}/{y}.png",
 ];
 
-/** Warm tan/golden land tones with readable ocean contrast on satellite/hybrid. */
+/** Muted tan/olive land, deep blue-green water, and cinematic contrast on satellite/hybrid. */
 const cinematicSatellitePaint = {
   "raster-brightness-min": 0,
-  "raster-brightness-max": 0.76,
-  "raster-contrast": 0.24,
-  "raster-saturation": 0.1,
+  "raster-brightness-max": 0.64,
+  "raster-contrast": 0.38,
+  "raster-saturation": -0.06,
+  "raster-hue-rotate": 14,
 } as const;
 
 const cinematicLabelPaint = {

@@ -29,10 +29,6 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
 }
 
-.karl-map-canvas--cinematic .maplibregl-canvas {
-  filter: brightness(1.04) saturate(1.1) contrast(1.02) sepia(0.06) hue-rotate(-8deg);
-}
-
 .karl-map-canvas .maplibregl-ctrl-group {
   background: rgb(9 27 42 / 0.92);
   border: 1px solid rgb(255 255 255 / 0.12);
