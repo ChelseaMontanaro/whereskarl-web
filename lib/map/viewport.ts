@@ -4,11 +4,17 @@ import {
   BAY_AREA_DEFAULT_BOUNDS,
   BAY_AREA_DEFAULT_MAX_ZOOM,
   BAY_AREA_DEFAULT_VIEWPORT_PADDING,
+  BAY_AREA_IMMERSIVE_MAX_ZOOM,
   BAY_AREA_IMMERSIVE_VIEWPORT_PADDING,
   BAY_AREA_LOCATION_ZOOM,
   type BayAreaProductRegionViewport,
   type MapBounds,
   type ViewportPadding,
+} from "@/lib/map/config";
+
+export {
+  BAY_AREA_IMMERSIVE_MAX_ZOOM,
+  BAY_AREA_IMMERSIVE_MIN_ZOOM,
 } from "@/lib/map/config";
 
 export { BAY_AREA_IMMERSIVE_VIEWPORT_PADDING };
@@ -57,12 +63,23 @@ function normalizeViewportPadding(
 export function fitDefaultBayAreaViewport(
   map: Map,
   padding: ViewportPadding = BAY_AREA_DEFAULT_VIEWPORT_PADDING,
+  maxZoom: number = BAY_AREA_DEFAULT_MAX_ZOOM,
 ): void {
   map.fitBounds(BAY_AREA_DEFAULT_BOUNDS, {
     padding: normalizeViewportPadding(padding, BAY_AREA_DEFAULT_VIEWPORT_PADDING),
-    maxZoom: BAY_AREA_DEFAULT_MAX_ZOOM,
+    maxZoom,
     essential: true,
   });
+}
+
+export function getImmersiveDefaultBayAreaFitOptions(): {
+  padding: ViewportPadding;
+  maxZoom: number;
+} {
+  return {
+    padding: BAY_AREA_IMMERSIVE_VIEWPORT_PADDING,
+    maxZoom: BAY_AREA_IMMERSIVE_MAX_ZOOM,
+  };
 }
 
 export function fitMapToBounds(

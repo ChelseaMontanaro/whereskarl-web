@@ -6,6 +6,8 @@ import { MapFogLegend } from "@/components/map/MapFogLegend";
 import { MapLayerControls } from "@/components/map/MapLayerControls";
 import {
   BAY_AREA_CENTER,
+  BAY_AREA_DEFAULT_MAX_ZOOM,
+  BAY_AREA_IMMERSIVE_MIN_ZOOM,
   BAY_AREA_MAX_BOUNDS,
   findBayAreaProductRegion,
 } from "@/lib/map/config";
@@ -24,8 +26,8 @@ import {
   fitDefaultBayAreaViewport,
   fitMapToBounds,
   focusMapOnLocation,
+  getImmersiveDefaultBayAreaFitOptions,
   resolveRegionViewportOptions,
-  BAY_AREA_IMMERSIVE_VIEWPORT_PADDING,
 } from "@/lib/map/viewport";
 
 type BayAreaMapProps = {
@@ -92,6 +94,7 @@ export function BayAreaMap({
         style: resolveKarlMapStyle(mapStyle),
         center: BAY_AREA_CENTER,
         zoom: 8,
+        minZoom: isImmersive ? BAY_AREA_IMMERSIVE_MIN_ZOOM : undefined,
         maxBounds: BAY_AREA_MAX_BOUNDS,
         attributionControl: { compact: true },
       });
@@ -108,9 +111,13 @@ export function BayAreaMap({
           return;
         }
 
+        const immersiveFit = isImmersive
+          ? getImmersiveDefaultBayAreaFitOptions()
+          : null;
         fitDefaultBayAreaViewport(
           map,
-          isImmersive ? BAY_AREA_IMMERSIVE_VIEWPORT_PADDING : undefined,
+          immersiveFit?.padding,
+          immersiveFit?.maxZoom ?? BAY_AREA_DEFAULT_MAX_ZOOM,
         );
         syncFogOverlayLayer(map, locations, fogLayerEnabled, intensityFilter);
         setMapReady(true);
@@ -162,9 +169,13 @@ export function BayAreaMap({
         return;
       }
 
+      const immersiveFit = isImmersive
+        ? getImmersiveDefaultBayAreaFitOptions()
+        : null;
       fitDefaultBayAreaViewport(
         map,
-        isImmersive ? BAY_AREA_IMMERSIVE_VIEWPORT_PADDING : undefined,
+        immersiveFit?.padding,
+        immersiveFit?.maxZoom ?? BAY_AREA_DEFAULT_MAX_ZOOM,
       );
     };
 
@@ -291,9 +302,13 @@ export function BayAreaMap({
       }
     }
 
+    const immersiveFit = isImmersive
+      ? getImmersiveDefaultBayAreaFitOptions()
+      : null;
     fitDefaultBayAreaViewport(
       map,
-      isImmersive ? BAY_AREA_IMMERSIVE_VIEWPORT_PADDING : undefined,
+      immersiveFit?.padding,
+      immersiveFit?.maxZoom ?? BAY_AREA_DEFAULT_MAX_ZOOM,
     );
   }, [
     intensityFilter,

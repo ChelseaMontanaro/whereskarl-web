@@ -1,7 +1,17 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
-import { findBayAreaProductRegion } from "@/lib/map/config";
-import { resolveRegionViewportOptions } from "@/lib/map/viewport";
+import {
+  BAY_AREA_DEFAULT_BOUNDS,
+  BAY_AREA_DEFAULT_MAX_ZOOM,
+  BAY_AREA_IMMERSIVE_MAX_ZOOM,
+  BAY_AREA_IMMERSIVE_MIN_ZOOM,
+  findBayAreaProductRegion,
+} from "@/lib/map/config";
+import {
+  fitDefaultBayAreaViewport,
+  getImmersiveDefaultBayAreaFitOptions,
+  resolveRegionViewportOptions,
+} from "@/lib/map/viewport";
 
 describe("resolveRegionViewportOptions", () => {
   it("uses mobile padding for North Bay on mobile layout", () => {
@@ -32,10 +42,10 @@ describe("resolveRegionViewportOptions", () => {
 
     expect(resolveRegionViewportOptions(northBay?.viewport, "immersive")).toEqual({
       padding: {
-        top: 112,
-        right: 44,
-        bottom: 188,
-        left: 40,
+        top: 88,
+        right: 28,
+        bottom: 148,
+        left: 28,
       },
       maxZoom: 11.3,
     });
@@ -107,6 +117,47 @@ describe("resolveRegionViewportOptions", () => {
         left: 360,
       },
       maxZoom: 10.5,
+    });
+  });
+});
+
+describe("immersive Bay Area framing", () => {
+  it("exposes immersive min and max zoom for wider mobile framing", () => {
+    expect(BAY_AREA_IMMERSIVE_MIN_ZOOM).toBeLessThan(BAY_AREA_DEFAULT_MAX_ZOOM);
+    expect(BAY_AREA_IMMERSIVE_MAX_ZOOM).toBeLessThan(BAY_AREA_DEFAULT_MAX_ZOOM);
+  });
+
+  it("returns immersive fit options with reduced overlay padding", () => {
+    expect(getImmersiveDefaultBayAreaFitOptions()).toEqual({
+      padding: {
+        top: 88,
+        right: 28,
+        bottom: 148,
+        left: 28,
+      },
+      maxZoom: BAY_AREA_IMMERSIVE_MAX_ZOOM,
+    });
+  });
+
+  it("fits the default Bay Area viewport with immersive max zoom", () => {
+    const fitBounds = vi.fn();
+    const map = { fitBounds } as unknown as import("maplibre-gl").Map;
+
+    fitDefaultBayAreaViewport(
+      map,
+      getImmersiveDefaultBayAreaFitOptions().padding,
+      BAY_AREA_IMMERSIVE_MAX_ZOOM,
+    );
+
+    expect(fitBounds).toHaveBeenCalledWith(BAY_AREA_DEFAULT_BOUNDS, {
+      padding: {
+        top: 88,
+        right: 28,
+        bottom: 148,
+        left: 28,
+      },
+      maxZoom: BAY_AREA_IMMERSIVE_MAX_ZOOM,
+      essential: true,
     });
   });
 });

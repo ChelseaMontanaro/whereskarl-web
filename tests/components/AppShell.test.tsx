@@ -67,6 +67,17 @@ describe("AppShell", () => {
     }
   });
 
+  it("uses glass styling and safe-area padding on the mobile bottom nav", () => {
+    renderShell("/");
+
+    const bottomNav = screen.getAllByRole("navigation", { name: "Primary" })[1];
+    const navInner = bottomNav.firstElementChild as HTMLElement;
+
+    expect(bottomNav.className).toContain("bg-black/40");
+    expect(bottomNav.className).toContain("backdrop-blur-lg");
+    expect(navInner.className).toContain("safe-area-inset-bottom");
+  });
+
   it("renders the desktop top navigation with primary links and Find Clear Skies", () => {
     renderShell("/");
 

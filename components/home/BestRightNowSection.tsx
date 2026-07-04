@@ -58,9 +58,7 @@ function MobileBestRightNowSection({ items }: BestRightNowSectionProps) {
                 ) : null}
               </div>
               {item.score != null ? (
-                <span className="rounded-full border border-karl-gold/25 px-2 py-1 text-xs font-semibold text-karl-gold">
-                  {item.score}
-                </span>
+                <BestRightNowScore score={item.score} />
               ) : null}
             </div>
           </li>

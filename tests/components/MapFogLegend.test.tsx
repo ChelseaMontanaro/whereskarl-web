@@ -89,4 +89,17 @@ describe("MapFogLegend", () => {
       screen.queryByRole("button", { name: "Clear intensity filter" }),
     ).not.toBeInTheDocument();
   });
+
+  it("renders all four immersive legend filters in a grid without horizontal scrolling", () => {
+    const { container } = render(
+      <MapFogLegend
+        layout="immersive-strip"
+        onSelectIntensity={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Karl Territory" })).toBeInTheDocument();
+    expect(container.querySelector(".overflow-x-auto")).toBeNull();
+    expect(container.querySelector(".grid.grid-cols-2")).toBeTruthy();
+  });
 });

@@ -12,10 +12,10 @@ export const BAY_AREA_CENTER: [number, number] = [-122.27, 37.62];
 export const BAY_AREA_LOCATION_ZOOM = 11.4;
 
 const immersiveViewportPadding = {
-  top: 112,
-  right: 44,
-  bottom: 188,
-  left: 40,
+  top: 88,
+  right: 28,
+  bottom: 148,
+  left: 28,
 };
 
 export const BAY_AREA_DEFAULT_VIEWPORT_PADDING = 36;
@@ -23,6 +23,10 @@ export const BAY_AREA_DEFAULT_VIEWPORT_PADDING = 36;
 export const BAY_AREA_IMMERSIVE_VIEWPORT_PADDING = immersiveViewportPadding;
 
 export const BAY_AREA_DEFAULT_MAX_ZOOM = 10.2;
+
+/** Immersive mobile framing — wider default view and room to zoom out to the full Bay Area. */
+export const BAY_AREA_IMMERSIVE_MIN_ZOOM = 6.4;
+export const BAY_AREA_IMMERSIVE_MAX_ZOOM = 8.6;
 
 /** Slightly wider pan limits than the default framed viewport. */
 export const BAY_AREA_MAX_BOUNDS: [[number, number], [number, number]] = [

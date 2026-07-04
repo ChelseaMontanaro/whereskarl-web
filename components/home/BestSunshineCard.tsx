@@ -9,7 +9,6 @@ import {
   CardLabel,
   InsightCardChevron,
   InsightIconFrame,
-  SunshineScoreBadge,
 } from "@/components/home/InsightCardParts";
 import {
   desktopClickableCardHoverClass,
@@ -113,7 +112,9 @@ function MobileBestSunshineCard({
             className="mt-4"
           />
         </div>
-        <SunshineScoreBadge score={recommendation.sunshineScore} />
+        <span className="shrink-0 text-xl font-light leading-none text-karl-gold">
+          {recommendation.sunshineScore}
+        </span>
       </div>
     </GlassCard>
   );
@@ -196,7 +197,9 @@ function DesktopBestSunshineCard({
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <SunshineScoreBadge score={recommendation.sunshineScore} />
+          <span className="text-xl font-light leading-none text-karl-gold lg:text-[1.65rem]">
+            {recommendation.sunshineScore}
+          </span>
           <InsightCardChevron />
         </div>
       </GlassCard>

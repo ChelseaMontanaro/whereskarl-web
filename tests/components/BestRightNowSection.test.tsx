@@ -87,4 +87,17 @@ describe("BestRightNowSection", () => {
       screen.queryByText(DEGRADED_BEST_RIGHT_NOW_LABEL),
     ).not.toBeInTheDocument();
   });
+
+  it("uses plain gold score text on mobile cards", () => {
+    const { container } = render(
+      <BestRightNowSection
+        items={items}
+        isNightPresentation={false}
+        layout="mobile"
+      />,
+    );
+
+    expect(container.querySelector(".rounded-full.border")).toBeNull();
+    expect(container.querySelector(".text-xl.font-light.text-karl-gold")).toBeTruthy();
+  });
 });

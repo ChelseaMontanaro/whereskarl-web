@@ -3,7 +3,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, render } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { createElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -63,5 +63,22 @@ describe("HomeView responsive polish", () => {
     expect(container.querySelector(".pb-28")).toBeInTheDocument();
     expect(container.querySelector(".pt-3")).toBeInTheDocument();
     expect(container.querySelector(".bg-black\\/26")).toBeInTheDocument();
+  });
+
+  it("renders Next Hour on mobile and desktop layouts", async () => {
+    renderHomeView();
+
+    const nextHourLabels = await screen.findAllByText("Next Hour");
+    expect(nextHourLabels.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("uses plain gold score text on mobile insight cards", async () => {
+    const { container } = renderHomeView();
+
+    await screen.findAllByText("Best Right Now");
+
+    const mobileCards = container.querySelector(".flex.flex-col.gap-3\\.5.lg\\:hidden");
+    expect(mobileCards?.querySelector(".rounded-full.border.border-karl-gold")).toBeNull();
+    expect(mobileCards?.querySelector(".text-xl.font-light.text-karl-gold")).toBeTruthy();
   });
 });
