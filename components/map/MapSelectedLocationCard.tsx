@@ -25,7 +25,7 @@ function formatFogPercent(location: LocationWeather): string | null {
     return null;
   }
 
-  return `${fogScore}%`;
+  return `Fog: ${fogScore}%`;
 }
 
 function formatWind(location: LocationWeather): string | null {
@@ -38,8 +38,8 @@ function formatWind(location: LocationWeather): string | null {
 
   const direction = location.windDirection?.trim();
   return direction
-    ? `${location.windSpeed} mph ${direction}`
-    : `${location.windSpeed} mph`;
+    ? `Wind: ${direction} ${location.windSpeed} mph`
+    : `Wind: ${location.windSpeed} mph`;
 }
 
 function formatTemperature(location: LocationWeather): string | null {
@@ -50,7 +50,31 @@ function formatTemperature(location: LocationWeather): string | null {
     return null;
   }
 
-  return `${location.temperature}°`;
+  return `${location.temperature}°F`;
+}
+
+function FavoriteHeartIcon({
+  filled,
+  className = "h-4 w-4",
+}: {
+  filled: boolean;
+  className?: string;
+}) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={className}
+      fill={filled ? "currentColor" : "none"}
+      stroke="currentColor"
+      strokeWidth={filled ? 0 : 1.75}
+    >
+      <path
+        d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
 }
 
 function getConditionSentence(location: LocationWeather): string {
@@ -125,12 +149,12 @@ export function MapSelectedLocationCard({
 
           {metadataItems.length > 0 ? (
             <p className="mt-1.5 text-[0.65rem] font-medium text-white/48">
-              {metadataItems.join(" · ")}
+              {metadataItems.join(" • ")}
             </p>
           ) : null}
         </div>
 
-        <div className="flex shrink-0 flex-col items-stretch gap-2 border-l border-white/10 pl-3">
+        <div className="flex shrink-0 flex-col items-center border-l border-white/10 pl-3">
           <div className="text-center">
             <p className="text-[0.5rem] font-bold uppercase tracking-[0.14em] text-white/40">
               Clear Skies Score
@@ -148,13 +172,13 @@ export function MapSelectedLocationCard({
                 ? `Remove ${location.name} from favorites`
                 : `Add ${location.name} to favorites`
             }
-            className={`rounded-full border px-2.5 py-1.5 text-[0.65rem] font-semibold transition-colors motion-reduce:transition-none ${
+            className={`mt-1.5 flex h-7 w-7 items-center justify-center rounded-full transition-colors motion-reduce:transition-none ${
               isFavorite
-                ? "border-karl-gold/45 bg-karl-gold/14 text-karl-gold shadow-[inset_0_1px_0_rgb(255_255_255_/_0.06)]"
-                : "border-white/14 bg-white/[0.05] text-white/72 hover:border-karl-gold/35 hover:bg-karl-gold/[0.08] hover:text-karl-gold"
+                ? "text-karl-gold"
+                : "text-white/42 hover:bg-white/[0.05] hover:text-karl-gold/85"
             }`}
           >
-            {isFavorite ? "Saved" : "Save"}
+            <FavoriteHeartIcon filled={isFavorite} />
           </button>
         </div>
       </div>
