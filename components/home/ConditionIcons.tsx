@@ -71,6 +71,36 @@ export function MoonIcon({ className = "h-5 w-5" }: IconProps) {
   );
 }
 
+/** Gold clock face for the Next Hour outlook card. */
+export function NextHourIcon({ className = "h-5 w-5" }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={className} fill="none">
+      <circle
+        cx="12"
+        cy="12"
+        r="7.25"
+        stroke="currentColor"
+        strokeWidth="1.35"
+        opacity="0.92"
+      />
+      <path
+        d="M12 7.5v4.75l3.1 2.1"
+        stroke="currentColor"
+        strokeWidth="1.45"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 4.25v1.35M12 18.4v1.35"
+        stroke="currentColor"
+        strokeWidth="1.1"
+        strokeLinecap="round"
+        opacity="0.55"
+      />
+    </svg>
+  );
+}
+
 export function ChevronRightIcon({ className = "h-5 w-5" }: IconProps) {
   return (
     <svg

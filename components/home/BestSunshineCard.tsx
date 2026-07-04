@@ -43,38 +43,56 @@ function MobileBestSunshineCard({
 
   if (isLoading) {
     return (
-      <GlassCard variant="insight" className="border-karl-gold/15 px-4 py-4">
-        <CardLabel className="text-white/45 lg:text-white/45">
-          Brightest Spot
-        </CardLabel>
-        <p className="mt-3 text-lg font-semibold text-white/50">
-          Finding brighter spots…
-        </p>
-        <FindClearSkiesCta
-          locationId={null}
-          isLoading
-          variant="secondary"
-          className="mt-4"
-        />
+      <GlassCard variant="insight" className="flex items-start gap-3 border-karl-gold/15 px-4 py-4">
+        <InsightIconFrame tone={isNightPresentation ? "mist" : "gold"}>
+          {isNightPresentation ? (
+            <MoonIcon className={`${desktopInsightIconSizeClass} text-[#8CB8D8]`} />
+          ) : (
+            <SunshineIcon className={desktopInsightIconSizeClass} />
+          )}
+        </InsightIconFrame>
+        <div className="min-w-0 flex-1">
+          <CardLabel className="text-white/45 lg:text-white/45">
+            Brightest Spot
+          </CardLabel>
+          <p className="mt-2 text-lg font-semibold text-white/50">
+            Finding brighter spots…
+          </p>
+          <FindClearSkiesCta
+            locationId={null}
+            isLoading
+            variant="secondary"
+            className="mt-4"
+          />
+        </div>
       </GlassCard>
     );
   }
 
   if (isUnavailable || !recommendation) {
     return (
-      <GlassCard variant="insight" className="border-karl-gold/15 px-4 py-4">
-        <CardLabel className="text-white/45 lg:text-white/45">
-          Brightest Spot
-        </CardLabel>
-        <p className="mt-3 text-sm text-white/60">
-          Brightest spot details are unavailable right now.
-        </p>
-        <FindClearSkiesCta
-          locationId={null}
-          isLoading={false}
-          variant="secondary"
-          className="mt-4"
-        />
+      <GlassCard variant="insight" className="flex items-start gap-3 border-karl-gold/15 px-4 py-4">
+        <InsightIconFrame tone={isNightPresentation ? "mist" : "gold"}>
+          {isNightPresentation ? (
+            <MoonIcon className={`${desktopInsightIconSizeClass} text-[#8CB8D8]`} />
+          ) : (
+            <SunshineIcon className={desktopInsightIconSizeClass} />
+          )}
+        </InsightIconFrame>
+        <div className="min-w-0 flex-1">
+          <CardLabel className="text-white/45 lg:text-white/45">
+            Brightest Spot
+          </CardLabel>
+          <p className="mt-2 text-sm text-white/60">
+            Brightest spot details are unavailable right now.
+          </p>
+          <FindClearSkiesCta
+            locationId={null}
+            isLoading={false}
+            variant="secondary"
+            className="mt-4"
+          />
+        </div>
       </GlassCard>
     );
   }
@@ -83,39 +101,45 @@ function MobileBestSunshineCard({
     recommendation.recommendationReason?.trim() ||
     recommendation.reason ||
     recommendation.status;
+  const spotIcon = isNightPresentation ? (
+    <MoonIcon className={`${desktopInsightIconSizeClass} text-[#8CB8D8]`} />
+  ) : (
+    <SunshineIcon className={desktopInsightIconSizeClass} />
+  );
 
   return (
-    <GlassCard variant="insight" className="border-karl-gold/20 px-4 py-4">
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0 flex-1">
-          <CardLabel className="text-white/45 lg:text-white/45">
-            {sunshineResultTitle(
-              recommendation.sunshineScore,
-              isNightPresentation,
-              {
-                fogScore: recommendation.fogScore,
-                sunshineScore: recommendation.sunshineScore,
-              },
-            )}
-          </CardLabel>
-          <h2 className="mt-2 text-xl font-semibold text-white">
-            {recommendation.locationName}
-          </h2>
-          <p className="mt-2 text-sm font-semibold text-karl-gold">{subtitle}</p>
-          <p className="mt-1.5 text-sm text-white/60">
-            {recommendation.distanceText} · {recommendation.temperature}°
-          </p>
-          <FindClearSkiesCta
-            locationId={recommendation.locationID}
-            isLoading={false}
-            variant="secondary"
-            className="mt-4"
-          />
-        </div>
-        <span className="shrink-0 text-xl font-light leading-none text-karl-gold">
-          {recommendation.sunshineScore}
-        </span>
+    <GlassCard variant="insight" className="flex items-start gap-3 border-karl-gold/20 px-4 py-4">
+      <InsightIconFrame tone={isNightPresentation ? "mist" : "gold"}>
+        {spotIcon}
+      </InsightIconFrame>
+      <div className="min-w-0 flex-1">
+        <CardLabel className="text-white/45 lg:text-white/45">
+          {sunshineResultTitle(
+            recommendation.sunshineScore,
+            isNightPresentation,
+            {
+              fogScore: recommendation.fogScore,
+              sunshineScore: recommendation.sunshineScore,
+            },
+          )}
+        </CardLabel>
+        <h2 className="mt-2 text-xl font-semibold text-white">
+          {recommendation.locationName}
+        </h2>
+        <p className="mt-1.5 text-sm font-semibold text-karl-gold">{subtitle}</p>
+        <p className="mt-1.5 text-sm text-white/60">
+          {recommendation.distanceText} · {recommendation.temperature}°
+        </p>
+        <FindClearSkiesCta
+          locationId={recommendation.locationID}
+          isLoading={false}
+          variant="secondary"
+          className="mt-4"
+        />
       </div>
+      <span className="shrink-0 text-[1.75rem] font-light leading-none text-karl-gold">
+        {recommendation.sunshineScore}
+      </span>
     </GlassCard>
   );
 }

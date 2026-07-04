@@ -245,7 +245,7 @@ export function HomeView() {
   ]);
 
   return (
-    <div className="relative pb-28 sm:pb-24 lg:pb-12">
+    <div className="relative pb-4 sm:pb-5 lg:pb-12">
       <HomeDesktopBackground presentation={heroPresentation} />
 
       <HomeHero

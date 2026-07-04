@@ -35,7 +35,10 @@ function BestRightNowSpotIcon({
   );
 }
 
-function MobileBestRightNowSection({ items }: BestRightNowSectionProps) {
+function MobileBestRightNowSection({
+  items,
+  isNightPresentation = false,
+}: BestRightNowSectionProps) {
   return (
     <GlassCard variant="insight" className="px-4 py-4">
       <CardLabel className="text-white/45 lg:text-white/45">
@@ -45,22 +48,23 @@ function MobileBestRightNowSection({ items }: BestRightNowSectionProps) {
         {items.map((item) => (
           <li
             key={item.locationId}
-            className="border-t border-white/8 pt-3 first:border-t-0 first:pt-0"
+            className="flex items-start gap-3 border-t border-white/8 pt-3 first:border-t-0 first:pt-0"
           >
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-base font-semibold text-white">
-                  {item.locationName}
-                </p>
-                <p className="mt-1 text-sm text-white/65">{item.detail}</p>
-                {item.isDegraded ? (
-                  <DegradedDataLabel variant="bestRightNow" className="mt-1.5" />
-                ) : null}
-              </div>
-              {item.score != null ? (
-                <BestRightNowScore score={item.score} size="mobile" />
+            <InsightIconFrame tone={isNightPresentation ? "mist" : "gold"}>
+              <BestRightNowSpotIcon isNightPresentation={isNightPresentation} />
+            </InsightIconFrame>
+            <div className="min-w-0 flex-1">
+              <p className="text-base font-semibold text-white">
+                {item.locationName}
+              </p>
+              <p className="mt-1 text-sm text-white/65">{item.detail}</p>
+              {item.isDegraded ? (
+                <DegradedDataLabel variant="bestRightNow" className="mt-1.5" />
               ) : null}
             </div>
+            {item.score != null ? (
+              <BestRightNowScore score={item.score} size="mobile" />
+            ) : null}
           </li>
         ))}
       </ul>
@@ -195,7 +199,7 @@ export function BestRightNowSection({
       return null;
     }
 
-    return <MobileBestRightNowSection items={items} />;
+    return <MobileBestRightNowSection items={items} isNightPresentation={isNightPresentation} />;
   }
 
   if (layout === "desktop") {
@@ -209,7 +213,10 @@ export function BestRightNowSection({
   return (
     <>
       <div className="lg:hidden">
-        <MobileBestRightNowSection items={items} />
+        <MobileBestRightNowSection
+          items={items}
+          isNightPresentation={isNightPresentation}
+        />
       </div>
       <div className="hidden lg:block">
         <DesktopBestRightNowGrid

@@ -202,6 +202,17 @@ describe("MetricDetailSheet", () => {
     fireEvent.keyDown(document, { key: "Escape" });
     expect(onClose).toHaveBeenCalledTimes(1);
   });
+
+  it("positions the mobile sheet above the bottom nav with safe-area clearance", () => {
+    render(<MetricDetailSheet metricKey="sunshine-score" onClose={vi.fn()} />);
+
+    const dialog = screen.getByRole("dialog");
+    expect(dialog.className).toContain("mb-[calc(4.25rem+env(safe-area-inset-bottom,0px))]");
+    expect(dialog.className).toContain(
+      "max-h-[min(72dvh,calc(100dvh-5.5rem-env(safe-area-inset-bottom,0px)))]",
+    );
+    expect(document.body.style.overflow).toBe("hidden");
+  });
 });
 
 describe("ConditionIcons", () => {

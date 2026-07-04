@@ -55,13 +55,14 @@ describe("HomeView responsive polish", () => {
     );
   });
 
-  it("adds a mobile content vignette and extra bottom clearance", () => {
+  it("adds a mobile content vignette without excessive bottom spacer", () => {
     const { container } = renderHomeView();
 
     expect(
       container.querySelector(".bg-gradient-to-b.from-transparent"),
     ).toBeInTheDocument();
-    expect(container.querySelector(".pb-28")).toBeInTheDocument();
+    expect(container.querySelector(".pb-28")).toBeNull();
+    expect(container.querySelector(".pb-4")).toBeInTheDocument();
     expect(container.querySelector(".pt-3")).toBeInTheDocument();
     expect(container.querySelector(".bg-black\\/26")).toBeInTheDocument();
   });
@@ -117,5 +118,6 @@ describe("HomeView responsive polish", () => {
     const mobileCards = container.querySelector(".flex.flex-col.gap-3\\.5.lg\\:hidden");
     expect(mobileCards?.querySelector(".rounded-full.border.border-karl-gold")).toBeNull();
     expect(mobileCards?.querySelector(".text-\\[1\\.75rem\\].text-karl-gold")).toBeTruthy();
+    expect(mobileCards?.querySelector(".h-12.w-12.rounded-full")).toBeTruthy();
   });
 });

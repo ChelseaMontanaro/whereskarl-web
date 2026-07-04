@@ -24,6 +24,9 @@ export function MetricDetailSheet({ metricKey, onClose }: MetricDetailSheetProps
 
     closeButtonRef.current?.focus();
 
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         onClose();
@@ -34,6 +37,7 @@ export function MetricDetailSheet({ metricKey, onClose }: MetricDetailSheetProps
 
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
     };
   }, [metricKey, onClose]);
 
@@ -56,7 +60,7 @@ export function MetricDetailSheet({ metricKey, onClose }: MetricDetailSheetProps
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={bodyId}
-        className="relative z-10 w-full max-w-lg rounded-t-3xl border border-white/10 bg-black/72 px-5 pb-6 pt-4 shadow-[0_-8px_40px_rgba(0,0,0,0.45)] backdrop-blur-md lg:rounded-2xl lg:px-6 lg:pb-6 lg:pt-5 lg:shadow-[0_8px_40px_rgba(0,0,0,0.45)]"
+        className="relative z-10 w-full max-w-lg overflow-y-auto rounded-t-3xl border border-white/10 bg-black/72 px-5 pb-6 pt-4 shadow-[0_-8px_40px_rgba(0,0,0,0.45)] backdrop-blur-md max-h-[min(72dvh,calc(100dvh-5.5rem-env(safe-area-inset-bottom,0px)))] mb-[calc(4.25rem+env(safe-area-inset-bottom,0px))] lg:mb-0 lg:max-h-none lg:overflow-visible lg:rounded-2xl lg:px-6 lg:pb-6 lg:pt-5 lg:shadow-[0_8px_40px_rgba(0,0,0,0.45)]"
       >
         <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-white/18 lg:hidden" />
         <div className="flex items-start justify-between gap-4">

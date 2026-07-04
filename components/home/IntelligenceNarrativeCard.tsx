@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { FogCoverageIcon } from "@/components/home/ConditionIcons";
+import { KarlLogo } from "@/components/brand/KarlLogo";
 import {
   CardLabel,
   InsightCardChevron,
@@ -23,6 +23,10 @@ type IntelligenceNarrativeCardProps = {
   layout?: "both" | "mobile" | "desktop";
 };
 
+function KarlReadIcon() {
+  return <KarlLogo className={desktopInsightIconSizeClass} />;
+}
+
 function MobileIntelligenceNarrativeCard({
   intelligence,
   karlReadPresentation,
@@ -30,11 +34,16 @@ function MobileIntelligenceNarrativeCard({
 }: Omit<IntelligenceNarrativeCardProps, "layout">) {
   if (isLoading) {
     return (
-      <GlassCard variant="insight" className="px-4 py-4">
-        <CardLabel>Karl&apos;s Read</CardLabel>
-        <p className="mt-3 text-lg font-semibold text-white/50">
-          Reading Karl intelligence…
-        </p>
+      <GlassCard variant="insight" className="flex items-start gap-3 px-4 py-4">
+        <InsightIconFrame>
+          <KarlReadIcon />
+        </InsightIconFrame>
+        <div className="min-w-0 flex-1">
+          <CardLabel>Karl&apos;s Read</CardLabel>
+          <p className="mt-2 text-lg font-semibold text-white/50">
+            Reading Karl intelligence…
+          </p>
+        </div>
       </GlassCard>
     );
   }
@@ -53,19 +62,24 @@ function MobileIntelligenceNarrativeCard({
     karlReadPresentation?.summary ?? intelligence.narrative.summary;
 
   return (
-    <GlassCard variant="insight" className="px-4 py-4">
-      <CardLabel>Karl&apos;s Read</CardLabel>
-      <h2 className="mt-3 text-lg font-semibold leading-snug text-white">
-        {headline}
-      </h2>
-      <p className="mt-2 text-sm leading-relaxed text-white/70">
-        {summary}
-      </p>
-      {confidenceLabel ? (
-        <p className="mt-3 text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-white/40">
-          {confidenceLabel} confidence
+    <GlassCard variant="insight" className="flex items-start gap-3 px-4 py-4">
+      <InsightIconFrame>
+        <KarlReadIcon />
+      </InsightIconFrame>
+      <div className="min-w-0 flex-1">
+        <CardLabel>Karl&apos;s Read</CardLabel>
+        <h2 className="mt-2 text-lg font-semibold leading-snug text-white">
+          {headline}
+        </h2>
+        <p className="mt-1.5 text-sm leading-relaxed text-white/70">
+          {summary}
         </p>
-      ) : null}
+        {confidenceLabel ? (
+          <p className="mt-2 text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-white/40">
+            {confidenceLabel} confidence
+          </p>
+        ) : null}
+      </div>
     </GlassCard>
   );
 }
@@ -79,7 +93,7 @@ function DesktopIntelligenceNarrativeCard({
     return (
       <GlassCard variant="desktop" className="flex items-center gap-4 px-5 py-5">
         <InsightIconFrame>
-          <FogCoverageIcon className={desktopInsightIconSizeClass} />
+          <KarlReadIcon />
         </InsightIconFrame>
         <div className="min-w-0 flex-1">
           <CardLabel>Karl&apos;s Read</CardLabel>
@@ -114,7 +128,7 @@ function DesktopIntelligenceNarrativeCard({
   const cardBody = (
     <>
       <InsightIconFrame>
-        <FogCoverageIcon className={desktopInsightIconSizeClass} />
+        <KarlReadIcon />
       </InsightIconFrame>
       <div className="min-w-0 flex-1">
         <CardLabel>Karl&apos;s Read</CardLabel>

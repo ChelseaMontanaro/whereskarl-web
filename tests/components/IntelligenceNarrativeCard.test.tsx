@@ -19,6 +19,23 @@ describe("IntelligenceNarrativeCard", () => {
     cleanup();
   });
 
+  it("renders the Karl fog character icon on desktop", () => {
+    const intelligence = readFixture<KarlIntelligenceResponse>(
+      "karl-intelligence-mill-valley.json",
+    );
+
+    const { container } = render(
+      <IntelligenceNarrativeCard
+        intelligence={intelligence}
+        isLoading={false}
+        layout="desktop"
+      />,
+    );
+
+    expect(container.querySelector("img")).toBeTruthy();
+    expect(container.querySelector("ellipse")).toBeNull();
+  });
+
   it("links Karl's Read to the map when focusLocationId is available", () => {
     const intelligence = readFixture<KarlIntelligenceResponse>(
       "karl-intelligence-mill-valley.json",

@@ -124,6 +124,7 @@ describe("resolveRegionViewportOptions", () => {
 
 describe("immersive Bay Area framing", () => {
   it("exposes immersive min and max zoom for wider mobile framing", () => {
+    expect(BAY_AREA_IMMERSIVE_MIN_ZOOM).toBe(6);
     expect(BAY_AREA_IMMERSIVE_MIN_ZOOM).toBeLessThan(BAY_AREA_DEFAULT_MAX_ZOOM);
     expect(BAY_AREA_IMMERSIVE_MAX_ZOOM).toBeLessThan(BAY_AREA_DEFAULT_MAX_ZOOM);
   });

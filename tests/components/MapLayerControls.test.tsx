@@ -153,8 +153,10 @@ describe("MapLayerControls immersive", () => {
     );
 
     const controls = screen.getByLabelText("Map zoom controls").parentElement;
-    expect(controls?.className).toContain("calc(100vw-2rem)");
-    expect(controls?.className).toContain("sm:right-5");
+    expect(controls?.className).toContain("calc(100%-0.75rem)");
+    expect(controls?.className).toContain("max-w-full");
+    expect(controls?.className).toContain("right-3");
+    expect(controls?.className).not.toContain("100vw");
     expect(controls?.className).toContain("items-stretch");
   });
 });

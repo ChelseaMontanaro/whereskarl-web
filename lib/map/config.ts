@@ -37,7 +37,7 @@ export type ImmersiveOverlayProfile = "tablet" | "phone-portrait";
 export const BAY_AREA_DEFAULT_MAX_ZOOM = 10.2;
 
 /** Immersive mobile framing — wider default view and room to zoom out to the full Bay Area. */
-export const BAY_AREA_IMMERSIVE_MIN_ZOOM = 6.4;
+export const BAY_AREA_IMMERSIVE_MIN_ZOOM = 6.0;
 export const BAY_AREA_IMMERSIVE_MAX_ZOOM = 8.6;
 
 /** Slightly wider pan limits than the default framed viewport. */
