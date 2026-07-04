@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { usePathname } from "next/navigation";
 
 import { ConditionsFooter } from "@/components/layout/ConditionsFooter";
 import { DesktopTopNav } from "@/components/layout/DesktopTopNav";
@@ -10,6 +11,7 @@ import {
   SecondaryNavList,
 } from "@/components/layout/NavLinks";
 import { ClearSkiesNavProvider } from "@/components/providers/ClearSkiesNavProvider";
+import { usePhonePortrait } from "@/lib/hooks/usePhonePortrait";
 
 function BottomNav() {
   return (
@@ -36,15 +38,22 @@ function MobileSecondaryLinks() {
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const isPhonePortrait = usePhonePortrait();
+  const isPhonePortraitHome = pathname === "/" && isPhonePortrait;
+  const mainBottomClass = isPhonePortraitHome
+    ? "pb-[calc(4.25rem+env(safe-area-inset-bottom,0.5rem))]"
+    : "max-lg:pb-24 lg:pb-0";
+
   return (
     <ClearSkiesNavProvider>
       <div className="min-h-screen bg-karl-navy">
         <DesktopTopNav />
-        <div className="flex min-h-screen flex-col">
-          <main className="flex-1 pb-24 lg:pb-0">{children}</main>
-          <ConditionsFooter />
-          <MobileSecondaryLinks />
-          <DevStatusFooter />
+        <div className="flex flex-col">
+          <main className={`flex-1 ${mainBottomClass}`}>{children}</main>
+          {isPhonePortraitHome ? null : <ConditionsFooter />}
+          {isPhonePortraitHome ? null : <MobileSecondaryLinks />}
+          {isPhonePortraitHome ? null : <DevStatusFooter />}
           <BottomNav />
         </div>
       </div>

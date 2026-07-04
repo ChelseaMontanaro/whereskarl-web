@@ -4,6 +4,7 @@ import {
   desktopGlassCardClass,
   insightGlassCardClass,
   metricGlassCardClass,
+  mobileInsightGlassHighlightClass,
 } from "@/components/home/desktopGlass";
 
 type GlassCardProps = {
@@ -26,5 +27,12 @@ export function GlassCard({
           ? insightGlassCardClass
         : "rounded-2xl border border-white/10 bg-karl-navy-glass/80 backdrop-blur-sm";
 
-  return <div className={`${surfaceClass} ${className}`}>{children}</div>;
+  return (
+    <div className={`${surfaceClass} ${className}`}>
+      {variant === "insight" ? (
+        <div aria-hidden="true" className={mobileInsightGlassHighlightClass} />
+      ) : null}
+      {children}
+    </div>
+  );
 }

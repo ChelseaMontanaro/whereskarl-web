@@ -5,7 +5,10 @@ export const metricGlassCardClass =
   "rounded-2xl border border-white/10 bg-black/40 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.14)] lg:bg-black/34";
 
 export const insightGlassCardClass =
-  "rounded-2xl border border-white/10 bg-black/26 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.12)] sm:bg-black/34";
+  "relative overflow-hidden rounded-2xl border border-white/10 bg-black/26 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.12)] max-sm:border-white/12 max-sm:bg-black/30 max-sm:backdrop-blur-lg max-sm:shadow-[0_6px_28px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.08)] sm:bg-black/34";
+
+export const mobileInsightGlassHighlightClass =
+  "pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-white/[0.05] via-transparent to-black/14 max-sm:block sm:hidden";
 
 export const desktopGlassCardClass = overlayGlassCardClass;
 

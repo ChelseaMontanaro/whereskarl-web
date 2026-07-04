@@ -245,7 +245,7 @@ export function HomeView() {
   ]);
 
   return (
-    <div className="relative pb-4 sm:pb-5 lg:pb-12">
+    <div className="relative max-sm:pb-0 sm:pb-5 lg:pb-12">
       <HomeDesktopBackground presentation={heroPresentation} />
 
       <HomeHero
@@ -263,7 +263,7 @@ export function HomeView() {
           className="pointer-events-none absolute inset-x-0 -top-20 bottom-0 bg-gradient-to-b from-transparent via-black/14 to-black/46 sm:via-black/16 sm:to-black/50 lg:hidden"
         />
 
-        <div className="relative pt-3 sm:pt-4 lg:pt-0">
+        <div className="relative max-sm:pt-5 pt-3 sm:pt-4 lg:pt-0">
         <DashboardGrid
           current={current}
           bestSunshine={bestSunshine}

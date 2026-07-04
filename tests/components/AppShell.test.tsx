@@ -11,8 +11,14 @@ const { usePathnameMock } = vi.hoisted(() => ({
   usePathnameMock: vi.fn(),
 }));
 
+const usePhonePortraitMock = vi.hoisted(() => vi.fn(() => false));
+
 vi.mock("next/navigation", () => ({
   usePathname: () => usePathnameMock(),
+}));
+
+vi.mock("@/lib/hooks/usePhonePortrait", () => ({
+  usePhonePortrait: () => usePhonePortraitMock(),
 }));
 
 vi.mock("next/link", () => ({
@@ -49,6 +55,7 @@ function renderShell(pathname = "/map") {
 describe("AppShell", () => {
   afterEach(() => {
     cleanup();
+    usePhonePortraitMock.mockReturnValue(false);
   });
 
   beforeEach(() => {
@@ -121,5 +128,19 @@ describe("AppShell", () => {
     expect(
       within(developerStatus).getByText("Developer status"),
     ).toBeInTheDocument();
+  });
+
+  it("trims phone portrait Home scroll chrome to nav clearance only", () => {
+    usePhonePortraitMock.mockReturnValue(true);
+    renderShell("/");
+
+    const main = screen.getByText("Placeholder content").closest("main");
+    expect(main?.className).toContain(
+      "pb-[calc(4.25rem+env(safe-area-inset-bottom,0.5rem))]",
+    );
+    expect(main?.className).not.toContain("pb-24");
+    expect(screen.queryByLabelText("Conditions status")).not.toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "Legal and support" })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Developer status")).not.toBeInTheDocument();
   });
 });

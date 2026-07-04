@@ -62,9 +62,32 @@ describe("HomeView responsive polish", () => {
       container.querySelector(".bg-gradient-to-b.from-transparent"),
     ).toBeInTheDocument();
     expect(container.querySelector(".pb-28")).toBeNull();
-    expect(container.querySelector(".pb-4")).toBeInTheDocument();
+    expect(container.querySelector(".pb-4")).toBeNull();
+    expect(container.querySelector(".max-sm\\:pb-0")).toBeInTheDocument();
     expect(container.querySelector(".pt-3")).toBeInTheDocument();
     expect(container.querySelector(".bg-black\\/26")).toBeInTheDocument();
+  });
+
+  it("adds phone portrait breathing room between the hero CTA and metric grid", () => {
+    const { container } = renderHomeView();
+
+    const heroCta = container.querySelector(
+      "section[aria-label='Karl conditions hero'] .max-sm\\:mb-2\\.5",
+    );
+    expect(heroCta).toBeTruthy();
+    expect(container.querySelector(".max-sm\\:pt-5")).toBeInTheDocument();
+  });
+
+  it("uses subtle mobile insight glass depth without opaque card fills", () => {
+    const { container } = renderHomeView();
+
+    const mobileCards = container.querySelector(".flex.flex-col.gap-3\\.5.lg\\:hidden");
+    const insightCard = mobileCards?.querySelector(".max-sm\\:backdrop-blur-lg");
+    const highlight = mobileCards?.querySelector(".from-white\\/\\[0\\.05\\]");
+
+    expect(insightCard).toBeTruthy();
+    expect(highlight).toBeTruthy();
+    expect(insightCard?.className).not.toContain("bg-karl-navy");
   });
 
   it("renders Next Hour on mobile and desktop layouts", async () => {
