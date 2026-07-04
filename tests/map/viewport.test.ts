@@ -10,6 +10,7 @@ import {
 import {
   fitDefaultBayAreaViewport,
   getImmersiveDefaultBayAreaFitOptions,
+  resolveIntensityFilterFitOptions,
   resolveRegionViewportOptions,
 } from "@/lib/map/viewport";
 
@@ -158,6 +159,27 @@ describe("immersive Bay Area framing", () => {
       },
       maxZoom: BAY_AREA_IMMERSIVE_MAX_ZOOM,
       essential: true,
+    });
+  });
+});
+
+describe("resolveIntensityFilterFitOptions", () => {
+  it("uses immersive overlay padding for filtered marker framing on mobile map", () => {
+    expect(resolveIntensityFilterFitOptions("immersive")).toEqual({
+      padding: {
+        top: 132,
+        right: 44,
+        bottom: 208,
+        left: 168,
+      },
+      maxZoom: 10,
+    });
+  });
+
+  it("preserves desktop intensity filter framing", () => {
+    expect(resolveIntensityFilterFitOptions("desktop")).toEqual({
+      padding: 80,
+      maxZoom: 10.4,
     });
   });
 });

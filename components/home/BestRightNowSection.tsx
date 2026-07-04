@@ -58,7 +58,7 @@ function MobileBestRightNowSection({ items }: BestRightNowSectionProps) {
                 ) : null}
               </div>
               {item.score != null ? (
-                <BestRightNowScore score={item.score} />
+                <BestRightNowScore score={item.score} size="mobile" />
               ) : null}
             </div>
           </li>
@@ -68,9 +68,21 @@ function MobileBestRightNowSection({ items }: BestRightNowSectionProps) {
   );
 }
 
-function BestRightNowScore({ score }: { score: number }) {
+function BestRightNowScore({
+  score,
+  size = "desktop",
+}: {
+  score: number;
+  size?: "mobile" | "desktop";
+}) {
   return (
-    <span className="text-xl font-light leading-none text-karl-gold lg:text-[1.65rem]">
+    <span
+      className={`font-light leading-none text-karl-gold ${
+        size === "mobile"
+          ? "text-[1.75rem]"
+          : "text-xl lg:text-[1.65rem]"
+      }`}
+    >
       {score}
     </span>
   );

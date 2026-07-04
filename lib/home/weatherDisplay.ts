@@ -5,6 +5,7 @@ import type {
   LocationWeather,
 } from "@/lib/schemas/weather";
 import type { WeatherPrediction } from "@/lib/schemas/shared";
+import { formatNextHourTimeCopy } from "@/lib/home/timeFormat";
 import { isLocationDataDegraded } from "@/lib/weather/dataStatus";
 import {
   getBestRightNowScoreLabel,
@@ -285,11 +286,11 @@ export function nextHourOutlookSummary(
 
   const reason = trimmedNonEmpty(prediction.predictionReason);
   if (reason) {
-    parts.push(reason);
+    parts.push(formatNextHourTimeCopy(reason));
   } else {
     const burnOff = trimmedNonEmpty(prediction.burnOffEstimateLocal);
     if (burnOff) {
-      parts.push(`Burn-off around ${burnOff}`);
+      parts.push(`Burn-off around ${formatNextHourTimeCopy(burnOff)}`);
     }
   }
 

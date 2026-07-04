@@ -138,4 +138,23 @@ describe("MapLayerControls immersive", () => {
     expect(onImmersivePanelOpenChange).toHaveBeenLastCalledWith(true);
     expect(screen.getByRole("button", { name: "Close map layers" })).toBeInTheDocument();
   });
+
+  it("keeps the immersive layers panel within the tablet viewport", () => {
+    usePhonePortraitMock.mockReturnValue(false);
+
+    render(
+      <MapLayerControls
+        layout="immersive"
+        mapStyle="standard"
+        fogLayerEnabled
+        onMapStyleChange={vi.fn()}
+        onFogLayerChange={vi.fn()}
+      />,
+    );
+
+    const controls = screen.getByLabelText("Map zoom controls").parentElement;
+    expect(controls?.className).toContain("calc(100vw-2rem)");
+    expect(controls?.className).toContain("sm:right-5");
+    expect(controls?.className).toContain("items-stretch");
+  });
 });

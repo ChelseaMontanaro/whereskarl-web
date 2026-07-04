@@ -11,6 +11,7 @@ import { HomeView } from "@/components/home/HomeView";
 import { ConditionsStatusProvider } from "@/components/providers/ConditionsStatusProvider";
 import * as intelligenceApi from "@/lib/api/intelligence";
 import * as weatherApi from "@/lib/api/weather";
+import type { LocationsResponse } from "@/lib/schemas/weather";
 
 const FIXTURES_DIR = join(process.cwd(), "tests/fixtures");
 
@@ -72,13 +73,49 @@ describe("HomeView responsive polish", () => {
     expect(nextHourLabels.length).toBeGreaterThanOrEqual(2);
   });
 
-  it("uses plain gold score text on mobile insight cards", async () => {
+  it("places desktop Next Hour below Best Right Now", async () => {
+    const locationsFixture = readFixture<LocationsResponse>("locations.json");
+    const sausalito = locationsFixture.locations[1];
+
+    vi.spyOn(weatherApi, "getLocations").mockResolvedValue({
+      locations: [
+        {
+          ...sausalito,
+          sunshineScore: 18,
+          prediction: {
+            trend: "holding",
+            predictionReason: "Fog may linger until 18:20.",
+            predictionConfidenceLabel: "Medium",
+          },
+        },
+      ],
+    });
+
+    const { container } = renderHomeView();
+
+    await screen.findAllByText(/6:20 PM/);
+
+    const desktopSection = container.querySelector(".mt-5.hidden.flex-col.gap-5.lg\\:flex");
+    const children = Array.from(desktopSection?.children ?? []);
+    const bestRightNowIndex = children.findIndex((child) =>
+      child.classList.contains("grid"),
+    );
+    const nextHourIndex = children.findIndex((child) =>
+      child.textContent?.includes("Next Hour"),
+    );
+
+    expect(bestRightNowIndex).toBeGreaterThanOrEqual(0);
+    expect(nextHourIndex).toBeGreaterThanOrEqual(0);
+    expect(bestRightNowIndex).toBeLessThan(nextHourIndex);
+  });
+
+  it("uses larger plain gold score text on mobile insight cards", async () => {
     const { container } = renderHomeView();
 
     await screen.findAllByText("Best Right Now");
 
     const mobileCards = container.querySelector(".flex.flex-col.gap-3\\.5.lg\\:hidden");
     expect(mobileCards?.querySelector(".rounded-full.border.border-karl-gold")).toBeNull();
-    expect(mobileCards?.querySelector(".text-xl.font-light.text-karl-gold")).toBeTruthy();
+    expect(mobileCards?.querySelector(".text-\\[1\\.75rem\\].text-karl-gold")).toBeTruthy();
   });
 });

@@ -305,13 +305,6 @@ export function HomeView() {
             layout="desktop"
           />
 
-          <NextHourOutlookCard
-            summary={nextHourSummary}
-            confidenceLabel={nextHourConfidence}
-            isLoading={!hasLoadedCoreWeather}
-            layout="desktop"
-          />
-
           <div className="grid grid-cols-2 gap-4">
             <BestRightNowSection
               items={desktopBestRightNow}
@@ -320,6 +313,13 @@ export function HomeView() {
               layout="desktop"
             />
           </div>
+
+          <NextHourOutlookCard
+            summary={nextHourSummary}
+            confidenceLabel={nextHourConfidence}
+            isLoading={!hasLoadedCoreWeather}
+            layout="desktop"
+          />
         </div>
 
         {current ? (

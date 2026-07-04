@@ -82,6 +82,29 @@ export function getImmersiveDefaultBayAreaFitOptions(): {
   };
 }
 
+const immersiveIntensityFilterPadding = {
+  top: 132,
+  right: 44,
+  bottom: 208,
+  left: 168,
+};
+
+export function resolveIntensityFilterFitOptions(
+  layout: "mobile" | "desktop" | "immersive",
+): { padding: ViewportPadding; maxZoom: number } {
+  if (layout === "immersive") {
+    return {
+      padding: immersiveIntensityFilterPadding,
+      maxZoom: 10,
+    };
+  }
+
+  return {
+    padding: 80,
+    maxZoom: 10.4,
+  };
+}
+
 export function fitMapToBounds(
   map: Map,
   bounds: MapBounds,

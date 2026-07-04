@@ -27,6 +27,7 @@ import {
   fitMapToBounds,
   focusMapOnLocation,
   getImmersiveDefaultBayAreaFitOptions,
+  resolveIntensityFilterFitOptions,
   resolveRegionViewportOptions,
 } from "@/lib/map/viewport";
 
@@ -297,7 +298,11 @@ export function BayAreaMap({
     if (intensityFilter) {
       const bounds = boundsForIntensityLocations(locations, intensityFilter);
       if (bounds) {
-        fitMapToBounds(map, bounds, { padding: 80, maxZoom: 10.4 });
+        fitMapToBounds(
+          map,
+          bounds,
+          resolveIntensityFilterFitOptions(layout),
+        );
         return;
       }
     }
