@@ -79,6 +79,44 @@ export function resolveLocationFogIntensity(
 }
 
 /**
+ * Marker-facing intensity when an active filter provides display context.
+ * Clear filter shows matching clear-sky locations as Clear even in the Light Fog band.
+ */
+export function resolveMarkerDisplayIntensity(
+  location: LocationConditionInput,
+  intensityFilter?: FogIntensity | null,
+): FogIntensity {
+  if (
+    intensityFilter === "clear" &&
+    locationQualifiesAsClearIntensity(location)
+  ) {
+    return "clear";
+  }
+
+  return resolveLocationFogIntensity(location);
+}
+
+export function getMarkerDisplayConditionLabel(
+  location: LocationConditionInput,
+  options: {
+    intensityFilter?: FogIntensity | null;
+    isNighttime?: boolean;
+  } = {},
+): string {
+  const intensity = resolveMarkerDisplayIntensity(
+    location,
+    options.intensityFilter,
+  );
+  const fogScore = resolveFogScore(location);
+
+  if (fogScore !== null) {
+    return getFogIntensityLabel(intensity, options.isNighttime ?? false);
+  }
+
+  return location.status?.trim() || "Conditions unavailable";
+}
+
+/**
  * Canonical intensity filter matching for map markers, trays, and overlays.
  * Clear uses clear-sky qualification; Light Fog excludes strong clear-sky locations.
  */

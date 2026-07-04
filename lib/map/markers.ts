@@ -1,7 +1,7 @@
 import {
-  getLocationConditionLabel,
+  getMarkerDisplayConditionLabel,
   locationMatchesFogIntensityFilter,
-  resolveLocationFogIntensity,
+  resolveMarkerDisplayIntensity,
   type FogIntensity,
   type LocationConditionInput,
 } from "@/lib/map/conditions";
@@ -23,8 +23,12 @@ export type MapMarkerLocation = {
 export function mapMarkerAriaLabel(
   location: MapMarkerLocation,
   isSelected: boolean,
+  intensityFilter?: FogIntensity | null,
 ): string {
-  const conditionLabel = getLocationConditionLabel(location);
+  const conditionLabel = getMarkerDisplayConditionLabel(location, {
+    intensityFilter,
+    isNighttime: isNighttime(new Date().getHours()),
+  });
 
   if (isSelected) {
     return `${location.name}, selected, ${conditionLabel}`;
@@ -33,12 +37,18 @@ export function mapMarkerAriaLabel(
   return `${location.name}, ${conditionLabel}`;
 }
 
-function getMarkerDisplayIntensity(location: MapMarkerLocation): FogIntensity {
-  return resolveLocationFogIntensity(location);
+function getMarkerDisplayIntensity(
+  location: MapMarkerLocation,
+  intensityFilter?: FogIntensity | null,
+): FogIntensity {
+  return resolveMarkerDisplayIntensity(location, intensityFilter);
 }
 
-function getMarkerIntensityClass(location: MapMarkerLocation): string {
-  return `karl-map-marker--${getMarkerDisplayIntensity(location)}`;
+function getMarkerIntensityClass(
+  location: MapMarkerLocation,
+  intensityFilter?: FogIntensity | null,
+): string {
+  return `karl-map-marker--${getMarkerDisplayIntensity(location, intensityFilter)}`;
 }
 
 function matchesIntensityFilter(
@@ -179,7 +189,10 @@ export function createMapMarkerElement(input: {
   showLocationLabel?: boolean;
   onSelect: (locationId: string) => void;
 }): HTMLElement {
-  const intensity = getMarkerDisplayIntensity(input.location);
+  const intensity = getMarkerDisplayIntensity(
+    input.location,
+    input.intensityFilter,
+  );
   const isFilteredOut = !matchesIntensityFilter(
     input.location,
     input.intensityFilter,
@@ -192,7 +205,7 @@ export function createMapMarkerElement(input: {
   button.type = "button";
   button.className = [
     "karl-map-marker",
-    getMarkerIntensityClass(input.location),
+    getMarkerIntensityClass(input.location, input.intensityFilter),
     input.isSelected ? "is-selected" : "",
     isFilteredOut ? "is-filtered-out" : "",
     !isVisible ||
@@ -210,7 +223,11 @@ export function createMapMarkerElement(input: {
   });
   button.setAttribute(
     "aria-label",
-    mapMarkerAriaLabel(input.location, input.isSelected),
+    mapMarkerAriaLabel(
+      input.location,
+      input.isSelected,
+      input.intensityFilter,
+    ),
   );
   button.setAttribute("aria-pressed", input.isSelected ? "true" : "false");
   button.addEventListener("click", (event) => {
@@ -235,6 +252,7 @@ export function createMapMarkerElement(input: {
 
 export function getMarkerFogIntensity(
   location: LocationConditionInput,
+  intensityFilter?: FogIntensity | null,
 ): FogIntensity {
-  return resolveLocationFogIntensity(location);
+  return resolveMarkerDisplayIntensity(location, intensityFilter);
 }

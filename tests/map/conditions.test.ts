@@ -11,6 +11,7 @@ import {
   locationQualifiesAsClearIntensity,
   resolveFogScore,
   resolveLocationFogIntensity,
+  resolveMarkerDisplayIntensity,
 } from "@/lib/map/conditions";
 
 describe("map conditions", () => {
@@ -111,6 +112,18 @@ describe("map conditions", () => {
     expect(locationQualifiesAsClearIntensity(sanJoseLike)).toBe(true);
     expect(locationMatchesFogIntensityFilter(sanJoseLike, "clear")).toBe(true);
     expect(getBestRightNowScoreLabel(sanJoseLike)).toBe("76 clear");
+  });
+
+  it("resolves marker display intensity from the active Clear filter context", () => {
+    const tiburonLike = { fogScore: 26, sunshineScore: 82 };
+    const moderateFog = { fogScore: 35, sunshineScore: 55 };
+
+    expect(resolveMarkerDisplayIntensity(tiburonLike)).toBe("lightFog");
+    expect(resolveMarkerDisplayIntensity(tiburonLike, "clear")).toBe("clear");
+    expect(resolveMarkerDisplayIntensity(moderateFog, "clear")).toBe("lightFog");
+    expect(resolveMarkerDisplayIntensity(moderateFog, "lightFog")).toBe(
+      "lightFog",
+    );
   });
 
   it("builds iOS-aligned location fog overlay styling without a new score model", () => {

@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   getBestRightNowScoreLabel,
@@ -107,7 +107,14 @@ const liveMapScenario: LocationWeather[] = [
 ];
 
 describe("classification contract regression", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("shows Clear markers for strong clear-sky locations in live-style data", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-03T12:00:00"));
+
     const clearMarkers = liveMapScenario.filter((location) =>
       locationMatchesFogIntensityFilter(location, "clear"),
     );
@@ -134,6 +141,10 @@ describe("classification contract regression", () => {
 
       expect(marker.className).toContain("is-intensity-match");
       expect(marker.className).not.toContain("is-filtered-hidden");
+      expect(marker.className).toContain("karl-map-marker--clear");
+      expect(marker.getAttribute("aria-label")).toContain("Clear");
+      expect(marker.innerHTML).toContain('circle cx="12" cy="12"');
+      expect(marker.innerHTML).not.toContain('ellipse cx="12" cy="11"');
     }
   });
 

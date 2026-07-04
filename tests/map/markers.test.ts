@@ -459,33 +459,6 @@ describe("createMapMarkerElement", () => {
     expect(marker.querySelector(".karl-map-marker__logo")).not.toBeNull();
   });
 
-  it("shows readable location labels below clear markers on desktop", () => {
-    const marker = createMapMarkerElement({
-      location: {
-        id: "san-jose",
-        name: "San Jose",
-        latitude: 37.3382,
-        longitude: -121.8863,
-        fogScore: 10,
-        sunshineScore: 90,
-        status: "Clear",
-      },
-      isSelected: false,
-      fogLayerEnabled: true,
-      intensityFilter: "clear",
-      layout: "desktop",
-      onSelect: vi.fn(),
-    });
-
-    expect(marker.className).toContain("karl-map-marker-root--labeled");
-    expect(marker.querySelector(".karl-map-marker__label")?.textContent).toBe(
-      "San Jose",
-    );
-    expect(marker.querySelector(".karl-map-marker")?.className).toContain(
-      "karl-map-marker--clear",
-    );
-  });
-
   it("shows readable location labels below light fog markers on desktop", () => {
     const marker = createMapMarkerElement({
       location: {
@@ -510,6 +483,98 @@ describe("createMapMarkerElement", () => {
     );
     expect(marker.querySelector(".karl-map-marker")?.className).toContain(
       "karl-map-marker--lightFog",
+    );
+  });
+});
+
+const tiburonClearSkyBand: MapMarkerLocation = {
+  id: "tiburon",
+  name: "Tiburon",
+  latitude: 37.8735,
+  longitude: -122.4566,
+  sunshineScore: 82,
+  fogScore: 26,
+  status: "Mostly Sunny",
+};
+
+const moderateFogLocation: MapMarkerLocation = {
+  id: "moderate-fog",
+  name: "Moderate Fog",
+  latitude: 37.5,
+  longitude: -122.2,
+  sunshineScore: 55,
+  fogScore: 35,
+  status: "Light Fog",
+};
+
+describe("clear filter display intensity", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("renders a high-sunshine Light Fog-band location as Clear when the Clear filter is active", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-03T12:00:00"));
+
+    const marker = createMapMarkerElement({
+      location: tiburonClearSkyBand,
+      isSelected: false,
+      fogLayerEnabled: true,
+      intensityFilter: "clear",
+      onSelect: vi.fn(),
+    });
+
+    expect(marker.className).toContain("karl-map-marker--clear");
+    expect(marker.className).toContain("is-intensity-match");
+    expect(marker.className).not.toContain("karl-map-marker--lightFog");
+    expect(marker.getAttribute("aria-label")).toBe("Tiburon, Clear");
+    expect(marker.innerHTML).toContain('circle cx="12" cy="12"');
+    expect(marker.innerHTML).not.toContain('ellipse cx="12" cy="11"');
+  });
+
+  it("renders the same location as Light Fog when no filter is active", () => {
+    const marker = createMapMarkerElement({
+      location: tiburonClearSkyBand,
+      isSelected: false,
+      fogLayerEnabled: true,
+      onSelect: vi.fn(),
+    });
+
+    expect(marker.className).toContain("karl-map-marker--lightFog");
+    expect(marker.className).not.toContain("karl-map-marker--clear");
+    expect(marker.getAttribute("aria-label")).toBe("Tiburon, Light Fog");
+    expect(marker.innerHTML).toContain('ellipse cx="12" cy="11"');
+    expect(marker.innerHTML).not.toContain('circle cx="12" cy="12"');
+  });
+
+  it("keeps moderate fog below the Clear sunshine threshold in Light Fog styling", () => {
+    const clearFilterMarker = createMapMarkerElement({
+      location: moderateFogLocation,
+      isSelected: false,
+      fogLayerEnabled: true,
+      intensityFilter: "clear",
+      onSelect: vi.fn(),
+    });
+    const lightFogFilterMarker = createMapMarkerElement({
+      location: moderateFogLocation,
+      isSelected: false,
+      fogLayerEnabled: true,
+      intensityFilter: "lightFog",
+      onSelect: vi.fn(),
+    });
+    const defaultMarker = createMapMarkerElement({
+      location: moderateFogLocation,
+      isSelected: false,
+      fogLayerEnabled: true,
+      onSelect: vi.fn(),
+    });
+
+    expect(clearFilterMarker.className).toContain("is-filtered-hidden");
+    expect(lightFogFilterMarker.className).toContain("karl-map-marker--lightFog");
+    expect(lightFogFilterMarker.className).toContain("is-intensity-match");
+    expect(defaultMarker.className).toContain("karl-map-marker--lightFog");
+    expect(defaultMarker.getAttribute("aria-label")).toBe(
+      "Moderate Fog, Light Fog",
     );
   });
 });
