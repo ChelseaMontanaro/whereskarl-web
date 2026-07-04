@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { BayAreaMap } from "@/components/map/BayAreaMap";
 import { MapBestRightNowTray } from "@/components/map/MapBestRightNowTray";
 import { MapConditionsPanel } from "@/components/map/MapConditionsPanel";
+import { MapPhonePortraitControls } from "@/components/map/MapPhonePortraitControls";
 import { MapFogLegend } from "@/components/map/MapFogLegend";
 import { MapSelectedLocationCard } from "@/components/map/MapSelectedLocationCard";
 import { GlassCard } from "@/components/ui/GlassCard";
@@ -289,34 +290,53 @@ function MobileMapView({ state }: { state: MapViewModel }) {
         suppressViewportUpdateRef={suppressViewportUpdateRef}
         intensityFilter={intensityFilter}
         onImmersiveLayersPanelOpenChange={setIsLayersPanelOpen}
+        immersiveOverlayProfile={isPhonePortrait ? "phone-portrait" : "tablet"}
       />
 
       <div className="pointer-events-none absolute inset-0 z-20">
         <div
           aria-hidden="true"
-          className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-karl-navy/42 via-karl-navy/16 to-transparent sm:h-36"
+          className={`absolute inset-x-0 top-0 bg-gradient-to-b from-karl-navy/42 via-karl-navy/16 to-transparent ${
+            isPhonePortrait ? "h-24" : "h-32 sm:h-36"
+          }`}
         />
 
         <div
-          className={`pointer-events-auto absolute left-3 top-3 flex max-w-[min(100%,13.5rem)] flex-col gap-1.5 transition-opacity motion-reduce:transition-none sm:left-4 sm:top-4 sm:max-w-xs sm:gap-2 md:top-[4.5rem] md:max-w-xs ${
+          className={`pointer-events-auto absolute left-3 top-3 flex flex-col gap-1.5 transition-opacity motion-reduce:transition-none sm:left-4 sm:top-4 sm:gap-2 md:top-[4.5rem] ${
+            isPhonePortrait
+              ? "max-w-[calc(100vw-5.75rem)]"
+              : "max-w-[min(100%,13.5rem)] sm:max-w-xs md:max-w-xs"
+          } ${
             isPhonePortrait && isLayersPanelOpen
               ? "pointer-events-none opacity-0"
               : "opacity-100"
           }`}
         >
-          <MapConditionsPanel
-            compact={isPhonePortrait}
-            isLoading={currentQuery.isLoading && !currentQuery.data}
-            selectedRegionId={
-              selectedLocation ? null : mapQuery.activeRegionId
-            }
-            onSelectRegion={handleSelectRegion}
-          />
-          <MapFogLegend
-            layout={isPhonePortrait ? "immersive-strip" : "desktop-stack"}
-            activeIntensity={intensityFilter}
-            onSelectIntensity={handleSelectIntensity}
-          />
+          {isPhonePortrait ? (
+            <MapPhonePortraitControls
+              selectedRegionId={
+                selectedLocation ? null : mapQuery.activeRegionId
+              }
+              onSelectRegion={handleSelectRegion}
+              activeIntensity={intensityFilter}
+              onSelectIntensity={handleSelectIntensity}
+            />
+          ) : (
+            <>
+              <MapConditionsPanel
+                isLoading={currentQuery.isLoading && !currentQuery.data}
+                selectedRegionId={
+                  selectedLocation ? null : mapQuery.activeRegionId
+                }
+                onSelectRegion={handleSelectRegion}
+              />
+              <MapFogLegend
+                layout="desktop-stack"
+                activeIntensity={intensityFilter}
+                onSelectIntensity={handleSelectIntensity}
+              />
+            </>
+          )}
           <MapQueryWarnings
             unknownLocationId={unknownLocationId}
             unknownRegionId={mapQuery.unknownRegionId}

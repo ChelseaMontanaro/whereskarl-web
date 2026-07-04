@@ -18,9 +18,21 @@ const immersiveViewportPadding = {
   left: 28,
 };
 
+const immersivePhonePortraitViewportPadding = {
+  top: 58,
+  right: 28,
+  bottom: 148,
+  left: 12,
+};
+
 export const BAY_AREA_DEFAULT_VIEWPORT_PADDING = 36;
 
 export const BAY_AREA_IMMERSIVE_VIEWPORT_PADDING = immersiveViewportPadding;
+
+export const BAY_AREA_IMMERSIVE_PHONE_PORTRAIT_VIEWPORT_PADDING =
+  immersivePhonePortraitViewportPadding;
+
+export type ImmersiveOverlayProfile = "tablet" | "phone-portrait";
 
 export const BAY_AREA_DEFAULT_MAX_ZOOM = 10.2;
 

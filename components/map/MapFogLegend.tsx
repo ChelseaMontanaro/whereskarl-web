@@ -15,7 +15,7 @@ const LEGEND_ITEMS: Array<{
 ];
 
 type MapFogLegendProps = {
-  layout?: "mobile" | "desktop" | "desktop-stack" | "immersive-strip";
+  layout?: "mobile" | "desktop" | "desktop-stack" | "immersive-strip" | "phone-compact";
   activeIntensity?: FogIntensity | null;
   onSelectIntensity?: (intensity: FogIntensity) => void;
 };
@@ -34,6 +34,57 @@ export function MapFogLegend({
   activeIntensity = null,
   onSelectIntensity,
 }: MapFogLegendProps) {
+  if (layout === "phone-compact") {
+    const isInteractive = Boolean(onSelectIntensity);
+
+    return (
+      <div aria-label="Fog intensity legend" className="w-full">
+        <p className="text-[0.56rem] font-bold uppercase tracking-[0.14em] text-white/38">
+          Fog Intensity
+        </p>
+        <ul className="mt-1 grid grid-cols-2 gap-x-1.5 gap-y-1">
+          {LEGEND_ITEMS.map((item) => {
+            const isActive = activeIntensity === item.intensity;
+            const label = getFogIntensityLabel(item.intensity);
+
+            if (isInteractive) {
+              return (
+                <li key={item.intensity}>
+                  <button
+                    type="button"
+                    aria-pressed={isActive}
+                    aria-label={label}
+                    onClick={() => onSelectIntensity?.(item.intensity)}
+                    className={`flex w-full min-w-0 items-center gap-1 rounded-md border px-1.5 py-0.5 text-left transition-colors motion-reduce:transition-none ${
+                      isActive
+                        ? "border-karl-gold/35 bg-karl-gold/10 text-karl-gold"
+                        : "border-white/10 bg-black/24 text-white/58 backdrop-blur-sm hover:border-white/18 hover:text-white/75"
+                    }`}
+                  >
+                    <LegendSwatch className={item.swatchClassName} />
+                    <span className="min-w-0 truncate text-[0.6rem]">{label}</span>
+                  </button>
+                </li>
+              );
+            }
+
+            return (
+              <li
+                key={item.intensity}
+                className="flex min-w-0 items-center gap-1 rounded-md border border-white/10 bg-black/24 px-1.5 py-0.5 backdrop-blur-sm"
+              >
+                <LegendSwatch className={item.swatchClassName} />
+                <span className="min-w-0 truncate text-[0.6rem] text-white/58">
+                  {label}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    );
+  }
+
   if (layout === "immersive-strip") {
     const isInteractive = Boolean(onSelectIntensity);
 

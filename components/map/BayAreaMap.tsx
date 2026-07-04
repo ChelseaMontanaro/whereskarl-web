@@ -10,6 +10,7 @@ import {
   BAY_AREA_IMMERSIVE_MIN_ZOOM,
   BAY_AREA_MAX_BOUNDS,
   findBayAreaProductRegion,
+  type ImmersiveOverlayProfile,
 } from "@/lib/map/config";
 import { syncFogOverlayLayer } from "@/lib/map/fogOverlays";
 import { boundsForIntensityLocations } from "@/lib/map/intensityFilter";
@@ -45,6 +46,7 @@ type BayAreaMapProps = {
   suppressViewportUpdateRef?: MutableRefObject<boolean>;
   intensityFilter?: FogIntensity | null;
   onImmersiveLayersPanelOpenChange?: (isOpen: boolean) => void;
+  immersiveOverlayProfile?: ImmersiveOverlayProfile;
 };
 
 export function BayAreaMap({
@@ -61,6 +63,7 @@ export function BayAreaMap({
   suppressViewportUpdateRef,
   intensityFilter = null,
   onImmersiveLayersPanelOpenChange,
+  immersiveOverlayProfile = "tablet",
 }: BayAreaMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<import("maplibre-gl").Map | null>(null);
@@ -113,7 +116,7 @@ export function BayAreaMap({
         }
 
         const immersiveFit = isImmersive
-          ? getImmersiveDefaultBayAreaFitOptions()
+          ? getImmersiveDefaultBayAreaFitOptions(immersiveOverlayProfile)
           : null;
         fitDefaultBayAreaViewport(
           map,
@@ -165,13 +168,17 @@ export function BayAreaMap({
         fitMapToBounds(
           map,
           region.bounds,
-          resolveRegionViewportOptions(region.viewport, layout),
+          resolveRegionViewportOptions(
+            region.viewport,
+            layout,
+            immersiveOverlayProfile,
+          ),
         );
         return;
       }
 
       const immersiveFit = isImmersive
-        ? getImmersiveDefaultBayAreaFitOptions()
+        ? getImmersiveDefaultBayAreaFitOptions(immersiveOverlayProfile)
         : null;
       fitDefaultBayAreaViewport(
         map,
@@ -184,6 +191,7 @@ export function BayAreaMap({
     map.setStyle(nextStyle);
   }, [
     fogLayerEnabled,
+    immersiveOverlayProfile,
     intensityFilter,
     isImmersive,
     layout,
@@ -290,7 +298,11 @@ export function BayAreaMap({
       fitMapToBounds(
         map,
         region.bounds,
-        resolveRegionViewportOptions(region.viewport, layout),
+        resolveRegionViewportOptions(
+          region.viewport,
+          layout,
+          immersiveOverlayProfile,
+        ),
       );
       return;
     }
@@ -301,14 +313,14 @@ export function BayAreaMap({
         fitMapToBounds(
           map,
           bounds,
-          resolveIntensityFilterFitOptions(layout),
+          resolveIntensityFilterFitOptions(layout, immersiveOverlayProfile),
         );
         return;
       }
     }
 
     const immersiveFit = isImmersive
-      ? getImmersiveDefaultBayAreaFitOptions()
+      ? getImmersiveDefaultBayAreaFitOptions(immersiveOverlayProfile)
       : null;
     fitDefaultBayAreaViewport(
       map,
@@ -316,6 +328,7 @@ export function BayAreaMap({
       immersiveFit?.maxZoom ?? BAY_AREA_DEFAULT_MAX_ZOOM,
     );
   }, [
+    immersiveOverlayProfile,
     intensityFilter,
     isImmersive,
     layout,

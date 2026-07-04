@@ -5,9 +5,11 @@ import {
   BAY_AREA_DEFAULT_MAX_ZOOM,
   BAY_AREA_DEFAULT_VIEWPORT_PADDING,
   BAY_AREA_IMMERSIVE_MAX_ZOOM,
+  BAY_AREA_IMMERSIVE_PHONE_PORTRAIT_VIEWPORT_PADDING,
   BAY_AREA_IMMERSIVE_VIEWPORT_PADDING,
   BAY_AREA_LOCATION_ZOOM,
   type BayAreaProductRegionViewport,
+  type ImmersiveOverlayProfile,
   type MapBounds,
   type ViewportPadding,
 } from "@/lib/map/config";
@@ -22,6 +24,7 @@ export { BAY_AREA_IMMERSIVE_VIEWPORT_PADDING };
 export function resolveRegionViewportOptions(
   viewport: BayAreaProductRegionViewport | undefined,
   layout: "mobile" | "desktop" | "immersive",
+  immersiveProfile: ImmersiveOverlayProfile = "tablet",
 ): { padding?: ViewportPadding; maxZoom?: number } | undefined {
   if (!viewport) {
     return undefined;
@@ -30,9 +33,11 @@ export function resolveRegionViewportOptions(
   const padding =
     layout === "desktop" && viewport.desktopPadding !== undefined
       ? viewport.desktopPadding
-      : layout === "immersive" && viewport.immersivePadding !== undefined
-        ? viewport.immersivePadding
-        : viewport.padding;
+      : layout === "immersive" && immersiveProfile === "phone-portrait"
+        ? BAY_AREA_IMMERSIVE_PHONE_PORTRAIT_VIEWPORT_PADDING
+        : layout === "immersive" && viewport.immersivePadding !== undefined
+          ? viewport.immersivePadding
+          : viewport.padding;
 
   return {
     padding,
@@ -72,12 +77,17 @@ export function fitDefaultBayAreaViewport(
   });
 }
 
-export function getImmersiveDefaultBayAreaFitOptions(): {
+export function getImmersiveDefaultBayAreaFitOptions(
+  immersiveProfile: ImmersiveOverlayProfile = "tablet",
+): {
   padding: ViewportPadding;
   maxZoom: number;
 } {
   return {
-    padding: BAY_AREA_IMMERSIVE_VIEWPORT_PADDING,
+    padding:
+      immersiveProfile === "phone-portrait"
+        ? BAY_AREA_IMMERSIVE_PHONE_PORTRAIT_VIEWPORT_PADDING
+        : BAY_AREA_IMMERSIVE_VIEWPORT_PADDING,
     maxZoom: BAY_AREA_IMMERSIVE_MAX_ZOOM,
   };
 }
@@ -89,12 +99,23 @@ const immersiveIntensityFilterPadding = {
   left: 168,
 };
 
+const immersivePhonePortraitIntensityFilterPadding = {
+  top: 88,
+  right: 44,
+  bottom: 208,
+  left: 108,
+};
+
 export function resolveIntensityFilterFitOptions(
   layout: "mobile" | "desktop" | "immersive",
+  immersiveProfile: ImmersiveOverlayProfile = "tablet",
 ): { padding: ViewportPadding; maxZoom: number } {
   if (layout === "immersive") {
     return {
-      padding: immersiveIntensityFilterPadding,
+      padding:
+        immersiveProfile === "phone-portrait"
+          ? immersivePhonePortraitIntensityFilterPadding
+          : immersiveIntensityFilterPadding,
       maxZoom: 10,
     };
   }

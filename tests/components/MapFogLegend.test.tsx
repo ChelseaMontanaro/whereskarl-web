@@ -102,4 +102,17 @@ describe("MapFogLegend", () => {
     expect(container.querySelector(".overflow-x-auto")).toBeNull();
     expect(container.querySelector(".grid.grid-cols-2")).toBeTruthy();
   });
+
+  it("renders the phone-compact fog legend without a glass card wrapper", () => {
+    const { container } = render(
+      <MapFogLegend
+        layout="phone-compact"
+        onSelectIntensity={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Karl Territory" })).toBeInTheDocument();
+    expect(container.querySelector(".rounded-2xl.border")).toBeNull();
+    expect(container.querySelector(".grid.grid-cols-2")).toBeTruthy();
+  });
 });
