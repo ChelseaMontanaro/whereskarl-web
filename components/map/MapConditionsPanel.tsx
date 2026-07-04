@@ -12,7 +12,7 @@ const REGION_CHIP_LABELS: Record<BayAreaProductRegion["id"], string> = {
 };
 
 const MAP_CONDITIONS_SUBTITLE =
-  "Explore live fog & clear skies across the Bay Area.";
+  "Explore live fog & clear skies around the Bay.";
 
 type MapConditionsPanelProps = {
   isLoading?: boolean;
