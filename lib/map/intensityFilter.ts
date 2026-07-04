@@ -9,6 +9,7 @@ import type { BestRightNowItem } from "@/lib/home/weatherDisplay";
 import type { MapMarkerLocation } from "@/lib/map/markers";
 import { filterLocationsByProductRegion } from "@/lib/map/regions";
 import type { LocationWeather } from "@/lib/schemas/weather";
+import { isLocationDataDegraded } from "@/lib/weather/dataStatus";
 import type { BayAreaProductRegionId } from "@/lib/map/config";
 
 export function locationMatchesIntensity(
@@ -46,6 +47,7 @@ export function intensityFilterTrayItems(
       score: location.sunshineScore,
       scoreLabel: getBestRightNowScoreLabel(location),
       rank: index + 1,
+      isDegraded: isLocationDataDegraded(location.dataStatus),
     }));
 }
 

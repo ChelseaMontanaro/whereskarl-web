@@ -217,6 +217,7 @@ function useMapViewState(): MapViewModel {
         fogScore: location.fogScore,
         status: location.status,
         region: location.region,
+        dataStatus: location.dataStatus,
       })),
     [locations],
   );

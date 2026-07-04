@@ -9,6 +9,8 @@ import { isBayAreaProductRegionId } from "@/lib/map/config";
 import { getMarkerIconMarkup } from "@/lib/map/markerIcons";
 import { getProductRegionIdForLocation } from "@/lib/map/regions";
 import { isNighttime } from "@/lib/home/weatherDisplay";
+import type { DataStatus } from "@/lib/schemas/shared";
+import { degradedMarkerAriaSuffix } from "@/lib/weather/dataStatus";
 
 export type MapMarkerLocation = {
   id: string;
@@ -19,6 +21,7 @@ export type MapMarkerLocation = {
   fogScore?: number | null;
   status?: string | null;
   region?: string | null;
+  dataStatus?: DataStatus;
 };
 
 export function mapMarkerAriaLabel(
@@ -29,11 +32,12 @@ export function mapMarkerAriaLabel(
     isNighttime: isNighttime(new Date().getHours()),
   });
 
-  if (isSelected) {
-    return `${location.name}, selected, ${conditionLabel}`;
-  }
+  const degradedSuffix = degradedMarkerAriaSuffix(location.dataStatus);
+  const base = isSelected
+    ? `${location.name}, selected, ${conditionLabel}`
+    : `${location.name}, ${conditionLabel}`;
 
-  return `${location.name}, ${conditionLabel}`;
+  return degradedSuffix ? `${base}, ${degradedSuffix}` : base;
 }
 
 function getMarkerDisplayIntensity(location: MapMarkerLocation): FogIntensity {

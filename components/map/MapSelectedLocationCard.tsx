@@ -12,7 +12,9 @@ import {
   isFavoriteLocation,
   toggleFavoriteLocation,
 } from "@/lib/storage/favorites";
+import { DegradedDataLabel } from "@/components/weather/DegradedDataLabel";
 import type { LocationWeather } from "@/lib/schemas/weather";
+import { isLocationDataDegraded } from "@/lib/weather/dataStatus";
 
 type MapSelectedLocationCardProps = {
   location: LocationWeather;
@@ -94,6 +96,7 @@ export function MapSelectedLocationCard({
   onClose,
 }: MapSelectedLocationCardProps) {
   const conditionSentence = getConditionSentence(location);
+  const isDegraded = isLocationDataDegraded(location.dataStatus);
   const fogPercent = formatFogPercent(location);
   const wind = formatWind(location);
   const temperature = formatTemperature(location);
@@ -165,6 +168,8 @@ export function MapSelectedLocationCard({
           <p className="mt-0.5 line-clamp-2 text-[0.75rem] leading-snug text-white/72">
             {conditionSentence}
           </p>
+
+          {isDegraded ? <DegradedDataLabel variant="location" className="mt-1" /> : null}
 
           {metadataItems.length > 0 ? (
             <p className="mt-1.5 text-[0.65rem] font-medium text-white/48">

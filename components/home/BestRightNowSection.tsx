@@ -12,6 +12,7 @@ import {
   desktopInsightIconSizeClass,
 } from "@/components/home/desktopGlass";
 import { GlassCard } from "@/components/ui/GlassCard";
+import { DegradedDataLabel } from "@/components/weather/DegradedDataLabel";
 import type { BestRightNowItem } from "@/lib/home/weatherDisplay";
 import { buildMapHref } from "@/lib/map/routing";
 
@@ -52,6 +53,9 @@ function MobileBestRightNowSection({ items }: BestRightNowSectionProps) {
                   {item.locationName}
                 </p>
                 <p className="mt-1 text-sm text-white/65">{item.detail}</p>
+                {item.isDegraded ? (
+                  <DegradedDataLabel variant="bestRightNow" className="mt-1.5" />
+                ) : null}
               </div>
               {item.score != null ? (
                 <span className="rounded-full border border-karl-gold/25 px-2 py-1 text-xs font-semibold text-karl-gold">
@@ -93,6 +97,9 @@ function DesktopBestRightNowCard({
             {item.locationName}
           </p>
           <p className="mt-1 text-sm leading-relaxed text-white/68">{item.detail}</p>
+          {item.isDegraded ? (
+            <DegradedDataLabel variant="bestRightNow" className="mt-1.5" />
+          ) : null}
         </div>
         {item.score != null ? (
           <div className="flex shrink-0 items-center gap-2">
@@ -124,6 +131,9 @@ function DesktopBestRightNowCard({
             {item.locationName}
           </p>
           <p className="mt-1 text-sm leading-relaxed text-white/68">{item.detail}</p>
+          {item.isDegraded ? (
+            <DegradedDataLabel variant="bestRightNow" className="mt-1.5" />
+          ) : null}
         </div>
         <div className="flex shrink-0 items-center gap-2">
           {item.score != null ? <BestRightNowScore score={item.score} /> : null}

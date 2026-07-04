@@ -1,6 +1,7 @@
 "use client";
 
 import { desktopGlassCardClass } from "@/components/home/desktopGlass";
+import { DegradedDataLabel } from "@/components/weather/DegradedDataLabel";
 import type { BestRightNowItem } from "@/lib/home/weatherDisplay";
 
 type MapBestRightNowTrayProps = {
@@ -66,6 +67,9 @@ export function MapBestRightNowTray({
                 <span className="mt-1 text-xs font-light text-karl-gold">
                   {item.scoreLabel ?? `${item.score} clear`}
                 </span>
+              ) : null}
+              {item.isDegraded ? (
+                <DegradedDataLabel variant="bestRightNow" className="mt-1" />
               ) : null}
             </button>
           </li>

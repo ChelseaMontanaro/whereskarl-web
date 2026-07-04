@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MapSelectedLocationCard } from "@/components/map/MapSelectedLocationCard";
 import { STORAGE_KEYS } from "@/lib/constants/config";
 import type { LocationWeather } from "@/lib/schemas/weather";
+import { DEGRADED_LOCATION_STATUS_LABEL } from "@/lib/weather/dataStatus";
 
 const location: LocationWeather = {
   id: "tiburon",
@@ -149,5 +150,45 @@ describe("MapSelectedLocationCard", () => {
     expect(
       screen.getByRole("button", { name: "Remove Tiburon from favorites" }),
     ).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("shows a degraded label when dataStatus.isDegraded is true", () => {
+    render(
+      <MapSelectedLocationCard
+        location={{
+          ...location,
+          dataStatus: {
+            source: "degraded",
+            isDegraded: true,
+            lastLiveObservationAt: null,
+            freshnessMinutes: null,
+          },
+        }}
+        onClose={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText(DEGRADED_LOCATION_STATUS_LABEL)).toBeInTheDocument();
+  });
+
+  it("does not show a degraded label for normal live data", () => {
+    render(
+      <MapSelectedLocationCard
+        location={{
+          ...location,
+          dataStatus: {
+            source: "live",
+            isDegraded: false,
+            lastLiveObservationAt: "2026-07-04T05:35:00+00:00",
+            freshnessMinutes: 28,
+          },
+        }}
+        onClose={vi.fn()}
+      />,
+    );
+
+    expect(
+      screen.queryByText(DEGRADED_LOCATION_STATUS_LABEL),
+    ).not.toBeInTheDocument();
   });
 });

@@ -5,6 +5,7 @@ import type {
   LocationWeather,
 } from "@/lib/schemas/weather";
 import type { WeatherPrediction } from "@/lib/schemas/shared";
+import { isLocationDataDegraded } from "@/lib/weather/dataStatus";
 import {
   getBestRightNowScoreLabel,
   locationQualifiesAsClearIntensity,
@@ -19,6 +20,7 @@ export type BestRightNowItem = {
   score: number | null;
   scoreLabel?: string | null;
   rank: number | null;
+  isDegraded?: boolean;
 };
 
 export type KarlReadPresentation = {
@@ -59,6 +61,7 @@ export function bestRightNowLocationItems(
       score: location.sunshineScore,
       scoreLabel: getBestRightNowScoreLabel(location),
       rank: index + 1,
+      isDegraded: isLocationDataDegraded(location.dataStatus),
     }));
 }
 

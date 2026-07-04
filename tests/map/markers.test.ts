@@ -157,6 +157,44 @@ describe("createMapMarkerElement", () => {
     expect(marker.getAttribute("aria-label")).toContain("Karl Territory");
   });
 
+  it("includes fallback wording in the aria-label for degraded locations", () => {
+    const marker = createMapMarkerElement({
+      location: {
+        ...tiburon,
+        dataStatus: {
+          source: "degraded",
+          isDegraded: true,
+          lastLiveObservationAt: null,
+          freshnessMinutes: null,
+        },
+      },
+      isSelected: false,
+      fogLayerEnabled: true,
+      onSelect: vi.fn(),
+    });
+
+    expect(marker.getAttribute("aria-label")).toContain("using fallback conditions");
+  });
+
+  it("does not include fallback wording in the aria-label for live locations", () => {
+    const marker = createMapMarkerElement({
+      location: {
+        ...tiburon,
+        dataStatus: {
+          source: "live",
+          isDegraded: false,
+          lastLiveObservationAt: "2026-07-04T05:35:00+00:00",
+          freshnessMinutes: 28,
+        },
+      },
+      isSelected: false,
+      fogLayerEnabled: true,
+      onSelect: vi.fn(),
+    });
+
+    expect(marker.getAttribute("aria-label")).not.toContain("fallback");
+  });
+
   it("hides non-Karl markers when the Karl Territory filter is active", () => {
     const marker = createMapMarkerElement({
       location: {
