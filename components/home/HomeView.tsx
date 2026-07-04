@@ -304,6 +304,7 @@ export function HomeView() {
             <BestRightNowSection
               items={desktopBestRightNow}
               isLoading={!hasLoadedCoreWeather}
+              isNightPresentation={isNightPresentation}
               layout="desktop"
             />
           </div>

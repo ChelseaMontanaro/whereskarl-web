@@ -1,8 +1,5 @@
 import { STORAGE_KEYS } from "@/lib/constants/config";
-import type {
-  KarlHeroImageryMetadata,
-  KarlIntelligenceResponse,
-} from "@/lib/schemas/intelligence";
+import type { KarlIntelligenceResponse } from "@/lib/schemas/intelligence";
 import type {
   BestSunshineResponse,
   CurrentResponse,
@@ -17,27 +14,18 @@ export type LastKnownWeather = {
   savedAt: string;
 };
 
-const PENDING_HERO_IMAGERY: KarlHeroImageryMetadata = {
-  conditionState: "unavailable",
-  stabilityKey: "pending|refresh",
-  imageUrl: null,
-  localFallbackAsset: null,
-  presentation: null,
-  source: null,
-  confidenceLabel: null,
-  imageKey: null,
-  focusLocationId: null,
-  fallbackReason: "pending-refresh",
-  altText: null,
-};
-
 /** Removes cached hero URLs so narrative can hydrate without stale hero imagery. */
 export function stripHeroImageryFromIntelligence(
   intelligence: KarlIntelligenceResponse,
 ): KarlIntelligenceResponse {
   return {
     ...intelligence,
-    heroImagery: PENDING_HERO_IMAGERY,
+    heroImagery: {
+      ...intelligence.heroImagery,
+      imageUrl: null,
+      fallbackReason:
+        intelligence.heroImagery.fallbackReason ?? "pending-refresh",
+    },
   };
 }
 

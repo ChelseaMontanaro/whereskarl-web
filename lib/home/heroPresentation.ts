@@ -1,8 +1,13 @@
+import {
+  normalizedHeroTimeOfDay,
+  resolveHeroImageUrls,
+} from "@/lib/home/heroAssets";
 import type { KarlHeroImageryMetadata } from "@/lib/schemas/intelligence";
 
 export type HeroPresentation = {
   stabilityKey: string;
   imageUrl: string | null;
+  fallbackImageUrl: string | null;
   altText: string | null;
   isNightPresentation: boolean;
   atmosphereTopOpacity: number;
@@ -14,6 +19,7 @@ export type HeroPresentation = {
 const DEFAULT_FALLBACK: HeroPresentation = {
   stabilityKey: "unavailable|day|default|hero_fog",
   imageUrl: null,
+  fallbackImageUrl: null,
   altText: null,
   isNightPresentation: false,
   atmosphereTopOpacity: 0.26,
@@ -29,23 +35,6 @@ function trimmedNonEmpty(value: string | null | undefined): string | null {
 
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
-}
-
-function normalizedTimeOfDay(value: string | null | undefined): "day" | "night" {
-  return trimmedNonEmpty(value)?.toLowerCase() === "night" ? "night" : "day";
-}
-
-function remoteImageURL(value: string | null | undefined): string | null {
-  if (!value) {
-    return null;
-  }
-
-  try {
-    const url = new URL(value);
-    return url.protocol === "https:" ? url.toString() : null;
-  } catch {
-    return null;
-  }
 }
 
 function defaultOverlayProfile(
@@ -125,7 +114,7 @@ export function resolveHeroPresentation(
     return DEFAULT_FALLBACK;
   }
 
-  const timeOfDay = normalizedTimeOfDay(
+  const timeOfDay = normalizedHeroTimeOfDay(
     heroImagery.timeOfDay ?? heroImagery.presentation?.timeOfDay,
   );
   const presentation = heroImagery.presentation;
@@ -144,23 +133,48 @@ export function resolveHeroPresentation(
           heroImagery.conditionState,
           timeOfDay === "night",
         );
+  const { imageUrl, fallbackImageUrl } = resolveHeroImageUrls(heroImagery);
 
   return {
     stabilityKey: heroImagery.stabilityKey,
-    imageUrl: remoteImageURL(heroImagery.imageUrl),
+    imageUrl,
+    fallbackImageUrl,
     altText: trimmedNonEmpty(heroImagery.altText),
     isNightPresentation: timeOfDay === "night",
     ...overlayFromPresentation,
   };
 }
 
+export type HeroImageSource = "remote" | "local-fallback" | "gradient";
+
 export function selectHeroImageSource(input: {
   imageUrl: string | null;
-  remoteLoadFailed: boolean;
-}): "remote" | "fallback" {
+  fallbackImageUrl?: string | null;
+  remoteLoadFailed?: boolean;
+  fallbackLoadFailed?: boolean;
+}): HeroImageSource {
   if (input.imageUrl && !input.remoteLoadFailed) {
     return "remote";
   }
 
-  return "fallback";
+  if (input.fallbackImageUrl && !input.fallbackLoadFailed) {
+    return "local-fallback";
+  }
+
+  return "gradient";
+}
+
+export function activeHeroImageUrl(
+  presentation: HeroPresentation,
+  source: HeroImageSource,
+): string | null {
+  if (source === "remote") {
+    return presentation.imageUrl;
+  }
+
+  if (source === "local-fallback") {
+    return presentation.fallbackImageUrl;
+  }
+
+  return null;
 }

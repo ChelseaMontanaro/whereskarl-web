@@ -29,7 +29,12 @@ describe("stripHeroImageryFromIntelligence", () => {
     const stripped = stripHeroImageryFromIntelligence(intelligence);
 
     expect(stripped.heroImagery.imageUrl).toBeNull();
-    expect(stripped.heroImagery.stabilityKey).toBe("pending|refresh");
+    expect(stripped.heroImagery.localFallbackAsset).toBe(
+      intelligence.heroImagery.localFallbackAsset,
+    );
+    expect(stripped.heroImagery.stabilityKey).toBe(
+      intelligence.heroImagery.stabilityKey,
+    );
     expect(stripped.narrative.headline).toBe(intelligence.narrative.headline);
     expect(stripped.multiRegionRanking).toEqual(intelligence.multiRegionRanking);
   });
@@ -69,7 +74,12 @@ describe("saveLastKnownWeather", () => {
     const restored = loadLastKnownWeather();
 
     expect(restored?.intelligence?.heroImagery.imageUrl).toBeNull();
-    expect(restored?.intelligence?.heroImagery.stabilityKey).toBe("pending|refresh");
+    expect(restored?.intelligence?.heroImagery.localFallbackAsset).toBe(
+      "hero_mixed",
+    );
+    expect(restored?.intelligence?.heroImagery.stabilityKey).toBe(
+      intelligence.heroImagery.stabilityKey,
+    );
     expect(
       window.localStorage.getItem(STORAGE_KEYS.lastKnownWeather),
     ).not.toContain("cdn.example.com/assets/hero");

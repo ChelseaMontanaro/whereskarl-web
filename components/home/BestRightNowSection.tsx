@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { SunshineIcon } from "@/components/home/ConditionIcons";
+import { MoonIcon, SunshineIcon } from "@/components/home/ConditionIcons";
 import {
   CardLabel,
   InsightCardChevron,
@@ -18,8 +18,21 @@ import { buildMapHref } from "@/lib/map/routing";
 type BestRightNowSectionProps = {
   items: BestRightNowItem[];
   isLoading?: boolean;
+  isNightPresentation?: boolean;
   layout?: "both" | "mobile" | "desktop";
 };
+
+function BestRightNowSpotIcon({
+  isNightPresentation,
+}: {
+  isNightPresentation: boolean;
+}) {
+  return isNightPresentation ? (
+    <MoonIcon className={`${desktopInsightIconSizeClass} text-[#8CB8D8]`} />
+  ) : (
+    <SunshineIcon className={desktopInsightIconSizeClass} />
+  );
+}
 
 function MobileBestRightNowSection({ items }: BestRightNowSectionProps) {
   return (
@@ -61,12 +74,18 @@ function BestRightNowScore({ score }: { score: number }) {
   );
 }
 
-function DesktopBestRightNowCard({ item }: { item: BestRightNowItem }) {
+function DesktopBestRightNowCard({
+  item,
+  isNightPresentation = false,
+}: {
+  item: BestRightNowItem;
+  isNightPresentation?: boolean;
+}) {
   if (!item.locationId) {
     return (
       <GlassCard variant="desktop" className="flex h-full items-center gap-4 px-5 py-5">
-        <InsightIconFrame tone="gold">
-          <SunshineIcon className={desktopInsightIconSizeClass} />
+        <InsightIconFrame tone={isNightPresentation ? "mist" : "gold"}>
+          <BestRightNowSpotIcon isNightPresentation={isNightPresentation} />
         </InsightIconFrame>
         <div className="min-w-0 flex-1">
           <CardLabel>Best Right Now</CardLabel>
@@ -96,8 +115,8 @@ function DesktopBestRightNowCard({ item }: { item: BestRightNowItem }) {
         variant="desktop"
         className={`flex h-full items-center gap-4 px-5 py-5 ${desktopClickableCardHoverClass}`}
       >
-        <InsightIconFrame tone="gold">
-          <SunshineIcon className={desktopInsightIconSizeClass} />
+        <InsightIconFrame tone={isNightPresentation ? "mist" : "gold"}>
+          <BestRightNowSpotIcon isNightPresentation={isNightPresentation} />
         </InsightIconFrame>
         <div className="min-w-0 flex-1">
           <CardLabel>Best Right Now</CardLabel>
@@ -118,6 +137,7 @@ function DesktopBestRightNowCard({ item }: { item: BestRightNowItem }) {
 function DesktopBestRightNowGrid({
   items,
   isLoading = false,
+  isNightPresentation = false,
 }: BestRightNowSectionProps) {
   if (isLoading) {
     return (
@@ -134,7 +154,11 @@ function DesktopBestRightNowGrid({
   return (
     <>
       {items.map((item) => (
-        <DesktopBestRightNowCard key={item.locationId} item={item} />
+        <DesktopBestRightNowCard
+          key={item.locationId}
+          item={item}
+          isNightPresentation={isNightPresentation}
+        />
       ))}
     </>
   );
@@ -143,6 +167,7 @@ function DesktopBestRightNowGrid({
 export function BestRightNowSection({
   items,
   isLoading = false,
+  isNightPresentation = false,
   layout = "both",
 }: BestRightNowSectionProps) {
   if (layout === "mobile") {
@@ -154,7 +179,7 @@ export function BestRightNowSection({
   }
 
   if (layout === "desktop") {
-    return <DesktopBestRightNowGrid items={items} isLoading={isLoading} />;
+    return <DesktopBestRightNowGrid items={items} isLoading={isLoading} isNightPresentation={isNightPresentation} />;
   }
 
   if (items.length === 0) {
@@ -167,7 +192,11 @@ export function BestRightNowSection({
         <MobileBestRightNowSection items={items} />
       </div>
       <div className="hidden lg:block">
-        <DesktopBestRightNowGrid items={items} isLoading={isLoading} />
+        <DesktopBestRightNowGrid
+          items={items}
+          isLoading={isLoading}
+          isNightPresentation={isNightPresentation}
+        />
       </div>
     </>
   );

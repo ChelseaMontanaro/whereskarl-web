@@ -4,7 +4,10 @@ import { useEffect, useState } from "react";
 
 import { FindClearSkiesCta } from "@/components/home/FindClearSkiesCta";
 import type { HeroPresentation } from "@/lib/home/heroPresentation";
-import { selectHeroImageSource } from "@/lib/home/heroPresentation";
+import {
+  activeHeroImageUrl,
+  selectHeroImageSource,
+} from "@/lib/home/heroPresentation";
 
 type HomeHeroProps = {
   presentation: HeroPresentation;
@@ -34,13 +37,18 @@ export function HomeHero({
   isFindingClearSkies,
 }: HomeHeroProps) {
   const [remoteLoadFailed, setRemoteLoadFailed] = useState(false);
+  const [fallbackLoadFailed, setFallbackLoadFailed] = useState(false);
   const imageSource = selectHeroImageSource({
     imageUrl: presentation.imageUrl,
+    fallbackImageUrl: presentation.fallbackImageUrl,
     remoteLoadFailed,
+    fallbackLoadFailed,
   });
+  const heroImageUrl = activeHeroImageUrl(presentation, imageSource);
 
   useEffect(() => {
     setRemoteLoadFailed(false);
+    setFallbackLoadFailed(false);
   }, [presentation.stabilityKey]);
 
   return (
@@ -49,14 +57,21 @@ export function HomeHero({
       className="relative min-h-[min(540px,70vh)] w-full overflow-hidden lg:min-h-0 lg:overflow-visible"
     >
       <div className="lg:hidden">
-        {imageSource === "remote" && presentation.imageUrl ? (
+        {heroImageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            key={presentation.stabilityKey}
-            src={presentation.imageUrl}
+            key={`${presentation.stabilityKey}|${imageSource}`}
+            src={heroImageUrl}
             alt={presentation.altText ?? "Bay Area weather hero image"}
             className="absolute inset-0 h-full w-full scale-[1.02] object-cover motion-reduce:scale-100 motion-reduce:transition-none"
-            onError={() => setRemoteLoadFailed(true)}
+            onError={() => {
+              if (imageSource === "remote") {
+                setRemoteLoadFailed(true);
+                return;
+              }
+
+              setFallbackLoadFailed(true);
+            }}
           />
         ) : (
           <div
