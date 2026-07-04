@@ -11,7 +11,7 @@ describe("MapRegionChips", () => {
     cleanup();
   });
 
-  it("renders all Bay Area product regions including Peninsula", () => {
+  it("renders exactly the four visible product regions", () => {
     render(
       <MapRegionChips selectedRegionId={null} onSelectRegion={vi.fn()} />,
     );
@@ -22,6 +22,7 @@ describe("MapRegionChips", () => {
       ).toBeInTheDocument();
     }
 
-    expect(screen.getAllByRole("button")).toHaveLength(5);
+    expect(screen.getAllByRole("button")).toHaveLength(4);
+    expect(screen.queryByRole("button", { name: "Peninsula" })).not.toBeInTheDocument();
   });
 });

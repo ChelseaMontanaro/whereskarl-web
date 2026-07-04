@@ -318,7 +318,7 @@ function MobileMapView({ state }: { state: MapViewModel }) {
     ? `Focused on ${selectedLocation.name}.`
     : activeRegion
       ? `Framing ${activeRegion.name} across the Bay.`
-      : "Explore conditions across San Francisco, North Bay, East Bay, Peninsula, and South Bay.";
+      : "Explore conditions across San Francisco, North Bay, East Bay, and South Bay.";
 
   return (
     <div className="mx-auto flex w-full max-w-[430px] flex-col gap-4 px-4 py-6 sm:py-8">

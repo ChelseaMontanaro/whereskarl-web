@@ -1,6 +1,7 @@
 import {
   findBayAreaProductRegion,
   isBayAreaProductRegionId,
+  normalizeVisibleMapRegionId,
   type BayAreaProductRegion,
 } from "@/lib/map/config";
 
@@ -97,10 +98,11 @@ export function resolveMapQueryState(
     };
   }
 
-  if (isBayAreaProductRegionId(requestedRegionId)) {
+  const activeRegionId = normalizeVisibleMapRegionId(requestedRegionId);
+  if (activeRegionId && isBayAreaProductRegionId(activeRegionId)) {
     return {
       requestedLocationId: null,
-      activeRegionId: requestedRegionId,
+      activeRegionId,
       unknownLocationId: null,
       unknownRegionId: null,
     };

@@ -1,7 +1,9 @@
 import {
   findBayAreaProductRegion,
-  isBayAreaProductRegionId,
-  type BayAreaProductRegionId,
+  isBayAreaBackendRegionId,
+  normalizeVisibleMapRegionId,
+  type BayAreaBackendRegionId,
+  type BayAreaVisibleProductRegionId,
 } from "@/lib/map/config";
 
 export type LocationWithRegion = {
@@ -13,9 +15,9 @@ export type LocationWithRegion = {
  * Fallback when the API omits `region` (fixtures, older payloads).
  * Prefer `location.region` from `/locations` whenever present.
  */
-export const LOCATION_PRODUCT_REGION_ASSIGNMENTS: Record<
+export const LOCATION_BACKEND_REGION_ASSIGNMENTS: Record<
   string,
-  BayAreaProductRegionId
+  BayAreaBackendRegionId
 > = {
   tiburon: "north-bay",
   sausalito: "north-bay",
@@ -36,25 +38,37 @@ export const LOCATION_PRODUCT_REGION_ASSIGNMENTS: Record<
   pacifica: "peninsula",
 };
 
-export function resolveProductRegionId(
+export function resolveBackendRegionId(
   location: LocationWithRegion,
-): BayAreaProductRegionId | null {
+): BayAreaBackendRegionId | null {
   const apiRegion = location.region?.trim().toLowerCase();
-  if (apiRegion && isBayAreaProductRegionId(apiRegion)) {
+  if (apiRegion && isBayAreaBackendRegionId(apiRegion)) {
     return apiRegion;
   }
 
-  const fallbackRegion = LOCATION_PRODUCT_REGION_ASSIGNMENTS[location.id];
-  if (fallbackRegion && isBayAreaProductRegionId(fallbackRegion)) {
+  const fallbackRegion = LOCATION_BACKEND_REGION_ASSIGNMENTS[location.id];
+  if (fallbackRegion && isBayAreaBackendRegionId(fallbackRegion)) {
     return fallbackRegion;
   }
 
   return null;
 }
 
+/** Visible product region for chips, lists, markers, and trays. */
+export function resolveProductRegionId(
+  location: LocationWithRegion,
+): BayAreaVisibleProductRegionId | null {
+  const backendRegionId = resolveBackendRegionId(location);
+  if (!backendRegionId) {
+    return null;
+  }
+
+  return normalizeVisibleMapRegionId(backendRegionId);
+}
+
 export function getProductRegionIdForLocation(
   locationOrId: string | LocationWithRegion,
-): BayAreaProductRegionId | null {
+): BayAreaVisibleProductRegionId | null {
   if (typeof locationOrId === "string") {
     return resolveProductRegionId({ id: locationOrId });
   }
@@ -75,7 +89,7 @@ export function getProductRegionNameForLocation(
 
 export function filterLocationsByProductRegion<T extends LocationWithRegion>(
   locations: T[],
-  regionId: BayAreaProductRegionId | null,
+  regionId: BayAreaVisibleProductRegionId | null,
 ): T[] {
   if (!regionId) {
     return locations;

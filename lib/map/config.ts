@@ -38,18 +38,30 @@ export type BayAreaProductRegionViewport = {
   maxZoom?: number;
 };
 
-export const BAY_AREA_PRODUCT_REGION_IDS = [
+/** Region chips and map framing — SF, North Bay, East Bay, South Bay only. */
+export const BAY_AREA_VISIBLE_PRODUCT_REGION_IDS = [
   "san-francisco",
   "north-bay",
   "east-bay",
   "south-bay",
+] as const;
+
+/** Backend `/locations` region values, including the coastal Peninsula belt. */
+export const BAY_AREA_BACKEND_REGION_IDS = [
+  ...BAY_AREA_VISIBLE_PRODUCT_REGION_IDS,
   "peninsula",
 ] as const;
 
-export type BayAreaProductRegionId = (typeof BAY_AREA_PRODUCT_REGION_IDS)[number];
+export type BayAreaVisibleProductRegionId =
+  (typeof BAY_AREA_VISIBLE_PRODUCT_REGION_IDS)[number];
+
+export type BayAreaBackendRegionId = (typeof BAY_AREA_BACKEND_REGION_IDS)[number];
+
+/** Visible product region id used by chips, routing, and UI filtering. */
+export type BayAreaProductRegionId = BayAreaVisibleProductRegionId;
 
 export type BayAreaProductRegion = {
-  id: BayAreaProductRegionId;
+  id: BayAreaVisibleProductRegionId;
   name: string;
   bounds: MapBounds;
   viewport?: BayAreaProductRegionViewport;
@@ -128,25 +140,19 @@ export const BAY_AREA_PRODUCT_REGIONS: BayAreaProductRegion[] = [
       maxZoom: 11,
     },
   },
-  {
-    id: "peninsula",
-    name: "Peninsula",
-    bounds: [
-      [-122.55, 37.58],
-      [-122.38, 37.72],
-    ],
-    viewport: {
-      padding: 36,
-      desktopPadding: {
-        top: 80,
-        right: 80,
-        bottom: 128,
-        left: 360,
-      },
-      maxZoom: 11.1,
-    },
-  },
 ];
+
+/** Maps backend-only regions into the visible coastal fog belt grouping. */
+const BACKEND_TO_VISIBLE_REGION: Record<
+  BayAreaBackendRegionId,
+  BayAreaVisibleProductRegionId
+> = {
+  "san-francisco": "san-francisco",
+  "north-bay": "north-bay",
+  "east-bay": "east-bay",
+  "south-bay": "south-bay",
+  peninsula: "san-francisco",
+};
 
 export function findBayAreaProductRegion(
   regionId: string | null | undefined,
@@ -155,11 +161,39 @@ export function findBayAreaProductRegion(
     return null;
   }
 
-  return BAY_AREA_PRODUCT_REGIONS.find((region) => region.id === regionId) ?? null;
+  const visibleRegionId = normalizeVisibleMapRegionId(regionId);
+  if (!visibleRegionId) {
+    return null;
+  }
+
+  return (
+    BAY_AREA_PRODUCT_REGIONS.find((region) => region.id === visibleRegionId) ??
+    null
+  );
+}
+
+export function isBayAreaBackendRegionId(
+  regionId: string,
+): regionId is BayAreaBackendRegionId {
+  return BAY_AREA_BACKEND_REGION_IDS.includes(regionId as BayAreaBackendRegionId);
 }
 
 export function isBayAreaProductRegionId(
   regionId: string,
-): regionId is BayAreaProductRegionId {
-  return BAY_AREA_PRODUCT_REGION_IDS.includes(regionId as BayAreaProductRegionId);
+): regionId is BayAreaVisibleProductRegionId {
+  return BAY_AREA_VISIBLE_PRODUCT_REGION_IDS.includes(
+    regionId as BayAreaVisibleProductRegionId,
+  );
+}
+
+export function normalizeVisibleMapRegionId(
+  regionId: string,
+): BayAreaVisibleProductRegionId | null {
+  const normalized = regionId.trim().toLowerCase();
+
+  if (isBayAreaBackendRegionId(normalized)) {
+    return BACKEND_TO_VISIBLE_REGION[normalized];
+  }
+
+  return null;
 }

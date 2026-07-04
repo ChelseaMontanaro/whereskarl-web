@@ -185,13 +185,16 @@ describe("MapView", () => {
     expect(await screen.findByText("Bay Area Locations")).toBeInTheDocument();
   });
 
-  it("accepts peninsula as a shareable region route", async () => {
+  it("normalizes peninsula region params to San Francisco", async () => {
     useSearchParamsMock.mockReturnValue(new URLSearchParams("region=peninsula"));
 
     renderMap();
 
-    expect(await screen.findByText("Framing Peninsula across the Bay.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Framing San Francisco across the Bay."),
+    ).toBeInTheDocument();
     expect(screen.queryByText(/Couldn't find region/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Peninsula" })).not.toBeInTheDocument();
   });
 
   it("selects a location from the list and updates routing", async () => {
