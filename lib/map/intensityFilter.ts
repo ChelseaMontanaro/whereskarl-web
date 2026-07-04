@@ -53,6 +53,23 @@ export function intensityFilterTrayTitle(intensity: FogIntensity): string {
   return `${getFogIntensityLabel(intensity)} Locations`;
 }
 
+/** Desktop tray is shown only for actionable clear-sky recommendations. */
+export function shouldShowDesktopBestRightNowTray(
+  intensityFilter: FogIntensity | null,
+): boolean {
+  return intensityFilter === null || intensityFilter === "clear";
+}
+
+export function getDesktopBestRightNowTrayTitle(
+  intensityFilter: FogIntensity | null,
+): string {
+  if (intensityFilter === "clear") {
+    return intensityFilterTrayTitle("clear");
+  }
+
+  return "Best Right Now";
+}
+
 export function toggleIntensityFilter(
   current: FogIntensity | null,
   next: FogIntensity,

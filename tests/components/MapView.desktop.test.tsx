@@ -178,4 +178,82 @@ describe("MapView desktop", () => {
       scroll: false,
     });
   });
+
+  describe("desktop tray intensity behavior", () => {
+    beforeEach(() => {
+      useSearchParamsMock.mockReturnValue(new URLSearchParams());
+    });
+
+    it("shows the Best Right Now tray when no intensity filter is selected", async () => {
+      renderDesktopMap();
+
+      expect(
+        await screen.findByLabelText("Best Right Now"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Select San Jose on map" }),
+      ).toBeInTheDocument();
+    });
+
+    it("shows the Clear Locations tray when Clear is selected", async () => {
+      renderDesktopMap();
+
+      fireEvent.click(await screen.findByRole("button", { name: "Clear" }));
+
+      expect(
+        await screen.findByLabelText("Clear Locations"),
+      ).toBeInTheDocument();
+      expect(screen.queryByLabelText("Best Right Now")).not.toBeInTheDocument();
+    });
+
+    it.each(["Light Fog", "Foggy", "Karl Territory"] as const)(
+      "hides the tray when %s is selected",
+      async (label) => {
+        renderDesktopMap();
+
+        fireEvent.click(await screen.findByRole("button", { name: label }));
+
+        expect(screen.queryByLabelText("Best Right Now")).not.toBeInTheDocument();
+        expect(screen.queryByLabelText("Clear Locations")).not.toBeInTheDocument();
+        expect(
+          screen.queryByRole("button", { name: /Select .+ on map$/ }),
+        ).not.toBeInTheDocument();
+      },
+    );
+
+    it("keeps the Clear Locations tray visible when a region filter is active", async () => {
+      useSearchParamsMock.mockReturnValue(new URLSearchParams("region=north-bay"));
+
+      renderDesktopMap();
+
+      fireEvent.click(await screen.findByRole("button", { name: "Clear" }));
+
+      expect(
+        await screen.findByLabelText("Clear Locations"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Select Tiburon on map" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Select Sausalito on map" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: "Select San Jose on map" }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("hides the tray for fog filters even when a region filter is active", async () => {
+      useSearchParamsMock.mockReturnValue(new URLSearchParams("region=north-bay"));
+
+      renderDesktopMap();
+
+      fireEvent.click(await screen.findByRole("button", { name: "Foggy" }));
+
+      expect(screen.queryByLabelText("Clear Locations")).not.toBeInTheDocument();
+      expect(screen.queryByLabelText("Best Right Now")).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /Select .+ on map$/ }),
+      ).not.toBeInTheDocument();
+    });
+  });
 });

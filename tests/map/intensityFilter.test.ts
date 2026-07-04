@@ -3,7 +3,9 @@ import { describe, expect, it } from "vitest";
 import type { FogIntensity } from "@/lib/map/conditions";
 import {
   boundsForIntensityLocations,
+  getDesktopBestRightNowTrayTitle,
   intensityFilterTrayItems,
+  shouldShowDesktopBestRightNowTray,
   toggleIntensityFilter,
 } from "@/lib/map/intensityFilter";
 import type { LocationWeather } from "@/lib/schemas/weather";
@@ -150,6 +152,21 @@ describe("intensityFilterTrayItems", () => {
     expect(items).toHaveLength(1);
     expect(items.map((item) => item.locationId)).toEqual(["moderate-fog"]);
     expect(items[0]?.scoreLabel).toBe("55 sunshine");
+  });
+});
+
+describe("desktop best-right-now tray visibility", () => {
+  it("shows the tray only when no filter or Clear is active", () => {
+    expect(shouldShowDesktopBestRightNowTray(null)).toBe(true);
+    expect(shouldShowDesktopBestRightNowTray("clear")).toBe(true);
+    expect(shouldShowDesktopBestRightNowTray("lightFog")).toBe(false);
+    expect(shouldShowDesktopBestRightNowTray("foggy")).toBe(false);
+    expect(shouldShowDesktopBestRightNowTray("karlTerritory")).toBe(false);
+  });
+
+  it("uses Best Right Now and Clear Locations titles", () => {
+    expect(getDesktopBestRightNowTrayTitle(null)).toBe("Best Right Now");
+    expect(getDesktopBestRightNowTrayTitle("clear")).toBe("Clear Locations");
   });
 });
 

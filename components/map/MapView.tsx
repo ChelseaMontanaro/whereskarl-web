@@ -23,8 +23,9 @@ import {
 } from "@/lib/map/conditions";
 import { findBayAreaProductRegion, isBayAreaProductRegionId } from "@/lib/map/config";
 import {
+  getDesktopBestRightNowTrayTitle,
   intensityFilterTrayItems,
-  intensityFilterTrayTitle,
+  shouldShowDesktopBestRightNowTray,
   toggleIntensityFilter,
 } from "@/lib/map/intensityFilter";
 import { resolveMapLocationFocus } from "@/lib/map/locationSelection";
@@ -231,13 +232,17 @@ function useMapViewState(): MapViewModel {
       return bestRightNow;
     }
 
-    return intensityFilterTrayItems(
-      locations,
-      intensityFilter,
-      null,
-      4,
-      mapQuery.activeRegionId,
-    );
+    if (intensityFilter === "clear") {
+      return intensityFilterTrayItems(
+        locations,
+        "clear",
+        null,
+        4,
+        mapQuery.activeRegionId,
+      );
+    }
+
+    return bestRightNow;
   }, [bestRightNow, intensityFilter, locations, mapQuery.activeRegionId]);
 
   const handleSelectLocation = useCallback(
@@ -434,19 +439,17 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
         </div>
 
         <div className="pointer-events-auto absolute inset-x-6 bottom-6 flex items-end justify-between gap-6">
-          <div className="max-w-xl shrink-0">
-            <MapBestRightNowTray
-              items={bestRightNowItems}
-              selectedLocationId={selectedLocation?.id ?? null}
-              title={
-                intensityFilter
-                  ? intensityFilterTrayTitle(intensityFilter)
-                  : "Best Right Now"
-              }
-              onSelectLocation={handleSelectLocation}
-              isLoading={locationsQuery.isLoading}
-            />
-          </div>
+          {shouldShowDesktopBestRightNowTray(intensityFilter) ? (
+            <div className="max-w-xl shrink-0">
+              <MapBestRightNowTray
+                items={bestRightNowItems}
+                selectedLocationId={selectedLocation?.id ?? null}
+                title={getDesktopBestRightNowTrayTitle(intensityFilter)}
+                onSelectLocation={handleSelectLocation}
+                isLoading={locationsQuery.isLoading}
+              />
+            </div>
+          ) : null}
 
           {selectedLocation ? (
             <div className="shrink-0">
