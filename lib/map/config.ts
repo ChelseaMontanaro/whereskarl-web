@@ -76,8 +76,8 @@ export const BAY_AREA_PRODUCT_REGIONS: BayAreaProductRegion[] = [
     id: "east-bay",
     name: "East Bay",
     bounds: [
-      [-122.4, 37.58],
-      [-121.58, 38.06],
+      [-122.33, 37.7],
+      [-121.72, 38.02],
     ],
     viewport: {
       padding: 36,
@@ -87,7 +87,7 @@ export const BAY_AREA_PRODUCT_REGIONS: BayAreaProductRegion[] = [
         bottom: 128,
         left: 360,
       },
-      maxZoom: 10.0,
+      maxZoom: 10.5,
     },
   },
   {

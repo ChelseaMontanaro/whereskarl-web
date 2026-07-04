@@ -38,7 +38,7 @@ describe("resolveRegionViewportOptions", () => {
 
     expect(resolveRegionViewportOptions(eastBay?.viewport, "mobile")).toEqual({
       padding: 36,
-      maxZoom: 10.0,
+      maxZoom: 10.5,
     });
   });
 
@@ -52,7 +52,7 @@ describe("resolveRegionViewportOptions", () => {
         bottom: 128,
         left: 360,
       },
-      maxZoom: 10.0,
+      maxZoom: 10.5,
     });
   });
 });

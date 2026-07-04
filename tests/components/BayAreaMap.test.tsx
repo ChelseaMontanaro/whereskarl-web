@@ -167,7 +167,7 @@ describe("BayAreaMap", () => {
         eastBay!.bounds,
         expect.objectContaining({
           padding: 36,
-          maxZoom: 10.0,
+          maxZoom: 10.5,
           essential: true,
         }),
       );
@@ -199,7 +199,7 @@ describe("BayAreaMap", () => {
             bottom: 128,
             left: 360,
           },
-          maxZoom: 10.0,
+          maxZoom: 10.5,
           essential: true,
         }),
       );
@@ -236,7 +236,7 @@ describe("BayAreaMap", () => {
       expect(mockFitBounds).toHaveBeenCalledWith(
         eastBay!.bounds,
         expect.objectContaining({
-          maxZoom: 10.0,
+          maxZoom: 10.5,
           essential: true,
         }),
       );

@@ -87,7 +87,7 @@ describe("Bay Area product regions", () => {
     });
   });
 
-  it("frames East Bay wide enough for core cities and inland context", () => {
+  it("frames East Bay with balanced bounds for core and inland context", () => {
     const eastBay = findBayAreaProductRegion("east-bay");
     expect(eastBay).toBeDefined();
 
@@ -102,15 +102,16 @@ describe("Bay Area product regions", () => {
     expect(pointInBounds(37.8216, -122.0322, eastBay!.bounds)).toBe(true);
     expect(pointInBounds(37.978, -122.0311, eastBay!.bounds)).toBe(true);
     expect(pointInBounds(38.0049, -121.8058, eastBay!.bounds)).toBe(true);
-    expect(pointInBounds(37.6819, -121.768, eastBay!.bounds)).toBe(true);
 
     expect(pointInBounds(37.7749, -122.4194, eastBay!.bounds)).toBe(false);
     expect(pointInBounds(37.8735, -122.4566, eastBay!.bounds)).toBe(false);
+    expect(pointInBounds(37.3382, -121.8863, eastBay!.bounds)).toBe(false);
+    expect(pointInBounds(37.6819, -121.768, eastBay!.bounds)).toBe(false);
 
-    expect(west).toBeGreaterThanOrEqual(-122.42);
-    expect(east).toBeLessThanOrEqual(-121.55);
-    expect(south).toBeLessThanOrEqual(37.6);
-    expect(north).toBeGreaterThanOrEqual(38.0);
+    expect(west).toBeGreaterThanOrEqual(-122.35);
+    expect(east).toBeLessThanOrEqual(-121.7);
+    expect(south).toBeGreaterThanOrEqual(37.68);
+    expect(north).toBeLessThanOrEqual(38.05);
 
     expect(eastBay?.viewport).toEqual({
       padding: 36,
@@ -120,7 +121,7 @@ describe("Bay Area product regions", () => {
         bottom: 128,
         left: 360,
       },
-      maxZoom: 10.0,
+      maxZoom: 10.5,
     });
   });
 });
