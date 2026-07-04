@@ -102,12 +102,39 @@ describe("intensityFilterTrayItems", () => {
 
     const items = intensityFilterTrayItems(locations, "clear", null, 4);
 
-    expect(items).toHaveLength(3);
-    expect(items.map((item) => item.locationId)).toEqual([
-      "san-jose",
-      "tiburon",
-      "sausalito",
-    ]);
+    expect(items).toHaveLength(1);
+    expect(items.map((item) => item.locationId)).toEqual(["san-jose"]);
+  });
+
+  it("returns light fog locations when fogScore is 25–49 even with sunshineScore >= 50", () => {
+    const locations: LocationWeather[] = [
+      {
+        ...baseLocation,
+        id: "tiburon",
+        name: "Tiburon",
+        fogScore: 26,
+        sunshineScore: 82,
+      },
+      {
+        ...baseLocation,
+        id: "sausalito",
+        name: "Sausalito",
+        fogScore: 41,
+        sunshineScore: 74,
+      },
+      {
+        ...baseLocation,
+        id: "san-jose",
+        name: "San Jose",
+        fogScore: 10,
+        sunshineScore: 90,
+      },
+    ];
+
+    const items = intensityFilterTrayItems(locations, "lightFog", null, 4);
+
+    expect(items).toHaveLength(2);
+    expect(items.map((item) => item.locationId)).toEqual(["tiburon", "sausalito"]);
   });
 });
 

@@ -27,25 +27,49 @@ describe("map conditions", () => {
     expect(getLocationConditionLabel({ status: "Mostly Sunny" })).toBe("Mostly Sunny");
   });
 
-  it("treats high sunshine scores as clear for map overlays", () => {
-    expect(
-      resolveLocationFogIntensity({ fogScore: 26, sunshineScore: 82 }),
-    ).toBe("clear");
-    expect(
-      resolveLocationFogIntensity({ fogScore: 41, sunshineScore: 74 }),
-    ).toBe("clear");
-    expect(
-      getLocationFogOverlayStyle({ fogScore: 26, sunshineScore: 82 }),
-    ).toBeNull();
-    expect(getLocationConditionLabel({ fogScore: 26, sunshineScore: 82 })).toBe(
+  it("keeps fogScore below 25 in the Clear band regardless of sunshineScore", () => {
+    expect(resolveLocationFogIntensity({ fogScore: 10, sunshineScore: 90 })).toBe(
+      "clear",
+    );
+    expect(resolveLocationFogIntensity({ fogScore: 24, sunshineScore: 76 })).toBe(
+      "clear",
+    );
+    expect(getLocationConditionLabel({ fogScore: 10, sunshineScore: 90 })).toBe(
       "Clear",
     );
+    expect(getLocationFogOverlayStyle({ fogScore: 10, sunshineScore: 90 })).toBeNull();
   });
 
-  it("keeps Karl Territory and low-clear-skies locations out of the clear band", () => {
+  it("resolves fogScore 25–49 to Light Fog even when sunshineScore is at least 50", () => {
+    expect(
+      resolveLocationFogIntensity({ fogScore: 25, sunshineScore: 75 }),
+    ).toBe("lightFog");
+    expect(
+      resolveLocationFogIntensity({ fogScore: 26, sunshineScore: 82 }),
+    ).toBe("lightFog");
+    expect(
+      resolveLocationFogIntensity({ fogScore: 41, sunshineScore: 74 }),
+    ).toBe("lightFog");
+    expect(
+      resolveLocationFogIntensity({ fogScore: 49, sunshineScore: 51 }),
+    ).toBe("lightFog");
+    expect(getLocationConditionLabel({ fogScore: 26, sunshineScore: 82 })).toBe(
+      "Light Fog",
+    );
+    expect(
+      getLocationFogOverlayStyle({ fogScore: 26, sunshineScore: 82 }),
+    ).toMatchObject({
+      radiusMeters: 1400 + 26 * 18,
+    });
+  });
+
+  it("keeps Karl Territory and foggy locations out of the clear band", () => {
     expect(
       resolveLocationFogIntensity({ fogScore: 82, sunshineScore: 74 }),
     ).toBe("karlTerritory");
+    expect(
+      resolveLocationFogIntensity({ fogScore: 60, sunshineScore: 40 }),
+    ).toBe("foggy");
     expect(
       resolveLocationFogIntensity({ fogScore: 41, sunshineScore: 40 }),
     ).toBe("lightFog");

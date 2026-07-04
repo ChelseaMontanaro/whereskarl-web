@@ -64,22 +64,13 @@ export function locationQualifiesAsClearIntensity(
 }
 
 /**
- * Map-facing intensity that treats high Clear Skies Score locations as clear
- * even when fogScore sits in a foggier band.
+ * Map-facing intensity from raw fogScore thresholds for markers and filters.
+ * Clear-skies score does not override the Light Fog band (25–49).
  */
 export function resolveLocationFogIntensity(
   location: LocationConditionInput,
 ): FogIntensity {
-  if (locationQualifiesAsClearIntensity(location)) {
-    return "clear";
-  }
-
-  const fogScore = resolveFogScore(location);
-  if (fogScore === null) {
-    return "clear";
-  }
-
-  return getFogIntensity(fogScore);
+  return getFogIntensity(resolveFogScore(location));
 }
 
 export function getFogIntensityLabel(

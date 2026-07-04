@@ -30,7 +30,7 @@ describe("fog overlays", () => {
     });
   });
 
-  it("skips fog circles for high Clear Skies Score locations", () => {
+  it("renders light fog circles for fogScore 25–49 even when sunshineScore is high", () => {
     const collection = buildLocationFogOverlayCollection([
       {
         id: "tiburon",
@@ -41,7 +41,8 @@ describe("fog overlays", () => {
       },
     ]);
 
-    expect(collection.features).toHaveLength(0);
+    expect(collection.features).toHaveLength(1);
+    expect(collection.features[0]?.properties?.intensity).toBe("lightFog");
   });
 
   it("only renders overlays matching the active intensity filter", () => {

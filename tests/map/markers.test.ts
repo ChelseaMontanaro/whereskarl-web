@@ -126,7 +126,7 @@ describe("createMapMarkerElement", () => {
     expect(marker.className).not.toContain("karl-map-marker--lightFog");
   });
 
-  it("classifies high-sunshine locations as clear markers", () => {
+  it("classifies fogScore 25–49 as light fog markers even with high sunshineScore", () => {
     const marker = createMapMarkerElement({
       location: {
         id: "tiburon",
@@ -142,7 +142,8 @@ describe("createMapMarkerElement", () => {
       onSelect: vi.fn(),
     });
 
-    expect(marker.className).toContain("karl-map-marker--clear");
+    expect(marker.className).toContain("karl-map-marker--lightFog");
+    expect(marker.className).not.toContain("karl-map-marker--clear");
   });
 
   it("uses shared condition language in the marker label", () => {
