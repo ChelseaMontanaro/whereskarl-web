@@ -41,6 +41,7 @@ type BayAreaMapProps = {
   layout?: "mobile" | "desktop" | "immersive";
   suppressViewportUpdateRef?: MutableRefObject<boolean>;
   intensityFilter?: FogIntensity | null;
+  onImmersiveLayersPanelOpenChange?: (isOpen: boolean) => void;
 };
 
 export function BayAreaMap({
@@ -56,6 +57,7 @@ export function BayAreaMap({
   layout = "mobile",
   suppressViewportUpdateRef,
   intensityFilter = null,
+  onImmersiveLayersPanelOpenChange,
 }: BayAreaMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<import("maplibre-gl").Map | null>(null);
@@ -325,6 +327,7 @@ export function BayAreaMap({
         onFogLayerChange={onFogLayerChange}
         onZoomIn={handleZoomIn}
         onZoomOut={handleZoomOut}
+        onImmersivePanelOpenChange={onImmersiveLayersPanelOpenChange}
       />
       {!isFullBleed && fogLayerEnabled ? <MapFogLegend layout="mobile" /> : null}
       {!isFullBleed ? (

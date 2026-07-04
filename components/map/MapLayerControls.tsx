@@ -17,6 +17,7 @@ type MapLayerControlsProps = {
   layout?: "mobile" | "desktop" | "immersive";
   onZoomIn?: () => void;
   onZoomOut?: () => void;
+  onImmersivePanelOpenChange?: (isOpen: boolean) => void;
 };
 
 function ZoomButton({
@@ -230,6 +231,7 @@ function ImmersiveMapLayerControls({
   onFogLayerChange,
   onZoomIn,
   onZoomOut,
+  onImmersivePanelOpenChange,
 }: Omit<MapLayerControlsProps, "layout">) {
   const isPhonePortrait = usePhonePortrait();
   const [isLayersCollapsed, setIsLayersCollapsed] = useState(true);
@@ -238,8 +240,29 @@ function ImmersiveMapLayerControls({
     setIsLayersCollapsed(isPhonePortrait);
   }, [isPhonePortrait]);
 
+  useEffect(() => {
+    onImmersivePanelOpenChange?.(!isLayersCollapsed);
+  }, [isLayersCollapsed, onImmersivePanelOpenChange]);
+
+  const openLayersPanel = () => setIsLayersCollapsed(false);
+  const closeLayersPanel = () => setIsLayersCollapsed(true);
+
   return (
-    <div className="absolute right-3 top-3 z-10 flex w-[min(100%,12.5rem)] flex-col items-end gap-1.5 sm:right-4 sm:top-4 sm:w-[min(100%,15rem)] sm:gap-2 md:top-[4.5rem]">
+    <>
+      {!isLayersCollapsed && isPhonePortrait ? (
+        <button
+          type="button"
+          aria-label="Close map layers"
+          className="fixed inset-0 z-[15] bg-black/42 backdrop-blur-[1px] motion-reduce:transition-none"
+          onClick={closeLayersPanel}
+        />
+      ) : null}
+
+      <div
+        className={`absolute top-3 z-20 flex w-[min(100%,12.5rem)] flex-col items-end gap-1.5 sm:right-4 sm:top-4 sm:w-[min(100%,15rem)] sm:gap-2 md:top-[4.5rem] ${
+          isPhonePortrait ? "right-3" : "right-3 sm:right-4"
+        } ${!isLayersCollapsed && isPhonePortrait ? "z-30" : "z-20"}`}
+      >
       <div
         className={`${desktopGlassCardClass} flex flex-col items-center p-0.5 sm:p-1`}
         aria-label="Map zoom controls"
@@ -255,7 +278,7 @@ function ImmersiveMapLayerControls({
           aria-expanded={false}
           aria-controls="map-layer-panel-immersive"
           aria-label="Open map layers"
-          onClick={() => setIsLayersCollapsed(false)}
+          onClick={openLayersPanel}
           className={`${desktopGlassCardClass} flex items-center gap-2 px-2.5 py-2 text-xs font-semibold text-white/80 transition-colors hover:text-karl-gold motion-reduce:transition-none sm:px-3`}
         >
           <LayersIcon className={isPhonePortrait ? "h-3.5 w-3.5" : "h-4 w-4"} />
@@ -278,7 +301,7 @@ function ImmersiveMapLayerControls({
             <button
               type="button"
               aria-label="Collapse layers panel"
-              onClick={() => setIsLayersCollapsed(true)}
+              onClick={closeLayersPanel}
               className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/12 bg-white/[0.04] text-sm text-white/65 transition-colors hover:border-white/20 hover:text-white motion-reduce:transition-none"
             >
               ×
@@ -293,7 +316,8 @@ function ImmersiveMapLayerControls({
           />
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }
 
@@ -305,6 +329,7 @@ export function MapLayerControls({
   layout = "mobile",
   onZoomIn,
   onZoomOut,
+  onImmersivePanelOpenChange,
 }: MapLayerControlsProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -330,6 +355,7 @@ export function MapLayerControls({
         onFogLayerChange={onFogLayerChange}
         onZoomIn={onZoomIn}
         onZoomOut={onZoomOut}
+        onImmersivePanelOpenChange={onImmersivePanelOpenChange}
       />
     );
   }

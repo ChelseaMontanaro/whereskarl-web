@@ -23,7 +23,7 @@ export function NextHourOutlookCard({
 }: NextHourOutlookCardProps) {
   if (isLoading) {
     return (
-      <GlassCard variant="desktop" className="px-4 py-4">
+      <GlassCard variant="insight" className="px-4 py-4">
         <CardLabel>Next Hour</CardLabel>
         <p className="mt-3 text-sm text-white/55">Checking the next-hour outlook…</p>
       </GlassCard>
@@ -35,7 +35,7 @@ export function NextHourOutlookCard({
   }
 
   return (
-    <GlassCard className="px-4 py-4">
+    <GlassCard variant="insight" className="px-4 py-4">
       <CardLabel>Next Hour</CardLabel>
       <p className="mt-3 text-sm leading-relaxed text-white/75">{summary}</p>
       {confidenceLabel ? (

@@ -37,7 +37,7 @@ function BestRightNowSpotIcon({
 
 function MobileBestRightNowSection({ items }: BestRightNowSectionProps) {
   return (
-    <GlassCard variant="desktop" className="px-4 py-4">
+    <GlassCard variant="insight" className="px-4 py-4">
       <CardLabel className="text-white/45 lg:text-white/45">
         Best Right Now
       </CardLabel>

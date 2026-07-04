@@ -252,6 +252,7 @@ function useMapViewState(): MapViewModel {
 
 function MobileMapView({ state }: { state: MapViewModel }) {
   const isPhonePortrait = usePhonePortrait();
+  const [isLayersPanelOpen, setIsLayersPanelOpen] = useState(false);
   const {
     mapQuery,
     mapStyle,
@@ -287,6 +288,7 @@ function MobileMapView({ state }: { state: MapViewModel }) {
         layout="immersive"
         suppressViewportUpdateRef={suppressViewportUpdateRef}
         intensityFilter={intensityFilter}
+        onImmersiveLayersPanelOpenChange={setIsLayersPanelOpen}
       />
 
       <div className="pointer-events-none absolute inset-0 z-20">
@@ -295,7 +297,13 @@ function MobileMapView({ state }: { state: MapViewModel }) {
           className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-karl-navy/42 via-karl-navy/16 to-transparent sm:h-36"
         />
 
-        <div className="pointer-events-auto absolute left-3 top-3 flex max-w-[min(100%,13.5rem)] flex-col gap-1.5 sm:left-4 sm:top-4 sm:max-w-xs sm:gap-2 md:top-[4.5rem] md:max-w-xs">
+        <div
+          className={`pointer-events-auto absolute left-3 top-3 flex max-w-[min(100%,13.5rem)] flex-col gap-1.5 transition-opacity motion-reduce:transition-none sm:left-4 sm:top-4 sm:max-w-xs sm:gap-2 md:top-[4.5rem] md:max-w-xs ${
+            isPhonePortrait && isLayersPanelOpen
+              ? "pointer-events-none opacity-0"
+              : "opacity-100"
+          }`}
+        >
           <MapConditionsPanel
             compact={isPhonePortrait}
             isLoading={currentQuery.isLoading && !currentQuery.data}

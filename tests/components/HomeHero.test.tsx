@@ -53,7 +53,8 @@ describe("HomeHero", () => {
       "/map?location=mill-valley",
     );
     expect(container.querySelector(".mt-6")).toBeInTheDocument();
-    expect(container.querySelector(".pb-16")).toBeInTheDocument();
+    expect(container.querySelector(".pb-12")).toBeInTheDocument();
+    expect(container.querySelector(".min-h-\\[min\\(560px\\,70vh\\)\\]")).toBeInTheDocument();
   });
 
   it("does not render a duplicate inline hero image", () => {

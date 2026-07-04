@@ -115,4 +115,27 @@ describe("MapLayerControls immersive", () => {
     expect(screen.getByRole("button", { name: "Open map layers" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Zoom in" })).toHaveClass("h-8", "w-8");
   });
+
+  it("notifies when the immersive layers panel opens on phone portrait", () => {
+    usePhonePortraitMock.mockReturnValue(true);
+    const onImmersivePanelOpenChange = vi.fn();
+
+    render(
+      <MapLayerControls
+        layout="immersive"
+        mapStyle="standard"
+        fogLayerEnabled
+        onMapStyleChange={vi.fn()}
+        onFogLayerChange={vi.fn()}
+        onImmersivePanelOpenChange={onImmersivePanelOpenChange}
+      />,
+    );
+
+    expect(onImmersivePanelOpenChange).toHaveBeenCalledWith(false);
+
+    fireEvent.click(screen.getByRole("button", { name: "Open map layers" }));
+
+    expect(onImmersivePanelOpenChange).toHaveBeenLastCalledWith(true);
+    expect(screen.getByRole("button", { name: "Close map layers" })).toBeInTheDocument();
+  });
 });

@@ -61,6 +61,7 @@ describe("HomeView responsive polish", () => {
       container.querySelector(".bg-gradient-to-b.from-transparent"),
     ).toBeInTheDocument();
     expect(container.querySelector(".pb-28")).toBeInTheDocument();
-    expect(container.querySelector(".pt-6")).toBeInTheDocument();
+    expect(container.querySelector(".pt-3")).toBeInTheDocument();
+    expect(container.querySelector(".bg-black\\/26")).toBeInTheDocument();
   });
 });

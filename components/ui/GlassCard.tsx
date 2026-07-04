@@ -2,13 +2,14 @@ import type { ReactNode } from "react";
 
 import {
   desktopGlassCardClass,
+  insightGlassCardClass,
   metricGlassCardClass,
 } from "@/components/home/desktopGlass";
 
 type GlassCardProps = {
   children: ReactNode;
   className?: string;
-  variant?: "default" | "desktop" | "metric";
+  variant?: "default" | "desktop" | "metric" | "insight";
 };
 
 export function GlassCard({
@@ -21,6 +22,8 @@ export function GlassCard({
       ? desktopGlassCardClass
       : variant === "metric"
         ? metricGlassCardClass
+        : variant === "insight"
+          ? insightGlassCardClass
         : "rounded-2xl border border-white/10 bg-karl-navy-glass/80 backdrop-blur-sm";
 
   return <div className={`${surfaceClass} ${className}`}>{children}</div>;
