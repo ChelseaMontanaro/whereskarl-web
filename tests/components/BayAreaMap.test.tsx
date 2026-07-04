@@ -356,4 +356,68 @@ describe("BayAreaMap", () => {
       )?.closest(".karl-map-marker-root--labeled"),
     ).toBeNull();
   });
+
+  it("shows only San Francisco clear markers when SF region and Clear filter are active", async () => {
+    render(
+      <BayAreaMap
+        locations={[
+          {
+            id: "presidio",
+            name: "Presidio",
+            latitude: 37.7989,
+            longitude: -122.4662,
+            sunshineScore: 90,
+            fogScore: 10,
+            status: "Clear",
+          },
+          {
+            id: "san-jose",
+            name: "San Jose",
+            latitude: 37.3382,
+            longitude: -121.8863,
+            sunshineScore: 90,
+            fogScore: 10,
+            status: "Clear",
+          },
+          {
+            id: "ocean-beach",
+            name: "Ocean Beach",
+            latitude: 37.7594,
+            longitude: -122.5107,
+            sunshineScore: 18,
+            fogScore: 96,
+            status: "Karl Territory",
+          },
+        ]}
+        selectedLocationId={null}
+        selectedRegionId="san-francisco"
+        onSelectLocation={vi.fn()}
+        {...defaultProps}
+        layout="desktop"
+        intensityFilter="clear"
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("map-marker-presidio")).toBeInTheDocument();
+    });
+
+    expect(
+      screen.getByTestId("map-marker-presidio").className,
+    ).toContain("is-intensity-match");
+    expect(
+      screen.getByTestId("map-marker-presidio").className,
+    ).not.toContain("is-filtered-hidden");
+
+    expect(
+      screen.getByTestId("map-marker-san-jose").className,
+    ).toContain("is-filtered-hidden");
+    expect(
+      screen.getByTestId("map-marker-san-jose").className,
+    ).not.toContain("is-intensity-match");
+
+    expect(
+      screen.getByTestId("map-marker-ocean-beach").className,
+    ).toContain("is-filtered-hidden");
+  });
 });

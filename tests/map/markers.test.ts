@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   createMapMarkerElement,
   getMapMarkerPlacementOptions,
+  isMapMarkerVisible,
   shouldShowFoggyFilterMarkerLabel,
   type MapMarkerLocation,
 } from "@/lib/map/markers";
@@ -566,5 +567,98 @@ describe("getMapMarkerPlacementOptions", () => {
     expect(showLocationLabel).toBe(true);
     expect(marker.className).toContain("karl-map-marker-root--labeled");
     expect(placement.offset).toEqual([0, -11]);
+  });
+});
+
+describe("isMapMarkerVisible", () => {
+  const sanFranciscoClear: MapMarkerLocation = {
+    id: "presidio",
+    name: "Presidio",
+    latitude: 37.7989,
+    longitude: -122.4662,
+    fogScore: 10,
+    sunshineScore: 90,
+    status: "Clear",
+  };
+
+  const southBayClear: MapMarkerLocation = {
+    id: "san-jose",
+    name: "San Jose",
+    latitude: 37.3382,
+    longitude: -121.8863,
+    fogScore: 10,
+    sunshineScore: 90,
+    status: "Clear",
+  };
+
+  const sanFranciscoFoggy: MapMarkerLocation = {
+    id: "ocean-beach",
+    name: "Ocean Beach",
+    latitude: 37.7594,
+    longitude: -122.5107,
+    fogScore: 96,
+    sunshineScore: 18,
+    status: "Karl Territory",
+  };
+
+  it("shows all markers when only a region is selected", () => {
+    expect(
+      isMapMarkerVisible(sanFranciscoClear, {
+        selectedRegionId: "san-francisco",
+      }),
+    ).toBe(true);
+    expect(
+      isMapMarkerVisible(southBayClear, {
+        selectedRegionId: "san-francisco",
+      }),
+    ).toBe(true);
+  });
+
+  it("filters by intensity when only an intensity filter is selected", () => {
+    expect(
+      isMapMarkerVisible(sanFranciscoClear, {
+        intensityFilter: "clear",
+      }),
+    ).toBe(true);
+    expect(
+      isMapMarkerVisible(sanFranciscoFoggy, {
+        intensityFilter: "clear",
+      }),
+    ).toBe(false);
+  });
+
+  it("requires both region and intensity when both filters are active", () => {
+    expect(
+      isMapMarkerVisible(sanFranciscoClear, {
+        intensityFilter: "clear",
+        selectedRegionId: "san-francisco",
+      }),
+    ).toBe(true);
+    expect(
+      isMapMarkerVisible(southBayClear, {
+        intensityFilter: "clear",
+        selectedRegionId: "san-francisco",
+      }),
+    ).toBe(false);
+    expect(
+      isMapMarkerVisible(sanFranciscoFoggy, {
+        intensityFilter: "clear",
+        selectedRegionId: "san-francisco",
+      }),
+    ).toBe(false);
+  });
+
+  it("hides clear markers outside San Francisco when SF and Clear are selected", () => {
+    const marker = createMapMarkerElement({
+      location: southBayClear,
+      isSelected: false,
+      fogLayerEnabled: true,
+      intensityFilter: "clear",
+      selectedRegionId: "san-francisco",
+      onSelect: vi.fn(),
+    });
+
+    expect(marker.className).toContain("is-filtered-hidden");
+    expect(marker.className).not.toContain("is-intensity-match");
   });
 });

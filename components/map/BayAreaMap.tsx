@@ -14,7 +14,7 @@ import { boundsForIntensityLocations } from "@/lib/map/intensityFilter";
 import {
   createMapMarkerElement,
   getMapMarkerPlacementOptions,
-  getMarkerFogIntensity,
+  isMapMarkerVisible,
   shouldShowFoggyFilterMarkerLabel,
   type MapMarkerLocation,
 } from "@/lib/map/markers";
@@ -182,20 +182,21 @@ export function BayAreaMap({
       markersRef.current.clear();
 
       for (const location of locations) {
-        const isFilteredOut =
-          intensityFilter !== null &&
-          intensityFilter !== undefined &&
-          getMarkerFogIntensity(location) !== intensityFilter;
+        const isVisible = isMapMarkerVisible(location, {
+          intensityFilter,
+          selectedRegionId,
+        });
         const showLocationLabel = shouldShowFoggyFilterMarkerLabel(
           layout,
           intensityFilter,
-          isFilteredOut,
+          !isVisible,
         );
         const element = createMapMarkerElement({
           location,
           isSelected: location.id === selectedLocationId,
           fogLayerEnabled,
           intensityFilter,
+          selectedRegionId,
           layout,
           showLocationLabel,
           onSelect: (locationId) => onSelectRef.current(locationId),
@@ -224,7 +225,7 @@ export function BayAreaMap({
       markers.forEach((marker) => marker.remove());
       markers.clear();
     };
-  }, [fogLayerEnabled, intensityFilter, layout, locations, mapReady, selectedLocationId]);
+  }, [fogLayerEnabled, intensityFilter, layout, locations, mapReady, selectedLocationId, selectedRegionId]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -254,18 +255,18 @@ export function BayAreaMap({
       return;
     }
 
+    const region = findBayAreaProductRegion(selectedRegionId);
+    if (region) {
+      fitMapToBounds(map, region.bounds);
+      return;
+    }
+
     if (intensityFilter) {
       const bounds = boundsForIntensityLocations(locations, intensityFilter);
       if (bounds) {
         fitMapToBounds(map, bounds, { padding: 80, maxZoom: 10.4 });
         return;
       }
-    }
-
-    const region = findBayAreaProductRegion(selectedRegionId);
-    if (region) {
-      fitMapToBounds(map, region.bounds);
-      return;
     }
 
     fitDefaultBayAreaViewport(map);

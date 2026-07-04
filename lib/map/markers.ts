@@ -4,7 +4,9 @@ import {
   type FogIntensity,
   type LocationConditionInput,
 } from "@/lib/map/conditions";
+import { isBayAreaProductRegionId } from "@/lib/map/config";
 import { getMarkerIconMarkup } from "@/lib/map/markerIcons";
+import { getProductRegionIdForLocation } from "@/lib/map/regions";
 import { isNighttime } from "@/lib/home/weatherDisplay";
 
 export type MapMarkerLocation = {
@@ -63,6 +65,49 @@ function shouldHideFilteredMarker(
     intensityFilter === "foggy" ||
     intensityFilter === "karlTerritory"
   );
+}
+
+function isOutsideSelectedRegionWhenCombinedFilter(
+  location: MapMarkerLocation,
+  intensityFilter: FogIntensity | null | undefined,
+  selectedRegionId: string | null | undefined,
+): boolean {
+  if (!intensityFilter || !selectedRegionId) {
+    return false;
+  }
+
+  if (!isBayAreaProductRegionId(selectedRegionId)) {
+    return false;
+  }
+
+  return getProductRegionIdForLocation(location.id) !== selectedRegionId;
+}
+
+export function isMapMarkerVisible(
+  location: MapMarkerLocation,
+  options: {
+    intensityFilter?: FogIntensity | null;
+    selectedRegionId?: string | null;
+  } = {},
+): boolean {
+  const { intensityFilter = null, selectedRegionId = null } = options;
+
+  if (
+    intensityFilter &&
+    !matchesIntensityFilter(location, intensityFilter)
+  ) {
+    return false;
+  }
+
+  if (isOutsideSelectedRegionWhenCombinedFilter(
+    location,
+    intensityFilter,
+    selectedRegionId,
+  )) {
+    return false;
+  }
+
+  return true;
 }
 
 export function shouldShowFoggyFilterMarkerLabel(
@@ -128,6 +173,7 @@ export function createMapMarkerElement(input: {
   isSelected: boolean;
   fogLayerEnabled: boolean;
   intensityFilter?: FogIntensity | null;
+  selectedRegionId?: string | null;
   layout?: "mobile" | "desktop";
   showLocationLabel?: boolean;
   onSelect: (locationId: string) => void;
@@ -137,6 +183,10 @@ export function createMapMarkerElement(input: {
     input.location,
     input.intensityFilter,
   );
+  const isVisible = isMapMarkerVisible(input.location, {
+    intensityFilter: input.intensityFilter,
+    selectedRegionId: input.selectedRegionId,
+  });
   const button = document.createElement("button");
   button.type = "button";
   button.className = [
@@ -144,10 +194,11 @@ export function createMapMarkerElement(input: {
     getMarkerIntensityClass(input.location),
     input.isSelected ? "is-selected" : "",
     isFilteredOut ? "is-filtered-out" : "",
+    !isVisible ||
     shouldHideFilteredMarker(input.intensityFilter, isFilteredOut)
       ? "is-filtered-hidden"
       : "",
-    input.intensityFilter && !isFilteredOut ? "is-intensity-match" : "",
+    input.intensityFilter && isVisible ? "is-intensity-match" : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -171,7 +222,7 @@ export function createMapMarkerElement(input: {
     shouldShowFoggyFilterMarkerLabel(
       input.layout,
       input.intensityFilter,
-      isFilteredOut,
+      !isVisible,
     );
 
   return buildMapMarkerElement(
