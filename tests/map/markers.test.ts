@@ -795,4 +795,36 @@ describe("isMapMarkerVisible", () => {
     expect(marker.className).toContain("is-filtered-hidden");
     expect(marker.className).not.toContain("is-intensity-match");
   });
+
+  it("shows Marin Headlands when North Bay and Karl Territory filters are combined", () => {
+    const marinHeadlands: MapMarkerLocation = {
+      id: "marin-headlands",
+      name: "Marin Headlands / Hawk Hill",
+      latitude: 37.827,
+      longitude: -122.499,
+      fogScore: 100,
+      sunshineScore: 8,
+      status: "Karl Territory",
+      region: "north-bay",
+    };
+
+    expect(
+      isMapMarkerVisible(marinHeadlands, {
+        intensityFilter: "karlTerritory",
+        selectedRegionId: "north-bay",
+      }),
+    ).toBe(true);
+
+    const marker = createMapMarkerElement({
+      location: marinHeadlands,
+      isSelected: false,
+      fogLayerEnabled: true,
+      intensityFilter: "karlTerritory",
+      selectedRegionId: "north-bay",
+      onSelect: vi.fn(),
+    });
+
+    expect(marker.className).toContain("is-intensity-match");
+    expect(marker.className).not.toContain("is-filtered-hidden");
+  });
 });

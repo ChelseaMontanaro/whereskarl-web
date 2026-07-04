@@ -55,7 +55,7 @@ function MapLocationCard({
   location: LocationWeather;
   isSelected: boolean;
 }) {
-  const regionName = getProductRegionNameForLocation(location.id);
+  const regionName = getProductRegionNameForLocation(location);
   const conditionLabel = getLocationConditionLabel(location);
 
   return (
@@ -216,6 +216,7 @@ function useMapViewState(): MapViewModel {
         sunshineScore: location.sunshineScore,
         fogScore: location.fogScore,
         status: location.status,
+        region: location.region,
       })),
     [locations],
   );
@@ -230,8 +231,14 @@ function useMapViewState(): MapViewModel {
       return bestRightNow;
     }
 
-    return intensityFilterTrayItems(locations, intensityFilter, null, 4);
-  }, [bestRightNow, intensityFilter, locations]);
+    return intensityFilterTrayItems(
+      locations,
+      intensityFilter,
+      null,
+      4,
+      mapQuery.activeRegionId,
+    );
+  }, [bestRightNow, intensityFilter, locations, mapQuery.activeRegionId]);
 
   const handleSelectLocation = useCallback(
     (locationId: string) => {
@@ -311,7 +318,7 @@ function MobileMapView({ state }: { state: MapViewModel }) {
     ? `Focused on ${selectedLocation.name}.`
     : activeRegion
       ? `Framing ${activeRegion.name} across the Bay.`
-      : "Explore conditions across San Francisco, North Bay, East Bay, and South Bay.";
+      : "Explore conditions across San Francisco, North Bay, East Bay, Peninsula, and South Bay.";
 
   return (
     <div className="mx-auto flex w-full max-w-[430px] flex-col gap-4 px-4 py-6 sm:py-8">

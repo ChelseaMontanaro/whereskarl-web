@@ -23,25 +23,27 @@ function pointInBounds(
 }
 
 describe("Bay Area product regions", () => {
-  it("defines the four product regions without a separate Peninsula region", () => {
+  it("defines the five product regions including Peninsula", () => {
     expect(BAY_AREA_PRODUCT_REGIONS.map((region) => region.id)).toEqual([
       "san-francisco",
       "north-bay",
       "east-bay",
       "south-bay",
+      "peninsula",
     ]);
-    expect(BAY_AREA_PRODUCT_REGIONS.map((region) => region.name)).not.toContain(
+    expect(BAY_AREA_PRODUCT_REGIONS.map((region) => region.name)).toContain(
       "Peninsula",
     );
   });
 
   it("recognizes valid product region ids", () => {
     expect(isBayAreaProductRegionId("east-bay")).toBe(true);
-    expect(isBayAreaProductRegionId("peninsula")).toBe(false);
+    expect(isBayAreaProductRegionId("peninsula")).toBe(true);
     expect(findBayAreaProductRegion("north-bay")?.name).toBe("North Bay");
+    expect(findBayAreaProductRegion("peninsula")?.name).toBe("Peninsula");
   });
 
-  it("uses a wide default viewport that spans all four regions", () => {
+  it("uses a wide default viewport that spans all five regions", () => {
     const [[west, south], [east, north]] = BAY_AREA_DEFAULT_BOUNDS;
 
     for (const region of BAY_AREA_PRODUCT_REGIONS) {
@@ -64,6 +66,7 @@ describe("Bay Area product regions", () => {
     expect(pointInBounds(37.8439, -122.6437, northBay!.bounds)).toBe(true);
     expect(pointInBounds(37.9061, -122.545, northBay!.bounds)).toBe(true);
     expect(pointInBounds(37.9735, -122.5311, northBay!.bounds)).toBe(true);
+    expect(pointInBounds(37.827, -122.499, northBay!.bounds)).toBe(true);
 
     expect(pointInBounds(37.7594, -122.5107, northBay!.bounds)).toBe(false);
     expect(pointInBounds(37.3382, -121.8863, northBay!.bounds)).toBe(false);
@@ -201,5 +204,15 @@ describe("Bay Area product regions", () => {
     expect(southBay?.viewport?.desktopPadding).not.toEqual(
       findBayAreaProductRegion("east-bay")?.viewport?.desktopPadding,
     );
+  });
+
+  it("frames Peninsula for Daly City and Pacifica", () => {
+    const peninsula = findBayAreaProductRegion("peninsula");
+    expect(peninsula).toBeDefined();
+
+    expect(pointInBounds(37.6875, -122.4702, peninsula!.bounds)).toBe(true);
+    expect(pointInBounds(37.6138, -122.4869, peninsula!.bounds)).toBe(true);
+    expect(pointInBounds(37.3382, -121.8863, peninsula!.bounds)).toBe(false);
+    expect(pointInBounds(37.7749, -122.4194, peninsula!.bounds)).toBe(false);
   });
 });

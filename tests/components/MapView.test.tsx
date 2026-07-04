@@ -176,13 +176,22 @@ describe("MapView", () => {
 
   it("handles unknown region params without crashing", async () => {
     useSearchParamsMock.mockReturnValue(
-      new URLSearchParams("region=peninsula"),
+      new URLSearchParams("region=unknown-coast"),
     );
 
     renderMap();
 
     expect(await screen.findByText(/Couldn't find region/i)).toBeInTheDocument();
     expect(await screen.findByText("Bay Area Locations")).toBeInTheDocument();
+  });
+
+  it("accepts peninsula as a shareable region route", async () => {
+    useSearchParamsMock.mockReturnValue(new URLSearchParams("region=peninsula"));
+
+    renderMap();
+
+    expect(await screen.findByText("Framing Peninsula across the Bay.")).toBeInTheDocument();
+    expect(screen.queryByText(/Couldn't find region/i)).not.toBeInTheDocument();
   });
 
   it("selects a location from the list and updates routing", async () => {

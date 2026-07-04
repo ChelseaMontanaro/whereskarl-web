@@ -76,7 +76,7 @@ function MapLocationRow({
   location: LocationWeather;
   onSelect: () => void;
 }) {
-  const regionName = getProductRegionNameForLocation(location.id) ?? "Bay Area";
+  const regionName = getProductRegionNameForLocation(location) ?? "Bay Area";
   const conditionLabel = getLocationConditionLabel(location);
 
   return (

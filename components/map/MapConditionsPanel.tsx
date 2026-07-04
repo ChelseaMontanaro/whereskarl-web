@@ -9,6 +9,7 @@ const REGION_CHIP_LABELS: Record<BayAreaProductRegion["id"], string> = {
   "north-bay": "North Bay",
   "east-bay": "East Bay",
   "south-bay": "South Bay",
+  peninsula: "Peninsula",
 };
 
 const MAP_CONDITIONS_SUBTITLE =

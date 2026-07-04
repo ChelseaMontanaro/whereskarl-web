@@ -1,15 +1,19 @@
 import { z } from "zod";
 
+import { BAY_AREA_PRODUCT_REGION_IDS } from "@/lib/map/config";
 import {
   apiSourceSchema,
   confidenceFieldsSchema,
   weatherPredictionSchema,
 } from "@/lib/schemas/shared";
 
+export const productRegionIdSchema = z.enum(BAY_AREA_PRODUCT_REGION_IDS);
+
 export const locationWeatherSchema = z
   .object({
     id: z.string(),
     name: z.string(),
+    region: productRegionIdSchema.optional(),
     latitude: z.number(),
     longitude: z.number(),
     distanceText: z.string(),

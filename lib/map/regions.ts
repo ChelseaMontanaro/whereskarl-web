@@ -1,18 +1,27 @@
 import {
   findBayAreaProductRegion,
   isBayAreaProductRegionId,
-  type BayAreaProductRegion,
+  type BayAreaProductRegionId,
 } from "@/lib/map/config";
 
-/** Mirrors backend `LOCATION_REGION_ASSIGNMENTS` for the four product regions. */
+export type LocationWithRegion = {
+  id: string;
+  region?: string | null;
+};
+
+/**
+ * Fallback when the API omits `region` (fixtures, older payloads).
+ * Prefer `location.region` from `/locations` whenever present.
+ */
 export const LOCATION_PRODUCT_REGION_ASSIGNMENTS: Record<
   string,
-  BayAreaProductRegion["id"]
+  BayAreaProductRegionId
 > = {
   tiburon: "north-bay",
   sausalito: "north-bay",
   "mill-valley": "north-bay",
   "stinson-beach": "north-bay",
+  "marin-headlands": "north-bay",
   "ocean-beach": "san-francisco",
   "san-francisco": "san-francisco",
   presidio: "san-francisco",
@@ -23,21 +32,40 @@ export const LOCATION_PRODUCT_REGION_ASSIGNMENTS: Record<
   "mountain-view": "south-bay",
   "san-jose": "south-bay",
   "half-moon-bay": "south-bay",
+  "daly-city": "peninsula",
+  pacifica: "peninsula",
 };
 
-export function getProductRegionIdForLocation(
-  locationId: string,
-): BayAreaProductRegion["id"] | null {
-  const regionId = LOCATION_PRODUCT_REGION_ASSIGNMENTS[locationId];
-  if (!regionId || !isBayAreaProductRegionId(regionId)) {
-    return null;
+export function resolveProductRegionId(
+  location: LocationWithRegion,
+): BayAreaProductRegionId | null {
+  const apiRegion = location.region?.trim().toLowerCase();
+  if (apiRegion && isBayAreaProductRegionId(apiRegion)) {
+    return apiRegion;
   }
 
-  return regionId;
+  const fallbackRegion = LOCATION_PRODUCT_REGION_ASSIGNMENTS[location.id];
+  if (fallbackRegion && isBayAreaProductRegionId(fallbackRegion)) {
+    return fallbackRegion;
+  }
+
+  return null;
 }
 
-export function getProductRegionNameForLocation(locationId: string): string | null {
-  const regionId = getProductRegionIdForLocation(locationId);
+export function getProductRegionIdForLocation(
+  locationOrId: string | LocationWithRegion,
+): BayAreaProductRegionId | null {
+  if (typeof locationOrId === "string") {
+    return resolveProductRegionId({ id: locationOrId });
+  }
+
+  return resolveProductRegionId(locationOrId);
+}
+
+export function getProductRegionNameForLocation(
+  locationOrId: string | LocationWithRegion,
+): string | null {
+  const regionId = getProductRegionIdForLocation(locationOrId);
   if (!regionId) {
     return null;
   }
@@ -45,15 +73,15 @@ export function getProductRegionNameForLocation(locationId: string): string | nu
   return findBayAreaProductRegion(regionId)?.name ?? null;
 }
 
-export function filterLocationsByProductRegion<T extends { id: string }>(
+export function filterLocationsByProductRegion<T extends LocationWithRegion>(
   locations: T[],
-  regionId: BayAreaProductRegion["id"] | null,
+  regionId: BayAreaProductRegionId | null,
 ): T[] {
   if (!regionId) {
     return locations;
   }
 
   return locations.filter(
-    (location) => getProductRegionIdForLocation(location.id) === regionId,
+    (location) => resolveProductRegionId(location) === regionId,
   );
 }

@@ -11,7 +11,7 @@ describe("MapRegionChips", () => {
     cleanup();
   });
 
-  it("renders exactly the four iOS-aligned product regions", () => {
+  it("renders all Bay Area product regions including Peninsula", () => {
     render(
       <MapRegionChips selectedRegionId={null} onSelectRegion={vi.fn()} />,
     );
@@ -22,6 +22,6 @@ describe("MapRegionChips", () => {
       ).toBeInTheDocument();
     }
 
-    expect(screen.getAllByRole("button")).toHaveLength(4);
+    expect(screen.getAllByRole("button")).toHaveLength(5);
   });
 });

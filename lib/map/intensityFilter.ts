@@ -7,7 +7,9 @@ import {
 } from "@/lib/map/conditions";
 import type { BestRightNowItem } from "@/lib/home/weatherDisplay";
 import type { MapMarkerLocation } from "@/lib/map/markers";
+import { filterLocationsByProductRegion } from "@/lib/map/regions";
 import type { LocationWeather } from "@/lib/schemas/weather";
+import type { BayAreaProductRegionId } from "@/lib/map/config";
 
 export function locationMatchesIntensity(
   location: LocationWeather,
@@ -21,10 +23,12 @@ export function intensityFilterTrayItems(
   intensity: FogIntensity,
   excludeLocationId: string | null | undefined,
   limit = 4,
+  regionId: BayAreaProductRegionId | null = null,
 ): BestRightNowItem[] {
   const excludedId = excludeLocationId?.trim().toLowerCase() ?? null;
+  const scopedLocations = filterLocationsByProductRegion(locations, regionId);
 
-  return locations
+  return scopedLocations
     .filter((location) => locationMatchesIntensity(location, intensity))
     .filter(
       (location) =>

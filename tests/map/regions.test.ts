@@ -7,10 +7,22 @@ import {
 } from "@/lib/map/regions";
 
 describe("map regions", () => {
-  it("maps monitored locations to the four product regions", () => {
+  it("maps monitored locations to the five product regions", () => {
     expect(getProductRegionIdForLocation("tiburon")).toBe("north-bay");
+    expect(getProductRegionIdForLocation("marin-headlands")).toBe("north-bay");
+    expect(getProductRegionIdForLocation("daly-city")).toBe("peninsula");
+    expect(getProductRegionIdForLocation("pacifica")).toBe("peninsula");
     expect(getProductRegionIdForLocation("oakland")).toBe("east-bay");
     expect(getProductRegionNameForLocation("san-jose")).toBe("South Bay");
+  });
+
+  it("prefers API region fields over fallback assignments", () => {
+    expect(
+      getProductRegionIdForLocation({
+        id: "custom-spot",
+        region: "north-bay",
+      }),
+    ).toBe("north-bay");
   });
 
   it("filters the location list by active region", () => {

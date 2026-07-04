@@ -18,6 +18,7 @@ export type MapMarkerLocation = {
   sunshineScore: number;
   fogScore?: number | null;
   status?: string | null;
+  region?: string | null;
 };
 
 export function mapMarkerAriaLabel(
@@ -83,7 +84,7 @@ function isOutsideSelectedRegionWhenCombinedFilter(
     return false;
   }
 
-  return getProductRegionIdForLocation(location.id) !== selectedRegionId;
+  return getProductRegionIdForLocation(location) !== selectedRegionId;
 }
 
 export function isMapMarkerVisible(

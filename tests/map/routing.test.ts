@@ -62,12 +62,23 @@ describe("map routing", () => {
   });
 
   it("resolveMapQueryState handles unknown region params gracefully", () => {
-    expect(resolveMapQueryState(new URLSearchParams("region=peninsula"))).toEqual(
+    expect(resolveMapQueryState(new URLSearchParams("region=unknown-coast"))).toEqual(
       {
         requestedLocationId: null,
         activeRegionId: null,
         unknownLocationId: null,
-        unknownRegionId: "peninsula",
+        unknownRegionId: "unknown-coast",
+      },
+    );
+  });
+
+  it("resolveMapQueryState accepts peninsula as a product region", () => {
+    expect(resolveMapQueryState(new URLSearchParams("region=peninsula"))).toEqual(
+      {
+        requestedLocationId: null,
+        activeRegionId: "peninsula",
+        unknownLocationId: null,
+        unknownRegionId: null,
       },
     );
   });

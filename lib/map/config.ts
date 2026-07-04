@@ -38,8 +38,18 @@ export type BayAreaProductRegionViewport = {
   maxZoom?: number;
 };
 
+export const BAY_AREA_PRODUCT_REGION_IDS = [
+  "san-francisco",
+  "north-bay",
+  "east-bay",
+  "south-bay",
+  "peninsula",
+] as const;
+
+export type BayAreaProductRegionId = (typeof BAY_AREA_PRODUCT_REGION_IDS)[number];
+
 export type BayAreaProductRegion = {
-  id: "san-francisco" | "north-bay" | "east-bay" | "south-bay";
+  id: BayAreaProductRegionId;
   name: string;
   bounds: MapBounds;
   viewport?: BayAreaProductRegionViewport;
@@ -68,7 +78,7 @@ export const BAY_AREA_PRODUCT_REGIONS: BayAreaProductRegion[] = [
     id: "north-bay",
     name: "North Bay",
     bounds: [
-      [-122.65, 37.835],
+      [-122.65, 37.795],
       [-122.43, 38.02],
     ],
     viewport: {
@@ -118,6 +128,24 @@ export const BAY_AREA_PRODUCT_REGIONS: BayAreaProductRegion[] = [
       maxZoom: 11,
     },
   },
+  {
+    id: "peninsula",
+    name: "Peninsula",
+    bounds: [
+      [-122.55, 37.58],
+      [-122.38, 37.72],
+    ],
+    viewport: {
+      padding: 36,
+      desktopPadding: {
+        top: 80,
+        right: 80,
+        bottom: 128,
+        left: 360,
+      },
+      maxZoom: 11.1,
+    },
+  },
 ];
 
 export function findBayAreaProductRegion(
@@ -132,6 +160,6 @@ export function findBayAreaProductRegion(
 
 export function isBayAreaProductRegionId(
   regionId: string,
-): regionId is BayAreaProductRegion["id"] {
-  return BAY_AREA_PRODUCT_REGIONS.some((region) => region.id === regionId);
+): regionId is BayAreaProductRegionId {
+  return BAY_AREA_PRODUCT_REGION_IDS.includes(regionId as BayAreaProductRegionId);
 }
