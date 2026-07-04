@@ -16,7 +16,7 @@ describe("MapConditionsPanel", () => {
     render(<MapConditionsPanel />);
 
     expect(
-      screen.getByText("Explore live fog & sunshine across the Bay Area."),
+      screen.getByText("Explore live fog & clear skies across the Bay Area."),
     ).toBeInTheDocument();
     expect(screen.queryByText(DYNAMIC_CURRENT_SUMMARY)).not.toBeInTheDocument();
   });
@@ -40,7 +40,7 @@ describe("MapConditionsPanel", () => {
 
     expect(screen.getByText("Checking live conditions…")).toBeInTheDocument();
     expect(
-      screen.queryByText("Explore live fog & sunshine across the Bay Area."),
+      screen.queryByText("Explore live fog & clear skies across the Bay Area."),
     ).not.toBeInTheDocument();
   });
 
