@@ -23,7 +23,6 @@ import {
 } from "@/lib/map/conditions";
 import { findBayAreaProductRegion, isBayAreaProductRegionId } from "@/lib/map/config";
 import {
-  getDesktopBestRightNowTrayTitle,
   intensityFilterTrayItems,
   shouldShowDesktopBestRightNowTray,
   toggleIntensityFilter,
@@ -444,7 +443,6 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
               <MapBestRightNowTray
                 items={bestRightNowItems}
                 selectedLocationId={selectedLocation?.id ?? null}
-                title={getDesktopBestRightNowTrayTitle(intensityFilter)}
                 onSelectLocation={handleSelectLocation}
                 isLoading={locationsQuery.isLoading}
               />

@@ -195,15 +195,15 @@ describe("MapView desktop", () => {
       ).toBeInTheDocument();
     });
 
-    it("shows the Clear Locations tray when Clear is selected", async () => {
+    it("shows the Best Right Now tray when Clear is selected", async () => {
       renderDesktopMap();
 
       fireEvent.click(await screen.findByRole("button", { name: "Clear" }));
 
       expect(
-        await screen.findByLabelText("Clear Locations"),
+        await screen.findByLabelText("Best Right Now"),
       ).toBeInTheDocument();
-      expect(screen.queryByLabelText("Best Right Now")).not.toBeInTheDocument();
+      expect(screen.queryByLabelText("Clear Locations")).not.toBeInTheDocument();
     });
 
     it.each(["Light Fog", "Foggy", "Karl Territory"] as const)(
@@ -221,7 +221,7 @@ describe("MapView desktop", () => {
       },
     );
 
-    it("keeps the Clear Locations tray visible when a region filter is active", async () => {
+    it("keeps the Best Right Now tray visible when Clear and a region filter are active", async () => {
       useSearchParamsMock.mockReturnValue(new URLSearchParams("region=north-bay"));
 
       renderDesktopMap();
@@ -229,8 +229,9 @@ describe("MapView desktop", () => {
       fireEvent.click(await screen.findByRole("button", { name: "Clear" }));
 
       expect(
-        await screen.findByLabelText("Clear Locations"),
+        await screen.findByLabelText("Best Right Now"),
       ).toBeInTheDocument();
+      expect(screen.queryByLabelText("Clear Locations")).not.toBeInTheDocument();
       expect(
         screen.getByRole("button", { name: "Select Tiburon on map" }),
       ).toBeInTheDocument();

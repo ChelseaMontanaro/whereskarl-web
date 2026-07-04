@@ -60,16 +60,6 @@ export function shouldShowDesktopBestRightNowTray(
   return intensityFilter === null || intensityFilter === "clear";
 }
 
-export function getDesktopBestRightNowTrayTitle(
-  intensityFilter: FogIntensity | null,
-): string {
-  if (intensityFilter === "clear") {
-    return intensityFilterTrayTitle("clear");
-  }
-
-  return "Best Right Now";
-}
-
 export function toggleIntensityFilter(
   current: FogIntensity | null,
   next: FogIntensity,

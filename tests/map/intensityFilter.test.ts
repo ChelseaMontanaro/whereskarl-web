@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import type { FogIntensity } from "@/lib/map/conditions";
 import {
   boundsForIntensityLocations,
-  getDesktopBestRightNowTrayTitle,
   intensityFilterTrayItems,
   shouldShowDesktopBestRightNowTray,
   toggleIntensityFilter,
@@ -162,11 +161,6 @@ describe("desktop best-right-now tray visibility", () => {
     expect(shouldShowDesktopBestRightNowTray("lightFog")).toBe(false);
     expect(shouldShowDesktopBestRightNowTray("foggy")).toBe(false);
     expect(shouldShowDesktopBestRightNowTray("karlTerritory")).toBe(false);
-  });
-
-  it("uses Best Right Now and Clear Locations titles", () => {
-    expect(getDesktopBestRightNowTrayTitle(null)).toBe("Best Right Now");
-    expect(getDesktopBestRightNowTrayTitle("clear")).toBe("Clear Locations");
   });
 });
 
