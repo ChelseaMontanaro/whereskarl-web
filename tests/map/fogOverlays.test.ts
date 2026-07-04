@@ -30,7 +30,7 @@ describe("fog overlays", () => {
     });
   });
 
-  it("renders light fog circles for fogScore 25–49 even when sunshineScore is high", () => {
+  it("suppresses fog circles for clear-qualified locations even in the raw Light Fog band", () => {
     const collection = buildLocationFogOverlayCollection([
       {
         id: "tiburon",
@@ -38,6 +38,20 @@ describe("fog overlays", () => {
         longitude: -122.4566,
         fogScore: 26,
         sunshineScore: 82,
+      },
+    ]);
+
+    expect(collection.features).toHaveLength(0);
+  });
+
+  it("renders light fog circles for moderate fog locations", () => {
+    const collection = buildLocationFogOverlayCollection([
+      {
+        id: "moderate-fog",
+        latitude: 37.5,
+        longitude: -122.2,
+        fogScore: 35,
+        sunshineScore: 55,
       },
     ]);
 

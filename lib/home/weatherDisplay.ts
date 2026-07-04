@@ -7,7 +7,8 @@ import type {
 import type { WeatherPrediction } from "@/lib/schemas/shared";
 import {
   getBestRightNowScoreLabel,
-  resolveLocationFogIntensity,
+  locationQualifiesAsClearIntensity,
+  resolveRawLocationFogIntensity,
   type LocationConditionInput,
 } from "@/lib/map/conditions";
 
@@ -522,7 +523,11 @@ export function sunshineResultTitle(
   isNighttime: boolean,
   location?: LocationConditionInput | null,
 ): string {
-  if (location && resolveLocationFogIntensity(location) === "lightFog") {
+  if (location && locationQualifiesAsClearIntensity(location)) {
+    return isNighttime ? "CLEAREST NIGHT" : "BEST CLEAR SKIES";
+  }
+
+  if (location && resolveRawLocationFogIntensity(location) === "lightFog") {
     return "BEST BREAK IN THE FOG";
   }
 

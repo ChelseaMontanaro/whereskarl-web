@@ -12,6 +12,7 @@ import {
   resolveFogScore,
   resolveLocationFogIntensity,
   resolveMarkerDisplayIntensity,
+  resolveRawLocationFogIntensity,
 } from "@/lib/map/conditions";
 
 describe("map conditions", () => {
@@ -31,45 +32,63 @@ describe("map conditions", () => {
     expect(getLocationConditionLabel({ status: "Mostly Sunny" })).toBe("Mostly Sunny");
   });
 
-  it("keeps fogScore below 25 in the Clear band regardless of sunshineScore", () => {
+  it("resolves raw fogScore bands for internal scoring helpers", () => {
+    expect(resolveRawLocationFogIntensity({ fogScore: 25, sunshineScore: 75 })).toBe(
+      "lightFog",
+    );
+    expect(resolveRawLocationFogIntensity({ fogScore: 26, sunshineScore: 82 })).toBe(
+      "lightFog",
+    );
+    expect(resolveRawLocationFogIntensity({ fogScore: 41, sunshineScore: 74 })).toBe(
+      "lightFog",
+    );
+    expect(resolveRawLocationFogIntensity({ fogScore: 49, sunshineScore: 51 })).toBe(
+      "lightFog",
+    );
+    expect(resolveRawLocationFogIntensity({ fogScore: 82, sunshineScore: 74 })).toBe(
+      "karlTerritory",
+    );
+    expect(resolveRawLocationFogIntensity({ fogScore: 60, sunshineScore: 40 })).toBe(
+      "foggy",
+    );
+    expect(
+      getLocationFogOverlayStyle({ fogScore: 26, sunshineScore: 82 }),
+    ).toBeNull();
+  });
+
+  it("renders clear-qualified locations as Clear in the user-facing display contract", () => {
     expect(resolveLocationFogIntensity({ fogScore: 10, sunshineScore: 90 })).toBe(
       "clear",
     );
     expect(resolveLocationFogIntensity({ fogScore: 24, sunshineScore: 76 })).toBe(
       "clear",
     );
-    expect(getLocationConditionLabel({ fogScore: 10, sunshineScore: 90 })).toBe(
+    expect(resolveLocationFogIntensity({ fogScore: 26, sunshineScore: 82 })).toBe(
+      "clear",
+    );
+    expect(getLocationConditionLabel({ fogScore: 26, sunshineScore: 82 })).toBe(
       "Clear",
     );
     expect(getLocationFogOverlayStyle({ fogScore: 10, sunshineScore: 90 })).toBeNull();
   });
 
-  it("resolves fogScore 25–49 to Light Fog even when sunshineScore is at least 50", () => {
-    expect(
-      resolveLocationFogIntensity({ fogScore: 25, sunshineScore: 75 }),
-    ).toBe("lightFog");
-    expect(
-      resolveLocationFogIntensity({ fogScore: 26, sunshineScore: 82 }),
-    ).toBe("lightFog");
-    expect(
-      resolveLocationFogIntensity({ fogScore: 41, sunshineScore: 74 }),
-    ).toBe("lightFog");
-    expect(
-      resolveLocationFogIntensity({ fogScore: 49, sunshineScore: 51 }),
-    ).toBe("lightFog");
-    expect(getLocationConditionLabel({ fogScore: 26, sunshineScore: 82 })).toBe(
+  it("renders moderate fog as Light Fog when sunshineScore is below the Clear threshold", () => {
+    expect(resolveLocationFogIntensity({ fogScore: 35, sunshineScore: 55 })).toBe(
+      "lightFog",
+    );
+    expect(getLocationConditionLabel({ fogScore: 35, sunshineScore: 55 })).toBe(
       "Light Fog",
     );
     expect(
-      getLocationFogOverlayStyle({ fogScore: 26, sunshineScore: 82 }),
+      getLocationFogOverlayStyle({ fogScore: 35, sunshineScore: 55 }),
     ).toMatchObject({
-      radiusMeters: 1400 + 26 * 18,
+      radiusMeters: 1400 + 35 * 18,
     });
   });
 
-  it("keeps Karl Territory and foggy locations out of the clear band", () => {
+  it("keeps Karl Territory and foggy locations on raw fogScore bands", () => {
     expect(
-      resolveLocationFogIntensity({ fogScore: 82, sunshineScore: 74 }),
+      resolveLocationFogIntensity({ fogScore: 82, sunshineScore: 18 }),
     ).toBe("karlTerritory");
     expect(
       resolveLocationFogIntensity({ fogScore: 60, sunshineScore: 40 }),
@@ -114,16 +133,12 @@ describe("map conditions", () => {
     expect(getBestRightNowScoreLabel(sanJoseLike)).toBe("76 clear");
   });
 
-  it("resolves marker display intensity from the active Clear filter context", () => {
+  it("aligns marker display intensity with the user-facing contract", () => {
     const tiburonLike = { fogScore: 26, sunshineScore: 82 };
     const moderateFog = { fogScore: 35, sunshineScore: 55 };
 
-    expect(resolveMarkerDisplayIntensity(tiburonLike)).toBe("lightFog");
-    expect(resolveMarkerDisplayIntensity(tiburonLike, "clear")).toBe("clear");
-    expect(resolveMarkerDisplayIntensity(moderateFog, "clear")).toBe("lightFog");
-    expect(resolveMarkerDisplayIntensity(moderateFog, "lightFog")).toBe(
-      "lightFog",
-    );
+    expect(resolveMarkerDisplayIntensity(tiburonLike)).toBe("clear");
+    expect(resolveMarkerDisplayIntensity(moderateFog)).toBe("lightFog");
   });
 
   it("builds iOS-aligned location fog overlay styling without a new score model", () => {

@@ -210,9 +210,15 @@ describe("sunshineResultTitle", () => {
     expect(sunshineResultTitle(10, false)).toBe("NO CLEAR SKIES NEARBY");
   });
 
-  it("uses break-in-the-fog title when fogScore is in the Light Fog band", () => {
+  it("uses clear-skies wording for strong clear-sky locations in the Light Fog band", () => {
     expect(
       sunshineResultTitle(82, false, { fogScore: 26, sunshineScore: 82 }),
+    ).toBe("BEST CLEAR SKIES");
+  });
+
+  it("uses break-in-the-fog title for moderate fog below the Clear sunshine threshold", () => {
+    expect(
+      sunshineResultTitle(55, false, { fogScore: 35, sunshineScore: 55 }),
     ).toBe("BEST BREAK IN THE FOG");
   });
 });

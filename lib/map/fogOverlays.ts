@@ -1,5 +1,6 @@
 import {
   getLocationFogOverlayStyle,
+  locationMatchesFogIntensityFilter,
   resolveLocationFogIntensity,
   type FogIntensity,
   type LocationConditionInput,
@@ -61,7 +62,10 @@ export function buildLocationFogOverlayCollection(
       continue;
     }
 
-    if (intensityFilter && markerIntensity !== intensityFilter) {
+    if (
+      intensityFilter &&
+      !locationMatchesFogIntensityFilter(location, intensityFilter)
+    ) {
       continue;
     }
 

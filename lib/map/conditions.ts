@@ -68,45 +68,41 @@ export function locationQualifiesAsClearIntensity(
   return false;
 }
 
-/**
- * Marker icons, labels, and fog overlays — raw fogScore bands only.
- * Sunshine score never overrides the Light Fog band (25–49).
- */
-export function resolveLocationFogIntensity(
+/** Raw fogScore bands only — use for filter matching and internal scoring. */
+export function resolveRawLocationFogIntensity(
   location: LocationConditionInput,
 ): FogIntensity {
   return getFogIntensity(resolveFogScore(location));
 }
 
 /**
- * Marker-facing intensity when an active filter provides display context.
- * Clear filter shows matching clear-sky locations as Clear even in the Light Fog band.
+ * User-facing intensity for markers, labels, overlays, and trays.
+ * Clear-qualified locations render as Clear before raw fogScore bands apply.
  */
-export function resolveMarkerDisplayIntensity(
+export function resolveLocationFogIntensity(
   location: LocationConditionInput,
-  intensityFilter?: FogIntensity | null,
 ): FogIntensity {
-  if (
-    intensityFilter === "clear" &&
-    locationQualifiesAsClearIntensity(location)
-  ) {
+  if (locationQualifiesAsClearIntensity(location)) {
     return "clear";
   }
 
+  return resolveRawLocationFogIntensity(location);
+}
+
+/** Marker display intensity — aligned with the user-facing contract. */
+export function resolveMarkerDisplayIntensity(
+  location: LocationConditionInput,
+): FogIntensity {
   return resolveLocationFogIntensity(location);
 }
 
 export function getMarkerDisplayConditionLabel(
   location: LocationConditionInput,
   options: {
-    intensityFilter?: FogIntensity | null;
     isNighttime?: boolean;
   } = {},
 ): string {
-  const intensity = resolveMarkerDisplayIntensity(
-    location,
-    options.intensityFilter,
-  );
+  const intensity = resolveMarkerDisplayIntensity(location);
   const fogScore = resolveFogScore(location);
 
   if (fogScore !== null) {
@@ -130,12 +126,12 @@ export function locationMatchesFogIntensityFilter(
 
   if (intensity === "lightFog") {
     return (
-      resolveLocationFogIntensity(location) === "lightFog" &&
+      resolveRawLocationFogIntensity(location) === "lightFog" &&
       !locationQualifiesAsClearIntensity(location)
     );
   }
 
-  return resolveLocationFogIntensity(location) === intensity;
+  return resolveRawLocationFogIntensity(location) === intensity;
 }
 
 /**
@@ -206,7 +202,7 @@ export type FogOverlayStyle = {
 
 function getFogOverlayIntensity(location: LocationConditionInput): FogIntensity | null {
   const fogScore = resolveFogScore(location);
-  if (fogScore === null || resolveLocationFogIntensity(location) === "clear") {
+  if (fogScore === null || locationQualifiesAsClearIntensity(location)) {
     return null;
   }
 
