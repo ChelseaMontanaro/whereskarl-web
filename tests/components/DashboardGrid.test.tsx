@@ -76,6 +76,29 @@ describe("DashboardGrid", () => {
     cleanup();
   });
 
+  it("uses translucent smoky-black glass on metric cards instead of opaque navy", () => {
+    const { container } = render(
+      <DashboardGrid
+        current={currentFixture}
+        bestSunshine={bestSunshineFixture}
+        isLoading={false}
+      />,
+    );
+
+    const metricCards = container.querySelectorAll(
+      '[aria-label="Bay Area conditions dashboard"] > * > .rounded-2xl',
+    );
+
+    expect(metricCards.length).toBe(4);
+
+    for (const card of metricCards) {
+      expect(card.className).toMatch(/bg-black\/40/);
+      expect(card.className).toMatch(/lg:bg-black\/34/);
+      expect(card.className).toMatch(/backdrop-blur-md/);
+      expect(card.className).not.toMatch(/karl-navy-glass/);
+    }
+  });
+
   it("renders premium weather icons alongside dashboard metrics", () => {
     const { container } = render(
       <DashboardGrid
