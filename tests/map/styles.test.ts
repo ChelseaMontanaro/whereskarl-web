@@ -1,18 +1,23 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  getKarlMapStyleLayerIds,
   karlMapStyleHasLabelLayer,
+  karlMapStyleHasRoadLayer,
   resolveKarlMapStyle,
 } from "@/lib/map/styles";
 
 describe("resolveKarlMapStyle", () => {
-  it("includes label layers on satellite and hybrid styles", () => {
-    expect(karlMapStyleHasLabelLayer("satellite")).toBe(true);
+  it("exposes labels and roads only on hybrid, not satellite or standard", () => {
     expect(karlMapStyleHasLabelLayer("hybrid")).toBe(true);
+    expect(karlMapStyleHasRoadLayer("hybrid")).toBe(true);
+    expect(karlMapStyleHasLabelLayer("satellite")).toBe(false);
+    expect(karlMapStyleHasRoadLayer("satellite")).toBe(false);
     expect(karlMapStyleHasLabelLayer("standard")).toBe(false);
+    expect(karlMapStyleHasRoadLayer("standard")).toBe(false);
   });
 
-  it("adds a label raster layer to satellite imagery", () => {
+  it("keeps satellite imagery-only with no label or road layers", () => {
     const style = resolveKarlMapStyle("satellite");
 
     expect(typeof style).toBe("object");
@@ -20,8 +25,39 @@ describe("resolveKarlMapStyle", () => {
       return;
     }
 
+    expect(style.sources).not.toHaveProperty("karl-labels");
+    expect(style.sources).not.toHaveProperty("karl-roads");
+    expect(getKarlMapStyleLayerIds("satellite")).toEqual(["karl-satellite"]);
+  });
+
+  it("adds label and road raster layers on top of satellite imagery for hybrid", () => {
+    const style = resolveKarlMapStyle("hybrid");
+
+    expect(typeof style).toBe("object");
+    if (typeof style === "string") {
+      return;
+    }
+
     expect(style.sources).toHaveProperty("karl-labels");
-    expect(style.layers?.some((layer) => layer.id === "karl-labels")).toBe(true);
+    expect(style.sources).toHaveProperty("karl-roads");
+    expect(getKarlMapStyleLayerIds("hybrid")).toEqual([
+      "karl-satellite",
+      "karl-roads",
+      "karl-labels",
+    ]);
+  });
+
+  it("uses different layer visibility between satellite and hybrid", () => {
+    const satelliteLayers = getKarlMapStyleLayerIds("satellite");
+    const hybridLayers = getKarlMapStyleLayerIds("hybrid");
+
+    expect(satelliteLayers).not.toEqual(hybridLayers);
+    expect(hybridLayers).toEqual(
+      expect.arrayContaining(["karl-labels", "karl-roads"]),
+    );
+    expect(satelliteLayers).not.toEqual(
+      expect.arrayContaining(["karl-labels", "karl-roads"]),
+    );
   });
 
   it("grades satellite imagery toward muted tan/olive without canvas filters", () => {

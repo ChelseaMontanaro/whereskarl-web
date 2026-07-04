@@ -29,11 +29,37 @@ describe("MapLayerControls", () => {
     );
 
     fireEvent.click(screen.getByRole("button", { name: "Map Layers" }));
-    fireEvent.click(screen.getByRole("checkbox"));
+
+    const fogSwitch = screen.getByRole("switch", { name: "Fog Layer" });
+    expect(fogSwitch).toHaveAttribute("aria-checked", "true");
+
+    fireEvent.click(fogSwitch);
 
     expect(onFogLayerChange).toHaveBeenCalledWith(false);
     expect(screen.getByText("Fog Layer")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Satellite" })).toBeInTheDocument();
+  });
+
+  it("supports keyboard activation for the fog layer switch", () => {
+    const onFogLayerChange = vi.fn();
+
+    render(
+      <MapLayerControls
+        layout="desktop"
+        mapStyle="standard"
+        fogLayerEnabled={false}
+        onMapStyleChange={vi.fn()}
+        onFogLayerChange={onFogLayerChange}
+      />,
+    );
+
+    const fogSwitch = screen.getByRole("switch", { name: "Fog Layer" });
+    expect(fogSwitch).toHaveAttribute("aria-checked", "false");
+
+    fireEvent.keyDown(fogSwitch, { key: "Enter" });
+    fireEvent.click(fogSwitch);
+
+    expect(onFogLayerChange).toHaveBeenCalledWith(true);
   });
 
   it("changes the base map style safely", () => {

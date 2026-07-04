@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
   buildLocationFogOverlayCollection,
   createCirclePolygon,
+  createOrganicFogPolygon,
+  FOG_BANK_LAYERS,
 } from "@/lib/map/fogOverlays";
 
 describe("fog overlays", () => {
@@ -24,9 +26,10 @@ describe("fog overlays", () => {
       },
     ]);
 
-    expect(collection.features).toHaveLength(1);
+    expect(collection.features).toHaveLength(FOG_BANK_LAYERS.length);
     expect(collection.features[0]?.properties).toMatchObject({
       intensity: "karlTerritory",
+      fogLayer: 0,
     });
   });
 
@@ -55,7 +58,7 @@ describe("fog overlays", () => {
       },
     ]);
 
-    expect(collection.features).toHaveLength(1);
+    expect(collection.features).toHaveLength(FOG_BANK_LAYERS.length);
     expect(collection.features[0]?.properties?.intensity).toBe("lightFog");
   });
 
@@ -84,7 +87,7 @@ describe("fog overlays", () => {
     );
 
     expect(clearFilter.features).toHaveLength(0);
-    expect(karlFilter.features).toHaveLength(1);
+    expect(karlFilter.features).toHaveLength(FOG_BANK_LAYERS.length);
     expect(karlFilter.features[0]?.properties).toMatchObject({
       intensity: "karlTerritory",
     });
@@ -128,7 +131,7 @@ describe("fog overlays", () => {
       "lightFog",
     );
 
-    expect(collection.features).toHaveLength(1);
+    expect(collection.features).toHaveLength(FOG_BANK_LAYERS.length);
     expect(collection.features[0]?.properties).toMatchObject({
       intensity: "lightFog",
     });
@@ -155,7 +158,7 @@ describe("fog overlays", () => {
       "foggy",
     );
 
-    expect(collection.features).toHaveLength(1);
+    expect(collection.features).toHaveLength(FOG_BANK_LAYERS.length);
     expect(collection.features[0]?.properties).toMatchObject({
       intensity: "foggy",
     });
@@ -167,5 +170,49 @@ describe("fog overlays", () => {
 
     expect(ring[0]).toEqual(ring[ring.length - 1]);
     expect(ring.length).toBeGreaterThan(4);
+  });
+
+  it("builds organic fog bank polygons with soft overlap layers", () => {
+    const polygon = createOrganicFogPolygon(-122.45, 37.87, 2500, 0.42, 12);
+    const ring = polygon.coordinates[0];
+
+    expect(ring[0]).toEqual(ring[ring.length - 1]);
+    expect(ring.length).toBeGreaterThan(8);
+
+    const perfectCircle = createCirclePolygon(-122.45, 37.87, 2500, 12);
+    const perfectRing = perfectCircle.coordinates[0];
+    const hasIrregularRadius = ring.some((coordinate, index) => {
+      if (index === 0 || index === ring.length - 1) {
+        return false;
+      }
+
+      const perfectCoordinate = perfectRing[index];
+      return (
+        coordinate[0] !== perfectCoordinate?.[0] ||
+        coordinate[1] !== perfectCoordinate?.[1]
+      );
+    });
+
+    expect(hasIrregularRadius).toBe(true);
+  });
+
+  it("uses cinematic bluish-gray fog tones with layered opacity falloff", () => {
+    const collection = buildLocationFogOverlayCollection([
+      {
+        id: "tiburon",
+        latitude: 37.8735,
+        longitude: -122.4566,
+        fogScore: 82,
+        sunshineScore: 18,
+      },
+    ]);
+
+    const opacities = collection.features.map(
+      (feature) => feature.properties?.opacity as number,
+    );
+
+    expect(collection.features[0]?.properties?.color).toBe("rgb(184 214 237)");
+    expect(opacities[0]).toBeGreaterThan(opacities[1] ?? 0);
+    expect(opacities[1]).toBeGreaterThan(opacities[2] ?? 0);
   });
 });

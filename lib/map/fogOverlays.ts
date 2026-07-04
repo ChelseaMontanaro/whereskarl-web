@@ -9,11 +9,28 @@ import {
 export const FOG_OVERLAY_SOURCE_ID = "karl-fog-overlays";
 export const FOG_OVERLAY_LAYER_ID = "karl-fog-overlays-fill";
 
+/** Organic fog bank layers per location for soft cinematic overlap. */
+export const FOG_BANK_LAYERS = [
+  { scale: 0.52, opacityFactor: 1, points: 20 },
+  { scale: 0.78, opacityFactor: 0.62, points: 22 },
+  { scale: 1, opacityFactor: 0.34, points: 24 },
+] as const;
+
 export type FogOverlayLocation = LocationConditionInput & {
   id: string;
   longitude: number;
   latitude: number;
 };
+
+function hashSeed(value: string): number {
+  let hash = 0;
+
+  for (let index = 0; index < value.length; index += 1) {
+    hash = (hash * 31 + value.charCodeAt(index)) % 1000;
+  }
+
+  return hash / 1000;
+}
 
 export function createCirclePolygon(
   longitude: number,
@@ -44,8 +61,53 @@ export function createCirclePolygon(
   };
 }
 
+function radiusWobble(angle: number, seed: number): number {
+  const wobble =
+    Math.sin(angle * 3 + seed * 6.28) * 0.14 +
+    Math.cos(angle * 5 + seed * 4.1) * 0.09 +
+    Math.sin(angle * 7 + seed * 2.7) * 0.05;
+
+  return 1 + wobble;
+}
+
 /**
- * Builds location-based fog circles from shared backend fog scores.
+ * Builds a soft, cloud-like fog bank polygon instead of a perfect geodesic circle.
+ */
+export function createOrganicFogPolygon(
+  longitude: number,
+  latitude: number,
+  radiusMeters: number,
+  seed: number,
+  points = 24,
+): GeoJSON.Polygon {
+  const coordinates: [number, number][] = [];
+  const earthRadius = 6371000;
+  const latitudeRadians = (latitude * Math.PI) / 180;
+  const driftLongitude = Math.sin(seed * 9.4) * radiusMeters * 0.08;
+  const driftLatitude = Math.cos(seed * 7.2) * radiusMeters * 0.08;
+
+  for (let index = 0; index <= points; index += 1) {
+    const angle = (index / points) * 2 * Math.PI;
+    const effectiveRadius = radiusMeters * radiusWobble(angle, seed);
+    const deltaX = effectiveRadius * Math.cos(angle) + driftLongitude;
+    const deltaY = effectiveRadius * Math.sin(angle) + driftLatitude;
+    const deltaLatitude = deltaY / earthRadius;
+    const deltaLongitude = deltaX / (earthRadius * Math.cos(latitudeRadians));
+
+    coordinates.push([
+      longitude + (deltaLongitude * 180) / Math.PI,
+      latitude + (deltaLatitude * 180) / Math.PI,
+    ]);
+  }
+
+  return {
+    type: "Polygon",
+    coordinates: [coordinates],
+  };
+}
+
+/**
+ * Builds location-based fog banks from shared backend fog scores.
  * Geographic fog rasters/polygons can replace this source later without changing controls.
  */
 export function buildLocationFogOverlayCollection(
@@ -69,20 +131,27 @@ export function buildLocationFogOverlayCollection(
       continue;
     }
 
-    features.push({
-      type: "Feature",
-      id: location.id,
-      geometry: createCirclePolygon(
-        location.longitude,
-        location.latitude,
-        overlayStyle.radiusMeters,
-      ),
-      properties: {
-        color: overlayStyle.color,
-        opacity: overlayStyle.opacity,
-        intensity: markerIntensity,
-      },
-    });
+    const seed = hashSeed(location.id);
+
+    for (const [layerIndex, layer] of FOG_BANK_LAYERS.entries()) {
+      features.push({
+        type: "Feature",
+        id: `${location.id}-fog-${layerIndex}`,
+        geometry: createOrganicFogPolygon(
+          location.longitude,
+          location.latitude,
+          overlayStyle.radiusMeters * layer.scale,
+          seed + layerIndex * 0.37,
+          layer.points,
+        ),
+        properties: {
+          color: overlayStyle.color,
+          opacity: overlayStyle.opacity * layer.opacityFactor,
+          intensity: markerIntensity,
+          fogLayer: layerIndex,
+        },
+      });
+    }
   }
 
   return {
@@ -129,6 +198,7 @@ export function syncFogOverlayLayer(
     paint: {
       "fill-color": ["get", "color"],
       "fill-opacity": ["get", "opacity"],
+      "fill-antialias": true,
     },
   });
 }

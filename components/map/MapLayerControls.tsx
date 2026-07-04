@@ -73,6 +73,41 @@ function RadioIndicator({ checked }: { checked: boolean }) {
   );
 }
 
+function FogLayerToggle({
+  enabled,
+  onChange,
+}: {
+  enabled: boolean;
+  onChange: (enabled: boolean) => void;
+}) {
+  return (
+    <div className="mt-2 flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-karl-navy-glass/70 px-3 py-2.5">
+      <span id="fog-layer-label" className="text-sm text-white/80">
+        Fog Layer
+      </span>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={enabled}
+        aria-labelledby="fog-layer-label"
+        onClick={() => onChange(!enabled)}
+        className={`relative h-7 w-12 shrink-0 rounded-full border transition-colors motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karl-gold/50 ${
+          enabled
+            ? "border-karl-gold/35 bg-karl-gold/30"
+            : "border-white/15 bg-white/10"
+        }`}
+      >
+        <span
+          aria-hidden="true"
+          className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform motion-reduce:transition-none ${
+            enabled ? "translate-x-5" : "translate-x-0"
+          }`}
+        />
+      </button>
+    </div>
+  );
+}
+
 function LayerPanelContent({
   mapStyle,
   fogLayerEnabled,
@@ -146,15 +181,10 @@ function LayerPanelContent({
         <p className="text-[0.625rem] font-bold uppercase tracking-[0.14em] text-white/45">
           Overlays
         </p>
-        <label className="mt-2 flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-karl-navy-glass/70 px-3 py-2.5">
-          <span className="text-sm text-white/80">Fog Layer</span>
-          <input
-            type="checkbox"
-            checked={fogLayerEnabled}
-            onChange={(event) => onFogLayerChange(event.target.checked)}
-            className="h-4 w-4 rounded border-white/20 bg-karl-navy text-karl-gold focus:ring-karl-gold/40"
-          />
-        </label>
+        <FogLayerToggle
+          enabled={fogLayerEnabled}
+          onChange={onFogLayerChange}
+        />
       </section>
     </div>
   );

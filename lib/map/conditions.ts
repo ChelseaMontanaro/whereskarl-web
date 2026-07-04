@@ -225,13 +225,13 @@ export function getLocationFogOverlayStyle(
       return null;
     case "lightFog":
       return {
-        color: "rgb(255 255 255)",
+        color: "rgb(228 236 244)",
         opacity: Math.min(0.22, 0.06 + (fogScore / 100) * 0.12),
         radiusMeters: 1400 + fogScore * 18,
       };
     case "foggy":
       return {
-        color: "rgb(255 255 255)",
+        color: "rgb(210 224 238)",
         opacity: Math.min(0.36, 0.1 + (fogScore / 100) * 0.22),
         radiusMeters: 2200 + fogScore * 42,
       };
