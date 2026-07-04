@@ -2,8 +2,10 @@ import { z } from "zod";
 
 import { BAY_AREA_BACKEND_REGION_IDS } from "@/lib/map/config";
 import {
+  apiDateTimeSchema,
   apiSourceSchema,
   confidenceFieldsSchema,
+  dataStatusSchema,
   weatherPredictionSchema,
 } from "@/lib/schemas/shared";
 
@@ -28,11 +30,12 @@ export const locationWeatherSchema = z
     weatherCode: z.number(),
     iconName: z.string(),
     fogScore: z.number(),
-    updatedAt: z.string().datetime(),
+    updatedAt: apiDateTimeSchema,
     karlReason: z.string(),
     primaryDrivers: z.array(z.string()),
     microclimateFactors: z.array(z.string()),
     prediction: weatherPredictionSchema,
+    dataStatus: dataStatusSchema.optional(),
   })
   .merge(confidenceFieldsSchema);
 
@@ -58,8 +61,9 @@ export const currentResponseSchema = z
     humidity: z.number(),
     weatherCode: z.number(),
     iconName: z.string(),
-    updatedAt: z.string().datetime(),
+    updatedAt: apiDateTimeSchema,
     source: apiSourceSchema,
+    dataStatus: dataStatusSchema.optional(),
   })
   .merge(confidenceFieldsSchema);
 
@@ -81,8 +85,9 @@ export const bestSunshineResponseSchema = z
     distanceText: z.string(),
     reason: z.string(),
     iconName: z.string(),
-    updatedAt: z.string().datetime(),
+    updatedAt: apiDateTimeSchema,
     source: apiSourceSchema,
+    dataStatus: dataStatusSchema.optional(),
     recommendationMode: recommendationModeSchema,
     lookaheadMinutes: z.number(),
     recommendationScore: z.number(),
