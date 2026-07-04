@@ -1,5 +1,6 @@
 import {
   getLocationConditionLabel,
+  locationMatchesFogIntensityFilter,
   resolveLocationFogIntensity,
   type FogIntensity,
   type LocationConditionInput,
@@ -48,7 +49,7 @@ function matchesIntensityFilter(
     return true;
   }
 
-  return getMarkerFogIntensity(location) === intensityFilter;
+  return locationMatchesFogIntensityFilter(location, intensityFilter);
 }
 
 function shouldHideFilteredMarker(

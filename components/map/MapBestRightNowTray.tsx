@@ -54,7 +54,7 @@ export function MapBestRightNowTray({
               </span>
               {item.score != null ? (
                 <span className="mt-1 text-xs font-light text-karl-gold">
-                  {item.score} clear
+                  {item.scoreLabel ?? `${item.score} clear`}
                 </span>
               ) : null}
             </button>

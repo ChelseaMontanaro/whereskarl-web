@@ -12,7 +12,6 @@ import {
   SunshineScoreBadge,
 } from "@/components/home/InsightCardParts";
 import {
-  clearestSpotDesktopLabel,
   desktopClickableCardHoverClass,
   desktopClickableCardLinkClass,
   desktopInsightIconSizeClass,
@@ -94,6 +93,10 @@ function MobileBestSunshineCard({
             {sunshineResultTitle(
               recommendation.sunshineScore,
               isNightPresentation,
+              {
+                fogScore: recommendation.fogScore,
+                sunshineScore: recommendation.sunshineScore,
+              },
             )}
           </CardLabel>
           <h2 className="mt-2 text-xl font-semibold text-white">
@@ -174,7 +177,16 @@ function DesktopBestSunshineCard({
           {spotIcon}
         </InsightIconFrame>
         <div className="min-w-0 flex-1">
-          <CardLabel>{clearestSpotDesktopLabel(isNightPresentation)}</CardLabel>
+          <CardLabel>
+            {sunshineResultTitle(
+              recommendation.sunshineScore,
+              isNightPresentation,
+              {
+                fogScore: recommendation.fogScore,
+                sunshineScore: recommendation.sunshineScore,
+              },
+            )}
+          </CardLabel>
           <h2 className="mt-1.5 text-lg font-semibold text-white lg:text-xl">
             {recommendation.locationName}
           </h2>

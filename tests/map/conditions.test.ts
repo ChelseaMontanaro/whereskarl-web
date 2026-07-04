@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  getBestRightNowScoreLabel,
   getFogIntensity,
   getFogIntensityLabel,
   getFogOverlayStyle,
   getLocationConditionLabel,
   getLocationFogOverlayStyle,
+  locationMatchesFogIntensityFilter,
+  locationQualifiesAsClearIntensity,
   resolveFogScore,
   resolveLocationFogIntensity,
 } from "@/lib/map/conditions";
@@ -73,6 +76,25 @@ describe("map conditions", () => {
     expect(
       resolveLocationFogIntensity({ fogScore: 41, sunshineScore: 40 }),
     ).toBe("lightFog");
+  });
+
+  it("does not treat high sunshineScore as Clear when fogScore is in the Light Fog band", () => {
+    const tiburonLike = { fogScore: 26, sunshineScore: 82 };
+
+    expect(locationQualifiesAsClearIntensity(tiburonLike)).toBe(false);
+    expect(locationMatchesFogIntensityFilter(tiburonLike, "clear")).toBe(false);
+    expect(locationMatchesFogIntensityFilter(tiburonLike, "lightFog")).toBe(
+      true,
+    );
+    expect(getBestRightNowScoreLabel(tiburonLike)).toBe("82 sunshine");
+  });
+
+  it("treats fogScore below 25 as Clear even when sunshineScore is high", () => {
+    const sanJoseLike = { fogScore: 24, sunshineScore: 76 };
+
+    expect(locationQualifiesAsClearIntensity(sanJoseLike)).toBe(true);
+    expect(locationMatchesFogIntensityFilter(sanJoseLike, "clear")).toBe(true);
+    expect(getBestRightNowScoreLabel(sanJoseLike)).toBe("76 clear");
   });
 
   it("builds iOS-aligned location fog overlay styling without a new score model", () => {

@@ -22,7 +22,11 @@ import {
   type FogIntensity,
 } from "@/lib/map/conditions";
 import { findBayAreaProductRegion, isBayAreaProductRegionId } from "@/lib/map/config";
-import { toggleIntensityFilter } from "@/lib/map/intensityFilter";
+import {
+  intensityFilterTrayItems,
+  intensityFilterTrayTitle,
+  toggleIntensityFilter,
+} from "@/lib/map/intensityFilter";
 import { resolveMapLocationFocus } from "@/lib/map/locationSelection";
 import type { MapMarkerLocation } from "@/lib/map/markers";
 import { getProductRegionNameForLocation } from "@/lib/map/regions";
@@ -226,6 +230,19 @@ function useMapViewState(): MapViewModel {
     [locations, selectedLocation?.id],
   );
 
+  const bestRightNowItems = useMemo(() => {
+    if (!intensityFilter) {
+      return bestRightNow;
+    }
+
+    return intensityFilterTrayItems(
+      locations,
+      intensityFilter,
+      selectedLocation?.id ?? null,
+      4,
+    );
+  }, [bestRightNow, intensityFilter, locations, selectedLocation?.id]);
+
   const handleSelectLocation = useCallback(
     (locationId: string) => {
       suppressViewportUpdateRef.current = false;
@@ -273,7 +290,7 @@ function useMapViewState(): MapViewModel {
     unknownLocationId,
     activeRegion,
     markerLocations,
-    bestRightNowItems: bestRightNow,
+    bestRightNowItems,
     suppressViewportUpdateRef,
     handleSelectLocation,
     handleSelectRegion,
@@ -423,7 +440,11 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
           <div className="max-w-xl shrink-0">
             <MapBestRightNowTray
               items={bestRightNowItems}
-              title="Best Right Now"
+              title={
+                intensityFilter
+                  ? intensityFilterTrayTitle(intensityFilter)
+                  : "Best Right Now"
+              }
               onSelectLocation={handleSelectLocation}
               isLoading={locationsQuery.isLoading}
             />

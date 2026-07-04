@@ -5,12 +5,18 @@ import type {
   LocationWeather,
 } from "@/lib/schemas/weather";
 import type { WeatherPrediction } from "@/lib/schemas/shared";
+import {
+  getBestRightNowScoreLabel,
+  resolveLocationFogIntensity,
+  type LocationConditionInput,
+} from "@/lib/map/conditions";
 
 export type BestRightNowItem = {
   locationId: string;
   locationName: string;
   detail: string;
   score: number | null;
+  scoreLabel?: string | null;
   rank: number | null;
 };
 
@@ -50,6 +56,7 @@ export function bestRightNowLocationItems(
         trimmedNonEmpty(location.status) ??
         "Current conditions available",
       score: location.sunshineScore,
+      scoreLabel: getBestRightNowScoreLabel(location),
       rank: index + 1,
     }));
 }
@@ -513,7 +520,12 @@ export function resolveKarlReadPresentation(input: {
 export function sunshineResultTitle(
   sunshineScore: number,
   isNighttime: boolean,
+  location?: LocationConditionInput | null,
 ): string {
+  if (location && resolveLocationFogIntensity(location) === "lightFog") {
+    return "BEST BREAK IN THE FOG";
+  }
+
   if (sunshineScore >= 50) {
     return isNighttime ? "CLEAREST NIGHT" : "BEST CLEAR SKIES";
   }

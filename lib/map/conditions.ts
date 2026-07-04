@@ -41,36 +41,66 @@ export function getFogIntensity(fogScore: number | null): FogIntensity {
   return "karlTerritory";
 }
 
+/**
+ * True when a location belongs in the Clear intensity filter.
+ * Uses the raw fogScore clear band (< 25) only — high sunshineScore does not
+ * override Light Fog evidence in the 25–49 band.
+ */
 export function locationQualifiesAsClearIntensity(
   location: LocationConditionInput,
 ): boolean {
-  const fogScore = resolveFogScore(location);
-  if (fogScore === null) {
-    return true;
-  }
-
-  if (getFogIntensity(fogScore) === "karlTerritory") {
-    return false;
-  }
-
-  if (
-    typeof location.sunshineScore === "number" &&
-    location.sunshineScore >= CLEAR_SKIES_SCORE_THRESHOLD
-  ) {
-    return true;
-  }
-
-  return getFogIntensity(fogScore) === "clear";
+  return resolveLocationFogIntensity(location) === "clear";
 }
 
 /**
- * Map-facing intensity from raw fogScore thresholds for markers and filters.
- * Clear-skies score does not override the Light Fog band (25–49).
+ * Marker icons, labels, and fog overlays — raw fogScore bands only.
+ * Sunshine score never overrides the Light Fog band (25–49).
  */
 export function resolveLocationFogIntensity(
   location: LocationConditionInput,
 ): FogIntensity {
   return getFogIntensity(resolveFogScore(location));
+}
+
+/**
+ * Canonical intensity filter matching for map markers, trays, and overlays.
+ * Clear uses the clear-band rule; other intensities use display intensity.
+ */
+export function locationMatchesFogIntensityFilter(
+  location: LocationConditionInput,
+  intensity: FogIntensity,
+): boolean {
+  if (intensity === "clear") {
+    return locationQualifiesAsClearIntensity(location);
+  }
+
+  return resolveLocationFogIntensity(location) === intensity;
+}
+
+/**
+ * Score suffix for Best Right Now / map tray cards aligned with fog intensity.
+ */
+export function getBestRightNowScoreLabel(
+  location: LocationConditionInput,
+): string {
+  const score = location.sunshineScore;
+
+  if (typeof score !== "number" || !Number.isFinite(score)) {
+    return "";
+  }
+
+  switch (resolveLocationFogIntensity(location)) {
+    case "clear":
+      return `${score} clear`;
+    case "lightFog":
+      return `${score} sunshine`;
+    case "foggy":
+      return `${score} foggy`;
+    case "karlTerritory":
+      return `${score} fog`;
+    default:
+      return `${score}`;
+  }
 }
 
 export function getFogIntensityLabel(

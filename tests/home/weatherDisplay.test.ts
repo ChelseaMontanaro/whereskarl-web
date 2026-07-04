@@ -209,6 +209,12 @@ describe("sunshineResultTitle", () => {
     expect(sunshineResultTitle(30, false)).toBe("BEST BREAK IN THE FOG");
     expect(sunshineResultTitle(10, false)).toBe("NO CLEAR SKIES NEARBY");
   });
+
+  it("uses break-in-the-fog title when fogScore is in the Light Fog band", () => {
+    expect(
+      sunshineResultTitle(82, false, { fogScore: 26, sunshineScore: 82 }),
+    ).toBe("BEST BREAK IN THE FOG");
+  });
 });
 
 describe("resolveKarlReadPresentation", () => {

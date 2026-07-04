@@ -1,18 +1,19 @@
 import type { MapBounds } from "@/lib/map/config";
 import {
+  getBestRightNowScoreLabel,
   getFogIntensityLabel,
+  locationMatchesFogIntensityFilter,
   type FogIntensity,
 } from "@/lib/map/conditions";
 import type { BestRightNowItem } from "@/lib/home/weatherDisplay";
 import type { MapMarkerLocation } from "@/lib/map/markers";
-import { getMarkerFogIntensity } from "@/lib/map/markers";
 import type { LocationWeather } from "@/lib/schemas/weather";
 
 export function locationMatchesIntensity(
   location: LocationWeather,
   intensity: FogIntensity,
 ): boolean {
-  return getMarkerFogIntensity(location) === intensity;
+  return locationMatchesFogIntensityFilter(location, intensity);
 }
 
 export function intensityFilterTrayItems(
@@ -39,6 +40,7 @@ export function intensityFilterTrayItems(
         location.karlReason?.trim() ||
         getFogIntensityLabel(intensity),
       score: location.sunshineScore,
+      scoreLabel: getBestRightNowScoreLabel(location),
       rank: index + 1,
     }));
 }
@@ -58,8 +60,8 @@ export function boundsForIntensityLocations(
   locations: MapMarkerLocation[],
   intensity: FogIntensity,
 ): MapBounds | null {
-  const matching = locations.filter(
-    (location) => getMarkerFogIntensity(location) === intensity,
+  const matching = locations.filter((location) =>
+    locationMatchesFogIntensityFilter(location, intensity),
   );
 
   if (matching.length === 0) {

@@ -90,7 +90,7 @@ describe("HomeView", () => {
     ).toBeGreaterThan(0);
     expect(screen.queryByText(/Berkeley should brighten/i)).not.toBeInTheDocument();
     expect(screen.getAllByText("Tiburon").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("BEST CLEAR SKIES").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("BEST BREAK IN THE FOG").length).toBeGreaterThan(0);
     expect(
       screen.getByRole("link", { name: "Find Clear Skies" }),
     ).toHaveAttribute("href", "/map?location=tiburon");
