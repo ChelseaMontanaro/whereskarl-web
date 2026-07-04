@@ -32,7 +32,7 @@ type DashboardGridProps = {
 };
 
 const metricCardSurfaceClass =
-  "h-full min-h-[5.75rem] border-white/10 bg-black/34 px-3.5 py-3 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.14)] lg:min-h-[7rem] lg:px-4 lg:py-4";
+  "h-full min-h-[5.75rem] px-3.5 py-3 lg:min-h-[7rem] lg:px-4 lg:py-4";
 
 function CardLabel({ children }: { children: ReactNode }) {
   return (
@@ -129,7 +129,11 @@ function MetricCard({
     />
   );
 
-  const card = <GlassCard className={cardClassName}>{content}</GlassCard>;
+  const card = (
+    <GlassCard variant="metric" className={cardClassName}>
+      {content}
+    </GlassCard>
+  );
 
   if (mapHref && mapAriaLabel) {
     return (

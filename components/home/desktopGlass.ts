@@ -1,6 +1,9 @@
 export const overlayGlassCardClass =
   "rounded-2xl border border-white/10 bg-black/34 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.14)]";
 
+export const metricGlassCardClass =
+  "rounded-2xl border border-white/10 bg-black/40 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.14)] lg:bg-black/34";
+
 export const desktopGlassCardClass = overlayGlassCardClass;
 
 export const desktopMistIconClass =
