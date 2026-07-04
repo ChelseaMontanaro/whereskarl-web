@@ -11,6 +11,60 @@ describe("MapBestRightNowTray", () => {
     cleanup();
   });
 
+  it("marks the selected tray card without reordering items", () => {
+    const onSelectLocation = vi.fn();
+    const items: BestRightNowItem[] = [
+      {
+        locationId: "san-jose",
+        locationName: "San Jose",
+        detail: "Mostly clear",
+        score: 90,
+        rank: 1,
+      },
+      {
+        locationId: "tiburon",
+        locationName: "Tiburon",
+        detail: "Mostly clear",
+        score: 82,
+        rank: 2,
+      },
+    ];
+
+    const { rerender } = render(
+      <MapBestRightNowTray
+        items={items}
+        selectedLocationId="tiburon"
+        onSelectLocation={onSelectLocation}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Select Tiburon on map" })).toHaveAttribute(
+      "data-selected",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: "Select San Jose on map" })).toHaveAttribute(
+      "data-selected",
+      "false",
+    );
+
+    rerender(
+      <MapBestRightNowTray
+        items={items}
+        selectedLocationId="san-jose"
+        onSelectLocation={onSelectLocation}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Select San Jose on map" })).toHaveAttribute(
+      "data-selected",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: "Select Tiburon on map" })).toHaveAttribute(
+      "data-selected",
+      "false",
+    );
+  });
+
   it("selects the clicked location id instead of a stale selection", () => {
     const onSelectLocation = vi.fn();
     const items: BestRightNowItem[] = [

@@ -6,6 +6,7 @@ import type { BestRightNowItem } from "@/lib/home/weatherDisplay";
 type MapBestRightNowTrayProps = {
   items: BestRightNowItem[];
   onSelectLocation: (locationId: string) => void;
+  selectedLocationId?: string | null;
   isLoading?: boolean;
   title?: string;
 };
@@ -13,6 +14,7 @@ type MapBestRightNowTrayProps = {
 export function MapBestRightNowTray({
   items,
   onSelectLocation,
+  selectedLocationId = null,
   isLoading = false,
   title = "Best Right Now",
 }: MapBestRightNowTrayProps) {
@@ -37,11 +39,19 @@ export function MapBestRightNowTray({
         {title}
       </p>
       <ul className="mt-2 flex items-stretch gap-2">
-        {items.map((item) => (
+        {items.map((item) => {
+          const isSelected =
+            selectedLocationId != null &&
+            item.locationId.trim().toLowerCase() ===
+              selectedLocationId.trim().toLowerCase();
+
+          return (
           <li key={item.locationId} className="shrink-0">
             <button
               type="button"
               data-location-id={item.locationId}
+              data-selected={isSelected ? "true" : "false"}
+              aria-current={isSelected ? "true" : undefined}
               aria-label={`Select ${item.locationName} on map`}
               onClick={(event) => {
                 event.stopPropagation();
@@ -59,7 +69,8 @@ export function MapBestRightNowTray({
               ) : null}
             </button>
           </li>
-        ))}
+          );
+        })}
       </ul>
     </section>
   );

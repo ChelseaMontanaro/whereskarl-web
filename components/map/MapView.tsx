@@ -221,13 +221,8 @@ function useMapViewState(): MapViewModel {
   );
 
   const bestRightNow = useMemo(
-    () =>
-      bestRightNowLocationItems(
-        locations,
-        selectedLocation?.id ?? null,
-        4,
-      ),
-    [locations, selectedLocation?.id],
+    () => bestRightNowLocationItems(locations, null, 4),
+    [locations],
   );
 
   const bestRightNowItems = useMemo(() => {
@@ -235,13 +230,8 @@ function useMapViewState(): MapViewModel {
       return bestRightNow;
     }
 
-    return intensityFilterTrayItems(
-      locations,
-      intensityFilter,
-      selectedLocation?.id ?? null,
-      4,
-    );
-  }, [bestRightNow, intensityFilter, locations, selectedLocation?.id]);
+    return intensityFilterTrayItems(locations, intensityFilter, null, 4);
+  }, [bestRightNow, intensityFilter, locations]);
 
   const handleSelectLocation = useCallback(
     (locationId: string) => {
@@ -440,6 +430,7 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
           <div className="max-w-xl shrink-0">
             <MapBestRightNowTray
               items={bestRightNowItems}
+              selectedLocationId={selectedLocation?.id ?? null}
               title={
                 intensityFilter
                   ? intensityFilterTrayTitle(intensityFilter)

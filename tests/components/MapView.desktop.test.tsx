@@ -35,6 +35,34 @@ const tiburon = JSON.parse(
   readFileSync(join(FIXTURES_DIR, "locations.json"), "utf8"),
 ).locations[0];
 
+const sausalito = JSON.parse(
+  readFileSync(join(FIXTURES_DIR, "locations.json"), "utf8"),
+).locations[1];
+
+const trayLocations = [
+  tiburon,
+  {
+    ...tiburon,
+    id: "san-jose",
+    name: "San Jose",
+    latitude: 37.3382,
+    longitude: -121.8863,
+    sunshineScore: 91,
+    fogScore: 12,
+    status: "Mostly Sunny",
+    distanceText: "42 mi",
+  },
+  sausalito,
+];
+
+const expectedTrayOrder = ["san-jose", "tiburon", "sausalito"];
+
+function getTrayLocationIds() {
+  return screen
+    .getAllByRole("button", { name: /Select .+ on map$/ })
+    .map((button) => button.getAttribute("data-location-id"));
+}
+
 function renderDesktopMap() {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -44,13 +72,25 @@ function renderDesktopMap() {
     },
   });
 
-  return render(
+  const view = render(
     createElement(
       QueryClientProvider,
       { client: queryClient },
       createElement(MapView),
     ),
   );
+
+  return {
+    ...view,
+    rerenderDesktopMap: () =>
+      view.rerender(
+        createElement(
+          QueryClientProvider,
+          { client: queryClient },
+          createElement(MapView),
+        ),
+      ),
+  };
 }
 
 describe("MapView desktop", () => {
@@ -78,24 +118,50 @@ describe("MapView desktop", () => {
   beforeEach(() => {
     useSearchParamsMock.mockReturnValue(new URLSearchParams("location=tiburon"));
     vi.spyOn(weatherApi, "getLocations").mockResolvedValue({
-      locations: [
-        tiburon,
-        {
-          ...tiburon,
-          id: "san-jose",
-          name: "San Jose",
-          latitude: 37.3382,
-          longitude: -121.8863,
-          sunshineScore: 91,
-          fogScore: 12,
-          status: "Mostly Sunny",
-          distanceText: "42 mi",
-        },
-      ],
+      locations: trayLocations,
     });
     vi.spyOn(weatherApi, "getCurrent").mockResolvedValue(
       JSON.parse(readFileSync(join(FIXTURES_DIR, "current.json"), "utf8")),
     );
+  });
+
+  it("keeps the score-ranked Best Right Now tray stable across selections", async () => {
+    const { rerenderDesktopMap } = renderDesktopMap();
+
+    await screen.findByRole("button", { name: "Select San Jose on map" });
+    expect(getTrayLocationIds()).toEqual(expectedTrayOrder);
+
+    useSearchParamsMock.mockReturnValue(new URLSearchParams("location=tiburon"));
+    rerenderDesktopMap();
+    await screen.findByRole("button", { name: "Select Tiburon on map" });
+    expect(getTrayLocationIds()).toEqual(expectedTrayOrder);
+    expect(
+      screen.getByRole("button", { name: "Select Tiburon on map" }),
+    ).toHaveAttribute("data-selected", "true");
+    expect(
+      screen.getByRole("button", { name: "Select San Jose on map" }),
+    ).toHaveAttribute("data-selected", "false");
+
+    useSearchParamsMock.mockReturnValue(new URLSearchParams("location=san-jose"));
+    rerenderDesktopMap();
+    await screen.findByRole("button", { name: "Select San Jose on map" });
+    expect(getTrayLocationIds()).toEqual(expectedTrayOrder);
+    expect(
+      screen.getByRole("button", { name: "Select San Jose on map" }),
+    ).toHaveAttribute("data-selected", "true");
+    expect(
+      screen.getByRole("button", { name: "Select Tiburon on map" }),
+    ).toHaveAttribute("data-selected", "false");
+
+    useSearchParamsMock.mockReturnValue(
+      new URLSearchParams("location=sausalito"),
+    );
+    rerenderDesktopMap();
+    await screen.findByRole("button", { name: "Select Sausalito on map" });
+    expect(getTrayLocationIds()).toEqual(expectedTrayOrder);
+    expect(
+      screen.getByRole("button", { name: "Select Sausalito on map" }),
+    ).toHaveAttribute("data-selected", "true");
   });
 
   it("routes Best Right Now clicks to the clicked location id", async () => {
