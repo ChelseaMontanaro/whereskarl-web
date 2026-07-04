@@ -243,7 +243,7 @@ describe("BayAreaMap", () => {
     });
   });
 
-  it("keeps the San Francisco region viewport unchanged", async () => {
+  it("frames a wider San Francisco viewport that includes the southern Peninsula", async () => {
     const sanFrancisco = findBayAreaProductRegion("san-francisco");
     expect(sanFrancisco).toBeDefined();
 
@@ -261,8 +261,77 @@ describe("BayAreaMap", () => {
       expect(mockFitBounds).toHaveBeenCalledWith(
         sanFrancisco!.bounds,
         expect.objectContaining({
-          padding: 48,
-          maxZoom: 11,
+          padding: 36,
+          maxZoom: 10.6,
+          essential: true,
+        }),
+      );
+    });
+  });
+
+  it("offsets the San Francisco desktop viewport to clear the left overlay panels", async () => {
+    const sanFrancisco = findBayAreaProductRegion("san-francisco");
+    expect(sanFrancisco).toBeDefined();
+
+    render(
+      <BayAreaMap
+        locations={locations}
+        selectedLocationId={null}
+        selectedRegionId="san-francisco"
+        onSelectLocation={vi.fn()}
+        {...defaultProps}
+        layout="desktop"
+      />,
+    );
+
+    await waitFor(() => {
+      expect(mockFitBounds).toHaveBeenCalledWith(
+        sanFrancisco!.bounds,
+        expect.objectContaining({
+          padding: {
+            top: 80,
+            right: 80,
+            bottom: 128,
+            left: 360,
+          },
+          maxZoom: 10.6,
+          essential: true,
+        }),
+      );
+    });
+  });
+
+  it("keeps the San Francisco viewport stable when an intensity filter has no matching markers", async () => {
+    const sanFrancisco = findBayAreaProductRegion("san-francisco");
+    expect(sanFrancisco).toBeDefined();
+
+    render(
+      <BayAreaMap
+        locations={[
+          {
+            id: "ocean-beach",
+            name: "Ocean Beach",
+            latitude: 37.7594,
+            longitude: -122.5107,
+            sunshineScore: 18,
+            fogScore: 96,
+            status: "Karl Territory",
+          },
+        ]}
+        selectedLocationId={null}
+        selectedRegionId="san-francisco"
+        onSelectLocation={vi.fn()}
+        {...defaultProps}
+        layout="desktop"
+        intensityFilter="clear"
+      />,
+    );
+
+    await waitFor(() => {
+      expect(mockFitBounds).toHaveBeenCalledWith(
+        sanFrancisco!.bounds,
+        expect.objectContaining({
+          maxZoom: 10.6,
           essential: true,
         }),
       );

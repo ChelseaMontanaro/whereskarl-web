@@ -87,6 +87,50 @@ describe("Bay Area product regions", () => {
     });
   });
 
+  it("frames San Francisco with southern Peninsula and light East Bay context", () => {
+    const sanFrancisco = findBayAreaProductRegion("san-francisco");
+    expect(sanFrancisco).toBeDefined();
+
+    const [[west, south], [east, north]] = sanFrancisco!.bounds;
+
+    expect(pointInBounds(37.6875, -122.4702, sanFrancisco!.bounds)).toBe(true);
+    expect(pointInBounds(37.6808, -122.4, sanFrancisco!.bounds)).toBe(true);
+    expect(pointInBounds(37.6547, -122.4077, sanFrancisco!.bounds)).toBe(true);
+    expect(pointInBounds(37.6769, -122.46, sanFrancisco!.bounds)).toBe(true);
+    expect(pointInBounds(37.6309, -122.4111, sanFrancisco!.bounds)).toBe(true);
+
+    expect(pointInBounds(37.7694, -122.4862, sanFrancisco!.bounds)).toBe(true);
+    expect(pointInBounds(37.7594, -122.5107, sanFrancisco!.bounds)).toBe(true);
+    expect(pointInBounds(37.7989, -122.4662, sanFrancisco!.bounds)).toBe(true);
+
+    expect(pointInBounds(37.8044, -122.2712, sanFrancisco!.bounds)).toBe(true);
+    expect(pointInBounds(37.8313, -122.2853, sanFrancisco!.bounds)).toBe(true);
+    expect(pointInBounds(37.7652, -122.2416, sanFrancisco!.bounds)).toBe(false);
+
+    expect(pointInBounds(37.3382, -121.8863, sanFrancisco!.bounds)).toBe(false);
+    expect(pointInBounds(37.4419, -122.143, sanFrancisco!.bounds)).toBe(false);
+    expect(pointInBounds(37.3861, -122.0839, sanFrancisco!.bounds)).toBe(false);
+    expect(pointInBounds(37.4636, -122.4286, sanFrancisco!.bounds)).toBe(false);
+
+    expect(south).toBeLessThanOrEqual(37.63);
+    expect(south).toBeGreaterThan(37.58);
+    expect(west).toBeLessThanOrEqual(-122.52);
+    expect(east).toBeGreaterThanOrEqual(-122.27);
+    expect(east).toBeLessThanOrEqual(-122.24);
+    expect(north).toBeGreaterThanOrEqual(37.8);
+
+    expect(sanFrancisco?.viewport).toEqual({
+      padding: 36,
+      desktopPadding: {
+        top: 80,
+        right: 80,
+        bottom: 128,
+        left: 360,
+      },
+      maxZoom: 10.6,
+    });
+  });
+
   it("frames East Bay with balanced bounds for core and inland context", () => {
     const eastBay = findBayAreaProductRegion("east-bay");
     expect(eastBay).toBeDefined();

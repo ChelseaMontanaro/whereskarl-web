@@ -50,9 +50,19 @@ export const BAY_AREA_PRODUCT_REGIONS: BayAreaProductRegion[] = [
     id: "san-francisco",
     name: "San Francisco",
     bounds: [
-      [-122.52, 37.7],
-      [-122.35, 37.84],
+      [-122.54, 37.615],
+      [-122.26, 37.84],
     ],
+    viewport: {
+      padding: 36,
+      desktopPadding: {
+        top: 80,
+        right: 80,
+        bottom: 128,
+        left: 360,
+      },
+      maxZoom: 10.6,
+    },
   },
   {
     id: "north-bay",

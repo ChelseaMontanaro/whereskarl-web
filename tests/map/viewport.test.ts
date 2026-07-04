@@ -28,9 +28,32 @@ describe("resolveRegionViewportOptions", () => {
   });
 
   it("returns undefined when a region has no viewport config", () => {
+    const southBay = findBayAreaProductRegion("south-bay");
+
+    expect(resolveRegionViewportOptions(southBay?.viewport, "desktop")).toBeUndefined();
+  });
+
+  it("uses mobile padding for San Francisco on mobile layout", () => {
     const sanFrancisco = findBayAreaProductRegion("san-francisco");
 
-    expect(resolveRegionViewportOptions(sanFrancisco?.viewport, "desktop")).toBeUndefined();
+    expect(resolveRegionViewportOptions(sanFrancisco?.viewport, "mobile")).toEqual({
+      padding: 36,
+      maxZoom: 10.6,
+    });
+  });
+
+  it("uses desktop padding for San Francisco on desktop layout", () => {
+    const sanFrancisco = findBayAreaProductRegion("san-francisco");
+
+    expect(resolveRegionViewportOptions(sanFrancisco?.viewport, "desktop")).toEqual({
+      padding: {
+        top: 80,
+        right: 80,
+        bottom: 128,
+        left: 360,
+      },
+      maxZoom: 10.6,
+    });
   });
 
   it("uses mobile padding for East Bay on mobile layout", () => {
