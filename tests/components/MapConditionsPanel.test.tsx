@@ -16,9 +16,7 @@ describe("MapConditionsPanel", () => {
     render(<MapConditionsPanel />);
 
     expect(
-      screen.getByText(
-        "See where skies are clear, foggy, or in Karl territory across the Bay Area.",
-      ),
+      screen.getByText("Explore live fog & sunshine across the Bay Area."),
     ).toBeInTheDocument();
     expect(screen.queryByText(DYNAMIC_CURRENT_SUMMARY)).not.toBeInTheDocument();
   });
@@ -42,9 +40,7 @@ describe("MapConditionsPanel", () => {
 
     expect(screen.getByText("Checking live conditions…")).toBeInTheDocument();
     expect(
-      screen.queryByText(
-        "See where skies are clear, foggy, or in Karl territory across the Bay Area.",
-      ),
+      screen.queryByText("Explore live fog & sunshine across the Bay Area."),
     ).not.toBeInTheDocument();
   });
 

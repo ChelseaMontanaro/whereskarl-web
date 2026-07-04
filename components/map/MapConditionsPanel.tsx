@@ -12,7 +12,7 @@ const REGION_CHIP_LABELS: Record<BayAreaProductRegion["id"], string> = {
 };
 
 const MAP_CONDITIONS_SUBTITLE =
-  "See where skies are clear, foggy, or in Karl territory across the Bay Area.";
+  "Explore live fog & sunshine across the Bay Area.";
 
 type MapConditionsPanelProps = {
   isLoading?: boolean;
