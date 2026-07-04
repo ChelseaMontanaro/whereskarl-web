@@ -99,6 +99,15 @@ describe("MapSelectedLocationCard", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  it("renders the favorite heart beside the location name", () => {
+    render(<MapSelectedLocationCard location={location} onClose={vi.fn()} />);
+
+    const heading = screen.getByRole("heading", { name: "Tiburon" });
+    const favoriteButton = getFavoriteButton();
+
+    expect(heading.parentElement).toContainElement(favoriteButton);
+  });
+
   it("toggles favorite state when the heart control is clicked", () => {
     render(<MapSelectedLocationCard location={location} onClose={vi.fn()} />);
 

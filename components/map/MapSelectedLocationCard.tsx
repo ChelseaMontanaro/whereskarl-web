@@ -140,9 +140,28 @@ export function MapSelectedLocationCard({
         <MapLocationConditionIcon location={location} />
 
         <div className="min-w-0 flex-1">
-          <h2 className="text-[1.05rem] font-semibold leading-tight tracking-tight text-white">
-            {location.name}
-          </h2>
+          <div className="flex items-center gap-1.5">
+            <h2 className="text-[1.05rem] font-semibold leading-tight tracking-tight text-white">
+              {location.name}
+            </h2>
+            <button
+              type="button"
+              onClick={handleToggleFavorite}
+              aria-pressed={isFavorite}
+              aria-label={
+                isFavorite
+                  ? `Remove ${location.name} from favorites`
+                  : `Add ${location.name} to favorites`
+              }
+              className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full transition-colors motion-reduce:transition-none ${
+                isFavorite
+                  ? "text-karl-gold"
+                  : "text-white/42 hover:bg-white/[0.05] hover:text-karl-gold/85"
+              }`}
+            >
+              <FavoriteHeartIcon filled={isFavorite} />
+            </button>
+          </div>
           <p className="mt-0.5 line-clamp-2 text-[0.75rem] leading-snug text-white/72">
             {conditionSentence}
           </p>
@@ -163,23 +182,6 @@ export function MapSelectedLocationCard({
               {location.sunshineScore}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={handleToggleFavorite}
-            aria-pressed={isFavorite}
-            aria-label={
-              isFavorite
-                ? `Remove ${location.name} from favorites`
-                : `Add ${location.name} to favorites`
-            }
-            className={`mt-1.5 flex h-7 w-7 items-center justify-center rounded-full transition-colors motion-reduce:transition-none ${
-              isFavorite
-                ? "text-karl-gold"
-                : "text-white/42 hover:bg-white/[0.05] hover:text-karl-gold/85"
-            }`}
-          >
-            <FavoriteHeartIcon filled={isFavorite} />
-          </button>
         </div>
       </div>
     </article>
