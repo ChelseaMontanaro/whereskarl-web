@@ -197,6 +197,7 @@ export function BayAreaMap({
           fogLayerEnabled,
           intensityFilter,
           layout,
+          showLocationLabel,
           onSelect: (locationId) => onSelectRef.current(locationId),
         });
         const placement = getMapMarkerPlacementOptions(showLocationLabel);

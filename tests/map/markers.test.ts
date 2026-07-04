@@ -428,6 +428,23 @@ describe("createMapMarkerElement", () => {
       "is-selected",
     );
   });
+
+  it("wraps Karl Territory markers when showLocationLabel is true", () => {
+    const marker = createMapMarkerElement({
+      location: tiburon,
+      isSelected: false,
+      fogLayerEnabled: true,
+      intensityFilter: "karlTerritory",
+      showLocationLabel: true,
+      onSelect: vi.fn(),
+    });
+
+    expect(marker.className).toContain("karl-map-marker-root--labeled");
+    expect(marker.querySelector(".karl-map-marker__label")?.textContent).toBe(
+      "Tiburon",
+    );
+    expect(marker.querySelector(".karl-map-marker__logo")).not.toBeNull();
+  });
 });
 
 describe("shouldShowFoggyFilterMarkerLabel", () => {

@@ -197,4 +197,59 @@ describe("BayAreaMap", () => {
 
     expect(onMapStyleChange).toHaveBeenCalledWith("satellite");
   });
+
+  it("shows glass-pill labels for visible Karl Territory markers on desktop", async () => {
+    render(
+      <BayAreaMap
+        locations={[
+          {
+            id: "ocean-beach",
+            name: "Ocean Beach",
+            latitude: 37.7594,
+            longitude: -122.5107,
+            sunshineScore: 18,
+            fogScore: 96,
+            status: "Karl Territory",
+          },
+          {
+            id: "san-jose",
+            name: "San Jose",
+            latitude: 37.3382,
+            longitude: -121.8863,
+            sunshineScore: 90,
+            fogScore: 10,
+            status: "Clear",
+          },
+        ]}
+        selectedLocationId={null}
+        selectedRegionId={null}
+        onSelectLocation={vi.fn()}
+        {...defaultProps}
+        layout="desktop"
+        intensityFilter="karlTerritory"
+      />,
+    );
+
+    await waitFor(() => {
+      expect(
+        document.querySelector(".karl-map-marker-root--labeled"),
+      ).not.toBeNull();
+    });
+
+    expect(
+      document.querySelector(
+        '[data-testid="map-marker-ocean-beach"]',
+      )?.closest(".karl-map-marker-root--labeled"),
+    ).not.toBeNull();
+    expect(
+      document.querySelector(
+        '[data-location-id="ocean-beach"] .karl-map-marker__label',
+      )?.textContent,
+    ).toBe("Ocean Beach");
+    expect(
+      document.querySelector(
+        '[data-testid="map-marker-san-jose"]',
+      )?.closest(".karl-map-marker-root--labeled"),
+    ).toBeNull();
+  });
 });

@@ -111,12 +111,25 @@ function wrapMarkerWithLocationLabel(
   return root;
 }
 
+function buildMapMarkerElement(
+  button: HTMLButtonElement,
+  locationName: string,
+  showLocationLabel: boolean,
+): HTMLElement {
+  if (!showLocationLabel) {
+    return button;
+  }
+
+  return wrapMarkerWithLocationLabel(button, locationName);
+}
+
 export function createMapMarkerElement(input: {
   location: MapMarkerLocation;
   isSelected: boolean;
   fogLayerEnabled: boolean;
   intensityFilter?: FogIntensity | null;
   layout?: "mobile" | "desktop";
+  showLocationLabel?: boolean;
   onSelect: (locationId: string) => void;
 }): HTMLElement {
   const intensity = getMarkerDisplayIntensity(input.location);
@@ -153,17 +166,19 @@ export function createMapMarkerElement(input: {
     input.onSelect(input.location.id);
   });
 
-  if (
+  const showLocationLabel =
+    input.showLocationLabel ??
     shouldShowFoggyFilterMarkerLabel(
       input.layout,
       input.intensityFilter,
       isFilteredOut,
-    )
-  ) {
-    return wrapMarkerWithLocationLabel(button, input.location.name);
-  }
+    );
 
-  return button;
+  return buildMapMarkerElement(
+    button,
+    input.location.name,
+    showLocationLabel,
+  );
 }
 
 export function getMarkerFogIntensity(
