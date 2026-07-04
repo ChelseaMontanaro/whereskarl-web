@@ -5,7 +5,22 @@ import {
   BAY_AREA_PRODUCT_REGIONS,
   findBayAreaProductRegion,
   isBayAreaProductRegionId,
+  type MapBounds,
 } from "@/lib/map/config";
+
+function pointInBounds(
+  latitude: number,
+  longitude: number,
+  bounds: MapBounds,
+): boolean {
+  const [[west, south], [east, north]] = bounds;
+  return (
+    longitude >= west &&
+    longitude <= east &&
+    latitude >= south &&
+    latitude <= north
+  );
+}
 
 describe("Bay Area product regions", () => {
   it("defines the four product regions without a separate Peninsula region", () => {
@@ -36,5 +51,39 @@ describe("Bay Area product regions", () => {
       expect(regionSouth).toBeGreaterThanOrEqual(south);
       expect(regionNorth).toBeLessThanOrEqual(north);
     }
+  });
+
+  it("frames North Bay tightly on Marin without including lower Bay or San Francisco", () => {
+    const northBay = findBayAreaProductRegion("north-bay");
+    expect(northBay).toBeDefined();
+
+    const [[west, south], [east, north]] = northBay!.bounds;
+
+    expect(pointInBounds(37.8735, -122.4566, northBay!.bounds)).toBe(true);
+    expect(pointInBounds(37.8591, -122.4853, northBay!.bounds)).toBe(true);
+    expect(pointInBounds(37.8439, -122.6437, northBay!.bounds)).toBe(true);
+    expect(pointInBounds(37.9061, -122.545, northBay!.bounds)).toBe(true);
+    expect(pointInBounds(37.9735, -122.5311, northBay!.bounds)).toBe(true);
+
+    expect(pointInBounds(37.7594, -122.5107, northBay!.bounds)).toBe(false);
+    expect(pointInBounds(37.3382, -121.8863, northBay!.bounds)).toBe(false);
+    expect(pointInBounds(37.7749, -122.4194, northBay!.bounds)).toBe(false);
+
+    expect(south).toBeGreaterThan(37.78);
+    expect(east).toBeLessThan(-122.38);
+    expect(west).toBeLessThanOrEqual(-122.65);
+    expect(north).toBeGreaterThan(37.94);
+    expect(north).toBeLessThanOrEqual(38.02);
+
+    expect(northBay?.viewport).toEqual({
+      padding: 36,
+      desktopPadding: {
+        top: 80,
+        right: 80,
+        bottom: 128,
+        left: 360,
+      },
+      maxZoom: 11.3,
+    });
   });
 });

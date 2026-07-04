@@ -23,10 +23,26 @@ export const BAY_AREA_MAX_BOUNDS: [[number, number], [number, number]] = [
 
 export type MapBounds = [[number, number], [number, number]];
 
+export type ViewportPadding =
+  | number
+  | {
+      top?: number;
+      right?: number;
+      bottom?: number;
+      left?: number;
+    };
+
+export type BayAreaProductRegionViewport = {
+  padding?: ViewportPadding;
+  desktopPadding?: ViewportPadding;
+  maxZoom?: number;
+};
+
 export type BayAreaProductRegion = {
   id: "san-francisco" | "north-bay" | "east-bay" | "south-bay";
   name: string;
   bounds: MapBounds;
+  viewport?: BayAreaProductRegionViewport;
 };
 
 export const BAY_AREA_PRODUCT_REGIONS: BayAreaProductRegion[] = [
@@ -42,9 +58,19 @@ export const BAY_AREA_PRODUCT_REGIONS: BayAreaProductRegion[] = [
     id: "north-bay",
     name: "North Bay",
     bounds: [
-      [-122.68, 37.78],
-      [-122.38, 38.12],
+      [-122.65, 37.835],
+      [-122.43, 38.02],
     ],
+    viewport: {
+      padding: 36,
+      desktopPadding: {
+        top: 80,
+        right: 80,
+        bottom: 128,
+        left: 360,
+      },
+      maxZoom: 11.3,
+    },
   },
   {
     id: "east-bay",

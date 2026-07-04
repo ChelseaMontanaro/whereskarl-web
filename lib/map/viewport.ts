@@ -5,8 +5,49 @@ import {
   BAY_AREA_DEFAULT_MAX_ZOOM,
   BAY_AREA_DEFAULT_VIEWPORT_PADDING,
   BAY_AREA_LOCATION_ZOOM,
+  type BayAreaProductRegionViewport,
   type MapBounds,
+  type ViewportPadding,
 } from "@/lib/map/config";
+
+export function resolveRegionViewportOptions(
+  viewport: BayAreaProductRegionViewport | undefined,
+  layout: "mobile" | "desktop",
+): { padding?: ViewportPadding; maxZoom?: number } | undefined {
+  if (!viewport) {
+    return undefined;
+  }
+
+  const padding =
+    layout === "desktop" && viewport.desktopPadding !== undefined
+      ? viewport.desktopPadding
+      : viewport.padding;
+
+  return {
+    padding,
+    maxZoom: viewport.maxZoom,
+  };
+}
+
+function normalizeViewportPadding(
+  padding: ViewportPadding | undefined,
+  fallback = 48,
+): number | { top: number; bottom: number; left: number; right: number } {
+  if (padding === undefined) {
+    return fallback;
+  }
+
+  if (typeof padding === "number") {
+    return padding;
+  }
+
+  return {
+    top: padding.top ?? fallback,
+    right: padding.right ?? fallback,
+    bottom: padding.bottom ?? fallback,
+    left: padding.left ?? fallback,
+  };
+}
 
 export function fitDefaultBayAreaViewport(
   map: Map,
@@ -22,10 +63,10 @@ export function fitDefaultBayAreaViewport(
 export function fitMapToBounds(
   map: Map,
   bounds: MapBounds,
-  options?: { padding?: number; maxZoom?: number },
+  options?: { padding?: ViewportPadding; maxZoom?: number },
 ): void {
   map.fitBounds(bounds, {
-    padding: options?.padding ?? 48,
+    padding: normalizeViewportPadding(options?.padding),
     maxZoom: options?.maxZoom ?? 11,
     essential: true,
   });

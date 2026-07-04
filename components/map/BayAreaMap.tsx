@@ -24,6 +24,7 @@ import {
   fitDefaultBayAreaViewport,
   fitMapToBounds,
   focusMapOnLocation,
+  resolveRegionViewportOptions,
 } from "@/lib/map/viewport";
 
 type BayAreaMapProps = {
@@ -145,7 +146,11 @@ export function BayAreaMap({
 
       const region = findBayAreaProductRegion(selectedRegionId);
       if (region) {
-        fitMapToBounds(map, region.bounds);
+        fitMapToBounds(
+          map,
+          region.bounds,
+          resolveRegionViewportOptions(region.viewport, layout),
+        );
         return;
       }
 
@@ -157,6 +162,7 @@ export function BayAreaMap({
   }, [
     fogLayerEnabled,
     intensityFilter,
+    layout,
     locations,
     mapReady,
     mapStyle,
@@ -257,7 +263,11 @@ export function BayAreaMap({
 
     const region = findBayAreaProductRegion(selectedRegionId);
     if (region) {
-      fitMapToBounds(map, region.bounds);
+      fitMapToBounds(
+        map,
+        region.bounds,
+        resolveRegionViewportOptions(region.viewport, layout),
+      );
       return;
     }
 
@@ -272,6 +282,7 @@ export function BayAreaMap({
     fitDefaultBayAreaViewport(map);
   }, [
     intensityFilter,
+    layout,
     locations,
     mapReady,
     selectedLocationId,

@@ -6,6 +6,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { BayAreaMap } from "@/components/map/BayAreaMap";
+import { findBayAreaProductRegion } from "@/lib/map/config";
 import type { MapMarkerLocation } from "@/lib/map/markers";
 import {
   mockAddLayer,
@@ -87,6 +88,90 @@ describe("BayAreaMap", () => {
       expect(mockFitBounds).toHaveBeenCalled();
     });
     expect(mockFlyTo).not.toHaveBeenCalled();
+  });
+
+  it("frames a tighter North Bay viewport when the North Bay region is selected", async () => {
+    const northBay = findBayAreaProductRegion("north-bay");
+    expect(northBay).toBeDefined();
+
+    render(
+      <BayAreaMap
+        locations={locations}
+        selectedLocationId={null}
+        selectedRegionId="north-bay"
+        onSelectLocation={vi.fn()}
+        {...defaultProps}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(mockFitBounds).toHaveBeenCalledWith(
+        northBay!.bounds,
+        expect.objectContaining({
+          padding: 36,
+          maxZoom: 11.3,
+          essential: true,
+        }),
+      );
+    });
+  });
+
+  it("offsets the North Bay desktop viewport to clear the left overlay panels", async () => {
+    const northBay = findBayAreaProductRegion("north-bay");
+    expect(northBay).toBeDefined();
+
+    render(
+      <BayAreaMap
+        locations={locations}
+        selectedLocationId={null}
+        selectedRegionId="north-bay"
+        onSelectLocation={vi.fn()}
+        {...defaultProps}
+        layout="desktop"
+      />,
+    );
+
+    await waitFor(() => {
+      expect(mockFitBounds).toHaveBeenCalledWith(
+        northBay!.bounds,
+        expect.objectContaining({
+          padding: {
+            top: 80,
+            right: 80,
+            bottom: 128,
+            left: 360,
+          },
+          maxZoom: 11.3,
+          essential: true,
+        }),
+      );
+    });
+  });
+
+  it("keeps the San Francisco region viewport unchanged", async () => {
+    const sanFrancisco = findBayAreaProductRegion("san-francisco");
+    expect(sanFrancisco).toBeDefined();
+
+    render(
+      <BayAreaMap
+        locations={locations}
+        selectedLocationId={null}
+        selectedRegionId="san-francisco"
+        onSelectLocation={vi.fn()}
+        {...defaultProps}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(mockFitBounds).toHaveBeenCalledWith(
+        sanFrancisco!.bounds,
+        expect.objectContaining({
+          padding: 48,
+          maxZoom: 11,
+          essential: true,
+        }),
+      );
+    });
   });
 
   it("focuses the selected location on the map", async () => {
