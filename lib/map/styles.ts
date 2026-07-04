@@ -25,12 +25,12 @@ const CARTO_DARK_LABEL_TILES = [
   "https://basemaps.cartocdn.com/rastertiles/dark_only_labels/{z}/{x}/{y}.png",
 ];
 
-/** Pull imagery darker with stronger land/ocean contrast for the desktop map. */
+/** Warm tan/golden land tones with readable ocean contrast on satellite/hybrid. */
 const cinematicSatellitePaint = {
   "raster-brightness-min": 0,
-  "raster-brightness-max": 0.62,
-  "raster-contrast": 0.36,
-  "raster-saturation": -0.12,
+  "raster-brightness-max": 0.76,
+  "raster-contrast": 0.24,
+  "raster-saturation": 0.1,
 } as const;
 
 const cinematicLabelPaint = {

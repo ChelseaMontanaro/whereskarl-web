@@ -41,7 +41,7 @@ export function HomeDesktopBackground({
           key={`${presentation.stabilityKey}|${imageSource}`}
           src={heroImageUrl}
           alt=""
-          className="absolute inset-0 h-full w-full scale-[1.02] object-cover motion-reduce:scale-100"
+          className="absolute inset-0 h-full w-full scale-[1.02] object-cover brightness-[1.06] contrast-[1.1] saturate-[1.14] motion-reduce:scale-100 motion-reduce:brightness-100 motion-reduce:contrast-100 motion-reduce:saturate-100"
           onError={() => {
             if (imageSource === "remote") {
               setRemoteLoadFailed(true);
@@ -56,31 +56,31 @@ export function HomeDesktopBackground({
       )}
 
       <div
-        className="absolute inset-0 mix-blend-multiply lg:hidden"
+        className="absolute inset-0 mix-blend-soft-light lg:hidden"
         style={{
-          background: `linear-gradient(180deg, rgba(3,11,20,${presentation.atmosphereTopOpacity * 0.72}) 0%, rgba(3,11,20,0.04) 42%, rgba(3,11,20,${presentation.atmosphereBottomOpacity * 0.48}) 100%)`,
+          background: `linear-gradient(180deg, rgba(3,11,20,${presentation.atmosphereTopOpacity * 0.5}) 0%, rgba(3,11,20,0.02) 42%, rgba(3,11,20,${presentation.atmosphereBottomOpacity * 0.34}) 100%)`,
         }}
       />
       <div
         className="absolute inset-0 lg:hidden"
         style={{
-          background: `linear-gradient(0deg, rgba(0,0,0,${presentation.bottomGradientLeadOpacity * 0.42}) 0%, rgba(0,0,0,${presentation.bottomGradientMidOpacity * 0.22}) 38%, rgba(0,0,0,0.14) 68%, rgba(0,0,0,0.06) 100%)`,
+          background: `linear-gradient(0deg, rgba(0,0,0,${presentation.bottomGradientLeadOpacity * 0.3}) 0%, rgba(0,0,0,${presentation.bottomGradientMidOpacity * 0.16}) 38%, rgba(0,0,0,0.1) 68%, rgba(0,0,0,0.04) 100%)`,
         }}
       />
-      <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/55 via-black/22 to-transparent lg:hidden" />
+      <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/42 via-black/16 to-transparent lg:hidden" />
       <div
-        className="absolute inset-0 hidden mix-blend-multiply lg:block"
+        className="absolute inset-0 hidden mix-blend-soft-light lg:block"
         style={{
-          background: `linear-gradient(180deg, rgba(3,11,20,${presentation.atmosphereTopOpacity * 0.55}) 0%, rgba(3,11,20,0.02) 48%, rgba(3,11,20,${presentation.atmosphereBottomOpacity * 0.32}) 100%)`,
+          background: `linear-gradient(180deg, rgba(3,11,20,${presentation.atmosphereTopOpacity * 0.4}) 0%, rgba(3,11,20,0.01) 48%, rgba(3,11,20,${presentation.atmosphereBottomOpacity * 0.22}) 100%)`,
         }}
       />
       <div
         className="absolute inset-0 hidden lg:block"
         style={{
-          background: `linear-gradient(0deg, rgba(0,0,0,${presentation.bottomGradientLeadOpacity * 0.28}) 0%, rgba(0,0,0,${presentation.bottomGradientMidOpacity * 0.16}) 45%, rgba(0,0,0,0.06) 80%, transparent 100%)`,
+          background: `linear-gradient(0deg, rgba(0,0,0,${presentation.bottomGradientLeadOpacity * 0.22}) 0%, rgba(0,0,0,${presentation.bottomGradientMidOpacity * 0.12}) 45%, rgba(0,0,0,0.04) 80%, transparent 100%)`,
         }}
       />
-      <div className="absolute inset-0 hidden bg-gradient-to-r from-black/28 via-transparent to-black/18 md:block" />
+      <div className="absolute inset-0 hidden bg-gradient-to-r from-black/18 via-transparent to-black/10 md:block" />
     </div>
   );
 }

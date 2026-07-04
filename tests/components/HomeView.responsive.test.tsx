@@ -90,14 +90,14 @@ describe("HomeView responsive polish", () => {
     expect(insightCard?.className).not.toContain("bg-karl-navy");
   });
 
-  it("renders Next Hour on mobile and desktop layouts", async () => {
+  it("renders Future Outlook on mobile and desktop layouts", async () => {
     renderHomeView();
 
-    const nextHourLabels = await screen.findAllByText("Next Hour");
-    expect(nextHourLabels.length).toBeGreaterThanOrEqual(2);
+    const futureOutlookLabels = await screen.findAllByText("Future Outlook");
+    expect(futureOutlookLabels.length).toBeGreaterThanOrEqual(2);
   });
 
-  it("places desktop Next Hour below Best Right Now", async () => {
+  it("places desktop Future Outlook below Best Right Now", async () => {
     const locationsFixture = readFixture<LocationsResponse>("locations.json");
     const sausalito = locationsFixture.locations[1];
 
@@ -124,13 +124,13 @@ describe("HomeView responsive polish", () => {
     const bestRightNowIndex = children.findIndex((child) =>
       child.classList.contains("grid"),
     );
-    const nextHourIndex = children.findIndex((child) =>
-      child.textContent?.includes("Next Hour"),
+    const futureOutlookIndex = children.findIndex((child) =>
+      child.textContent?.includes("Future Outlook"),
     );
 
     expect(bestRightNowIndex).toBeGreaterThanOrEqual(0);
-    expect(nextHourIndex).toBeGreaterThanOrEqual(0);
-    expect(bestRightNowIndex).toBeLessThan(nextHourIndex);
+    expect(futureOutlookIndex).toBeGreaterThanOrEqual(0);
+    expect(bestRightNowIndex).toBeLessThan(futureOutlookIndex);
   });
 
   it("uses larger plain gold score text on mobile insight cards", async () => {

@@ -31,6 +31,6 @@ describe("NextHourOutlookCard", () => {
 
     expect(desktop.querySelector("circle[cx='12'][cy='12']")).toBeTruthy();
     expect(mobile.querySelector("circle[cx='12'][cy='12']")).toBeTruthy();
-    expect(screen.getAllByText("Next Hour").length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByText("Future Outlook").length).toBeGreaterThanOrEqual(2);
   });
 });

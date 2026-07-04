@@ -260,7 +260,7 @@ export function HomeView() {
       <div className="relative z-10 mx-auto -mt-14 flex w-full max-w-[430px] flex-col px-4 sm:-mt-12 sm:max-w-xl sm:px-5 md:-mt-14 md:max-w-2xl lg:-mt-2 lg:max-w-6xl lg:px-8 lg:pt-4 xl:max-w-7xl">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 -top-20 bottom-0 bg-gradient-to-b from-transparent via-black/14 to-black/46 sm:via-black/16 sm:to-black/50 lg:hidden"
+          className="pointer-events-none absolute inset-x-0 -top-20 bottom-0 bg-gradient-to-b from-transparent via-black/10 to-black/36 sm:via-black/12 sm:to-black/40 lg:hidden"
         />
 
         <div className="relative max-sm:pt-5 pt-3 sm:pt-4 lg:pt-0">

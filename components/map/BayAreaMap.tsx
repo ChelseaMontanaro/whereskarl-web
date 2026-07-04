@@ -22,7 +22,11 @@ import {
   type MapMarkerLocation,
 } from "@/lib/map/markers";
 import type { FogIntensity } from "@/lib/map/conditions";
-import { resolveKarlMapStyle, type KarlMapStyleId } from "@/lib/map/styles";
+import {
+  karlMapStyleHasLabelLayer,
+  resolveKarlMapStyle,
+  type KarlMapStyleId,
+} from "@/lib/map/styles";
 import {
   fitDefaultBayAreaViewport,
   fitMapToBounds,
@@ -349,8 +353,8 @@ export function BayAreaMap({
         ref={containerRef}
         data-testid="bay-area-map"
         className={`karl-map-canvas w-full ${
-          isFullBleed ? "h-full min-h-screen" : "h-full min-h-[360px]"
-        }`}
+          karlMapStyleHasLabelLayer(mapStyle) ? "karl-map-canvas--cinematic" : ""
+        } ${isFullBleed ? "h-full min-h-screen" : "h-full min-h-[360px]"}`}
       />
       <MapLayerControls
         layout={layout}

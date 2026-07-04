@@ -22,10 +22,10 @@ const DEFAULT_FALLBACK: HeroPresentation = {
   fallbackImageUrl: null,
   altText: null,
   isNightPresentation: false,
-  atmosphereTopOpacity: 0.26,
-  atmosphereBottomOpacity: 0.52,
-  bottomGradientLeadOpacity: 0.82,
-  bottomGradientMidOpacity: 0.58,
+  atmosphereTopOpacity: 0.2,
+  atmosphereBottomOpacity: 0.42,
+  bottomGradientLeadOpacity: 0.72,
+  bottomGradientMidOpacity: 0.48,
 };
 
 function trimmedNonEmpty(value: string | null | undefined): string | null {
@@ -53,24 +53,24 @@ function defaultOverlayProfile(
     switch (state) {
       case "coastal-fog":
         return {
-          atmosphereTopOpacity: 0.38,
-          atmosphereBottomOpacity: 0.68,
-          bottomGradientLeadOpacity: 0.78,
-          bottomGradientMidOpacity: 0.54,
+          atmosphereTopOpacity: 0.3,
+          atmosphereBottomOpacity: 0.56,
+          bottomGradientLeadOpacity: 0.68,
+          bottomGradientMidOpacity: 0.44,
         };
       case "clear":
         return {
-          atmosphereTopOpacity: 0.26,
-          atmosphereBottomOpacity: 0.56,
-          bottomGradientLeadOpacity: 0.68,
-          bottomGradientMidOpacity: 0.42,
+          atmosphereTopOpacity: 0.2,
+          atmosphereBottomOpacity: 0.46,
+          bottomGradientLeadOpacity: 0.58,
+          bottomGradientMidOpacity: 0.34,
         };
       default:
         return {
-          atmosphereTopOpacity: 0.32,
-          atmosphereBottomOpacity: 0.62,
-          bottomGradientLeadOpacity: 0.72,
-          bottomGradientMidOpacity: 0.48,
+          atmosphereTopOpacity: 0.26,
+          atmosphereBottomOpacity: 0.52,
+          bottomGradientLeadOpacity: 0.62,
+          bottomGradientMidOpacity: 0.4,
         };
     }
   }
@@ -78,31 +78,31 @@ function defaultOverlayProfile(
   switch (state) {
     case "coastal-fog":
       return {
-        atmosphereTopOpacity: 0.34,
-        atmosphereBottomOpacity: 0.62,
-        bottomGradientLeadOpacity: 0.86,
-        bottomGradientMidOpacity: 0.64,
+        atmosphereTopOpacity: 0.26,
+        atmosphereBottomOpacity: 0.5,
+        bottomGradientLeadOpacity: 0.74,
+        bottomGradientMidOpacity: 0.52,
       };
     case "clear":
       return {
-        atmosphereTopOpacity: 0.18,
-        atmosphereBottomOpacity: 0.42,
-        bottomGradientLeadOpacity: 0.74,
-        bottomGradientMidOpacity: 0.5,
+        atmosphereTopOpacity: 0.14,
+        atmosphereBottomOpacity: 0.34,
+        bottomGradientLeadOpacity: 0.64,
+        bottomGradientMidOpacity: 0.4,
       };
     case "mixed-bay":
       return {
-        atmosphereTopOpacity: 0.26,
-        atmosphereBottomOpacity: 0.52,
-        bottomGradientLeadOpacity: 0.82,
-        bottomGradientMidOpacity: 0.58,
+        atmosphereTopOpacity: 0.2,
+        atmosphereBottomOpacity: 0.42,
+        bottomGradientLeadOpacity: 0.72,
+        bottomGradientMidOpacity: 0.48,
       };
     default:
       return {
-        atmosphereTopOpacity: 0.26,
-        atmosphereBottomOpacity: 0.52,
-        bottomGradientLeadOpacity: 0.82,
-        bottomGradientMidOpacity: 0.58,
+        atmosphereTopOpacity: 0.2,
+        atmosphereBottomOpacity: 0.42,
+        bottomGradientLeadOpacity: 0.72,
+        bottomGradientMidOpacity: 0.48,
       };
   }
 }

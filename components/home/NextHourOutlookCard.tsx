@@ -28,13 +28,13 @@ function NextHourCardBody({
           <NextHourIcon className={desktopInsightIconSizeClass} />
         </InsightIconFrame>
         <div className="min-w-0 flex-1">
-          <CardLabel>Next Hour</CardLabel>
+          <CardLabel>Future Outlook</CardLabel>
           <p
             className={`mt-2 text-sm text-white/55 ${
               isDesktop ? "lg:mt-1.5 lg:text-base" : ""
             }`}
           >
-            Checking the next-hour outlook…
+            Checking the future outlook…
           </p>
         </div>
       </>
@@ -51,7 +51,7 @@ function NextHourCardBody({
         <NextHourIcon className={desktopInsightIconSizeClass} />
       </InsightIconFrame>
       <div className="min-w-0 flex-1">
-        <CardLabel>Next Hour</CardLabel>
+        <CardLabel>Future Outlook</CardLabel>
         <p
           className={`mt-2 text-sm leading-relaxed text-white/75 ${
             isDesktop ? "lg:mt-1.5 lg:text-base lg:leading-relaxed" : ""
