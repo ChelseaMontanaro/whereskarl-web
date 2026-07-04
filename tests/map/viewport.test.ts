@@ -27,10 +27,27 @@ describe("resolveRegionViewportOptions", () => {
     });
   });
 
-  it("returns undefined when a region has no viewport config", () => {
+  it("uses mobile padding for South Bay on mobile layout", () => {
     const southBay = findBayAreaProductRegion("south-bay");
 
-    expect(resolveRegionViewportOptions(southBay?.viewport, "desktop")).toBeUndefined();
+    expect(resolveRegionViewportOptions(southBay?.viewport, "mobile")).toEqual({
+      padding: 36,
+      maxZoom: 11,
+    });
+  });
+
+  it("uses reduced desktop left padding for South Bay to keep Half Moon Bay clear of overlay panels", () => {
+    const southBay = findBayAreaProductRegion("south-bay");
+
+    expect(resolveRegionViewportOptions(southBay?.viewport, "desktop")).toEqual({
+      padding: {
+        top: 80,
+        right: 80,
+        bottom: 128,
+        left: 280,
+      },
+      maxZoom: 11,
+    });
   });
 
   it("uses mobile padding for San Francisco on mobile layout", () => {

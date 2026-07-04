@@ -168,4 +168,38 @@ describe("Bay Area product regions", () => {
       maxZoom: 10.5,
     });
   });
+
+  it("frames South Bay with reduced desktop left padding so Half Moon Bay clears overlay panels", () => {
+    const southBay = findBayAreaProductRegion("south-bay");
+    expect(southBay).toBeDefined();
+
+    const [[west, south], [east, north]] = southBay!.bounds;
+
+    expect(pointInBounds(37.4636, -122.4286, southBay!.bounds)).toBe(true);
+    expect(pointInBounds(37.4419, -122.143, southBay!.bounds)).toBe(true);
+    expect(pointInBounds(37.3861, -122.0839, southBay!.bounds)).toBe(true);
+    expect(pointInBounds(37.3382, -121.8863, southBay!.bounds)).toBe(true);
+
+    expect(pointInBounds(37.7749, -122.4194, southBay!.bounds)).toBe(false);
+    expect(pointInBounds(37.8735, -122.4566, southBay!.bounds)).toBe(false);
+
+    expect(west).toBe(-122.5);
+    expect(east).toBe(-121.7);
+    expect(south).toBe(37.08);
+    expect(north).toBe(37.58);
+
+    expect(southBay?.viewport).toEqual({
+      padding: 36,
+      desktopPadding: {
+        top: 80,
+        right: 80,
+        bottom: 128,
+        left: 280,
+      },
+      maxZoom: 11,
+    });
+    expect(southBay?.viewport?.desktopPadding).not.toEqual(
+      findBayAreaProductRegion("east-bay")?.viewport?.desktopPadding,
+    );
+  });
 });

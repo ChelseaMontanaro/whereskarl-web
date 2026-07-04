@@ -107,6 +107,16 @@ export const BAY_AREA_PRODUCT_REGIONS: BayAreaProductRegion[] = [
       [-122.5, 37.08],
       [-121.7, 37.58],
     ],
+    viewport: {
+      padding: 36,
+      desktopPadding: {
+        top: 80,
+        right: 80,
+        bottom: 128,
+        left: 280,
+      },
+      maxZoom: 11,
+    },
   },
 ];
 

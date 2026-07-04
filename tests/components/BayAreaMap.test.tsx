@@ -269,6 +269,64 @@ describe("BayAreaMap", () => {
     });
   });
 
+  it("frames the South Bay viewport when the South Bay region is selected", async () => {
+    const southBay = findBayAreaProductRegion("south-bay");
+    expect(southBay).toBeDefined();
+
+    render(
+      <BayAreaMap
+        locations={locations}
+        selectedLocationId={null}
+        selectedRegionId="south-bay"
+        onSelectLocation={vi.fn()}
+        {...defaultProps}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(mockFitBounds).toHaveBeenCalledWith(
+        southBay!.bounds,
+        expect.objectContaining({
+          padding: 36,
+          maxZoom: 11,
+          essential: true,
+        }),
+      );
+    });
+  });
+
+  it("offsets the South Bay desktop viewport with reduced left padding so Half Moon Bay clears overlay panels", async () => {
+    const southBay = findBayAreaProductRegion("south-bay");
+    expect(southBay).toBeDefined();
+
+    render(
+      <BayAreaMap
+        locations={locations}
+        selectedLocationId={null}
+        selectedRegionId="south-bay"
+        onSelectLocation={vi.fn()}
+        {...defaultProps}
+        layout="desktop"
+      />,
+    );
+
+    await waitFor(() => {
+      expect(mockFitBounds).toHaveBeenCalledWith(
+        southBay!.bounds,
+        expect.objectContaining({
+          padding: {
+            top: 80,
+            right: 80,
+            bottom: 128,
+            left: 280,
+          },
+          maxZoom: 11,
+          essential: true,
+        }),
+      );
+    });
+  });
+
   it("offsets the San Francisco desktop viewport to clear the left overlay panels", async () => {
     const sanFrancisco = findBayAreaProductRegion("san-francisco");
     expect(sanFrancisco).toBeDefined();
