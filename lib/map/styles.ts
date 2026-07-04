@@ -24,10 +24,12 @@ const ESRI_TRANSPORTATION_TILES = [
   "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}",
 ];
 
-/** Light-theme labels read clearly over muted satellite imagery. */
-const CARTO_LIGHT_LABEL_TILES = [
-  "https://basemaps.cartocdn.com/rastertiles/light_only_labels/{z}/{x}/{y}.png",
+/** Dark-theme labels: near-white text with charcoal halo for satellite overlays. */
+const CARTO_DARK_LABEL_TILES = [
+  "https://basemaps.cartocdn.com/rastertiles/dark_only_labels/{z}/{x}/{y}.png",
 ];
+
+export const HYBRID_LABEL_TILESET = "dark_only_labels";
 
 /** Muted tan/olive land, deep blue-green water, and cinematic contrast on satellite/hybrid. */
 const cinematicSatellitePaint = {
@@ -42,14 +44,14 @@ const cinematicSatellitePaint = {
 export const HYBRID_LABEL_OPACITY_BASELINE = 0.84;
 export const HYBRID_ROAD_OPACITY_BASELINE = 0.42;
 
-/** Warm, readable city and road labels without overpowering markers. */
+/** Crisp near-white labels with a narrow dark charcoal halo over satellite imagery. */
 export const hybridLabelPaint = {
-  "raster-opacity": 0.96,
-  "raster-brightness-min": 0.12,
-  "raster-brightness-max": 0.94,
-  "raster-contrast": 0.38,
-  "raster-saturation": -0.42,
-  "raster-hue-rotate": 10,
+  "raster-opacity": 1,
+  "raster-brightness-min": 0,
+  "raster-brightness-max": 1,
+  "raster-contrast": 0.52,
+  "raster-saturation": -0.88,
+  "raster-hue-rotate": 0,
 } as const;
 
 /** Quiet secondary streets and connectors beneath major roads. */
@@ -107,7 +109,7 @@ const hybridStyle = {
     },
     "karl-labels": {
       type: "raster",
-      tiles: CARTO_LIGHT_LABEL_TILES,
+      tiles: CARTO_DARK_LABEL_TILES,
       tileSize: 256,
       attribution: "© OpenStreetMap contributors © CARTO",
     },
@@ -168,6 +170,20 @@ export function getKarlMapStyleLayerIds(styleId: KarlMapStyleId): string[] {
   }
 
   return style.layers?.map((layer) => layer.id) ?? [];
+}
+
+export function getHybridLabelSourceTiles(): string[] {
+  const style = resolveKarlMapStyle("hybrid");
+  if (typeof style === "string") {
+    return [];
+  }
+
+  const source = style.sources?.["karl-labels"];
+  if (!source || source.type !== "raster") {
+    return [];
+  }
+
+  return source.tiles ?? [];
 }
 
 export function getKarlMapStyleLayerPaint(

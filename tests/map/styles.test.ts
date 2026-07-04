@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  getHybridLabelSourceTiles,
   getKarlMapStyleLayerIds,
   getKarlMapStyleLayerPaint,
   HYBRID_LABEL_OPACITY_BASELINE,
+  HYBRID_LABEL_TILESET,
   HYBRID_ROAD_OPACITY_BASELINE,
   hybridLabelPaint,
   hybridMajorRoadPaint,
@@ -82,13 +84,27 @@ describe("resolveKarlMapStyle", () => {
         "raster-opacity"
       ] ?? 0,
     );
-    expect(getKarlMapStyleLayerPaint("hybrid", "karl-labels")).toMatchObject({
-      "raster-opacity": hybridLabelPaint["raster-opacity"],
-      "raster-contrast": hybridLabelPaint["raster-contrast"],
-    });
     expect(getKarlMapStyleLayerPaint("hybrid", "karl-roads-major")).toMatchObject({
       "raster-hue-rotate": hybridMajorRoadPaint["raster-hue-rotate"],
     });
+  });
+
+  it("uses dark-halo CARTO labels with crisp near-white paint on hybrid only", () => {
+    const labelTiles = getHybridLabelSourceTiles();
+
+    expect(labelTiles[0]).toContain(HYBRID_LABEL_TILESET);
+    expect(labelTiles[0]).not.toContain("light_only_labels");
+    expect(getKarlMapStyleLayerPaint("hybrid", "karl-labels")).toMatchObject({
+      "raster-opacity": hybridLabelPaint["raster-opacity"],
+      "raster-brightness-max": hybridLabelPaint["raster-brightness-max"],
+      "raster-contrast": hybridLabelPaint["raster-contrast"],
+      "raster-saturation": hybridLabelPaint["raster-saturation"],
+      "raster-hue-rotate": hybridLabelPaint["raster-hue-rotate"],
+    });
+    expect(hybridLabelPaint["raster-opacity"]).toBeGreaterThanOrEqual(0.98);
+    expect(hybridLabelPaint["raster-contrast"]).toBeGreaterThanOrEqual(0.45);
+    expect(hybridLabelPaint["raster-saturation"]).toBeLessThan(-0.5);
+    expect(hybridLabelPaint["raster-hue-rotate"]).toBe(0);
   });
 
   it("grades satellite imagery toward muted tan/olive without canvas filters", () => {
