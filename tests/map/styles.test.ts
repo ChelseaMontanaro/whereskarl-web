@@ -2,6 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import {
   getKarlMapStyleLayerIds,
+  getKarlMapStyleLayerPaint,
+  HYBRID_LABEL_OPACITY_BASELINE,
+  HYBRID_ROAD_OPACITY_BASELINE,
+  hybridLabelPaint,
+  hybridMajorRoadPaint,
   karlMapStyleHasLabelLayer,
   karlMapStyleHasRoadLayer,
   resolveKarlMapStyle,
@@ -30,7 +35,7 @@ describe("resolveKarlMapStyle", () => {
     expect(getKarlMapStyleLayerIds("satellite")).toEqual(["karl-satellite"]);
   });
 
-  it("adds label and road raster layers on top of satellite imagery for hybrid", () => {
+  it("adds readable label and tiered road raster layers on top of satellite imagery for hybrid", () => {
     const style = resolveKarlMapStyle("hybrid");
 
     expect(typeof style).toBe("object");
@@ -42,7 +47,8 @@ describe("resolveKarlMapStyle", () => {
     expect(style.sources).toHaveProperty("karl-roads");
     expect(getKarlMapStyleLayerIds("hybrid")).toEqual([
       "karl-satellite",
-      "karl-roads",
+      "karl-roads-minor",
+      "karl-roads-major",
       "karl-labels",
     ]);
   });
@@ -53,11 +59,36 @@ describe("resolveKarlMapStyle", () => {
 
     expect(satelliteLayers).not.toEqual(hybridLayers);
     expect(hybridLayers).toEqual(
-      expect.arrayContaining(["karl-labels", "karl-roads"]),
+      expect.arrayContaining([
+        "karl-labels",
+        "karl-roads-minor",
+        "karl-roads-major",
+      ]),
     );
     expect(satelliteLayers).not.toEqual(
       expect.arrayContaining(["karl-labels", "karl-roads"]),
     );
+  });
+
+  it("boosts hybrid label and major-road paint above the previous faded baseline", () => {
+    expect(hybridLabelPaint["raster-opacity"]).toBeGreaterThan(
+      HYBRID_LABEL_OPACITY_BASELINE,
+    );
+    expect(hybridMajorRoadPaint["raster-opacity"]).toBeGreaterThan(
+      HYBRID_ROAD_OPACITY_BASELINE,
+    );
+    expect(hybridMajorRoadPaint["raster-opacity"]).toBeGreaterThan(
+      getKarlMapStyleLayerPaint("hybrid", "karl-roads-minor")?.[
+        "raster-opacity"
+      ] ?? 0,
+    );
+    expect(getKarlMapStyleLayerPaint("hybrid", "karl-labels")).toMatchObject({
+      "raster-opacity": hybridLabelPaint["raster-opacity"],
+      "raster-contrast": hybridLabelPaint["raster-contrast"],
+    });
+    expect(getKarlMapStyleLayerPaint("hybrid", "karl-roads-major")).toMatchObject({
+      "raster-hue-rotate": hybridMajorRoadPaint["raster-hue-rotate"],
+    });
   });
 
   it("grades satellite imagery toward muted tan/olive without canvas filters", () => {
