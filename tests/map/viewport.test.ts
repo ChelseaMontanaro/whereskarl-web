@@ -33,8 +33,8 @@ describe("resolveRegionViewportOptions", () => {
     expect(resolveRegionViewportOptions(northBay?.viewport, "immersive")).toEqual({
       padding: {
         top: 112,
-        right: 40,
-        bottom: 168,
+        right: 44,
+        bottom: 188,
         left: 40,
       },
       maxZoom: 11.3,

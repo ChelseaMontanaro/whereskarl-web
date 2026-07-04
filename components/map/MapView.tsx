@@ -15,6 +15,7 @@ import { getCurrent, getLocations } from "@/lib/api/weather";
 import { WEATHER_STALE_TIME_MS } from "@/lib/constants/config";
 import { bestRightNowLocationItems } from "@/lib/home/weatherDisplay";
 import { useMinWidth } from "@/lib/hooks/useMinWidth";
+import { usePhonePortrait } from "@/lib/hooks/usePhonePortrait";
 import type { FogIntensity } from "@/lib/map/conditions";
 import { findBayAreaProductRegion, isBayAreaProductRegionId } from "@/lib/map/config";
 import {
@@ -250,6 +251,7 @@ function useMapViewState(): MapViewModel {
 }
 
 function MobileMapView({ state }: { state: MapViewModel }) {
+  const isPhonePortrait = usePhonePortrait();
   const {
     mapQuery,
     mapStyle,
@@ -288,8 +290,14 @@ function MobileMapView({ state }: { state: MapViewModel }) {
       />
 
       <div className="pointer-events-none absolute inset-0 z-20">
-        <div className="pointer-events-auto absolute left-3 right-16 top-3 flex max-w-xs flex-col gap-2 sm:left-4 sm:top-4 md:top-[4.5rem] md:right-auto">
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-karl-navy/42 via-karl-navy/16 to-transparent sm:h-36"
+        />
+
+        <div className="pointer-events-auto absolute left-3 top-3 flex max-w-[min(100%,13.5rem)] flex-col gap-1.5 sm:left-4 sm:top-4 sm:max-w-xs sm:gap-2 md:top-[4.5rem] md:max-w-xs">
           <MapConditionsPanel
+            compact={isPhonePortrait}
             isLoading={currentQuery.isLoading && !currentQuery.data}
             selectedRegionId={
               selectedLocation ? null : mapQuery.activeRegionId
@@ -297,7 +305,7 @@ function MobileMapView({ state }: { state: MapViewModel }) {
             onSelectRegion={handleSelectRegion}
           />
           <MapFogLegend
-            layout="desktop-stack"
+            layout={isPhonePortrait ? "immersive-strip" : "desktop-stack"}
             activeIntensity={intensityFilter}
             onSelectIntensity={handleSelectIntensity}
           />
@@ -308,7 +316,7 @@ function MobileMapView({ state }: { state: MapViewModel }) {
           />
         </div>
 
-        <div className="pointer-events-auto absolute inset-x-3 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] flex flex-col items-stretch gap-2 sm:inset-x-4">
+        <div className="pointer-events-auto absolute inset-x-3 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] flex flex-col items-stretch gap-2 sm:inset-x-4 md:bottom-[calc(5.25rem+env(safe-area-inset-bottom))]">
           {shouldShowDesktopBestRightNowTray(intensityFilter) ? (
             <MapBestRightNowTray
               items={bestRightNowItems}
@@ -327,7 +335,7 @@ function MobileMapView({ state }: { state: MapViewModel }) {
         </div>
       </div>
 
-      <p className="pointer-events-none absolute bottom-[calc(4.25rem+env(safe-area-inset-bottom))] right-3 z-20 text-[0.6rem] text-white/25 sm:right-4">
+      <p className="pointer-events-none absolute bottom-[calc(5rem+env(safe-area-inset-bottom))] right-3 z-20 text-[0.6rem] text-white/25 sm:right-4">
         Map data © OpenStreetMap contributors · CARTO
       </p>
     </div>

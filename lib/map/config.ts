@@ -13,8 +13,8 @@ export const BAY_AREA_LOCATION_ZOOM = 11.4;
 
 const immersiveViewportPadding = {
   top: 112,
-  right: 40,
-  bottom: 168,
+  right: 44,
+  bottom: 188,
   left: 40,
 };
 

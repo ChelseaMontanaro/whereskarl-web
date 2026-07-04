@@ -36,7 +36,7 @@ describe("HomeHero", () => {
   });
 
   it("uses loaded position badge and clear skies CTA", () => {
-    render(
+    const { container } = render(
       <HomeHero
         {...heroDefaults}
         headline="Karl is lingering over Mill Valley."
@@ -52,6 +52,8 @@ describe("HomeHero", () => {
       "href",
       "/map?location=mill-valley",
     );
+    expect(container.querySelector(".mt-6")).toBeInTheDocument();
+    expect(container.querySelector(".pb-16")).toBeInTheDocument();
   });
 
   it("does not render a duplicate inline hero image", () => {

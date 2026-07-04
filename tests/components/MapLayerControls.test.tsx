@@ -3,6 +3,12 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+const usePhonePortraitMock = vi.fn(() => false);
+
+vi.mock("@/lib/hooks/usePhonePortrait", () => ({
+  usePhonePortrait: () => usePhonePortraitMock(),
+}));
+
 import { MapLayerControls } from "@/components/map/MapLayerControls";
 
 describe("MapLayerControls", () => {
@@ -83,5 +89,30 @@ describe("MapLayerControls", () => {
     fireEvent.click(screen.getByRole("button", { name: "Layers" }));
 
     expect(screen.getByRole("radio", { name: "Satellite" })).toBeInTheDocument();
+  });
+});
+
+describe("MapLayerControls immersive", () => {
+  afterEach(() => {
+    cleanup();
+    usePhonePortraitMock.mockReturnValue(false);
+  });
+
+  it("starts collapsed on phone portrait with a compact layers button", () => {
+    usePhonePortraitMock.mockReturnValue(true);
+
+    render(
+      <MapLayerControls
+        layout="immersive"
+        mapStyle="standard"
+        fogLayerEnabled
+        onMapStyleChange={vi.fn()}
+        onFogLayerChange={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryByRole("radio", { name: "Satellite" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Open map layers" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Zoom in" })).toHaveClass("h-8", "w-8");
   });
 });
