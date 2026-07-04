@@ -163,7 +163,6 @@ type MapViewModel = {
   handleClearSelectedLocation: () => void;
   handleSelectIntensity: (intensity: FogIntensity) => void;
   intensityFilter: FogIntensity | null;
-  statusSentence: string;
 };
 
 function useMapViewState(): MapViewModel {
@@ -261,11 +260,6 @@ function useMapViewState(): MapViewModel {
     [mapQuery.activeRegionId, router],
   );
 
-  const statusSentence =
-    currentQuery.data?.summary?.trim() ||
-    currentQuery.data?.status?.trim() ||
-    "Explore live fog and sunshine across the Bay.";
-
   return {
     mapQuery,
     mapStyle,
@@ -286,7 +280,6 @@ function useMapViewState(): MapViewModel {
     handleClearSelectedLocation,
     handleSelectIntensity,
     intensityFilter,
-    statusSentence,
   };
 }
 
@@ -386,7 +379,6 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
     handleSelectIntensity,
     intensityFilter,
     suppressViewportUpdateRef,
-    statusSentence,
   } = state;
 
   return (
@@ -409,7 +401,6 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
       <div className="pointer-events-none absolute inset-0 z-20">
         <div className="pointer-events-auto absolute left-6 top-[5.5rem] flex max-w-xs flex-col gap-2">
           <MapConditionsPanel
-            statusSentence={statusSentence}
             isLoading={currentQuery.isLoading && !currentQuery.data}
             selectedRegionId={
               selectedLocation ? null : mapQuery.activeRegionId

@@ -11,15 +11,16 @@ const REGION_CHIP_LABELS: Record<BayAreaProductRegion["id"], string> = {
   "south-bay": "South Bay",
 };
 
+const MAP_CONDITIONS_SUBTITLE =
+  "See where skies are clear, foggy, or in Karl territory across the Bay Area.";
+
 type MapConditionsPanelProps = {
-  statusSentence: string;
   isLoading?: boolean;
   selectedRegionId?: string | null;
   onSelectRegion?: (regionId: string) => void;
 };
 
 export function MapConditionsPanel({
-  statusSentence,
   isLoading = false,
   selectedRegionId = null,
   onSelectRegion,
@@ -36,7 +37,7 @@ export function MapConditionsPanel({
         Bay Area conditions
       </h1>
       <p className="mt-2 text-sm leading-relaxed text-white/72">
-        {isLoading ? "Checking live conditions…" : statusSentence}
+        {isLoading ? "Checking live conditions…" : MAP_CONDITIONS_SUBTITLE}
       </p>
 
       {onSelectRegion ? (
