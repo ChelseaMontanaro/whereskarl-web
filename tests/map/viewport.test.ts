@@ -143,10 +143,10 @@ describe("immersive Bay Area framing", () => {
   it("returns tighter phone portrait fit options after the compact overlay redesign", () => {
     expect(getImmersiveDefaultBayAreaFitOptions("phone-portrait")).toEqual({
       padding: {
-        top: 58,
+        top: 52,
         right: 28,
         bottom: 148,
-        left: 12,
+        left: 78,
       },
       maxZoom: BAY_AREA_IMMERSIVE_MAX_ZOOM,
     });
@@ -198,10 +198,10 @@ describe("resolveIntensityFilterFitOptions", () => {
   it("uses lighter phone portrait overlay padding for filtered marker framing", () => {
     expect(resolveIntensityFilterFitOptions("immersive", "phone-portrait")).toEqual({
       padding: {
-        top: 88,
+        top: 72,
         right: 44,
         bottom: 208,
-        left: 108,
+        left: 78,
       },
       maxZoom: 10,
     });

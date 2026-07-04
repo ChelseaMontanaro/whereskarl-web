@@ -19,10 +19,10 @@ const immersiveViewportPadding = {
 };
 
 const immersivePhonePortraitViewportPadding = {
-  top: 58,
+  top: 52,
   right: 28,
   bottom: 148,
-  left: 12,
+  left: 78,
 };
 
 export const BAY_AREA_DEFAULT_VIEWPORT_PADDING = 36;

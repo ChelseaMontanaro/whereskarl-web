@@ -100,10 +100,10 @@ const immersiveIntensityFilterPadding = {
 };
 
 const immersivePhonePortraitIntensityFilterPadding = {
-  top: 88,
+  top: 72,
   right: 44,
   bottom: 208,
-  left: 108,
+  left: 78,
 };
 
 export function resolveIntensityFilterFitOptions(

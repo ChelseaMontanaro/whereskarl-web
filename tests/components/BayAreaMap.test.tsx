@@ -258,6 +258,59 @@ describe("BayAreaMap", () => {
     });
   });
 
+  it("uses phone portrait overlay padding when framing filtered markers on phone portrait", async () => {
+    render(
+      <BayAreaMap
+        locations={[
+          {
+            id: "ocean-beach",
+            name: "Ocean Beach",
+            latitude: 37.7594,
+            longitude: -122.5107,
+            sunshineScore: 18,
+            fogScore: 60,
+            status: "Foggy",
+          },
+          {
+            id: "presidio",
+            name: "Presidio",
+            latitude: 37.7989,
+            longitude: -122.4662,
+            sunshineScore: 22,
+            fogScore: 55,
+            status: "Foggy",
+          },
+        ]}
+        selectedLocationId={null}
+        selectedRegionId={null}
+        onSelectLocation={vi.fn()}
+        {...defaultProps}
+        layout="immersive"
+        immersiveOverlayProfile="phone-portrait"
+        intensityFilter="foggy"
+      />,
+    );
+
+    await waitFor(() => {
+      expect(mockFitBounds).toHaveBeenCalledWith(
+        [
+          [-122.5107, 37.7594],
+          [-122.4662, 37.7989],
+        ],
+        expect.objectContaining({
+          padding: {
+            top: 72,
+            right: 44,
+            bottom: 208,
+            left: 78,
+          },
+          maxZoom: 10,
+          essential: true,
+        }),
+      );
+    });
+  });
+
   it("keeps the East Bay viewport stable when an intensity filter has no matching markers", async () => {
     const eastBay = findBayAreaProductRegion("east-bay");
     expect(eastBay).toBeDefined();

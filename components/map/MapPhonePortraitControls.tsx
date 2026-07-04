@@ -1,5 +1,3 @@
-import { MapFogLegend } from "@/components/map/MapFogLegend";
-import type { FogIntensity } from "@/lib/map/conditions";
 import {
   BAY_AREA_PRODUCT_REGIONS,
   type BayAreaProductRegion,
@@ -15,18 +13,14 @@ const REGION_CHIP_LABELS: Record<BayAreaProductRegion["id"], string> = {
 type MapPhonePortraitControlsProps = {
   selectedRegionId: string | null;
   onSelectRegion: (regionId: string) => void;
-  activeIntensity: FogIntensity | null;
-  onSelectIntensity: (intensity: FogIntensity) => void;
 };
 
 export function MapPhonePortraitControls({
   selectedRegionId,
   onSelectRegion,
-  activeIntensity,
-  onSelectIntensity,
 }: MapPhonePortraitControlsProps) {
   return (
-    <div className="flex w-full max-w-[calc(100vw-5.75rem)] flex-col gap-2">
+    <div className="flex w-full flex-col gap-2">
       <div aria-label="Bay Area map conditions summary">
         <p className="text-[0.58rem] font-bold uppercase tracking-[0.16em] text-karl-gold/90">
           Karl around the Bay
@@ -57,12 +51,6 @@ export function MapPhonePortraitControls({
           );
         })}
       </div>
-
-      <MapFogLegend
-        layout="phone-compact"
-        activeIntensity={activeIntensity}
-        onSelectIntensity={onSelectIntensity}
-      />
     </div>
   );
 }

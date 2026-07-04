@@ -313,14 +313,19 @@ function MobileMapView({ state }: { state: MapViewModel }) {
           }`}
         >
           {isPhonePortrait ? (
-            <MapPhonePortraitControls
-              selectedRegionId={
-                selectedLocation ? null : mapQuery.activeRegionId
-              }
-              onSelectRegion={handleSelectRegion}
-              activeIntensity={intensityFilter}
-              onSelectIntensity={handleSelectIntensity}
-            />
+            <div className="flex w-full max-w-[calc(100vw-5.75rem)] flex-col gap-2">
+              <MapPhonePortraitControls
+                selectedRegionId={
+                  selectedLocation ? null : mapQuery.activeRegionId
+                }
+                onSelectRegion={handleSelectRegion}
+              />
+              <MapFogLegend
+                layout="phone-rail"
+                activeIntensity={intensityFilter}
+                onSelectIntensity={handleSelectIntensity}
+              />
+            </div>
           ) : (
             <>
               <MapConditionsPanel

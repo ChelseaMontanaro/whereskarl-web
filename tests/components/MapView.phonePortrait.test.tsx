@@ -68,7 +68,7 @@ describe("MapView phone portrait", () => {
   });
 
   it("uses the compact phone portrait header instead of the large conditions card", async () => {
-    renderMap();
+    const { container } = renderMap();
 
     expect(
       await screen.findByRole("heading", { name: "Bay Area conditions" }),
@@ -78,5 +78,7 @@ describe("MapView phone portrait", () => {
       screen.queryByText("Explore live fog & clear skies around the Bay."),
     ).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Karl Territory" })).toBeInTheDocument();
+    expect(container.querySelector(".grid.grid-cols-2")).toBeNull();
+    expect(container.querySelector(".flex.flex-col.gap-1")).toBeTruthy();
   });
 });

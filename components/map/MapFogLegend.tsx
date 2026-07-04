@@ -15,7 +15,13 @@ const LEGEND_ITEMS: Array<{
 ];
 
 type MapFogLegendProps = {
-  layout?: "mobile" | "desktop" | "desktop-stack" | "immersive-strip" | "phone-compact";
+  layout?:
+    | "mobile"
+    | "desktop"
+    | "desktop-stack"
+    | "immersive-strip"
+    | "phone-compact"
+    | "phone-rail";
   activeIntensity?: FogIntensity | null;
   onSelectIntensity?: (intensity: FogIntensity) => void;
 };
@@ -34,6 +40,62 @@ export function MapFogLegend({
   activeIntensity = null,
   onSelectIntensity,
 }: MapFogLegendProps) {
+  if (layout === "phone-rail") {
+    const isInteractive = Boolean(onSelectIntensity);
+
+    return (
+      <div
+        aria-label="Fog intensity legend"
+        className={`${desktopGlassCardClass} w-[4.35rem] shrink-0 px-1 py-1.5`}
+      >
+        <p className="text-center text-[0.5rem] font-bold uppercase tracking-[0.12em] text-white/38">
+          Fog Intensity
+        </p>
+        <ul className="mt-1 flex flex-col gap-1">
+          {LEGEND_ITEMS.map((item) => {
+            const isActive = activeIntensity === item.intensity;
+            const label = getFogIntensityLabel(item.intensity);
+
+            if (isInteractive) {
+              return (
+                <li key={item.intensity}>
+                  <button
+                    type="button"
+                    aria-pressed={isActive}
+                    aria-label={label}
+                    onClick={() => onSelectIntensity?.(item.intensity)}
+                    className={`flex w-full flex-col items-center gap-0.5 rounded-lg border px-1 py-1 text-center transition-colors motion-reduce:transition-none ${
+                      isActive
+                        ? "border-karl-gold/40 bg-karl-gold/10 text-karl-gold"
+                        : "border-white/10 bg-black/20 text-white/58 hover:border-white/18 hover:text-white/75"
+                    }`}
+                  >
+                    <LegendSwatch className={item.swatchClassName} />
+                    <span className="max-w-full text-[0.5rem] leading-[1.1]">
+                      {label}
+                    </span>
+                  </button>
+                </li>
+              );
+            }
+
+            return (
+              <li
+                key={item.intensity}
+                className="flex flex-col items-center gap-0.5 rounded-lg border border-white/10 bg-black/20 px-1 py-1 text-center"
+              >
+                <LegendSwatch className={item.swatchClassName} />
+                <span className="max-w-full text-[0.5rem] leading-[1.1] text-white/58">
+                  {label}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    );
+  }
+
   if (layout === "phone-compact") {
     const isInteractive = Boolean(onSelectIntensity);
 

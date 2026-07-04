@@ -115,4 +115,26 @@ describe("MapFogLegend", () => {
     expect(container.querySelector(".rounded-2xl.border")).toBeNull();
     expect(container.querySelector(".grid.grid-cols-2")).toBeTruthy();
   });
+
+  it("renders the phone-rail fog legend as a compact vertical stack", () => {
+    const { container } = render(
+      <MapFogLegend
+        layout="phone-rail"
+        activeIntensity="clear"
+        onSelectIntensity={vi.fn()}
+      />,
+    );
+
+    for (const label of ["Clear", "Light Fog", "Foggy", "Karl Territory"]) {
+      expect(screen.getByRole("button", { name: label })).toBeInTheDocument();
+    }
+
+    expect(container.querySelector(".overflow-x-auto")).toBeNull();
+    expect(container.querySelector(".grid.grid-cols-2")).toBeNull();
+    expect(container.querySelector(".flex.flex-col.gap-1")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Clear" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
 });
