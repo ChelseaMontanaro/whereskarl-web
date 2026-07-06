@@ -72,10 +72,10 @@ describe("HomeView responsive polish", () => {
     const { container } = renderHomeView();
 
     const heroCta = container.querySelector(
-      "section[aria-label='Karl conditions hero'] .max-sm\\:mb-2\\.5",
+      "section[aria-label='Karl conditions hero'] .max-sm\\:mb-4",
     );
     expect(heroCta).toBeTruthy();
-    expect(container.querySelector(".max-sm\\:pt-5")).toBeInTheDocument();
+    expect(container.querySelector(".max-sm\\:pt-6")).toBeInTheDocument();
   });
 
   it("uses subtle mobile insight glass depth without opaque card fills", () => {
@@ -152,11 +152,11 @@ describe("HomeView responsive polish", () => {
     await screen.findByText("Fog Coverage");
 
     const dashboard = container.querySelector('[aria-label="Bay Area conditions dashboard"]');
-    expect(dashboard?.className).toContain("max-sm:gap-3");
+    expect(dashboard?.className).toContain("max-sm:gap-3.5");
 
-    const metricSurfaces = container.querySelectorAll(".max-sm\\:min-h-\\[7\\.25rem\\]");
+    const metricSurfaces = container.querySelectorAll(".max-sm\\:min-h-\\[8\\.75rem\\]");
     expect(metricSurfaces.length).toBe(4);
-    expect(container.querySelector(".max-sm\\:text-\\[1\\.65rem\\]")).toBeTruthy();
+    expect(container.querySelector(".max-sm\\:text-\\[2\\.125rem\\]")).toBeTruthy();
   });
 
   it("adds phone portrait spacing between mobile insight cards", () => {
@@ -164,6 +164,6 @@ describe("HomeView responsive polish", () => {
 
     const mobileStack = container.querySelector(".max-sm\\:gap-4.lg\\:hidden");
     expect(mobileStack).toBeTruthy();
-    expect(mobileStack?.className).toContain("max-sm:mt-4");
+    expect(mobileStack?.className).toContain("max-sm:mt-6");
   });
 });

@@ -263,7 +263,7 @@ export function HomeView() {
           className="pointer-events-none absolute inset-x-0 -top-20 bottom-0 bg-gradient-to-b from-transparent via-black/10 to-black/36 sm:via-black/12 sm:to-black/40 lg:hidden"
         />
 
-        <div className="relative max-sm:pt-5 pt-3 sm:pt-4 lg:pt-0">
+        <div className="relative max-sm:pt-6 pt-3 sm:pt-4 lg:pt-0">
         <DashboardGrid
           current={current}
           bestSunshine={bestSunshine}
@@ -271,7 +271,7 @@ export function HomeView() {
           isNightPresentation={isNightPresentation}
         />
 
-        <div className="mt-3.5 max-sm:mt-4 flex flex-col gap-3.5 max-sm:gap-4 lg:hidden">
+        <div className="mt-3.5 max-sm:mt-6 flex flex-col gap-3.5 max-sm:gap-4 lg:hidden">
           <BestSunshineCard
             recommendation={bestSunshine}
             isLoading={

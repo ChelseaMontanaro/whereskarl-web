@@ -14,6 +14,7 @@ import {
   desktopClickableCardHoverClass,
   desktopClickableCardLinkClass,
   desktopInsightIconSizeClass,
+  mobileBestSunshineCardSurfaceClass,
   mobileInsightCardSurfaceClass,
 } from "@/components/home/desktopGlass";
 import { GlassCard } from "@/components/ui/GlassCard";
@@ -44,7 +45,7 @@ function MobileBestSunshineCard({
 
   if (isLoading) {
     return (
-      <GlassCard variant="insight" className={`flex items-start gap-3 px-4 py-4 ${mobileInsightCardSurfaceClass} border-karl-gold/15`}>
+      <GlassCard variant="insight" className={`flex items-start gap-3 px-4 py-4 ${mobileInsightCardSurfaceClass} ${mobileBestSunshineCardSurfaceClass} border-karl-gold/15`}>
         <InsightIconFrame tone={isNightPresentation ? "mist" : "gold"}>
           {isNightPresentation ? (
             <MoonIcon className={`${desktopInsightIconSizeClass} text-[#8CB8D8]`} />
@@ -56,7 +57,7 @@ function MobileBestSunshineCard({
           <CardLabel className="text-white/45 lg:text-white/45">
             Brightest Spot
           </CardLabel>
-          <p className="mt-2 max-sm:mt-2.5 text-lg max-sm:text-[1.25rem] font-semibold text-white/50">
+          <p className="mt-2 max-sm:mt-3 text-lg max-sm:text-[1.3125rem] font-semibold text-white/50">
             Finding brighter spots…
           </p>
           <FindClearSkiesCta
@@ -72,7 +73,7 @@ function MobileBestSunshineCard({
 
   if (isUnavailable || !recommendation) {
     return (
-      <GlassCard variant="insight" className={`flex items-start gap-3 px-4 py-4 ${mobileInsightCardSurfaceClass} border-karl-gold/15`}>
+      <GlassCard variant="insight" className={`flex items-start gap-3 px-4 py-4 ${mobileInsightCardSurfaceClass} ${mobileBestSunshineCardSurfaceClass} border-karl-gold/15`}>
         <InsightIconFrame tone={isNightPresentation ? "mist" : "gold"}>
           {isNightPresentation ? (
             <MoonIcon className={`${desktopInsightIconSizeClass} text-[#8CB8D8]`} />
@@ -84,7 +85,7 @@ function MobileBestSunshineCard({
           <CardLabel className="text-white/45 lg:text-white/45">
             Brightest Spot
           </CardLabel>
-          <p className="mt-2 max-sm:mt-2.5 text-sm max-sm:text-[0.9375rem] text-white/60">
+          <p className="mt-2 max-sm:mt-3 text-sm max-sm:text-[0.9375rem] text-white/60">
             Brightest spot details are unavailable right now.
           </p>
           <FindClearSkiesCta
@@ -109,7 +110,7 @@ function MobileBestSunshineCard({
   );
 
   return (
-    <GlassCard variant="insight" className={`flex items-start gap-3 px-4 py-4 ${mobileInsightCardSurfaceClass} border-karl-gold/20`}>
+    <GlassCard variant="insight" className={`flex items-start gap-3 px-4 py-4 ${mobileInsightCardSurfaceClass} ${mobileBestSunshineCardSurfaceClass} border-karl-gold/20`}>
       <InsightIconFrame tone={isNightPresentation ? "mist" : "gold"}>
         {spotIcon}
       </InsightIconFrame>
@@ -124,11 +125,11 @@ function MobileBestSunshineCard({
             },
           )}
         </CardLabel>
-        <h2 className="mt-2 max-sm:mt-2.5 text-xl max-sm:text-[1.375rem] font-semibold text-white">
+        <h2 className="mt-2 max-sm:mt-3 text-xl max-sm:text-[1.5rem] font-semibold leading-tight text-white">
           {recommendation.locationName}
         </h2>
-        <p className="mt-1.5 max-sm:mt-2 text-sm max-sm:text-[0.9375rem] font-semibold text-karl-gold">{subtitle}</p>
-        <p className="mt-1.5 max-sm:mt-2 text-sm max-sm:text-[0.9375rem] text-white/60">
+        <p className="mt-1.5 max-sm:mt-2.5 text-sm max-sm:text-base font-semibold text-karl-gold">{subtitle}</p>
+        <p className="mt-1.5 max-sm:mt-2.5 text-sm max-sm:text-[0.9375rem] text-white/60">
           {recommendation.distanceText} · {recommendation.temperature}°
         </p>
         <FindClearSkiesCta
@@ -138,7 +139,7 @@ function MobileBestSunshineCard({
           className="mt-4 max-sm:mt-5"
         />
       </div>
-      <span className="shrink-0 text-[1.75rem] max-sm:text-[2rem] font-light leading-none text-karl-gold">
+      <span className="shrink-0 text-[1.75rem] max-sm:text-[2.25rem] font-light leading-none text-karl-gold">
         {recommendation.sunshineScore}
       </span>
     </GlassCard>

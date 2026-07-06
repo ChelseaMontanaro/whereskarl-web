@@ -109,11 +109,11 @@ describe("DashboardGrid", () => {
     );
 
     const dashboard = container.querySelector('[aria-label="Bay Area conditions dashboard"]');
-    expect(dashboard?.className).toContain("max-sm:gap-3");
+    expect(dashboard?.className).toContain("max-sm:gap-3.5");
 
-    const metricSurfaces = container.querySelectorAll(".max-sm\\:min-h-\\[7\\.25rem\\]");
+    const metricSurfaces = container.querySelectorAll(".max-sm\\:min-h-\\[8\\.75rem\\]");
     expect(metricSurfaces.length).toBe(4);
-    expect(container.querySelector(".max-sm\\:text-\\[1\\.65rem\\]")).toBeTruthy();
+    expect(container.querySelector(".max-sm\\:text-\\[2\\.125rem\\]")).toBeTruthy();
   });
 
   it("renders premium weather icons alongside dashboard metrics", () => {

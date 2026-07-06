@@ -16,6 +16,8 @@ import {
   desktopMistIconClass,
   mobileCardLabelClass,
   mobileMetricCardSurfaceClass,
+  mobileMetricIconFrameClass,
+  mobileMetricIconSizeClass,
 } from "@/components/home/desktopGlass";
 import { GlassCard } from "@/components/ui/GlassCard";
 import {
@@ -67,22 +69,22 @@ function MetricCardContent({
   valueClassName?: string;
 }) {
   return (
-    <div className="flex h-full items-center gap-3 max-sm:items-start max-sm:gap-3.5 lg:items-center lg:gap-3.5">
+    <div className="flex h-full items-center gap-3 max-sm:items-start max-sm:gap-4 lg:items-center lg:gap-3.5">
       <div
-        className={`order-2 flex h-9 w-9 shrink-0 items-center justify-center self-center rounded-full border border-white/8 bg-white/4 max-sm:self-start max-sm:mt-0.5 lg:order-1 ${desktopMetricIconFrameClass} ${iconFrameClassName}`}
+        className={`order-2 flex h-9 w-9 shrink-0 items-center justify-center self-center rounded-full border border-white/8 bg-white/4 max-sm:self-start max-sm:mt-1 ${mobileMetricIconFrameClass} lg:order-1 ${desktopMetricIconFrameClass} ${iconFrameClassName}`}
       >
         {icon}
       </div>
       <div className="order-1 flex min-w-0 flex-1 flex-col lg:order-2">
         <CardLabel>{label}</CardLabel>
         <p
-          className={`mt-1 line-clamp-2 text-[1.35rem] font-light leading-none max-sm:mt-1.5 max-sm:text-[1.65rem] lg:mt-1.5 lg:font-light ${valueClassName} ${
+          className={`mt-1 line-clamp-2 text-[1.35rem] font-light leading-none max-sm:mt-2 max-sm:text-[2.125rem] lg:mt-1.5 lg:font-light ${valueClassName} ${
             isLoading ? "opacity-35 text-white" : "text-white/94"
           }`}
         >
           {value}
         </p>
-        <p className="mt-1 text-[0.6875rem] font-medium text-white/50 max-sm:mt-1.5 max-sm:text-xs max-sm:text-white/55 lg:mt-1.5 lg:text-xs lg:text-white/55">
+        <p className="mt-1 text-[0.6875rem] font-medium text-white/50 max-sm:mt-2 max-sm:text-[0.8125rem] max-sm:text-white/58 lg:mt-1.5 lg:text-xs lg:text-white/55">
           {detail}
         </p>
       </div>
@@ -185,10 +187,11 @@ export function DashboardGrid({
     lastTriggerRef.current?.focus();
   };
 
+  const metricIconClassName = `${desktopMetricIconSizeClass} ${mobileMetricIconSizeClass}`;
   const spotIcon = isNightPresentation ? (
-    <MoonIcon className={`${desktopMetricIconSizeClass} text-[#8CB8D8]`} />
+    <MoonIcon className={`${metricIconClassName} text-[#8CB8D8]`} />
   ) : (
-    <SunshineIcon className={desktopMetricIconSizeClass} />
+    <SunshineIcon className={metricIconClassName} />
   );
   const spotMapHref =
     !isLoading && bestSunshine?.locationID
@@ -203,14 +206,14 @@ export function DashboardGrid({
     <>
       <div
         aria-label="Bay Area conditions dashboard"
-        className="grid grid-cols-2 gap-2 max-sm:gap-3 lg:grid-cols-4 lg:grid-rows-1 lg:items-stretch lg:gap-3.5 xl:gap-4"
+        className="grid grid-cols-2 gap-2 max-sm:gap-3.5 lg:grid-cols-4 lg:grid-rows-1 lg:items-stretch lg:gap-3.5 xl:gap-4"
       >
         <MetricCard
           label="Fog Coverage"
           value={isLoading || !current ? "--" : `${current.fogCoverage}%`}
           detail={isLoading ? "Checking conditions" : "Bay Area"}
           isLoading={isLoading}
-          icon={<FogCoverageIcon className={desktopMetricIconSizeClass} />}
+          icon={<FogCoverageIcon className={metricIconClassName} />}
           iconFrameClassName={desktopMistIconClass}
           detailKey="fog-coverage"
           onOpenDetail={openMetricDetail}
@@ -220,9 +223,9 @@ export function DashboardGrid({
           value={isLoading || !current ? "--" : current.status}
           detail={isLoading ? "Checking conditions" : "Across the Bay"}
           isLoading={isLoading}
-          icon={<FogCoverageIcon className={desktopMetricIconSizeClass} />}
+          icon={<FogCoverageIcon className={metricIconClassName} />}
           iconFrameClassName={desktopMistIconClass}
-          valueClassName="max-sm:text-[1.125rem] max-sm:leading-snug lg:text-[0.98rem] lg:leading-snug lg:tracking-[-0.01em]"
+          valueClassName="max-sm:!text-[1.2rem] max-sm:!line-clamp-3 max-sm:leading-snug max-sm:tracking-[-0.01em] lg:text-[0.98rem] lg:leading-snug lg:tracking-[-0.01em]"
           detailKey="karl-status"
           onOpenDetail={openMetricDetail}
         />
@@ -231,7 +234,7 @@ export function DashboardGrid({
           value={isLoading || !current ? "--" : `${current.sunshineScore}`}
           detail={isLoading ? "Checking conditions" : "Bay Area average"}
           isLoading={isLoading}
-          icon={<SunshineIcon className={desktopMetricIconSizeClass} />}
+          icon={<SunshineIcon className={metricIconClassName} />}
           iconFrameClassName={desktopGoldIconClass}
           detailKey="sunshine-score"
           onOpenDetail={openMetricDetail}
