@@ -14,6 +14,8 @@ import {
   desktopMetricIconFrameClass,
   desktopMetricIconSizeClass,
   desktopMistIconClass,
+  mobileCardLabelClass,
+  mobileMetricCardSurfaceClass,
 } from "@/components/home/desktopGlass";
 import { GlassCard } from "@/components/ui/GlassCard";
 import {
@@ -31,12 +33,13 @@ type DashboardGridProps = {
   isNightPresentation?: boolean;
 };
 
-const metricCardSurfaceClass =
-  "h-full min-h-[5.75rem] px-3.5 py-3 lg:min-h-[7rem] lg:px-4 lg:py-4";
+const metricCardSurfaceClass = `h-full min-h-[5.75rem] px-3.5 py-3 ${mobileMetricCardSurfaceClass} lg:min-h-[7rem] lg:px-4 lg:py-4`;
 
 function CardLabel({ children }: { children: ReactNode }) {
   return (
-    <p className="text-[0.625rem] font-bold uppercase tracking-[0.14em] text-white/38 lg:text-[0.68rem] lg:tracking-[0.16em] lg:text-karl-gold/82">
+    <p
+      className={`text-[0.625rem] font-bold uppercase tracking-[0.14em] text-white/38 ${mobileCardLabelClass} lg:text-[0.68rem] lg:tracking-[0.16em] lg:text-karl-gold/82`}
+    >
       {children}
     </p>
   );
@@ -64,22 +67,22 @@ function MetricCardContent({
   valueClassName?: string;
 }) {
   return (
-    <div className="flex h-full items-center gap-3 lg:items-center lg:gap-3.5">
+    <div className="flex h-full items-center gap-3 max-sm:items-start max-sm:gap-3.5 lg:items-center lg:gap-3.5">
       <div
-        className={`order-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/8 bg-white/4 lg:order-1 ${desktopMetricIconFrameClass} ${iconFrameClassName}`}
+        className={`order-2 flex h-9 w-9 shrink-0 items-center justify-center self-center rounded-full border border-white/8 bg-white/4 max-sm:self-start max-sm:mt-0.5 lg:order-1 ${desktopMetricIconFrameClass} ${iconFrameClassName}`}
       >
         {icon}
       </div>
       <div className="order-1 flex min-w-0 flex-1 flex-col lg:order-2">
         <CardLabel>{label}</CardLabel>
         <p
-          className={`mt-1 line-clamp-2 text-[1.35rem] font-light leading-none lg:mt-1.5 lg:font-light ${valueClassName} ${
+          className={`mt-1 line-clamp-2 text-[1.35rem] font-light leading-none max-sm:mt-1.5 max-sm:text-[1.65rem] lg:mt-1.5 lg:font-light ${valueClassName} ${
             isLoading ? "opacity-35 text-white" : "text-white/94"
           }`}
         >
           {value}
         </p>
-        <p className="mt-1 text-[0.6875rem] font-medium text-white/50 lg:mt-1.5 lg:text-xs lg:text-white/55">
+        <p className="mt-1 text-[0.6875rem] font-medium text-white/50 max-sm:mt-1.5 max-sm:text-xs max-sm:text-white/55 lg:mt-1.5 lg:text-xs lg:text-white/55">
           {detail}
         </p>
       </div>
@@ -200,7 +203,7 @@ export function DashboardGrid({
     <>
       <div
         aria-label="Bay Area conditions dashboard"
-        className="grid grid-cols-2 gap-2 lg:grid-cols-4 lg:grid-rows-1 lg:items-stretch lg:gap-3.5 xl:gap-4"
+        className="grid grid-cols-2 gap-2 max-sm:gap-3 lg:grid-cols-4 lg:grid-rows-1 lg:items-stretch lg:gap-3.5 xl:gap-4"
       >
         <MetricCard
           label="Fog Coverage"
@@ -219,7 +222,7 @@ export function DashboardGrid({
           isLoading={isLoading}
           icon={<FogCoverageIcon className={desktopMetricIconSizeClass} />}
           iconFrameClassName={desktopMistIconClass}
-          valueClassName="lg:text-[0.98rem] lg:leading-snug lg:tracking-[-0.01em]"
+          valueClassName="max-sm:text-[1.125rem] max-sm:leading-snug lg:text-[0.98rem] lg:leading-snug lg:tracking-[-0.01em]"
           detailKey="karl-status"
           onOpenDetail={openMetricDetail}
         />

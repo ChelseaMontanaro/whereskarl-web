@@ -271,7 +271,7 @@ export function HomeView() {
           isNightPresentation={isNightPresentation}
         />
 
-        <div className="mt-3.5 flex flex-col gap-3.5 lg:hidden">
+        <div className="mt-3.5 max-sm:mt-4 flex flex-col gap-3.5 max-sm:gap-4 lg:hidden">
           <BestSunshineCard
             recommendation={bestSunshine}
             isLoading={

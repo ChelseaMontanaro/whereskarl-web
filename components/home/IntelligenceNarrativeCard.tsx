@@ -10,6 +10,7 @@ import {
   desktopClickableCardHoverClass,
   desktopClickableCardLinkClass,
   desktopInsightIconSizeClass,
+  mobileInsightCardSurfaceClass,
 } from "@/components/home/desktopGlass";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { buildMapHref } from "@/lib/map/routing";
@@ -34,13 +35,13 @@ function MobileIntelligenceNarrativeCard({
 }: Omit<IntelligenceNarrativeCardProps, "layout">) {
   if (isLoading) {
     return (
-      <GlassCard variant="insight" className="flex items-start gap-3 px-4 py-4">
+      <GlassCard variant="insight" className={`flex items-start gap-3 px-4 py-4 ${mobileInsightCardSurfaceClass}`}>
         <InsightIconFrame>
           <KarlReadIcon />
         </InsightIconFrame>
         <div className="min-w-0 flex-1">
           <CardLabel>Karl&apos;s Read</CardLabel>
-          <p className="mt-2 text-lg font-semibold text-white/50">
+          <p className="mt-2 max-sm:mt-2.5 text-lg max-sm:text-[1.25rem] font-semibold text-white/50">
             Reading Karl intelligence…
           </p>
         </div>
@@ -62,20 +63,20 @@ function MobileIntelligenceNarrativeCard({
     karlReadPresentation?.summary ?? intelligence.narrative.summary;
 
   return (
-    <GlassCard variant="insight" className="flex items-start gap-3 px-4 py-4">
+    <GlassCard variant="insight" className={`flex items-start gap-3 px-4 py-4 ${mobileInsightCardSurfaceClass}`}>
       <InsightIconFrame>
         <KarlReadIcon />
       </InsightIconFrame>
       <div className="min-w-0 flex-1">
         <CardLabel>Karl&apos;s Read</CardLabel>
-        <h2 className="mt-2 text-lg font-semibold leading-snug text-white">
+        <h2 className="mt-2 max-sm:mt-2.5 text-lg max-sm:text-[1.25rem] font-semibold leading-snug text-white">
           {headline}
         </h2>
-        <p className="mt-1.5 text-sm leading-relaxed text-white/70">
+        <p className="mt-1.5 max-sm:mt-2 text-sm max-sm:text-[0.9375rem] leading-relaxed text-white/70">
           {summary}
         </p>
         {confidenceLabel ? (
-          <p className="mt-2 text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-white/40">
+          <p className="mt-2 max-sm:mt-2.5 text-[0.68rem] max-sm:text-xs font-semibold uppercase tracking-[0.12em] text-white/40">
             {confidenceLabel} confidence
           </p>
         ) : null}

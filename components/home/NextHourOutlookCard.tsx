@@ -3,7 +3,7 @@ import {
   CardLabel,
   InsightIconFrame,
 } from "@/components/home/InsightCardParts";
-import { desktopInsightIconSizeClass } from "@/components/home/desktopGlass";
+import { desktopInsightIconSizeClass, mobileInsightCardSurfaceClass } from "@/components/home/desktopGlass";
 import { GlassCard } from "@/components/ui/GlassCard";
 
 type NextHourOutlookCardProps = {
@@ -30,7 +30,7 @@ function NextHourCardBody({
         <div className="min-w-0 flex-1">
           <CardLabel>Future Outlook</CardLabel>
           <p
-            className={`mt-2 text-sm text-white/55 ${
+            className={`mt-2 max-sm:mt-2.5 text-sm max-sm:text-[0.9375rem] text-white/55 ${
               isDesktop ? "lg:mt-1.5 lg:text-base" : ""
             }`}
           >
@@ -53,7 +53,7 @@ function NextHourCardBody({
       <div className="min-w-0 flex-1">
         <CardLabel>Future Outlook</CardLabel>
         <p
-          className={`mt-2 text-sm leading-relaxed text-white/75 ${
+          className={`mt-2 max-sm:mt-2.5 text-sm max-sm:text-[0.9375rem] leading-relaxed text-white/75 ${
             isDesktop ? "lg:mt-1.5 lg:text-base lg:leading-relaxed" : ""
           }`}
         >
@@ -61,7 +61,7 @@ function NextHourCardBody({
         </p>
         {confidenceLabel ? (
           <p
-            className={`mt-2 text-xs font-semibold uppercase tracking-[0.12em] text-white/40 ${
+            className={`mt-2 max-sm:mt-2.5 text-xs max-sm:text-[0.8125rem] font-semibold uppercase tracking-[0.12em] text-white/40 ${
               isDesktop ? "lg:font-medium lg:normal-case lg:tracking-normal" : ""
             }`}
           >
@@ -83,7 +83,7 @@ export function NextHourOutlookCard({
   const variant = isDesktop ? "desktop" : "insight";
   const cardClassName = isDesktop
     ? "flex items-start gap-4 px-5 py-5"
-    : "flex items-start gap-3 px-4 py-4";
+    : `flex items-start gap-3 px-4 py-4 ${mobileInsightCardSurfaceClass}`;
 
   if (!isLoading && !summary) {
     return null;

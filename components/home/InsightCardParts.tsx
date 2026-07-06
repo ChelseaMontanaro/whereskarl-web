@@ -5,6 +5,8 @@ import {
   desktopGoldIconClass,
   desktopInsightIconFrameClass,
   desktopMistIconClass,
+  mobileCardLabelClass,
+  mobileInsightIconFrameClass,
 } from "@/components/home/desktopGlass";
 
 export function CardLabel({
@@ -16,7 +18,7 @@ export function CardLabel({
 }) {
   return (
     <p
-      className={`text-[0.625rem] font-bold uppercase tracking-[0.14em] text-white/38 lg:text-[0.68rem] lg:font-bold lg:tracking-[0.16em] lg:text-karl-gold/82 ${className}`}
+      className={`text-[0.625rem] font-bold uppercase tracking-[0.14em] text-white/38 ${mobileCardLabelClass} lg:text-[0.68rem] lg:font-bold lg:tracking-[0.16em] lg:text-karl-gold/82 ${className}`}
     >
       {children}
     </p>
@@ -46,7 +48,9 @@ export function InsightIconFrame({
   const toneClass = tone === "gold" ? desktopGoldIconClass : desktopMistIconClass;
 
   return (
-    <div className={`h-12 w-12 rounded-full ${desktopInsightIconFrameClass} ${toneClass}`}>
+    <div
+      className={`h-12 w-12 rounded-full ${mobileInsightIconFrameClass} ${desktopInsightIconFrameClass} ${toneClass}`}
+    >
       {children}
     </div>
   );

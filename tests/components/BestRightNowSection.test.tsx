@@ -100,7 +100,9 @@ describe("BestRightNowSection", () => {
     expect(
       container.querySelector(".rounded-full.border.border-karl-gold\\/28.bg-black\\/28"),
     ).toBeNull();
-    expect(container.querySelector(".text-\\[1\\.75rem\\].text-karl-gold")).toBeTruthy();
-    expect(container.querySelector(".h-12.w-12.rounded-full")).toBeTruthy();
+    expect(
+      container.querySelector(".text-\\[1\\.75rem\\].max-sm\\:text-\\[2rem\\].text-karl-gold"),
+    ).toBeTruthy();
+    expect(container.querySelector(".max-sm\\:h-14.max-sm\\:w-14.rounded-full")).toBeTruthy();
   });
 });

@@ -140,7 +140,30 @@ describe("HomeView responsive polish", () => {
 
     const mobileCards = container.querySelector(".flex.flex-col.gap-3\\.5.lg\\:hidden");
     expect(mobileCards?.querySelector(".rounded-full.border.border-karl-gold")).toBeNull();
-    expect(mobileCards?.querySelector(".text-\\[1\\.75rem\\].text-karl-gold")).toBeTruthy();
-    expect(mobileCards?.querySelector(".h-12.w-12.rounded-full")).toBeTruthy();
+    expect(
+      mobileCards?.querySelector(".text-\\[1\\.75rem\\].max-sm\\:text-\\[2rem\\].text-karl-gold"),
+    ).toBeTruthy();
+    expect(mobileCards?.querySelector(".max-sm\\:h-14.max-sm\\:w-14.rounded-full")).toBeTruthy();
+  });
+
+  it("uses larger phone portrait metric tiles with clearer hierarchy", async () => {
+    const { container } = renderHomeView();
+
+    await screen.findByText("Fog Coverage");
+
+    const dashboard = container.querySelector('[aria-label="Bay Area conditions dashboard"]');
+    expect(dashboard?.className).toContain("max-sm:gap-3");
+
+    const metricSurfaces = container.querySelectorAll(".max-sm\\:min-h-\\[7\\.25rem\\]");
+    expect(metricSurfaces.length).toBe(4);
+    expect(container.querySelector(".max-sm\\:text-\\[1\\.65rem\\]")).toBeTruthy();
+  });
+
+  it("adds phone portrait spacing between mobile insight cards", () => {
+    const { container } = renderHomeView();
+
+    const mobileStack = container.querySelector(".max-sm\\:gap-4.lg\\:hidden");
+    expect(mobileStack).toBeTruthy();
+    expect(mobileStack?.className).toContain("max-sm:mt-4");
   });
 });
