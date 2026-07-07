@@ -6,7 +6,7 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 
 import { FogCoverageIcon, MoonIcon, SunshineIcon } from "@/components/home/ConditionIcons";
-import { ClearestSpotBellCurve } from "@/components/home/ClearestSpotBellCurve";
+import { ClearestSpotGauge } from "@/components/home/ClearestSpotGauge";
 import { ClearSkiesScoreSlider } from "@/components/home/ClearSkiesScoreSlider";
 import { FogCoverageSlider } from "@/components/home/FogCoverageSlider";
 import { MetricCardLabel, TwoLineMetricLabel } from "@/components/home/MetricCardLabel";
@@ -291,7 +291,7 @@ export function DashboardGrid({
           mapAriaLabel={spotMapAriaLabel}
           mobileDetailAddon={
             !isLoading && bestSunshine ? (
-              <ClearestSpotBellCurve score={bestSunshine.sunshineScore} />
+              <ClearestSpotGauge score={bestSunshine.sunshineScore} />
             ) : null
           }
         />

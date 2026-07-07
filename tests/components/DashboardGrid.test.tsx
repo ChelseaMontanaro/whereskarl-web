@@ -12,11 +12,10 @@ import { DashboardGrid } from "@/components/home/DashboardGrid";
 import { MetricDetailSheet } from "@/components/home/MetricDetailSheet";
 import {
   clearSkiesIndicatorAriaLabel,
-  clearestSpotBellCurveAriaLabel,
-  clearestSpotBellCurveVisualX,
   fogCoverageIndicatorAriaLabel,
   metricPercentFillWidth,
 } from "@/lib/home/metricPercent";
+import { clearestSpotGaugeAriaLabel } from "@/lib/home/clearestSpotGauge";
 import { fogCoverageSliderFillWidth } from "@/lib/home/fogCoverageIndicator";
 import { METRIC_DETAILS } from "@/lib/home/metricDetails";
 import type { BestSunshineResponse, CurrentResponse } from "@/lib/schemas/weather";
@@ -278,7 +277,7 @@ describe("DashboardGrid", () => {
     expect(screen.queryByRole("img", { name: /Fog coverage:/ })).not.toBeInTheDocument();
     expect(screen.queryByTestId("fog-coverage-slider")).not.toBeInTheDocument();
     expect(screen.queryByTestId("clear-skies-slider")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("clearest-spot-bell-curve")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("clearest-spot-gauge")).not.toBeInTheDocument();
   });
 
   it("renders an orange clear skies slider only on the Clear Skies Score tile", () => {
@@ -309,7 +308,7 @@ describe("DashboardGrid", () => {
     ).toBe(false);
   });
 
-  it("renders a blue bell curve only on the Clearest Spot tile", () => {
+  it("renders a semicircle gauge only on the Clearest Spot tile", () => {
     render(
       <DashboardGrid
         current={currentFixture}
@@ -318,35 +317,35 @@ describe("DashboardGrid", () => {
       />,
     );
 
-    const curve = screen.getByTestId("clearest-spot-bell-curve");
+    const gauge = screen.getByTestId("clearest-spot-gauge");
     expect(
-      screen.getByRole("img", { name: clearestSpotBellCurveAriaLabel(81) }),
+      screen.getByRole("img", { name: clearestSpotGaugeAriaLabel(81) }),
     ).toBeInTheDocument();
-    expect(screen.getByTestId("clearest-spot-bell-curve-path")).toBeInTheDocument();
-    expect(screen.getByTestId("clearest-spot-bell-curve-peak")).toHaveAttribute(
-      "cx",
-      String(clearestSpotBellCurveVisualX(81)),
-    );
-    expect(screen.getByTestId("clearest-spot-bell-curve-svg")).toHaveAttribute(
+    expect(screen.getByTestId("clearest-spot-gauge-active-arc")).toBeInTheDocument();
+    expect(screen.getByTestId("clearest-spot-gauge-marker")).toBeInTheDocument();
+    expect(screen.getByTestId("clearest-spot-gauge-needle")).toBeInTheDocument();
+    expect(screen.getByTestId("clearest-spot-gauge-svg")).toHaveAttribute(
       "data-viewbox-height",
-      "64",
+      "56",
     );
-    expect(screen.getByTestId("clearest-spot-bell-curve-svg").getAttribute("preserveAspectRatio")).toBe(
+    expect(screen.getByTestId("clearest-spot-gauge-svg").getAttribute("preserveAspectRatio")).toBe(
       "xMidYMax meet",
     );
-    expect(curve.className).toContain("max-sm:overflow-hidden");
-    expect(screen.getByTestId("clearest-spot-bell-curve-frame").className).toContain("max-sm:h-12");
+    expect(gauge.className).toContain("max-sm:overflow-hidden");
+    expect(screen.getByTestId("clearest-spot-gauge-frame").className).toContain("max-sm:h-12");
+    expect(within(gauge).getByText("Low")).toBeInTheDocument();
+    expect(within(gauge).getByText("Best")).toBeInTheDocument();
 
     const clearestSpotLink = screen.getByRole("link", {
       name: "View clearest spot on map: Tiburon",
     });
-    expect(clearestSpotLink.contains(curve)).toBe(true);
+    expect(clearestSpotLink.contains(gauge)).toBe(true);
     expect(
-      screen.getByRole("button", { name: "Learn about Clear Skies Score" }).contains(curve),
+      screen.getByRole("button", { name: "Learn about Clear Skies Score" }).contains(gauge),
     ).toBe(false);
   });
 
-  it("keeps the clearest spot bell curve contained inside the Clearest Spot card", () => {
+  it("keeps the clearest spot gauge contained inside the Clearest Spot card", () => {
     render(
       <DashboardGrid
         current={currentFixture}
@@ -358,20 +357,18 @@ describe("DashboardGrid", () => {
     const clearestSpotLink = screen.getByRole("link", {
       name: "View clearest spot on map: Tiburon",
     });
-    const curve = screen.getByTestId("clearest-spot-bell-curve");
-    const frame = screen.getByTestId("clearest-spot-bell-curve-frame");
-    const baseline = screen.getByTestId("clearest-spot-bell-curve-baseline");
+    const gauge = screen.getByTestId("clearest-spot-gauge");
+    const frame = screen.getByTestId("clearest-spot-gauge-frame");
 
-    expect(clearestSpotLink.contains(curve)).toBe(true);
-    expect(curve.contains(frame)).toBe(true);
-    expect(curve.className).toContain("max-sm:overflow-hidden");
+    expect(clearestSpotLink.contains(gauge)).toBe(true);
+    expect(gauge.contains(frame)).toBe(true);
+    expect(gauge.className).toContain("max-sm:overflow-hidden");
     expect(frame.className).toContain("max-sm:h-12");
-    expect(baseline).toBeInTheDocument();
     expect(screen.getByTestId("fog-coverage-slider").className).not.toContain("overflow-hidden");
     expect(screen.getByTestId("clear-skies-slider").className).not.toContain("overflow-hidden");
   });
 
-  it("does not change fog or clear skies slider markup when clearest spot uses the bell curve", () => {
+  it("does not change fog or clear skies slider markup when clearest spot uses the gauge", () => {
     render(
       <DashboardGrid
         current={{ ...currentFixture, fogCoverage: 59, sunshineScore: 41 }}
@@ -382,11 +379,8 @@ describe("DashboardGrid", () => {
 
     expect(screen.getByTestId("fog-coverage-slider-track").getAttribute("data-fill-percent")).toBe("59");
     expect(screen.getByTestId("clear-skies-slider-track").getAttribute("data-fill-percent")).toBe("41");
-    expect(screen.getByTestId("clearest-spot-bell-curve-peak")).toHaveAttribute(
-      "cx",
-      String(clearestSpotBellCurveVisualX(79)),
-    );
-    expect(screen.queryAllByTestId("clearest-spot-bell-curve")).toHaveLength(1);
+    expect(screen.getByTestId("clearest-spot-gauge-marker")).toBeInTheDocument();
+    expect(screen.queryAllByTestId("clearest-spot-gauge")).toHaveLength(1);
     expect(screen.queryAllByTestId("fog-coverage-slider")).toHaveLength(1);
     expect(screen.queryAllByTestId("clear-skies-slider")).toHaveLength(1);
   });
