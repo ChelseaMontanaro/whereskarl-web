@@ -24,7 +24,7 @@ export const CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX = {
 export const clearestSpotGaugeFrameClass =
   "max-sm:h-[3.375rem] max-sm:w-full max-sm:shrink-0 max-sm:overflow-hidden";
 
-export const clearestSpotGaugeContainerClass = `${mobileMetricIndicatorClass} flex max-sm:min-h-0 max-sm:flex-1 max-sm:flex-col max-sm:justify-end max-sm:w-full max-sm:!pt-0 max-sm:pb-0`;
+export const clearestSpotGaugeContainerClass = `${mobileMetricIndicatorClass} flex max-sm:min-h-0 max-sm:flex-1 max-sm:flex-col max-sm:justify-end max-sm:w-full max-sm:!pt-0 max-sm:pl-4 max-sm:pr-1 max-sm:pb-0`;
 
 const CLEAREST_SPOT_GAUGE_LABEL_Y = CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX.height - 2.5;
 

@@ -90,8 +90,8 @@ describe("ClearestSpotGauge", () => {
     const svg = screen.getByTestId("clearest-spot-gauge-svg");
 
     expect(container.className).not.toMatch(/-mt-/);
-    expect(container.className).toContain("max-sm:!pt-0");
-    expect(container.className).toContain("max-sm:pb-0");
+    expect(container.className).toContain("max-sm:pl-4");
+    expect(container.className).toContain("max-sm:pr-1");
     expect(frame.className).not.toContain("max-sm:mx-auto");
     expect(frame.className).toContain("max-sm:overflow-hidden");
     expect(svg).toHaveAttribute(
