@@ -6,6 +6,7 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 
 import { FogCoverageIcon, MoonIcon, SunshineIcon } from "@/components/home/ConditionIcons";
+import { FogCoverageSlider } from "@/components/home/FogCoverageSlider";
 import { MetricDetailSheet } from "@/components/home/MetricDetailSheet";
 import {
   desktopClickableCardHoverClass,
@@ -22,11 +23,6 @@ import {
   mobileKarlStatusValueClass,
 } from "@/components/home/desktopGlass";
 import { GlassCard } from "@/components/ui/GlassCard";
-import {
-  FOG_COVERAGE_DENSITY_MARK_COUNT,
-  fogCoverageActiveMarkCount,
-  fogCoverageIndicatorAriaLabel,
-} from "@/lib/home/fogCoverageIndicator";
 import {
   METRIC_DETAILS,
   metricDetailAriaLabel,
@@ -56,35 +52,6 @@ function CardLabel({ children }: { children: ReactNode }) {
 
 function MetricSpotLabel() {
   return "Clearest Spot";
-}
-
-function MobileFogCoverageDensityStrip({
-  fogCoveragePercent,
-}: {
-  fogCoveragePercent: number;
-}) {
-  const activeCount = fogCoverageActiveMarkCount(fogCoveragePercent);
-
-  return (
-    <div
-      className="mt-2.5 hidden max-sm:block"
-      role="img"
-      aria-label={fogCoverageIndicatorAriaLabel(fogCoveragePercent)}
-    >
-      <div className="flex items-center gap-1.5" aria-hidden="true">
-        {Array.from({ length: FOG_COVERAGE_DENSITY_MARK_COUNT }, (_, index) => (
-          <FogCoverageIcon
-            key={index}
-            className={
-              index < activeCount
-                ? "h-[0.875rem] w-[0.875rem] opacity-[0.72]"
-                : "h-[0.875rem] w-[0.875rem] opacity-[0.22]"
-            }
-          />
-        ))}
-      </div>
-    </div>
-  );
 }
 
 function MetricCardContent({
@@ -261,7 +228,7 @@ export function DashboardGrid({
           onOpenDetail={openMetricDetail}
           mobileDetailAddon={
             !isLoading && current ? (
-              <MobileFogCoverageDensityStrip fogCoveragePercent={current.fogCoverage} />
+              <FogCoverageSlider fogCoveragePercent={current.fogCoverage} />
             ) : null
           }
         />

@@ -1,12 +1,12 @@
-export const FOG_COVERAGE_DENSITY_MARK_COUNT = 5;
+export function clampFogCoveragePercent(fogCoveragePercent: number): number {
+  return Math.min(100, Math.max(0, fogCoveragePercent));
+}
 
-export function fogCoverageActiveMarkCount(fogCoveragePercent: number): number {
-  const clamped = Math.min(100, Math.max(0, fogCoveragePercent));
-  return Math.round(
-    (clamped / 100) * FOG_COVERAGE_DENSITY_MARK_COUNT,
-  );
+export function fogCoverageSliderFillWidth(fogCoveragePercent: number): string {
+  return `${clampFogCoveragePercent(fogCoveragePercent)}%`;
 }
 
 export function fogCoverageIndicatorAriaLabel(fogCoveragePercent: number): string {
-  return `Fog coverage: ${fogCoveragePercent} percent`;
+  const clamped = clampFogCoveragePercent(fogCoveragePercent);
+  return `Fog coverage: ${clamped} percent`;
 }
