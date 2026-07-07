@@ -75,7 +75,7 @@ function MetricCardContent({
   return (
     <div
       className={`flex h-full w-full flex-col ${
-        mobileGaugeLayout ? "max-sm:justify-end max-sm:gap-1.5" : "max-sm:justify-between"
+        mobileGaugeLayout ? "max-sm:justify-end max-sm:gap-1" : "max-sm:justify-between"
       }`}
     >
       <div
