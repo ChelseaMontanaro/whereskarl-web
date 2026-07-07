@@ -331,7 +331,11 @@ describe("DashboardGrid", () => {
       "data-viewbox-height",
       "64",
     );
-    expect(screen.getByTestId("clearest-spot-bell-curve-svg").className).toContain("h-16");
+    expect(screen.getByTestId("clearest-spot-bell-curve-svg").getAttribute("preserveAspectRatio")).toBe(
+      "xMidYMax meet",
+    );
+    expect(curve.className).toContain("max-sm:overflow-hidden");
+    expect(screen.getByTestId("clearest-spot-bell-curve-frame").className).toContain("max-sm:h-12");
 
     const clearestSpotLink = screen.getByRole("link", {
       name: "View clearest spot on map: Tiburon",
@@ -340,6 +344,31 @@ describe("DashboardGrid", () => {
     expect(
       screen.getByRole("button", { name: "Learn about Clear Skies Score" }).contains(curve),
     ).toBe(false);
+  });
+
+  it("keeps the clearest spot bell curve contained inside the Clearest Spot card", () => {
+    render(
+      <DashboardGrid
+        current={currentFixture}
+        bestSunshine={{ ...bestSunshineFixture, sunshineScore: 81 }}
+        isLoading={false}
+      />,
+    );
+
+    const clearestSpotLink = screen.getByRole("link", {
+      name: "View clearest spot on map: Tiburon",
+    });
+    const curve = screen.getByTestId("clearest-spot-bell-curve");
+    const frame = screen.getByTestId("clearest-spot-bell-curve-frame");
+    const baseline = screen.getByTestId("clearest-spot-bell-curve-baseline");
+
+    expect(clearestSpotLink.contains(curve)).toBe(true);
+    expect(curve.contains(frame)).toBe(true);
+    expect(curve.className).toContain("max-sm:overflow-hidden");
+    expect(frame.className).toContain("max-sm:h-12");
+    expect(baseline).toBeInTheDocument();
+    expect(screen.getByTestId("fog-coverage-slider").className).not.toContain("overflow-hidden");
+    expect(screen.getByTestId("clear-skies-slider").className).not.toContain("overflow-hidden");
   });
 
   it("does not change fog or clear skies slider markup when clearest spot uses the bell curve", () => {
