@@ -18,21 +18,27 @@ type ClearestSpotGaugeProps = {
 
 export const CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_X = 1.18;
 
-export const CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_Y = 0.46;
+export const CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_Y = 0.42;
+
+export const CLEAREST_SPOT_GAUGE_PRESENTATION_TRANSLATE_Y = -2;
 
 export const CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX = {
   minX: 0,
-  minY: 26,
+  minY: 27,
   width: CLEAREST_SPOT_GAUGE_VIEWBOX.width,
-  height: 27,
+  height: 25,
 } as const;
 
 export const clearestSpotGaugeFrameClass =
-  "max-sm:h-[2.625rem] max-sm:w-full max-sm:shrink-0 max-sm:overflow-hidden";
+  "max-sm:h-[2.375rem] max-sm:w-full max-sm:shrink-0 max-sm:overflow-hidden";
 
-export const clearestSpotGaugeContainerClass = `${mobileMetricIndicatorClass} max-sm:shrink-0 max-sm:w-full max-sm:!pt-0 max-sm:pb-0.5`;
+export const clearestSpotGaugeContainerClass = `${mobileMetricIndicatorClass} max-sm:shrink-0 max-sm:w-full max-sm:!pt-0.5 max-sm:pb-1`;
 
-const CLEAREST_SPOT_GAUGE_LABEL_Y = 48;
+export const CLEAREST_SPOT_GAUGE_LABEL_Y = 51;
+
+const CLEAREST_SPOT_GAUGE_HUB_RADIUS = 2.85;
+
+const CLEAREST_SPOT_GAUGE_HUB_DOT_RADIUS = 1.15;
 
 export function clearestSpotGaugeDisplayViewBox(): string {
   const { minX, minY, width, height } = CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX;
@@ -40,7 +46,7 @@ export function clearestSpotGaugeDisplayViewBox(): string {
 }
 
 export function clearestSpotGaugePresentationTransform(): string {
-  return `translate(${CLEAREST_SPOT_GAUGE_CENTER_X} ${CLEAREST_SPOT_GAUGE_CENTER_Y}) scale(${CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_X} ${CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_Y}) translate(${-CLEAREST_SPOT_GAUGE_CENTER_X} ${-CLEAREST_SPOT_GAUGE_CENTER_Y})`;
+  return `translate(${CLEAREST_SPOT_GAUGE_CENTER_X} ${CLEAREST_SPOT_GAUGE_CENTER_Y}) scale(${CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_X} ${CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_Y}) translate(${-CLEAREST_SPOT_GAUGE_CENTER_X} ${-CLEAREST_SPOT_GAUGE_CENTER_Y}) translate(0 ${CLEAREST_SPOT_GAUGE_PRESENTATION_TRANSLATE_Y})`;
 }
 
 export function clearestSpotGaugePresentationLabelX(x: number): number {
@@ -79,6 +85,7 @@ export function ClearestSpotGauge({ score }: ClearestSpotGaugeProps) {
           data-viewbox-width={CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX.width}
           data-viewbox-height={CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX.height}
           data-presentation-scale-y={CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_Y}
+          data-presentation-translate-y={CLEAREST_SPOT_GAUGE_PRESENTATION_TRANSLATE_Y}
         >
           <defs>
             <linearGradient
@@ -130,14 +137,14 @@ export function ClearestSpotGauge({ score }: ClearestSpotGaugeProps) {
             <circle
               cx={CLEAREST_SPOT_GAUGE_CENTER_X}
               cy={CLEAREST_SPOT_GAUGE_CENTER_Y}
-              r="3.25"
+              r={CLEAREST_SPOT_GAUGE_HUB_RADIUS}
               fill="white"
               data-testid="clearest-spot-gauge-hub"
             />
             <circle
               cx={CLEAREST_SPOT_GAUGE_CENTER_X}
               cy={CLEAREST_SPOT_GAUGE_CENTER_Y}
-              r="1.35"
+              r={CLEAREST_SPOT_GAUGE_HUB_DOT_RADIUS}
               fill="#8EC8F0"
               data-testid="clearest-spot-gauge-hub-dot"
             />
@@ -158,8 +165,8 @@ export function ClearestSpotGauge({ score }: ClearestSpotGaugeProps) {
             x={clearestSpotGaugePresentationLabelX(arcStart.x)}
             y={CLEAREST_SPOT_GAUGE_LABEL_Y}
             textAnchor="middle"
-            fill="rgba(255,255,255,0.42)"
-            fontSize="4.5"
+            fill="rgba(255,255,255,0.38)"
+            fontSize="4"
             fontWeight="700"
             letterSpacing="0.08em"
             data-testid="clearest-spot-gauge-label-low"
@@ -170,8 +177,8 @@ export function ClearestSpotGauge({ score }: ClearestSpotGaugeProps) {
             x={clearestSpotGaugePresentationLabelX(arcEnd.x)}
             y={CLEAREST_SPOT_GAUGE_LABEL_Y}
             textAnchor="middle"
-            fill="rgba(255,255,255,0.42)"
-            fontSize="4.5"
+            fill="rgba(255,255,255,0.38)"
+            fontSize="4"
             fontWeight="700"
             letterSpacing="0.08em"
             data-testid="clearest-spot-gauge-label-best"

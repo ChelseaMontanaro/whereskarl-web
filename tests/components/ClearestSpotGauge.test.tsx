@@ -6,7 +6,9 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   ClearestSpotGauge,
   CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX,
+  CLEAREST_SPOT_GAUGE_LABEL_Y,
   CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_Y,
+  CLEAREST_SPOT_GAUGE_PRESENTATION_TRANSLATE_Y,
   clearestSpotGaugeContainerClass,
   clearestSpotGaugeFrameClass,
   clearestSpotGaugePresentationTransform,
@@ -68,6 +70,9 @@ describe("ClearestSpotGauge", () => {
     expect(gauge.contains(bestLabel)).toBe(true);
     expect(lowLabel.textContent).toBe("LOW");
     expect(bestLabel.textContent).toBe("BEST");
+    expect(lowLabel.getAttribute("y")).toBe(String(CLEAREST_SPOT_GAUGE_LABEL_Y));
+    expect(bestLabel.getAttribute("y")).toBe(String(CLEAREST_SPOT_GAUGE_LABEL_Y));
+    expect(Number(lowLabel.getAttribute("y"))).toBeGreaterThan(CLEAREST_SPOT_GAUGE_CENTER_Y);
   });
 
   it("uses a bounded fixed mobile gauge frame height", () => {
@@ -80,7 +85,7 @@ describe("ClearestSpotGauge", () => {
     expect(container.className).toContain("max-sm:shrink-0");
     expect(container.className).not.toContain("max-sm:flex-1");
     expect(frame.className).toBe(clearestSpotGaugeFrameClass);
-    expect(frame.className).toContain("max-sm:h-[2.625rem]");
+    expect(frame.className).toContain("max-sm:h-[2.375rem]");
     expect(frame.className).toContain("max-sm:w-full");
     expect(frame.className).not.toContain("aspect-");
   });
@@ -109,6 +114,10 @@ describe("ClearestSpotGauge", () => {
       String(CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX.minY),
     );
     expect(svg.getAttribute("preserveAspectRatio")).toBe("xMidYMax slice");
+    expect(svg).toHaveAttribute(
+      "data-presentation-translate-y",
+      String(CLEAREST_SPOT_GAUGE_PRESENTATION_TRANSLATE_Y),
+    );
     expect(svg.getAttribute("data-presentation-scale-y")).toBe(
       String(CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_Y),
     );
