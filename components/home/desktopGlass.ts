@@ -25,6 +25,9 @@ export const mobileInsightCardSurfaceClass =
 export const mobileCardLabelClass =
   "max-sm:text-[0.6875rem] max-sm:tracking-[0.12em] max-sm:text-white/50";
 
+/** Shared primary metric value typography for phone portrait metric tiles */
+export const mobileMetricPrimaryValueClass = "max-sm:text-[1.95rem]";
+
 export const mobileInsightIconFrameClass = "max-sm:h-12 max-sm:w-12";
 
 /** Compact icon frame for mobile Best Right Now list rows */

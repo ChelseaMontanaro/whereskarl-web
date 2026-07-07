@@ -1,21 +1,15 @@
-import Link from "next/link";
-
 import { MoonIcon, SunshineIcon } from "@/components/home/ConditionIcons";
 import {
   CardLabel,
-  InsightCardChevron,
   InsightIconFrame,
 } from "@/components/home/InsightCardParts";
 import {
-  desktopClickableCardHoverClass,
-  desktopClickableCardLinkClass,
   desktopInsightIconSizeClass,
   mobileInsightCardSurfaceClass,
 } from "@/components/home/desktopGlass";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { DegradedDataLabel } from "@/components/weather/DegradedDataLabel";
 import type { BestRightNowItem } from "@/lib/home/weatherDisplay";
-import { buildMapHref } from "@/lib/map/routing";
 
 type BestRightNowSectionProps = {
   items: BestRightNowItem[];
@@ -23,6 +17,11 @@ type BestRightNowSectionProps = {
   isNightPresentation?: boolean;
   layout?: "both" | "mobile" | "desktop";
 };
+
+/** Prevents iOS Safari from auto-linking city names to Apple/Google Maps. */
+const preventLocationAutoLinkProps = {
+  "x-apple-data-detectors": "false",
+} as const;
 
 function BestRightNowSpotIcon({
   isNightPresentation,
@@ -36,6 +35,30 @@ function BestRightNowSpotIcon({
   );
 }
 
+function BestRightNowLocationCopy({
+  locationName,
+  detail,
+  isDegraded,
+  nameClassName,
+  detailClassName,
+}: {
+  locationName: string;
+  detail: string;
+  isDegraded?: boolean;
+  nameClassName: string;
+  detailClassName: string;
+}) {
+  return (
+    <>
+      <p className={nameClassName}>{locationName}</p>
+      <p className={detailClassName}>{detail}</p>
+      {isDegraded ? (
+        <DegradedDataLabel variant="bestRightNow" className="mt-1.5" />
+      ) : null}
+    </>
+  );
+}
+
 function MobileBestRightNowSection({
   items,
   isNightPresentation = false,
@@ -45,7 +68,10 @@ function MobileBestRightNowSection({
       <CardLabel className="text-white/45 lg:text-white/45">
         Best Right Now
       </CardLabel>
-      <ul className="mt-3 max-sm:mt-3.5 space-y-0">
+      <ul
+        className="mt-3 max-sm:mt-3.5 space-y-0"
+        {...preventLocationAutoLinkProps}
+      >
         {items.map((item) => (
           <li
             key={item.locationId}
@@ -57,14 +83,14 @@ function MobileBestRightNowSection({
             >
               <BestRightNowSpotIcon isNightPresentation={isNightPresentation} />
             </InsightIconFrame>
-            <div className="min-w-0 flex-1">
-              <p className="text-base max-sm:text-[1.0625rem] font-semibold text-white">
-                {item.locationName}
-              </p>
-              <p className="mt-1 max-sm:mt-1.5 text-sm max-sm:text-[0.9375rem] leading-snug text-white/65">{item.detail}</p>
-              {item.isDegraded ? (
-                <DegradedDataLabel variant="bestRightNow" className="mt-1.5" />
-              ) : null}
+            <div className="min-w-0 flex-1" {...preventLocationAutoLinkProps}>
+              <BestRightNowLocationCopy
+                locationName={item.locationName}
+                detail={item.detail}
+                isDegraded={item.isDegraded}
+                nameClassName="text-base max-sm:text-[1.0625rem] font-semibold text-white"
+                detailClassName="mt-1 max-sm:mt-1.5 text-sm max-sm:text-[0.9375rem] leading-snug text-white/65"
+              />
             </div>
             {item.score != null ? (
               <BestRightNowScore score={item.score} size="mobile" />
@@ -103,62 +129,27 @@ function DesktopBestRightNowCard({
   item: BestRightNowItem;
   isNightPresentation?: boolean;
 }) {
-  if (!item.locationId) {
-    return (
-      <GlassCard variant="desktop" className="flex h-full items-center gap-4 px-5 py-5">
-        <InsightIconFrame tone={isNightPresentation ? "mist" : "gold"}>
-          <BestRightNowSpotIcon isNightPresentation={isNightPresentation} />
-        </InsightIconFrame>
-        <div className="min-w-0 flex-1">
-          <CardLabel>Best Right Now</CardLabel>
-          <p className="mt-1.5 text-lg font-semibold text-white lg:text-xl">
-            {item.locationName}
-          </p>
-          <p className="mt-1 text-sm leading-relaxed text-white/68">{item.detail}</p>
-          {item.isDegraded ? (
-            <DegradedDataLabel variant="bestRightNow" className="mt-1.5" />
-          ) : null}
-        </div>
-        {item.score != null ? (
-          <div className="flex shrink-0 items-center gap-2">
-            <BestRightNowScore score={item.score} />
-          </div>
-        ) : null}
-      </GlassCard>
-    );
-  }
-
-  const href = buildMapHref(item.locationId);
-
   return (
-    <Link
-      href={href}
-      aria-label={`View ${item.locationName} on map`}
-      className={`${desktopClickableCardLinkClass} h-full`}
-    >
-      <GlassCard
-        variant="desktop"
-        className={`flex h-full items-center gap-4 px-5 py-5 ${desktopClickableCardHoverClass}`}
-      >
-        <InsightIconFrame tone={isNightPresentation ? "mist" : "gold"}>
-          <BestRightNowSpotIcon isNightPresentation={isNightPresentation} />
-        </InsightIconFrame>
-        <div className="min-w-0 flex-1">
-          <CardLabel>Best Right Now</CardLabel>
-          <p className="mt-1.5 text-lg font-semibold text-white lg:text-xl">
-            {item.locationName}
-          </p>
-          <p className="mt-1 text-sm leading-relaxed text-white/68">{item.detail}</p>
-          {item.isDegraded ? (
-            <DegradedDataLabel variant="bestRightNow" className="mt-1.5" />
-          ) : null}
-        </div>
+    <GlassCard variant="desktop" className="flex h-full items-center gap-4 px-5 py-5">
+      <InsightIconFrame tone={isNightPresentation ? "mist" : "gold"}>
+        <BestRightNowSpotIcon isNightPresentation={isNightPresentation} />
+      </InsightIconFrame>
+      <div className="min-w-0 flex-1" {...preventLocationAutoLinkProps}>
+        <CardLabel>Best Right Now</CardLabel>
+        <BestRightNowLocationCopy
+          locationName={item.locationName}
+          detail={item.detail}
+          isDegraded={item.isDegraded}
+          nameClassName="mt-1.5 text-lg font-semibold text-white lg:text-xl"
+          detailClassName="mt-1 text-sm leading-relaxed text-white/68"
+        />
+      </div>
+      {item.score != null ? (
         <div className="flex shrink-0 items-center gap-2">
-          {item.score != null ? <BestRightNowScore score={item.score} /> : null}
-          <InsightCardChevron />
+          <BestRightNowScore score={item.score} />
         </div>
-      </GlassCard>
-    </Link>
+      ) : null}
+    </GlassCard>
   );
 }
 

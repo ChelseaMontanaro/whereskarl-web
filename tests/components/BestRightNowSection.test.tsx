@@ -23,9 +23,9 @@ const items: BestRightNowItem[] = [
     rank: 2,
   },
   {
-    locationId: "palo-alto",
-    locationName: "Palo Alto",
-    detail: "Mostly clear near Palo Alto.",
+    locationId: "san-jose",
+    locationName: "San Jose",
+    detail: "San Jose is one of the clearest spots right now.",
     score: 76,
     rank: 3,
   },
@@ -45,13 +45,15 @@ describe("BestRightNowSection", () => {
       />,
     );
 
+    const tiburonCard = screen.getByText("Tiburon").closest(".rounded-2xl");
     expect(
-      container.querySelector('[aria-label="View Tiburon on map"] svg path[fill="#8CB8D8"]'),
+      tiburonCard?.querySelector('svg path[fill="#8CB8D8"]'),
     ).toBeTruthy();
+    expect(container.querySelector('a[href*="/map"]')).toBeNull();
   });
 
   it("uses a sun icon during the day on desktop cards", () => {
-    const { container } = render(
+    render(
       <BestRightNowSection
         items={items}
         isNightPresentation={false}
@@ -59,11 +61,10 @@ describe("BestRightNowSection", () => {
       />,
     );
 
+    const tiburonCard = screen.getByText("Tiburon").closest(".rounded-2xl");
+    expect(tiburonCard?.querySelector("svg circle")).toBeTruthy();
     expect(
-      container.querySelector('[aria-label="View Tiburon on map"] svg circle'),
-    ).toBeTruthy();
-    expect(
-      container.querySelector('[aria-label="View Tiburon on map"] svg path[fill="#8CB8D8"]'),
+      tiburonCard?.querySelector('svg path[fill="#8CB8D8"]'),
     ).toBeNull();
   });
 
@@ -132,5 +133,39 @@ describe("BestRightNowSection", () => {
     expect(listItems.length).toBe(3);
     expect(iconFrames.length).toBe(3);
     expect(container.querySelectorAll("ul li svg").length).toBe(3);
+  });
+
+  it("does not render Best Right Now location names as map links or anchors", () => {
+    const { container } = render(
+      <BestRightNowSection
+        items={items}
+        isNightPresentation={false}
+        layout="mobile"
+      />,
+    );
+
+    expect(screen.getByText("San Jose")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /San Jose/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /View .* on map/i })).not.toBeInTheDocument();
+    expect(container.querySelector('a[href*="/map"]')).toBeNull();
+    expect(container.querySelector('a[href*="google"]')).toBeNull();
+
+    const sanJoseName = screen.getByText("San Jose");
+    expect(sanJoseName.tagName).toBe("P");
+    expect(sanJoseName.closest("a")).toBeNull();
+  });
+
+  it("disables iOS location auto-linking on Best Right Now text rows", () => {
+    const { container } = render(
+      <BestRightNowSection
+        items={items}
+        isNightPresentation={false}
+        layout="mobile"
+      />,
+    );
+
+    const autoLinkGuard = container.querySelector('[x-apple-data-detectors="false"]');
+    expect(autoLinkGuard).toBeTruthy();
+    expect(autoLinkGuard?.contains(screen.getByText("San Jose"))).toBe(true);
   });
 });

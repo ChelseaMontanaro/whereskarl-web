@@ -93,9 +93,10 @@ describe("HomeView", () => {
     expect(
       screen.getAllByRole("link", { name: "View clearest spot on map: Tiburon" }),
     ).toHaveLength(1);
+    expect(screen.getAllByText("Sausalito").length).toBeGreaterThan(0);
     expect(
-      screen.getByRole("link", { name: "View Sausalito on map" }),
-    ).toHaveAttribute("href", "/map?location=sausalito");
+      screen.queryByRole("link", { name: "View Sausalito on map" }),
+    ).not.toBeInTheDocument();
     expect(
       screen.getByRole("link", {
         name: "View Karl's read on map: Marin Headlands / Hawk Hill",

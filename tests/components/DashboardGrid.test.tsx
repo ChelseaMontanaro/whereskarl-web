@@ -116,6 +116,31 @@ describe("DashboardGrid", () => {
     expect(container.querySelector(".max-sm\\:text-\\[1\\.95rem\\]")).toBeTruthy();
   });
 
+  it("uses the same primary metric value sizing for Karl Status as other metric tiles on phone portrait", () => {
+    const statusFixture: CurrentResponse = {
+      ...currentFixture,
+      status: "Patchy fog nearby",
+    };
+
+    render(
+      <DashboardGrid
+        current={statusFixture}
+        bestSunshine={bestSunshineFixture}
+        isLoading={false}
+      />,
+    );
+
+    const fogCoverageValue = screen.getByText("56%");
+    const karlStatusValue = screen.getByText("Patchy fog nearby");
+    const sunshineScoreValue = screen.getByText("44");
+
+    expect(fogCoverageValue.className).toContain("max-sm:text-[1.95rem]");
+    expect(karlStatusValue.className).toContain("max-sm:text-[1.95rem]");
+    expect(sunshineScoreValue.className).toContain("max-sm:text-[1.95rem]");
+    expect(karlStatusValue.className).not.toContain("1.1875rem");
+    expect(karlStatusValue.className).toContain("max-sm:!line-clamp-3");
+  });
+
   it("renders premium weather icons alongside dashboard metrics", () => {
     const { container } = render(
       <DashboardGrid
