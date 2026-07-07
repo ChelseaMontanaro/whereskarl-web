@@ -1,11 +1,11 @@
 import { mobileMetricIndicatorClass } from "@/components/home/desktopGlass";
 import {
   CLEAREST_SPOT_BELL_CURVE_BASELINE_Y,
+  CLEAREST_SPOT_BELL_CURVE_PEAK_Y,
   CLEAREST_SPOT_BELL_CURVE_VIEWBOX,
   clearestSpotBellCurveAriaLabel,
   clearestSpotBellCurvePath,
-  clearestSpotBellCurvePeakY,
-  clampMetricPercent,
+  clearestSpotBellCurveVisualX,
 } from "@/lib/home/metricPercent";
 
 type ClearestSpotBellCurveProps = {
@@ -13,9 +13,8 @@ type ClearestSpotBellCurveProps = {
 };
 
 export function ClearestSpotBellCurve({ score }: ClearestSpotBellCurveProps) {
-  const peakX = clampMetricPercent(score);
-  const peakY = clearestSpotBellCurvePeakY(peakX);
-  const curvePath = clearestSpotBellCurvePath(peakX);
+  const visualPeakX = clearestSpotBellCurveVisualX(score);
+  const curvePath = clearestSpotBellCurvePath(score);
 
   return (
     <div
@@ -43,12 +42,13 @@ export function ClearestSpotBellCurve({ score }: ClearestSpotBellCurveProps) {
         <line
           x1="0"
           y1={CLEAREST_SPOT_BELL_CURVE_BASELINE_Y}
-          x2="100"
+          x2={CLEAREST_SPOT_BELL_CURVE_VIEWBOX.width}
           y2={CLEAREST_SPOT_BELL_CURVE_BASELINE_Y}
-          stroke="white"
-          strokeOpacity="0.18"
+          stroke="#6BA3D6"
+          strokeOpacity="0.35"
           strokeWidth="1"
           strokeLinecap="round"
+          data-testid="clearest-spot-bell-curve-baseline"
         />
         <path
           d={curvePath}
@@ -60,12 +60,13 @@ export function ClearestSpotBellCurve({ score }: ClearestSpotBellCurveProps) {
           data-testid="clearest-spot-bell-curve-path"
         />
         <circle
-          cx={peakX}
-          cy={peakY}
+          cx={visualPeakX}
+          cy={CLEAREST_SPOT_BELL_CURVE_PEAK_Y}
           r="3.4"
           fill="white"
           filter="url(#clearest-spot-peak-glow)"
           data-testid="clearest-spot-bell-curve-peak"
+          data-visual-peak-x={visualPeakX}
         />
       </svg>
     </div>

@@ -4,11 +4,13 @@ import { describe, expect, it } from "vitest";
 
 import {
   CLEAREST_SPOT_BELL_CURVE_BASELINE_Y,
+  CLEAREST_SPOT_BELL_CURVE_END_X,
+  CLEAREST_SPOT_BELL_CURVE_PEAK_Y,
+  CLEAREST_SPOT_BELL_CURVE_START_X,
   clampMetricPercent,
-  clearestSpotBellCurveLeftControlX,
+  clearestSpotBellCurveControlPoints,
   clearestSpotBellCurvePath,
-  clearestSpotBellCurvePeakY,
-  clearestSpotBellCurveRightControlX,
+  clearestSpotBellCurveVisualX,
   clearSkiesIndicatorAriaLabel,
   fogCoverageIndicatorAriaLabel,
   metricPercentFillWidth,
@@ -31,36 +33,44 @@ describe("metricPercent", () => {
     expect(clearSkiesIndicatorAriaLabel(41)).toBe("Clear skies score: 41 out of 100");
   });
 
+  it.each([
+    [0, 18],
+    [25, 32],
+    [50, 50],
+    [75, 68],
+    [80, 72],
+    [100, 82],
+  ])("maps clearest spot score %i to visual x %i", (score, visualX) => {
+    expect(clearestSpotBellCurveVisualX(score)).toBeCloseTo(visualX, 5);
+  });
+
   it.each([20, 50, 79, 100])(
-    "builds a smooth two-segment bell curve for score %i",
+    "builds the approved smooth bell curve path for score %i",
     (score) => {
-      const peakX = clampMetricPercent(score);
-      const peakY = clearestSpotBellCurvePeakY(peakX);
-      const path = clearestSpotBellCurvePath(peakX);
+      const { peakX, peakY, c1x, c2x } = clearestSpotBellCurveControlPoints(score);
+      const path = clearestSpotBellCurvePath(score);
 
-      expect(path.split(" C ").length).toBeGreaterThanOrEqual(2);
-      expect(path).toContain(`${peakX} ${peakY}`);
-
-      if (score > 0 && score < 100) {
-        const leftMid = clearestSpotBellCurveLeftControlX(peakX);
-        const rightMid = clearestSpotBellCurveRightControlX(peakX);
-
-        expect(path).toContain(`${leftMid} ${CLEAREST_SPOT_BELL_CURVE_BASELINE_Y}`);
-        expect(path).toContain(`${leftMid} ${peakY}`);
-        expect(path).toContain(`${rightMid} ${peakY}`);
-        expect(path).toContain(`${rightMid} ${CLEAREST_SPOT_BELL_CURVE_BASELINE_Y}`);
-        expect(rightMid).toBeGreaterThan(peakX);
-        expect(leftMid).toBeLessThan(peakX);
-      }
-
-      if (score >= 79 && score < 100) {
-        expect(clearestSpotBellCurveRightControlX(score)).toBeGreaterThan(score);
+      expect(path).toBe(
+        `M 0 ${CLEAREST_SPOT_BELL_CURVE_BASELINE_Y} H ${CLEAREST_SPOT_BELL_CURVE_START_X} C ${c1x} ${CLEAREST_SPOT_BELL_CURVE_BASELINE_Y}, ${c1x} ${peakY}, ${peakX} ${peakY} C ${c2x} ${peakY}, ${c2x} ${CLEAREST_SPOT_BELL_CURVE_BASELINE_Y}, 100 ${CLEAREST_SPOT_BELL_CURVE_BASELINE_Y}`,
+      );
+      expect(path).not.toContain(" V ");
+      expect(path.match(/ C /g)?.length).toBe(2);
+      expect(peakY).toBe(CLEAREST_SPOT_BELL_CURVE_PEAK_Y);
+      expect(peakX).toBeGreaterThanOrEqual(CLEAREST_SPOT_BELL_CURVE_START_X);
+      expect(peakX).toBeLessThanOrEqual(CLEAREST_SPOT_BELL_CURVE_END_X);
+      if (score < 100) {
+        expect(c2x).toBeGreaterThan(peakX);
       }
     },
   );
 
-  it("positions the bell curve peak dot x-coordinate from the live score", () => {
-    expect(clearestSpotBellCurvePath(79)).toContain(`79 ${clearestSpotBellCurvePeakY(79)}`);
-    expect(clearestSpotBellCurvePath(81)).toContain(`81 ${clearestSpotBellCurvePeakY(81)}`);
+  it("keeps high scores right-of-center while preserving right-side taper room", () => {
+    const score79 = clearestSpotBellCurveControlPoints(79);
+    const score81 = clearestSpotBellCurveControlPoints(81);
+
+    expect(score79.peakX).toBeGreaterThan(50);
+    expect(score79.peakX).toBeLessThan(CLEAREST_SPOT_BELL_CURVE_END_X);
+    expect(score81.peakX).toBeGreaterThan(score79.peakX);
+    expect(score81.c2x).toBeLessThanOrEqual(CLEAREST_SPOT_BELL_CURVE_END_X);
   });
 });

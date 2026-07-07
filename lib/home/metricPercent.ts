@@ -25,55 +25,64 @@ export const CLEAREST_SPOT_BELL_CURVE_VIEWBOX = {
 
 export const CLEAREST_SPOT_BELL_CURVE_BASELINE_Y = 44;
 
-export function clearestSpotBellCurvePeakY(peakX: number): number {
-  const clamped = clampMetricPercent(peakX);
-  const edgeDistance = Math.min(clamped, 100 - clamped);
-  const rise = 32 + Math.min(edgeDistance / 50, 1) * 8;
-  return CLEAREST_SPOT_BELL_CURVE_BASELINE_Y - rise;
+export const CLEAREST_SPOT_BELL_CURVE_PEAK_Y = 12;
+
+export const CLEAREST_SPOT_BELL_CURVE_START_X = 18;
+
+export const CLEAREST_SPOT_BELL_CURVE_END_X = 82;
+
+const CLEAREST_SPOT_SCORE_TO_VISUAL_X: ReadonlyArray<readonly [number, number]> = [
+  [0, 18],
+  [25, 32],
+  [50, 50],
+  [75, 68],
+  [80, 72],
+  [100, 82],
+];
+
+export function clearestSpotBellCurveVisualX(score: number): number {
+  const clamped = clampMetricPercent(score);
+
+  for (let index = 0; index < CLEAREST_SPOT_SCORE_TO_VISUAL_X.length - 1; index += 1) {
+    const [scoreStart, visualStart] = CLEAREST_SPOT_SCORE_TO_VISUAL_X[index];
+    const [scoreEnd, visualEnd] = CLEAREST_SPOT_SCORE_TO_VISUAL_X[index + 1];
+
+    if (clamped >= scoreStart && clamped <= scoreEnd) {
+      if (scoreEnd === scoreStart) {
+        return visualStart;
+      }
+
+      const progress = (clamped - scoreStart) / (scoreEnd - scoreStart);
+      return visualStart + progress * (visualEnd - visualStart);
+    }
+  }
+
+  return CLEAREST_SPOT_SCORE_TO_VISUAL_X[CLEAREST_SPOT_SCORE_TO_VISUAL_X.length - 1][1];
 }
 
-/** Midpoint cubic control on the right side — always beyond the peak for a smooth taper. */
-export function clearestSpotBellCurveRightControlX(peakX: number): number {
-  const x = clampMetricPercent(peakX);
-  if (x >= 100) {
-    return 100;
-  }
-  if (x <= 0) {
-    return 50;
-  }
+export function clearestSpotBellCurveControlPoints(score: number): {
+  peakX: number;
+  peakY: number;
+  c1x: number;
+  c2x: number;
+} {
+  const peakX = clearestSpotBellCurveVisualX(score);
+  const startX = CLEAREST_SPOT_BELL_CURVE_START_X;
+  const endX = CLEAREST_SPOT_BELL_CURVE_END_X;
 
-  return x + (100 - x) * 0.5;
+  return {
+    peakX,
+    peakY: CLEAREST_SPOT_BELL_CURVE_PEAK_Y,
+    c1x: startX + (peakX - startX) * 0.5,
+    c2x: peakX + (endX - peakX) * 0.5,
+  };
 }
 
-export function clearestSpotBellCurveLeftControlX(peakX: number): number {
-  const x = clampMetricPercent(peakX);
-  if (x <= 0) {
-    return 0;
-  }
-  if (x >= 100) {
-    return 50;
-  }
+export function clearestSpotBellCurvePath(score: number): string {
+  const baselineY = CLEAREST_SPOT_BELL_CURVE_BASELINE_Y;
+  const { peakX, peakY, c1x, c2x } = clearestSpotBellCurveControlPoints(score);
+  const startX = CLEAREST_SPOT_BELL_CURVE_START_X;
+  const width = CLEAREST_SPOT_BELL_CURVE_VIEWBOX.width;
 
-  return x * 0.5;
-}
-
-export function clearestSpotBellCurvePath(peakX: number): string {
-  const x = clampMetricPercent(peakX);
-  const baseline = CLEAREST_SPOT_BELL_CURVE_BASELINE_Y;
-  const peakY = clearestSpotBellCurvePeakY(x);
-
-  if (x <= 0) {
-    const rightMid = clearestSpotBellCurveRightControlX(x);
-    return `M 0 ${peakY} C ${rightMid * 0.7} ${peakY} ${rightMid} ${baseline} 100 ${baseline}`;
-  }
-
-  if (x >= 100) {
-    const leftMid = clearestSpotBellCurveLeftControlX(x);
-    return `M 0 ${baseline} C ${leftMid} ${baseline} ${leftMid} ${peakY} 100 ${peakY}`;
-  }
-
-  const leftMid = clearestSpotBellCurveLeftControlX(x);
-  const rightMid = clearestSpotBellCurveRightControlX(x);
-
-  return `M 0 ${baseline} C ${leftMid} ${baseline} ${leftMid} ${peakY} ${x} ${peakY} C ${rightMid} ${peakY} ${rightMid} ${baseline} 100 ${baseline}`;
+  return `M 0 ${baselineY} H ${startX} C ${c1x} ${baselineY}, ${c1x} ${peakY}, ${peakX} ${peakY} C ${c2x} ${peakY}, ${c2x} ${baselineY}, ${width} ${baselineY}`;
 }

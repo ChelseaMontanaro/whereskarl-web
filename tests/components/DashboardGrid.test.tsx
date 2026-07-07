@@ -13,6 +13,7 @@ import { MetricDetailSheet } from "@/components/home/MetricDetailSheet";
 import {
   clearSkiesIndicatorAriaLabel,
   clearestSpotBellCurveAriaLabel,
+  clearestSpotBellCurveVisualX,
   fogCoverageIndicatorAriaLabel,
   metricPercentFillWidth,
 } from "@/lib/home/metricPercent";
@@ -322,7 +323,10 @@ describe("DashboardGrid", () => {
       screen.getByRole("img", { name: clearestSpotBellCurveAriaLabel(81) }),
     ).toBeInTheDocument();
     expect(screen.getByTestId("clearest-spot-bell-curve-path")).toBeInTheDocument();
-    expect(screen.getByTestId("clearest-spot-bell-curve-peak")).toHaveAttribute("cx", "81");
+    expect(screen.getByTestId("clearest-spot-bell-curve-peak")).toHaveAttribute(
+      "cx",
+      String(clearestSpotBellCurveVisualX(81)),
+    );
     expect(screen.getByTestId("clearest-spot-bell-curve-svg")).toHaveAttribute(
       "data-viewbox-height",
       "52",
@@ -349,7 +353,10 @@ describe("DashboardGrid", () => {
 
     expect(screen.getByTestId("fog-coverage-slider-track").getAttribute("data-fill-percent")).toBe("59");
     expect(screen.getByTestId("clear-skies-slider-track").getAttribute("data-fill-percent")).toBe("41");
-    expect(screen.getByTestId("clearest-spot-bell-curve-peak")).toHaveAttribute("cx", "79");
+    expect(screen.getByTestId("clearest-spot-bell-curve-peak")).toHaveAttribute(
+      "cx",
+      String(clearestSpotBellCurveVisualX(79)),
+    );
     expect(screen.queryAllByTestId("clearest-spot-bell-curve")).toHaveLength(1);
     expect(screen.queryAllByTestId("fog-coverage-slider")).toHaveLength(1);
     expect(screen.queryAllByTestId("clear-skies-slider")).toHaveLength(1);
