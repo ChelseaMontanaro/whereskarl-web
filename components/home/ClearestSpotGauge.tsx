@@ -16,10 +16,17 @@ type ClearestSpotGaugeProps = {
   score: number;
 };
 
-export const clearestSpotGaugeFrameClass =
-  "max-sm:mx-auto max-sm:h-full max-sm:w-[88%] max-sm:max-w-full max-sm:overflow-hidden";
+export const CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX = {
+  width: CLEAREST_SPOT_GAUGE_VIEWBOX.width,
+  height: 62,
+} as const;
 
-export const clearestSpotGaugeContainerClass = `${mobileMetricIndicatorClass} max-sm:h-[2.375rem] max-sm:min-h-0 max-sm:w-full max-sm:shrink-0 max-sm:!pt-0 max-sm:pb-0`;
+export const clearestSpotGaugeFrameClass =
+  "max-sm:mx-auto max-sm:h-[3.375rem] max-sm:w-[88%] max-sm:max-w-full max-sm:shrink-0 max-sm:overflow-hidden";
+
+export const clearestSpotGaugeContainerClass = `${mobileMetricIndicatorClass} flex max-sm:min-h-0 max-sm:flex-1 max-sm:flex-col max-sm:justify-end max-sm:w-full max-sm:!pt-0 max-sm:pb-0`;
+
+const CLEAREST_SPOT_GAUGE_LABEL_Y = CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX.height - 2.5;
 
 export function ClearestSpotGauge({ score }: ClearestSpotGaugeProps) {
   const marker = clearestSpotGaugeMarkerPoint(score);
@@ -28,7 +35,6 @@ export function ClearestSpotGauge({ score }: ClearestSpotGaugeProps) {
   const markerRotation = clearestSpotGaugeMarkerRotationDegrees(score);
   const arcStart = clearestSpotGaugeArcStart();
   const arcEnd = clearestSpotGaugeArcEnd();
-  const labelY = CLEAREST_SPOT_GAUGE_VIEWBOX.height - 1.5;
 
   return (
     <div
@@ -42,21 +48,34 @@ export function ClearestSpotGauge({ score }: ClearestSpotGaugeProps) {
         data-testid="clearest-spot-gauge-frame"
       >
         <svg
-          viewBox={`0 0 ${CLEAREST_SPOT_GAUGE_VIEWBOX.width} ${CLEAREST_SPOT_GAUGE_VIEWBOX.height}`}
+          viewBox={`0 0 ${CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX.width} ${CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX.height}`}
           preserveAspectRatio="xMidYMax meet"
           className="h-full w-full"
           aria-hidden="true"
           data-testid="clearest-spot-gauge-svg"
-          data-viewbox-width={CLEAREST_SPOT_GAUGE_VIEWBOX.width}
-          data-viewbox-height={CLEAREST_SPOT_GAUGE_VIEWBOX.height}
+          data-viewbox-width={CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX.width}
+          data-viewbox-height={CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX.height}
         >
+          <defs>
+            <linearGradient
+              id="clearest-spot-gauge-active-gradient"
+              gradientUnits="userSpaceOnUse"
+              x1={arcStart.x}
+              y1={CLEAREST_SPOT_GAUGE_CENTER_Y}
+              x2={arcEnd.x}
+              y2={CLEAREST_SPOT_GAUGE_CENTER_Y - CLEAREST_SPOT_GAUGE_VIEWBOX.height * 0.45}
+            >
+              <stop offset="0%" stopColor="#4A86B5" />
+              <stop offset="100%" stopColor="#9AD4FF" />
+            </linearGradient>
+          </defs>
           <g>
             {inactiveArcPath ? (
               <path
                 d={inactiveArcPath}
                 fill="none"
-                stroke="rgba(107, 163, 214, 0.22)"
-                strokeWidth="4.5"
+                stroke="rgba(255,255,255,0.14)"
+                strokeWidth="5"
                 strokeLinecap="round"
                 data-testid="clearest-spot-gauge-inactive-arc"
               />
@@ -65,8 +84,8 @@ export function ClearestSpotGauge({ score }: ClearestSpotGaugeProps) {
               <path
                 d={activeArcPath}
                 fill="none"
-                stroke="#6BA3D6"
-                strokeWidth="4.5"
+                stroke="url(#clearest-spot-gauge-active-gradient)"
+                strokeWidth="5"
                 strokeLinecap="round"
                 data-testid="clearest-spot-gauge-active-arc"
               />
@@ -92,7 +111,7 @@ export function ClearestSpotGauge({ score }: ClearestSpotGaugeProps) {
               cx={CLEAREST_SPOT_GAUGE_CENTER_X}
               cy={CLEAREST_SPOT_GAUGE_CENTER_Y}
               r="1.35"
-              fill="#6BA3D6"
+              fill="#8EC8F0"
               data-testid="clearest-spot-gauge-hub-dot"
             />
             <rect
@@ -109,24 +128,24 @@ export function ClearestSpotGauge({ score }: ClearestSpotGaugeProps) {
             />
             <text
               x={arcStart.x}
-              y={labelY}
+              y={CLEAREST_SPOT_GAUGE_LABEL_Y}
               textAnchor="middle"
               fill="rgba(255,255,255,0.42)"
-              fontSize="4.25"
+              fontSize="4.5"
               fontWeight="700"
-              letterSpacing="0.06em"
+              letterSpacing="0.08em"
               data-testid="clearest-spot-gauge-label-low"
             >
               LOW
             </text>
             <text
               x={arcEnd.x}
-              y={labelY}
+              y={CLEAREST_SPOT_GAUGE_LABEL_Y}
               textAnchor="middle"
               fill="rgba(255,255,255,0.42)"
-              fontSize="4.25"
+              fontSize="4.5"
               fontWeight="700"
-              letterSpacing="0.06em"
+              letterSpacing="0.08em"
               data-testid="clearest-spot-gauge-label-best"
             >
               BEST

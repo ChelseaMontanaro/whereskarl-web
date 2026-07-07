@@ -56,6 +56,7 @@ function MetricCardContent({
   valueClassName = "lg:text-[1.65rem]",
   mobileDetailAddon,
   mobileValueLayout = "numeric",
+  mobileGaugeLayout = false,
 }: {
   label: ReactNode;
   value: string;
@@ -66,23 +67,38 @@ function MetricCardContent({
   valueClassName?: string;
   mobileDetailAddon?: ReactNode;
   mobileValueLayout?: "numeric" | "phrase";
+  mobileGaugeLayout?: boolean;
 }) {
   const valueAreaClassName =
     mobileValueLayout === "phrase" ? mobileKarlStatusValueAreaClass : "";
 
   return (
-    <div className="flex h-full w-full flex-col max-sm:justify-between">
-      <div className="relative flex min-w-0 flex-1 lg:items-center lg:gap-3.5">
+    <div
+      className={`flex h-full w-full flex-col ${
+        mobileGaugeLayout ? "max-sm:justify-end max-sm:gap-1" : "max-sm:justify-between"
+      }`}
+    >
+      <div
+        className={`relative flex min-w-0 ${
+          mobileGaugeLayout ? "max-sm:flex-none" : "flex-1"
+        } lg:items-center lg:gap-3.5`}
+      >
         <div className="order-1 flex min-w-0 flex-1 flex-col max-sm:pr-10 lg:order-2">
           <MetricCardLabel>{label}</MetricCardLabel>
           <p
-            className={`mt-1 line-clamp-2 text-[1.35rem] font-light leading-none max-sm:mt-1.5 ${mobileMetricPrimaryValueClass} lg:mt-1.5 lg:font-light ${valueClassName} ${valueAreaClassName} ${
+            className={`mt-1 line-clamp-2 text-[1.35rem] font-light leading-none ${
+              mobileGaugeLayout ? "max-sm:mt-1" : "max-sm:mt-1.5"
+            } ${mobileMetricPrimaryValueClass} lg:mt-1.5 lg:font-light ${valueClassName} ${valueAreaClassName} ${
               isLoading ? "opacity-35 text-white" : "text-white/94"
             }`}
           >
             {value}
           </p>
-          <p className="mt-1 text-[0.6875rem] font-medium text-white/50 max-sm:mt-1.5 max-sm:text-xs max-sm:text-white/55 lg:mt-1.5 lg:text-xs lg:text-white/55">
+          <p
+            className={`mt-1 text-[0.6875rem] font-medium text-white/50 ${
+              mobileGaugeLayout ? "max-sm:mt-0.5" : "max-sm:mt-1.5"
+            } max-sm:text-xs max-sm:text-white/55 lg:mt-1.5 lg:text-xs lg:text-white/55`}
+          >
             {detail}
           </p>
         </div>
@@ -112,6 +128,7 @@ function MetricCard({
   onOpenDetail,
   mobileDetailAddon,
   mobileValueLayout = "numeric",
+  mobileGaugeLayout = false,
 }: {
   label: ReactNode;
   value: string;
@@ -126,6 +143,7 @@ function MetricCard({
   onOpenDetail?: (key: MetricDetailKey, trigger: HTMLButtonElement) => void;
   mobileDetailAddon?: ReactNode;
   mobileValueLayout?: "numeric" | "phrase";
+  mobileGaugeLayout?: boolean;
 }) {
   const isInteractive = Boolean((mapHref && mapAriaLabel) || (detailKey && onOpenDetail));
   const cardClassName = `${metricCardSurfaceClass}${
@@ -143,6 +161,7 @@ function MetricCard({
       valueClassName={valueClassName}
       mobileDetailAddon={mobileDetailAddon}
       mobileValueLayout={mobileValueLayout}
+      mobileGaugeLayout={mobileGaugeLayout}
     />
   );
 
@@ -275,13 +294,7 @@ export function DashboardGrid({
           }
         />
         <MetricCard
-          label={
-            <TwoLineMetricLabel
-              lineOne="Clearest"
-              lineTwo="Spot"
-              desktopText="Clearest Spot"
-            />
-          }
+          label="Clearest Spot"
           value={
             isLoading || !bestSunshine ? "--" : `${bestSunshine.sunshineScore}`
           }
@@ -302,6 +315,7 @@ export function DashboardGrid({
               <ClearestSpotGauge score={bestSunshine.sunshineScore} />
             ) : null
           }
+          mobileGaugeLayout
         />
       </div>
       <MetricDetailSheet metricKey={activeMetric} onClose={closeMetricDetail} />

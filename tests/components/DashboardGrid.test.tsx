@@ -215,7 +215,7 @@ describe("DashboardGrid", () => {
     }
   });
 
-  it("preserves two-line mobile headings for Clear Skies Score and Clearest Spot", () => {
+  it("preserves a two-line mobile heading for Clear Skies Score only", () => {
     render(
       <DashboardGrid
         current={currentFixture}
@@ -225,11 +225,10 @@ describe("DashboardGrid", () => {
     );
 
     const twoLineLabels = screen.getAllByTestId("two-line-metric-label");
-    expect(twoLineLabels).toHaveLength(2);
+    expect(twoLineLabels).toHaveLength(1);
     expect(within(twoLineLabels[0]).getByText("Clear Skies")).toBeInTheDocument();
     expect(within(twoLineLabels[0]).getByText("Score")).toBeInTheDocument();
-    expect(within(twoLineLabels[1]).getByText("Clearest")).toBeInTheDocument();
-    expect(within(twoLineLabels[1]).getByText("Spot")).toBeInTheDocument();
+    expect(screen.getByText("Clearest Spot")).toBeInTheDocument();
   });
 
   it("renders a mobile-only fog coverage slider only on the Fog Coverage tile", () => {
@@ -364,7 +363,7 @@ describe("DashboardGrid", () => {
     expect(screen.getByTestId("clearest-spot-gauge-needle")).toBeInTheDocument();
     expect(screen.getByTestId("clearest-spot-gauge-svg")).toHaveAttribute(
       "data-viewbox-height",
-      "56",
+      "62",
     );
     expect(screen.getByTestId("clearest-spot-gauge-svg")).toHaveAttribute(
       "data-viewbox-width",
@@ -376,7 +375,7 @@ describe("DashboardGrid", () => {
     expect(gauge.className).not.toContain("max-sm:overflow-hidden");
     expect(screen.getByTestId("clearest-spot-gauge-frame").className).toContain("max-sm:w-[88%]");
     expect(screen.getByTestId("clearest-spot-gauge-frame").className).toContain(
-      "max-sm:h-full",
+      "max-sm:h-[3.375rem]",
     );
     expect(screen.getByTestId("clearest-spot-gauge-label-low")).toBeInTheDocument();
     expect(screen.getByTestId("clearest-spot-gauge-label-best")).toBeInTheDocument();
@@ -408,8 +407,9 @@ describe("DashboardGrid", () => {
     expect(clearestSpotLink.contains(gauge)).toBe(true);
     expect(gauge.contains(frame)).toBe(true);
     expect(gauge.className).not.toContain("max-sm:overflow-hidden");
-    expect(gauge.className).toContain("max-sm:h-[2.375rem]");
+    expect(gauge.className).toContain("max-sm:flex-1");
     expect(frame.className).toContain("max-sm:w-[88%]");
+    expect(frame.className).toContain("max-sm:h-[3.375rem]");
     expect(screen.getByTestId("fog-coverage-slider").className).not.toContain("overflow-hidden");
     expect(screen.getByTestId("clear-skies-slider").className).not.toContain("overflow-hidden");
   });

@@ -5,13 +5,13 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import {
   ClearestSpotGauge,
+  CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX,
   clearestSpotGaugeContainerClass,
   clearestSpotGaugeFrameClass,
 } from "@/components/home/ClearestSpotGauge";
 import {
   CLEAREST_SPOT_GAUGE_CENTER_X,
   CLEAREST_SPOT_GAUGE_CENTER_Y,
-  CLEAREST_SPOT_GAUGE_VIEWBOX,
   clearestSpotGaugeAriaLabel,
   clearestSpotGaugeMarkerPoint,
 } from "@/lib/home/clearestSpotGauge";
@@ -68,17 +68,17 @@ describe("ClearestSpotGauge", () => {
     expect(bestLabel.textContent).toBe("BEST");
   });
 
-  it("uses a bounded fixed mobile gauge block height", () => {
+  it("uses a bounded fixed mobile gauge frame height", () => {
     render(<ClearestSpotGauge score={60} />);
 
     const container = screen.getByTestId("clearest-spot-gauge");
     const frame = screen.getByTestId("clearest-spot-gauge-frame");
 
     expect(container.className).toBe(clearestSpotGaugeContainerClass);
-    expect(container.className).toContain("max-sm:h-[2.375rem]");
+    expect(container.className).toContain("max-sm:flex-1");
     expect(frame.className).toBe(clearestSpotGaugeFrameClass);
+    expect(frame.className).toContain("max-sm:h-[3.375rem]");
     expect(frame.className).toContain("max-sm:w-[88%]");
-    expect(frame.className).toContain("max-sm:h-full");
     expect(frame.className).not.toContain("aspect-");
   });
 
@@ -94,9 +94,16 @@ describe("ClearestSpotGauge", () => {
     expect(container.className).toContain("max-sm:pb-0");
     expect(frame.className).toContain("max-sm:mx-auto");
     expect(frame.className).toContain("max-sm:overflow-hidden");
-    expect(svg).toHaveAttribute("data-viewbox-width", String(CLEAREST_SPOT_GAUGE_VIEWBOX.width));
-    expect(svg).toHaveAttribute("data-viewbox-height", String(CLEAREST_SPOT_GAUGE_VIEWBOX.height));
+    expect(svg).toHaveAttribute(
+      "data-viewbox-width",
+      String(CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX.width),
+    );
+    expect(svg).toHaveAttribute(
+      "data-viewbox-height",
+      String(CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX.height),
+    );
     expect(svg.getAttribute("preserveAspectRatio")).toBe("xMidYMax meet");
+    expect(svg.querySelector("#clearest-spot-gauge-active-gradient")).not.toBeNull();
     expect(container.contains(frame)).toBe(true);
     expect(container.contains(screen.getByTestId("clearest-spot-gauge-label-low"))).toBe(true);
   });
