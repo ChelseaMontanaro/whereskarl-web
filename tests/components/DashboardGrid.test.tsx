@@ -118,7 +118,7 @@ describe("DashboardGrid", () => {
     const dashboard = container.querySelector('[aria-label="Bay Area conditions dashboard"]');
     expect(dashboard?.className).toContain("max-sm:gap-3");
 
-    const metricSurfaces = container.querySelectorAll(".max-sm\\:min-h-\\[8rem\\]");
+    const metricSurfaces = container.querySelectorAll(".max-sm\\:min-h-\\[9\\.25rem\\]");
     expect(metricSurfaces.length).toBe(4);
     expect(container.querySelector(".max-sm\\:text-\\[1\\.95rem\\]")).toBeTruthy();
   });
@@ -148,6 +148,50 @@ describe("DashboardGrid", () => {
     expect(karlStatusValue.className).toContain("max-sm:!text-[1.5625rem]");
     expect(karlStatusValue.className).toContain("max-sm:!line-clamp-3");
     expect(karlStatusValue.className).toContain("max-sm:leading-snug");
+    expect(karlStatusValue.className).toContain("max-sm:min-h-[4.75rem]");
+    expect(karlStatusValue.className).toContain("max-sm:max-h-[4.75rem]");
+  });
+
+  it("keeps Karl Status card height stable when the phrase wraps to three lines", () => {
+    const { container } = render(
+      <DashboardGrid
+        current={{ ...currentFixture, status: "Patchy fog nearby" }}
+        bestSunshine={bestSunshineFixture}
+        isLoading={false}
+      />,
+    );
+
+    const karlStatusValue = screen.getByText("Patchy fog nearby");
+    expect(karlStatusValue.className).toContain("max-sm:!line-clamp-3");
+
+    const karlStatusCard = screen
+      .getByRole("button", { name: "Learn about Karl Status" })
+      .querySelector(".rounded-2xl");
+    expect(karlStatusCard?.className).toContain("max-sm:h-[9.25rem]");
+
+    const metricCards = container.querySelectorAll(
+      '[aria-label="Bay Area conditions dashboard"] > * > .rounded-2xl, [aria-label="Bay Area conditions dashboard"] > * > a > .rounded-2xl',
+    );
+    for (const card of metricCards) {
+      expect(card.className).toContain("max-sm:h-[9.25rem]");
+    }
+  });
+
+  it("preserves two-line mobile headings for Clear Skies Score and Clearest Spot", () => {
+    render(
+      <DashboardGrid
+        current={currentFixture}
+        bestSunshine={bestSunshineFixture}
+        isLoading={false}
+      />,
+    );
+
+    const twoLineLabels = screen.getAllByTestId("two-line-metric-label");
+    expect(twoLineLabels).toHaveLength(2);
+    expect(within(twoLineLabels[0]).getByText("Clear Skies")).toBeInTheDocument();
+    expect(within(twoLineLabels[0]).getByText("Score")).toBeInTheDocument();
+    expect(within(twoLineLabels[1]).getByText("Clearest")).toBeInTheDocument();
+    expect(within(twoLineLabels[1]).getByText("Spot")).toBeInTheDocument();
   });
 
   it("renders a mobile-only fog coverage slider only on the Fog Coverage tile", () => {
@@ -176,9 +220,9 @@ describe("DashboardGrid", () => {
     expect(labels.className).toContain("justify-between");
     expect(labels.className).toContain("w-full");
 
-    const fill = screen.getByTestId("fog-coverage-slider-fill");
+    const fill = screen.getByTestId("fog-coverage-slider-track");
     const knob = screen.getByTestId("fog-coverage-slider-knob");
-    expect(fill.style.width).toBe(fogCoverageSliderFillWidth(56));
+    expect(fill.getAttribute("data-fill-percent")).toBe("56");
     expect(knob.style.left).toBe(fogCoverageSliderFillWidth(56));
 
     const bayAreaDetail = screen.getByText("Bay Area");
@@ -211,7 +255,9 @@ describe("DashboardGrid", () => {
         />,
       );
 
-      expect(screen.getByTestId("fog-coverage-slider-fill").style.width).toBe(expectedWidth);
+      expect(screen.getByTestId("fog-coverage-slider-track").getAttribute("data-fill-percent")).toBe(
+        String(percent),
+      );
       expect(screen.getByTestId("fog-coverage-slider-knob").style.left).toBe(expectedWidth);
       expect(
         screen.getByRole("img", { name: fogCoverageIndicatorAriaLabel(percent) }),
@@ -249,9 +295,9 @@ describe("DashboardGrid", () => {
     ).toBeInTheDocument();
     expect(within(slider).getByText("Poor")).toBeInTheDocument();
     expect(within(slider).getByText("Excellent")).toBeInTheDocument();
-    expect(screen.getByTestId("clear-skies-slider-fill").className).toContain("bg-karl-gold");
-    expect(screen.getByTestId("clear-skies-slider-fill").style.width).toBe("41%");
+    expect(screen.getByTestId("clear-skies-slider-track").getAttribute("data-fill-percent")).toBe("41");
     expect(screen.getByTestId("clear-skies-slider-knob").style.left).toBe("41%");
+    expect(screen.getByTestId("clear-skies-slider-track").style.background).toContain("41%");
 
     const clearSkiesButton = screen.getByRole("button", {
       name: "Learn about Clear Skies Score",
@@ -277,6 +323,11 @@ describe("DashboardGrid", () => {
     ).toBeInTheDocument();
     expect(screen.getByTestId("clearest-spot-bell-curve-path")).toBeInTheDocument();
     expect(screen.getByTestId("clearest-spot-bell-curve-peak")).toHaveAttribute("cx", "81");
+    expect(screen.getByTestId("clearest-spot-bell-curve-svg")).toHaveAttribute(
+      "data-viewbox-height",
+      "48",
+    );
+    expect(screen.getByTestId("clearest-spot-bell-curve-svg").className).toContain("h-11");
 
     const clearestSpotLink = screen.getByRole("link", {
       name: "View clearest spot on map: Tiburon",
@@ -304,8 +355,14 @@ describe("DashboardGrid", () => {
         />,
       );
 
-      expect(screen.getByTestId("fog-coverage-slider-fill").style.width).toBe(expectedWidth);
-      expect(screen.getByTestId("clear-skies-slider-fill").style.width).toBe(expectedWidth);
+      expect(screen.getByTestId("fog-coverage-slider-track").getAttribute("data-fill-percent")).toBe(
+        String(percent),
+      );
+      expect(screen.getByTestId("clear-skies-slider-track").getAttribute("data-fill-percent")).toBe(
+        String(percent),
+      );
+      expect(screen.getByTestId("fog-coverage-slider-knob").style.left).toBe(expectedWidth);
+      expect(screen.getByTestId("clear-skies-slider-knob").style.left).toBe(expectedWidth);
       expect(metricPercentFillWidth(percent)).toBe(expectedWidth);
       expect(fogCoverageSliderFillWidth(percent)).toBe(expectedWidth);
     },
@@ -325,9 +382,17 @@ describe("DashboardGrid", () => {
 
     for (const iconWrapper of iconWrappers) {
       expect(iconWrapper.className).toContain("max-sm:absolute");
+      expect(iconWrapper.className).toContain("max-sm:right-1.5");
+      expect(iconWrapper.className).toContain("max-sm:top-1.5");
       expect(iconWrapper.className).toContain("max-sm:border-0");
       expect(iconWrapper.className).toContain("max-sm:rounded-none");
       expect(iconWrapper.className).toContain("lg:rounded-full");
+    }
+
+    const iconSvgs = container.querySelectorAll('[data-testid="metric-card-icon"] svg');
+    for (const iconSvg of iconSvgs) {
+      expect(iconSvg.className).toContain("max-sm:h-8");
+      expect(iconSvg.className).toContain("max-sm:w-8");
     }
   });
 

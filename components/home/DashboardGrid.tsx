@@ -9,6 +9,7 @@ import { FogCoverageIcon, MoonIcon, SunshineIcon } from "@/components/home/Condi
 import { ClearestSpotBellCurve } from "@/components/home/ClearestSpotBellCurve";
 import { ClearSkiesScoreSlider } from "@/components/home/ClearSkiesScoreSlider";
 import { FogCoverageSlider } from "@/components/home/FogCoverageSlider";
+import { MetricCardLabel, TwoLineMetricLabel } from "@/components/home/MetricCardLabel";
 import { MetricDetailSheet } from "@/components/home/MetricDetailSheet";
 import {
   desktopClickableCardHoverClass,
@@ -17,7 +18,7 @@ import {
   desktopMetricIconFrameClass,
   desktopMetricIconSizeClass,
   desktopMistIconClass,
-  mobileCardLabelClass,
+  mobileKarlStatusValueAreaClass,
   mobileMetricCardSurfaceClass,
   mobileMetricIconWrapperClass,
   mobileMetricIconSizeClass,
@@ -40,21 +41,7 @@ type DashboardGridProps = {
   isNightPresentation?: boolean;
 };
 
-const metricCardSurfaceClass = `h-full min-h-[5.75rem] px-3.5 py-3 ${mobileMetricCardSurfaceClass} lg:min-h-[7rem] lg:px-4 lg:py-4`;
-
-function CardLabel({ children }: { children: ReactNode }) {
-  return (
-    <p
-      className={`text-[0.625rem] font-bold uppercase tracking-[0.14em] text-white/38 ${mobileCardLabelClass} lg:text-[0.68rem] lg:tracking-[0.16em] lg:text-karl-gold/82`}
-    >
-      {children}
-    </p>
-  );
-}
-
-function MetricSpotLabel() {
-  return "Clearest Spot";
-}
+const metricCardSurfaceClass = `h-full min-h-[5.75rem] px-3.5 py-3 ${mobileMetricCardSurfaceClass} lg:min-h-[7rem] lg:h-auto lg:px-4 lg:py-4`;
 
 function MetricCardContent({
   label,
@@ -65,6 +52,7 @@ function MetricCardContent({
   iconFrameClassName,
   valueClassName = "lg:text-[1.65rem]",
   mobileDetailAddon,
+  mobileValueLayout = "numeric",
 }: {
   label: ReactNode;
   value: string;
@@ -74,14 +62,18 @@ function MetricCardContent({
   iconFrameClassName: string;
   valueClassName?: string;
   mobileDetailAddon?: ReactNode;
+  mobileValueLayout?: "numeric" | "phrase";
 }) {
+  const valueAreaClassName =
+    mobileValueLayout === "phrase" ? mobileKarlStatusValueAreaClass : "";
+
   return (
-    <div className="flex h-full w-full flex-col">
-      <div className="relative flex min-w-0 flex-1 max-sm:min-h-[3.75rem] lg:items-center lg:gap-3.5">
-        <div className="order-1 flex min-w-0 flex-1 flex-col max-sm:pr-7 lg:order-2">
-          <CardLabel>{label}</CardLabel>
+    <div className="flex h-full w-full flex-col max-sm:justify-between">
+      <div className="relative flex min-w-0 flex-1 lg:items-center lg:gap-3.5">
+        <div className="order-1 flex min-w-0 flex-1 flex-col max-sm:pr-10 lg:order-2">
+          <MetricCardLabel>{label}</MetricCardLabel>
           <p
-            className={`mt-1 line-clamp-2 text-[1.35rem] font-light leading-none max-sm:mt-1.5 ${mobileMetricPrimaryValueClass} lg:mt-1.5 lg:font-light ${valueClassName} ${
+            className={`mt-1 line-clamp-2 text-[1.35rem] font-light leading-none max-sm:mt-1.5 ${mobileMetricPrimaryValueClass} lg:mt-1.5 lg:font-light ${valueClassName} ${valueAreaClassName} ${
               isLoading ? "opacity-35 text-white" : "text-white/94"
             }`}
           >
@@ -116,6 +108,7 @@ function MetricCard({
   detailKey,
   onOpenDetail,
   mobileDetailAddon,
+  mobileValueLayout = "numeric",
 }: {
   label: ReactNode;
   value: string;
@@ -129,6 +122,7 @@ function MetricCard({
   detailKey?: MetricDetailKey;
   onOpenDetail?: (key: MetricDetailKey, trigger: HTMLButtonElement) => void;
   mobileDetailAddon?: ReactNode;
+  mobileValueLayout?: "numeric" | "phrase";
 }) {
   const isInteractive = Boolean((mapHref && mapAriaLabel) || (detailKey && onOpenDetail));
   const cardClassName = `${metricCardSurfaceClass}${
@@ -145,6 +139,7 @@ function MetricCard({
       iconFrameClassName={iconFrameClassName}
       valueClassName={valueClassName}
       mobileDetailAddon={mobileDetailAddon}
+      mobileValueLayout={mobileValueLayout}
     />
   );
 
@@ -248,9 +243,16 @@ export function DashboardGrid({
           valueClassName={`${mobileKarlStatusValueClass} lg:text-[0.98rem] lg:leading-snug lg:tracking-[-0.01em]`}
           detailKey="karl-status"
           onOpenDetail={openMetricDetail}
+          mobileValueLayout="phrase"
         />
         <MetricCard
-          label="Clear Skies Score"
+          label={
+            <TwoLineMetricLabel
+              lineOne="Clear Skies"
+              lineTwo="Score"
+              desktopText="Clear Skies Score"
+            />
+          }
           value={isLoading || !current ? "--" : `${current.sunshineScore}`}
           detail={isLoading ? "Checking conditions" : "Bay Area average"}
           isLoading={isLoading}
@@ -265,7 +267,13 @@ export function DashboardGrid({
           }
         />
         <MetricCard
-          label={MetricSpotLabel()}
+          label={
+            <TwoLineMetricLabel
+              lineOne="Clearest"
+              lineTwo="Spot"
+              desktopText="Clearest Spot"
+            />
+          }
           value={
             isLoading || !bestSunshine ? "--" : `${bestSunshine.sunshineScore}`
           }

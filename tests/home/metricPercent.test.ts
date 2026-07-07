@@ -34,7 +34,7 @@ describe("metricPercent", () => {
     const path = clearestSpotBellCurvePath(peakX);
 
     expect(path).toContain(`${peakX} ${peakY}`);
-    expect(path.startsWith("M 0 20")).toBe(true);
-    expect(path.endsWith("100 20")).toBe(true);
+    expect(path.startsWith("M 0 42")).toBe(true);
+    expect(path.endsWith("100 42")).toBe(true);
   });
 });

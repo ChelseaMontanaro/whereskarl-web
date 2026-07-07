@@ -223,10 +223,10 @@ describe("HomeView responsive polish", () => {
     const dashboard = container.querySelector('[aria-label="Bay Area conditions dashboard"]');
     expect(dashboard?.className).toContain("max-sm:gap-3");
 
-    const metricSurfaces = container.querySelectorAll(".max-sm\\:min-h-\\[8rem\\]");
+    const metricSurfaces = container.querySelectorAll(".max-sm\\:min-h-\\[9\\.25rem\\]");
     expect(metricSurfaces.length).toBe(4);
     expect(container.querySelector(".max-sm\\:text-\\[1\\.95rem\\]")).toBeTruthy();
-    expect(container.querySelector(".max-sm\\:min-h-\\[8\\.75rem\\]")).toBeNull();
+    expect(container.querySelector(".max-sm\\:min-h-\\[8rem\\]")).toBeNull();
   });
 
   it("adds phone portrait spacing between mobile insight cards", () => {

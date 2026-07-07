@@ -1,4 +1,11 @@
-import { metricPercentFillWidth } from "@/lib/home/metricPercent";
+import {
+  clampMetricPercent,
+  metricPercentFillWidth,
+} from "@/lib/home/metricPercent";
+import {
+  mobileMetricIndicatorClass,
+  mobileMetricSliderTrackClass,
+} from "@/components/home/desktopGlass";
 
 export type MetricPercentSliderVariant = "fog" | "sunshine";
 
@@ -11,17 +18,14 @@ type MetricPercentSliderProps = {
   testId: string;
 };
 
-const variantStyles: Record<
-  MetricPercentSliderVariant,
-  { fillClass: string; knobBorderClass: string }
-> = {
+const variantColors: Record<MetricPercentSliderVariant, { fill: string; knob: string }> = {
   fog: {
-    fillClass: "bg-karl-navy",
-    knobBorderClass: "border-karl-navy",
+    fill: "rgb(3 11 20)",
+    knob: "border-karl-navy",
   },
   sunshine: {
-    fillClass: "bg-karl-gold",
-    knobBorderClass: "border-karl-gold",
+    fill: "rgb(242 163 38)",
+    knob: "border-karl-gold",
   },
 };
 
@@ -33,29 +37,28 @@ export function MetricPercentSlider({
   ariaLabel,
   testId,
 }: MetricPercentSliderProps) {
-  const fillWidth = metricPercentFillWidth(percent);
-  const styles = variantStyles[variant];
+  const clampedPercent = clampMetricPercent(percent);
+  const fillWidth = metricPercentFillWidth(clampedPercent);
+  const colors = variantColors[variant];
 
   return (
     <div
-      className="mt-2.5 hidden w-full max-sm:block"
+      className={mobileMetricIndicatorClass}
       role="img"
       aria-label={ariaLabel}
       data-testid={testId}
     >
       <div
-        className="relative h-[5px] w-full"
+        className={mobileMetricSliderTrackClass}
         aria-hidden="true"
         data-testid={`${testId}-track`}
+        data-fill-percent={clampedPercent}
+        style={{
+          background: `linear-gradient(to right, ${colors.fill} 0%, ${colors.fill} ${fillWidth}, rgba(255,255,255,0.22) ${fillWidth}, rgba(255,255,255,0.22) 100%)`,
+        }}
       >
-        <div className="absolute inset-0 rounded-full bg-white/22" />
         <div
-          className={`absolute inset-y-0 left-0 rounded-full ${styles.fillClass}`}
-          data-testid={`${testId}-fill`}
-          style={{ width: fillWidth }}
-        />
-        <div
-          className={`absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 bg-white shadow-[0_0_0_1px_rgba(255,255,255,0.12)] ${styles.knobBorderClass}`}
+          className={`absolute top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 bg-white shadow-[0_0_0_1px_rgba(255,255,255,0.12)] ${colors.knob}`}
           data-testid={`${testId}-knob`}
           style={{ left: fillWidth }}
         />

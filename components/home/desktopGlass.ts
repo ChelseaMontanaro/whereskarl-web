@@ -10,16 +10,30 @@ export const insightGlassCardClass =
 export const mobileInsightGlassHighlightClass =
   "pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-white/[0.05] via-transparent to-black/14 max-sm:block sm:hidden";
 
-/** Phone portrait (max-sm) metric tile sizing — balanced, not oversized */
+/** Phone portrait (max-sm) metric tile sizing — fixed height for stable grid rows */
 export const mobileMetricCardSurfaceClass =
-  "max-sm:min-h-[8rem] max-sm:px-4 max-sm:py-4";
+  "max-sm:h-[9.25rem] max-sm:min-h-[9.25rem] max-sm:px-4 max-sm:py-4";
 
 export const mobileMetricIconFrameClass = "max-sm:h-10 max-sm:w-10";
 
 export const mobileMetricIconWrapperClass =
-  "order-2 flex shrink-0 items-center justify-center max-sm:absolute max-sm:right-0 max-sm:top-0 max-sm:h-auto max-sm:w-auto max-sm:rounded-none max-sm:border-0 max-sm:bg-transparent lg:order-1 lg:relative lg:right-auto lg:top-auto lg:self-center";
+  "order-2 flex shrink-0 items-center justify-center max-sm:absolute max-sm:right-1.5 max-sm:top-1.5 max-sm:h-auto max-sm:w-auto max-sm:rounded-none max-sm:border-0 max-sm:bg-transparent lg:order-1 lg:relative lg:right-auto lg:top-auto lg:self-center";
 
-export const mobileMetricIconSizeClass = "max-sm:h-[1.625rem] max-sm:w-[1.625rem]";
+/** Shared top-right metric icon size on phone portrait */
+export const mobileMetricIconSizeClass = "max-sm:h-8 max-sm:w-8";
+
+/** Reserve space for Karl Status phrase values without changing card height */
+export const mobileKarlStatusValueAreaClass =
+  "max-sm:min-h-[4.75rem] max-sm:max-h-[4.75rem]";
+
+/** Two-line metric headings on phone portrait */
+export const mobileMetricTwoLineLabelClass = "max-sm:leading-[1.15]";
+
+/** Mobile metric indicator spacing — anchors sliders/curve in the card lower half */
+export const mobileMetricIndicatorClass =
+  "mt-auto hidden w-full max-sm:block max-sm:pt-3";
+
+export const mobileMetricSliderTrackClass = "relative h-[6px] w-full overflow-hidden rounded-full";
 
 /** Phone portrait insight card padding/gap — used below lg only */
 export const mobileInsightCardSurfaceClass =
