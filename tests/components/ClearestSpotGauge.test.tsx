@@ -7,10 +7,12 @@ import {
   ClearestSpotGauge,
   CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX,
   CLEAREST_SPOT_GAUGE_LABEL_Y,
+  CLEAREST_SPOT_GAUGE_INSTRUMENT_TRANSLATE_Y,
   CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_Y,
   CLEAREST_SPOT_GAUGE_PRESENTATION_TRANSLATE_Y,
   clearestSpotGaugeContainerClass,
   clearestSpotGaugeFrameClass,
+  clearestSpotGaugeInstrumentTransform,
   clearestSpotGaugePresentationTransform,
 } from "@/components/home/ClearestSpotGauge";
 import {
@@ -97,6 +99,7 @@ describe("ClearestSpotGauge", () => {
     const frame = screen.getByTestId("clearest-spot-gauge-frame");
     const svg = screen.getByTestId("clearest-spot-gauge-svg");
     const arcGroup = screen.getByTestId("clearest-spot-gauge-arc-group");
+    const instrumentGroup = screen.getByTestId("clearest-spot-gauge-instrument-group");
 
     expect(container.className).not.toMatch(/-mt-/);
     expect(container.className).not.toContain("max-sm:pl-4");
@@ -115,15 +118,23 @@ describe("ClearestSpotGauge", () => {
     );
     expect(svg.getAttribute("preserveAspectRatio")).toBe("xMidYMax slice");
     expect(svg).toHaveAttribute(
+      "data-instrument-translate-y",
+      String(CLEAREST_SPOT_GAUGE_INSTRUMENT_TRANSLATE_Y),
+    );
+    expect(svg).toHaveAttribute(
       "data-presentation-translate-y",
       String(CLEAREST_SPOT_GAUGE_PRESENTATION_TRANSLATE_Y),
     );
     expect(svg.getAttribute("data-presentation-scale-y")).toBe(
       String(CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_Y),
     );
+    expect(instrumentGroup.getAttribute("transform")).toBe(clearestSpotGaugeInstrumentTransform());
     expect(arcGroup.getAttribute("transform")).toBe(clearestSpotGaugePresentationTransform());
     expect(svg.querySelector("#clearest-spot-gauge-active-gradient")).not.toBeNull();
-    expect(container.contains(frame)).toBe(true);
-    expect(container.contains(screen.getByTestId("clearest-spot-gauge-label-low"))).toBe(true);
+    expect(container.contains(instrumentGroup)).toBe(true);
+    expect(instrumentGroup.contains(arcGroup)).toBe(true);
+    expect(instrumentGroup.contains(screen.getByTestId("clearest-spot-gauge-label-low"))).toBe(
+      true,
+    );
   });
 });
