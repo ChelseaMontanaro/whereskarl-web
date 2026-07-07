@@ -1,9 +1,11 @@
-import { mobileCardLabelClass, mobileMetricIndicatorClass } from "@/components/home/desktopGlass";
+import { mobileMetricIndicatorClass } from "@/components/home/desktopGlass";
 import {
   CLEAREST_SPOT_GAUGE_CENTER_X,
   CLEAREST_SPOT_GAUGE_CENTER_Y,
   CLEAREST_SPOT_GAUGE_VIEWBOX,
   clearestSpotGaugeActiveArcPath,
+  clearestSpotGaugeArcEnd,
+  clearestSpotGaugeArcStart,
   clearestSpotGaugeAriaLabel,
   clearestSpotGaugeInactiveArcPath,
   clearestSpotGaugeMarkerPoint,
@@ -15,19 +17,18 @@ type ClearestSpotGaugeProps = {
 };
 
 export const clearestSpotGaugeFrameClass =
-  "max-sm:mx-auto max-sm:h-[3.5rem] max-sm:w-[84%] max-sm:max-w-full max-sm:overflow-hidden";
+  "max-sm:mx-auto max-sm:h-full max-sm:w-[88%] max-sm:max-w-full max-sm:overflow-hidden";
 
-export const clearestSpotGaugeContainerClass = `${mobileMetricIndicatorClass} max-sm:shrink-0 max-sm:w-full max-sm:pt-1 max-sm:pb-1.5`;
-
-export const clearestSpotGaugeLabelsClass = `mt-1 flex w-[84%] max-sm:mx-auto items-center justify-between`;
-
-export const clearestSpotGaugeLabelClass = `text-[0.625rem] font-bold uppercase tracking-[0.14em] text-white/42 ${mobileCardLabelClass}`;
+export const clearestSpotGaugeContainerClass = `${mobileMetricIndicatorClass} max-sm:h-[2.375rem] max-sm:min-h-0 max-sm:w-full max-sm:shrink-0 max-sm:!pt-0 max-sm:pb-0`;
 
 export function ClearestSpotGauge({ score }: ClearestSpotGaugeProps) {
   const marker = clearestSpotGaugeMarkerPoint(score);
   const activeArcPath = clearestSpotGaugeActiveArcPath(score);
   const inactiveArcPath = clearestSpotGaugeInactiveArcPath(score);
   const markerRotation = clearestSpotGaugeMarkerRotationDegrees(score);
+  const arcStart = clearestSpotGaugeArcStart();
+  const arcEnd = clearestSpotGaugeArcEnd();
+  const labelY = CLEAREST_SPOT_GAUGE_VIEWBOX.height - 1.5;
 
   return (
     <div
@@ -106,16 +107,32 @@ export function ClearestSpotGauge({ score }: ClearestSpotGaugeProps) {
               data-marker-x={marker.x}
               data-marker-y={marker.y}
             />
+            <text
+              x={arcStart.x}
+              y={labelY}
+              textAnchor="middle"
+              fill="rgba(255,255,255,0.42)"
+              fontSize="4.25"
+              fontWeight="700"
+              letterSpacing="0.06em"
+              data-testid="clearest-spot-gauge-label-low"
+            >
+              LOW
+            </text>
+            <text
+              x={arcEnd.x}
+              y={labelY}
+              textAnchor="middle"
+              fill="rgba(255,255,255,0.42)"
+              fontSize="4.25"
+              fontWeight="700"
+              letterSpacing="0.06em"
+              data-testid="clearest-spot-gauge-label-best"
+            >
+              BEST
+            </text>
           </g>
         </svg>
-      </div>
-      <div
-        className={`${clearestSpotGaugeLabelsClass} ${clearestSpotGaugeLabelClass}`}
-        aria-hidden="true"
-        data-testid="clearest-spot-gauge-labels"
-      >
-        <span>LOW</span>
-        <span>BEST</span>
       </div>
     </div>
   );

@@ -374,12 +374,12 @@ describe("DashboardGrid", () => {
       "xMidYMax meet",
     );
     expect(gauge.className).not.toContain("max-sm:overflow-hidden");
-    expect(screen.getByTestId("clearest-spot-gauge-frame").className).toContain("max-sm:w-[84%]");
+    expect(screen.getByTestId("clearest-spot-gauge-frame").className).toContain("max-sm:w-[88%]");
     expect(screen.getByTestId("clearest-spot-gauge-frame").className).toContain(
-      "max-sm:h-[3.5rem]",
+      "max-sm:h-full",
     );
-    expect(within(gauge).getByText("LOW")).toBeInTheDocument();
-    expect(within(gauge).getByText("BEST")).toBeInTheDocument();
+    expect(screen.getByTestId("clearest-spot-gauge-label-low")).toBeInTheDocument();
+    expect(screen.getByTestId("clearest-spot-gauge-label-best")).toBeInTheDocument();
 
     const clearestSpotLink = screen.getByRole("link", {
       name: "View clearest spot on map: Tiburon",
@@ -408,8 +408,8 @@ describe("DashboardGrid", () => {
     expect(clearestSpotLink.contains(gauge)).toBe(true);
     expect(gauge.contains(frame)).toBe(true);
     expect(gauge.className).not.toContain("max-sm:overflow-hidden");
-    expect(frame.className).toContain("max-sm:w-[84%]");
-    expect(frame.className).toContain("max-sm:h-[3.5rem]");
+    expect(gauge.className).toContain("max-sm:h-[2.375rem]");
+    expect(frame.className).toContain("max-sm:w-[88%]");
     expect(screen.getByTestId("fog-coverage-slider").className).not.toContain("overflow-hidden");
     expect(screen.getByTestId("clear-skies-slider").className).not.toContain("overflow-hidden");
   });

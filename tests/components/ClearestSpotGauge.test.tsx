@@ -1,13 +1,12 @@
 // @vitest-environment happy-dom
 
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
 import {
   ClearestSpotGauge,
   clearestSpotGaugeContainerClass,
   clearestSpotGaugeFrameClass,
-  clearestSpotGaugeLabelsClass,
 } from "@/components/home/ClearestSpotGauge";
 import {
   CLEAREST_SPOT_GAUGE_CENTER_X,
@@ -60,27 +59,27 @@ describe("ClearestSpotGauge", () => {
     render(<ClearestSpotGauge score={60} />);
 
     const gauge = screen.getByTestId("clearest-spot-gauge");
-    const labels = screen.getByTestId("clearest-spot-gauge-labels");
+    const lowLabel = screen.getByTestId("clearest-spot-gauge-label-low");
+    const bestLabel = screen.getByTestId("clearest-spot-gauge-label-best");
 
-    expect(gauge.contains(labels)).toBe(true);
-    expect(within(labels).getByText("LOW")).toBeInTheDocument();
-    expect(within(labels).getByText("BEST")).toBeInTheDocument();
-    expect(labels.className).toContain(clearestSpotGaugeLabelsClass);
-    expect(labels.className).toContain("uppercase");
-    expect(labels.className).toContain("tracking-[0.14em]");
-    expect(labels.className).toContain("font-bold");
+    expect(gauge.contains(lowLabel)).toBe(true);
+    expect(gauge.contains(bestLabel)).toBe(true);
+    expect(lowLabel.textContent).toBe("LOW");
+    expect(bestLabel.textContent).toBe("BEST");
   });
 
-  it("uses a bounded fixed mobile gauge frame height", () => {
+  it("uses a bounded fixed mobile gauge block height", () => {
     render(<ClearestSpotGauge score={60} />);
 
+    const container = screen.getByTestId("clearest-spot-gauge");
     const frame = screen.getByTestId("clearest-spot-gauge-frame");
 
+    expect(container.className).toBe(clearestSpotGaugeContainerClass);
+    expect(container.className).toContain("max-sm:h-[2.375rem]");
     expect(frame.className).toBe(clearestSpotGaugeFrameClass);
-    expect(frame.className).toContain("max-sm:h-[3.5rem]");
-    expect(frame.className).toContain("max-sm:w-[84%]");
+    expect(frame.className).toContain("max-sm:w-[88%]");
+    expect(frame.className).toContain("max-sm:h-full");
     expect(frame.className).not.toContain("aspect-");
-    expect(frame.className).not.toContain("h-auto");
   });
 
   it("does not use negative margin to position the gauge", () => {
@@ -90,16 +89,15 @@ describe("ClearestSpotGauge", () => {
     const frame = screen.getByTestId("clearest-spot-gauge-frame");
     const svg = screen.getByTestId("clearest-spot-gauge-svg");
 
-    expect(container.className).toBe(clearestSpotGaugeContainerClass);
     expect(container.className).not.toMatch(/-mt-/);
-    expect(container.className).toContain("max-sm:pt-1");
-    expect(container.className).toContain("max-sm:pb-1.5");
+    expect(container.className).toContain("max-sm:!pt-0");
+    expect(container.className).toContain("max-sm:pb-0");
     expect(frame.className).toContain("max-sm:mx-auto");
     expect(frame.className).toContain("max-sm:overflow-hidden");
     expect(svg).toHaveAttribute("data-viewbox-width", String(CLEAREST_SPOT_GAUGE_VIEWBOX.width));
     expect(svg).toHaveAttribute("data-viewbox-height", String(CLEAREST_SPOT_GAUGE_VIEWBOX.height));
     expect(svg.getAttribute("preserveAspectRatio")).toBe("xMidYMax meet");
     expect(container.contains(frame)).toBe(true);
-    expect(container.contains(screen.getByTestId("clearest-spot-gauge-labels"))).toBe(true);
+    expect(container.contains(screen.getByTestId("clearest-spot-gauge-label-low"))).toBe(true);
   });
 });
