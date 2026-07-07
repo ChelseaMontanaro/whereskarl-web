@@ -62,7 +62,7 @@ export function HomeHero({
           <FindClearSkiesCta
             locationId={clearSkiesLocationId}
             isLoading={isFindingClearSkies}
-            className="mt-6 max-sm:mb-4 sm:mt-5 lg:hidden"
+            className="mt-6 max-sm:mb-3.5 sm:mt-5 lg:hidden"
           />
         </div>
       </div>

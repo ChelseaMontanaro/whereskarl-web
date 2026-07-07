@@ -14,7 +14,6 @@ import {
   desktopClickableCardHoverClass,
   desktopClickableCardLinkClass,
   desktopInsightIconSizeClass,
-  mobileBestSunshineCardSurfaceClass,
   mobileInsightCardSurfaceClass,
 } from "@/components/home/desktopGlass";
 import { GlassCard } from "@/components/ui/GlassCard";
@@ -45,7 +44,7 @@ function MobileBestSunshineCard({
 
   if (isLoading) {
     return (
-      <GlassCard variant="insight" className={`flex items-start gap-3 px-4 py-4 ${mobileInsightCardSurfaceClass} ${mobileBestSunshineCardSurfaceClass} border-karl-gold/15`}>
+      <GlassCard variant="insight" className={`flex items-start gap-3 px-4 py-4 ${mobileInsightCardSurfaceClass} border-karl-gold/15`}>
         <InsightIconFrame tone={isNightPresentation ? "mist" : "gold"}>
           {isNightPresentation ? (
             <MoonIcon className={`${desktopInsightIconSizeClass} text-[#8CB8D8]`} />
@@ -73,7 +72,7 @@ function MobileBestSunshineCard({
 
   if (isUnavailable || !recommendation) {
     return (
-      <GlassCard variant="insight" className={`flex items-start gap-3 px-4 py-4 ${mobileInsightCardSurfaceClass} ${mobileBestSunshineCardSurfaceClass} border-karl-gold/15`}>
+      <GlassCard variant="insight" className={`flex items-start gap-3 px-4 py-4 ${mobileInsightCardSurfaceClass} border-karl-gold/15`}>
         <InsightIconFrame tone={isNightPresentation ? "mist" : "gold"}>
           {isNightPresentation ? (
             <MoonIcon className={`${desktopInsightIconSizeClass} text-[#8CB8D8]`} />
@@ -110,7 +109,7 @@ function MobileBestSunshineCard({
   );
 
   return (
-    <GlassCard variant="insight" className={`flex items-start gap-3 px-4 py-4 ${mobileInsightCardSurfaceClass} ${mobileBestSunshineCardSurfaceClass} border-karl-gold/20`}>
+    <GlassCard variant="insight" className={`flex items-start gap-3 px-4 py-4 ${mobileInsightCardSurfaceClass} border-karl-gold/20`}>
       <InsightIconFrame tone={isNightPresentation ? "mist" : "gold"}>
         {spotIcon}
       </InsightIconFrame>

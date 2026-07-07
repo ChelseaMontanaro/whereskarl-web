@@ -83,14 +83,10 @@ describe("HomeView", () => {
     expect(
       screen.getAllByText("Karl is picking favorites across the Bay").length,
     ).toBeGreaterThan(0);
-    expect(
-      screen.getAllByText(
-        "Tiburon has the clearest conditions nearby right now.",
-      ).length,
-    ).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Karl is shifting unevenly/i).length).toBeGreaterThan(0);
     expect(screen.queryByText(/Berkeley should brighten/i)).not.toBeInTheDocument();
     expect(screen.getAllByText("Tiburon").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("BEST CLEAR SKIES").length).toBeGreaterThan(0);
+    expect(screen.queryByText("BEST CLEAR SKIES")).not.toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Find Clear Skies" }),
     ).toHaveAttribute("href", "/map?location=tiburon");
@@ -135,7 +131,7 @@ describe("HomeView", () => {
       screen.getByRole("link", { name: "Find Clear Skies" }),
     ).toHaveAttribute("href", "/map");
     expect(
-      screen.getByRole("link", { name: "View brightest spot on map" }),
-    ).toHaveAttribute("href", "/map");
+      screen.queryByRole("link", { name: "View brightest spot on map" }),
+    ).not.toBeInTheDocument();
   });
 });

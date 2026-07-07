@@ -45,20 +45,23 @@ function MobileBestRightNowSection({
       <CardLabel className="text-white/45 lg:text-white/45">
         Best Right Now
       </CardLabel>
-      <ul className="mt-3 max-sm:mt-4 space-y-3 max-sm:space-y-4">
+      <ul className="mt-3 max-sm:mt-3.5 space-y-0">
         {items.map((item) => (
           <li
             key={item.locationId}
-            className="flex items-start gap-3 max-sm:gap-4 border-t border-white/8 pt-3 max-sm:pt-4 first:border-t-0 first:pt-0"
+            className="flex items-start gap-3 border-t border-white/8 pt-3 first:border-t-0 first:pt-0"
           >
-            <InsightIconFrame tone={isNightPresentation ? "mist" : "gold"}>
+            <InsightIconFrame
+              tone={isNightPresentation ? "mist" : "gold"}
+              size="compact"
+            >
               <BestRightNowSpotIcon isNightPresentation={isNightPresentation} />
             </InsightIconFrame>
             <div className="min-w-0 flex-1">
-              <p className="text-base max-sm:text-[1.0625rem] font-semibold text-white">
+              <p className="text-base font-semibold text-white">
                 {item.locationName}
               </p>
-              <p className="mt-1 max-sm:mt-1.5 text-sm max-sm:text-[0.9375rem] text-white/65">{item.detail}</p>
+              <p className="mt-1 text-sm text-white/65">{item.detail}</p>
               {item.isDegraded ? (
                 <DegradedDataLabel variant="bestRightNow" className="mt-1.5" />
               ) : null}
@@ -84,7 +87,7 @@ function BestRightNowScore({
     <span
       className={`font-light leading-none text-karl-gold ${
         size === "mobile"
-          ? "text-[1.75rem] max-sm:text-[2rem]"
+          ? "text-[1.75rem]"
           : "text-xl lg:text-[1.65rem]"
       }`}
     >

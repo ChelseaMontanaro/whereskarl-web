@@ -72,10 +72,60 @@ describe("HomeView responsive polish", () => {
     const { container } = renderHomeView();
 
     const heroCta = container.querySelector(
-      "section[aria-label='Karl conditions hero'] .max-sm\\:mb-4",
+      "section[aria-label='Karl conditions hero'] .max-sm\\:mb-3\\.5",
     );
     expect(heroCta).toBeTruthy();
-    expect(container.querySelector(".max-sm\\:pt-6")).toBeInTheDocument();
+    expect(container.querySelector(".max-sm\\:pt-5")).toBeInTheDocument();
+  });
+
+  it("omits the Best Clear Skies card from the phone portrait insight stack", async () => {
+    const { container } = renderHomeView();
+
+    await screen.findAllByText("Karl's Read");
+
+    const mobileStack = container.querySelector(".flex.flex-col.gap-3\\.5.lg\\:hidden");
+    expect(mobileStack).toBeTruthy();
+    expect(mobileStack?.textContent).not.toMatch(/BEST CLEAR SKIES/i);
+    expect(mobileStack?.textContent).not.toMatch(/Brightest Spot/i);
+    expect(
+      screen.queryByRole("link", { name: "View brightest spot on map" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("orders phone portrait insight cards as Karl's Read, Best Right Now, then Future Outlook", async () => {
+    const locationsFixture = readFixture<LocationsResponse>("locations.json");
+    const sausalito = locationsFixture.locations[1];
+
+    vi.spyOn(weatherApi, "getLocations").mockResolvedValue({
+      locations: [
+        {
+          ...sausalito,
+          sunshineScore: 18,
+          prediction: {
+            trend: "holding",
+            predictionReason: "Fog may linger until 18:20.",
+            predictionConfidenceLabel: "Medium",
+          },
+        },
+      ],
+    });
+
+    const { container } = renderHomeView();
+
+    await screen.findAllByText(/Karl's Read/i);
+    await screen.findAllByText(/6:20 PM/);
+
+    const mobileStack = container.querySelector(".flex.flex-col.gap-3\\.5.lg\\:hidden");
+    const children = Array.from(mobileStack?.children ?? []);
+    const labels = children.map((child) => child.textContent ?? "");
+
+    const karlReadIndex = labels.findIndex((text) => /Karl's Read/i.test(text));
+    const bestRightNowIndex = labels.findIndex((text) => text.includes("Best Right Now"));
+    const futureOutlookIndex = labels.findIndex((text) => text.includes("Future Outlook"));
+
+    expect(karlReadIndex).toBe(0);
+    expect(bestRightNowIndex).toBeGreaterThan(karlReadIndex);
+    expect(futureOutlookIndex).toBeGreaterThan(bestRightNowIndex);
   });
 
   it("uses subtle mobile insight glass depth without opaque card fills", () => {
@@ -133,37 +183,35 @@ describe("HomeView responsive polish", () => {
     expect(bestRightNowIndex).toBeLessThan(futureOutlookIndex);
   });
 
-  it("uses larger plain gold score text on mobile insight cards", async () => {
+  it("uses plain gold score text on mobile Best Right Now cards", async () => {
     const { container } = renderHomeView();
 
     await screen.findAllByText("Best Right Now");
 
     const mobileCards = container.querySelector(".flex.flex-col.gap-3\\.5.lg\\:hidden");
     expect(mobileCards?.querySelector(".rounded-full.border.border-karl-gold")).toBeNull();
-    expect(
-      mobileCards?.querySelector(".text-\\[1\\.75rem\\].max-sm\\:text-\\[2rem\\].text-karl-gold"),
-    ).toBeTruthy();
-    expect(mobileCards?.querySelector(".max-sm\\:h-14.max-sm\\:w-14.rounded-full")).toBeTruthy();
+    expect(mobileCards?.querySelector(".text-\\[1\\.75rem\\].text-karl-gold")).toBeTruthy();
   });
 
-  it("uses larger phone portrait metric tiles with clearer hierarchy", async () => {
+  it("uses balanced phone portrait metric tiles without oversized sizing", async () => {
     const { container } = renderHomeView();
 
     await screen.findByText("Fog Coverage");
 
     const dashboard = container.querySelector('[aria-label="Bay Area conditions dashboard"]');
-    expect(dashboard?.className).toContain("max-sm:gap-3.5");
+    expect(dashboard?.className).toContain("max-sm:gap-3");
 
-    const metricSurfaces = container.querySelectorAll(".max-sm\\:min-h-\\[8\\.75rem\\]");
+    const metricSurfaces = container.querySelectorAll(".max-sm\\:min-h-\\[7\\.5rem\\]");
     expect(metricSurfaces.length).toBe(4);
-    expect(container.querySelector(".max-sm\\:text-\\[2\\.125rem\\]")).toBeTruthy();
+    expect(container.querySelector(".max-sm\\:text-\\[1\\.875rem\\]")).toBeTruthy();
+    expect(container.querySelector(".max-sm\\:min-h-\\[8\\.75rem\\]")).toBeNull();
   });
 
   it("adds phone portrait spacing between mobile insight cards", () => {
     const { container } = renderHomeView();
 
-    const mobileStack = container.querySelector(".max-sm\\:gap-4.lg\\:hidden");
+    const mobileStack = container.querySelector(".max-sm\\:gap-3\\.5.lg\\:hidden");
     expect(mobileStack).toBeTruthy();
-    expect(mobileStack?.className).toContain("max-sm:mt-6");
+    expect(mobileStack?.className).toContain("max-sm:mt-5");
   });
 });

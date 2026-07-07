@@ -41,7 +41,7 @@ function MobileIntelligenceNarrativeCard({
         </InsightIconFrame>
         <div className="min-w-0 flex-1">
           <CardLabel>Karl&apos;s Read</CardLabel>
-          <p className="mt-2 max-sm:mt-3 text-lg max-sm:text-[1.3125rem] font-semibold text-white/50">
+          <p className="mt-2 text-lg max-sm:text-[1.25rem] font-semibold text-white/50">
             Reading Karl intelligence…
           </p>
         </div>
@@ -69,14 +69,14 @@ function MobileIntelligenceNarrativeCard({
       </InsightIconFrame>
       <div className="min-w-0 flex-1">
         <CardLabel>Karl&apos;s Read</CardLabel>
-        <h2 className="mt-2 max-sm:mt-3 text-lg max-sm:text-[1.3125rem] font-semibold leading-snug text-white">
+        <h2 className="mt-2 text-lg max-sm:text-[1.25rem] font-semibold leading-snug text-white">
           {headline}
         </h2>
-        <p className="mt-1.5 max-sm:mt-2.5 text-sm max-sm:text-base leading-relaxed text-white/70">
+        <p className="mt-1.5 max-sm:mt-2 text-sm max-sm:text-[0.9375rem] leading-relaxed text-white/70">
           {summary}
         </p>
         {confidenceLabel ? (
-          <p className="mt-2 max-sm:mt-2.5 text-[0.68rem] max-sm:text-xs font-semibold uppercase tracking-[0.12em] text-white/40">
+          <p className="mt-2 text-[0.68rem] max-sm:text-xs font-semibold uppercase tracking-[0.12em] text-white/40">
             {confidenceLabel} confidence
           </p>
         ) : null}

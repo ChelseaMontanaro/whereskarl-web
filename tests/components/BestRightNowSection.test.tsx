@@ -15,6 +15,20 @@ const items: BestRightNowItem[] = [
     score: 82,
     rank: 1,
   },
+  {
+    locationId: "oakland",
+    locationName: "Oakland",
+    detail: "Mostly clear near Oakland.",
+    score: 99,
+    rank: 2,
+  },
+  {
+    locationId: "palo-alto",
+    locationName: "Palo Alto",
+    detail: "Mostly clear near Palo Alto.",
+    score: 76,
+    rank: 3,
+  },
 ];
 
 describe("BestRightNowSection", () => {
@@ -100,9 +114,23 @@ describe("BestRightNowSection", () => {
     expect(
       container.querySelector(".rounded-full.border.border-karl-gold\\/28.bg-black\\/28"),
     ).toBeNull();
-    expect(
-      container.querySelector(".text-\\[1\\.75rem\\].max-sm\\:text-\\[2rem\\].text-karl-gold"),
-    ).toBeTruthy();
-    expect(container.querySelector(".max-sm\\:h-14.max-sm\\:w-14.rounded-full")).toBeTruthy();
+    expect(container.querySelector(".text-\\[1\\.75rem\\].text-karl-gold")).toBeTruthy();
+  });
+
+  it("renders a weather icon for every mobile Best Right Now list item", () => {
+    const { container } = render(
+      <BestRightNowSection
+        items={items}
+        isNightPresentation={false}
+        layout="mobile"
+      />,
+    );
+
+    const listItems = container.querySelectorAll("ul li");
+    const iconFrames = container.querySelectorAll("ul li .rounded-full");
+
+    expect(listItems.length).toBe(3);
+    expect(iconFrames.length).toBe(3);
+    expect(container.querySelectorAll("ul li svg").length).toBe(3);
   });
 });

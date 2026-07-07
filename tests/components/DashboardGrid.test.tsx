@@ -99,7 +99,7 @@ describe("DashboardGrid", () => {
     }
   });
 
-  it("uses larger phone portrait metric tile sizing scoped to max-sm", () => {
+  it("uses balanced phone portrait metric tile sizing scoped to max-sm", () => {
     const { container } = render(
       <DashboardGrid
         current={currentFixture}
@@ -109,11 +109,11 @@ describe("DashboardGrid", () => {
     );
 
     const dashboard = container.querySelector('[aria-label="Bay Area conditions dashboard"]');
-    expect(dashboard?.className).toContain("max-sm:gap-3.5");
+    expect(dashboard?.className).toContain("max-sm:gap-3");
 
-    const metricSurfaces = container.querySelectorAll(".max-sm\\:min-h-\\[8\\.75rem\\]");
+    const metricSurfaces = container.querySelectorAll(".max-sm\\:min-h-\\[7\\.5rem\\]");
     expect(metricSurfaces.length).toBe(4);
-    expect(container.querySelector(".max-sm\\:text-\\[2\\.125rem\\]")).toBeTruthy();
+    expect(container.querySelector(".max-sm\\:text-\\[1\\.875rem\\]")).toBeTruthy();
   });
 
   it("renders premium weather icons alongside dashboard metrics", () => {

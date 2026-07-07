@@ -10,26 +10,25 @@ export const insightGlassCardClass =
 export const mobileInsightGlassHighlightClass =
   "pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-white/[0.05] via-transparent to-black/14 max-sm:block sm:hidden";
 
-/** Phone portrait (max-sm) metric tile sizing — tablet/desktop unchanged */
+/** Phone portrait (max-sm) metric tile sizing — balanced, not oversized */
 export const mobileMetricCardSurfaceClass =
-  "max-sm:min-h-[8.75rem] max-sm:px-5 max-sm:py-5";
+  "max-sm:min-h-[7.5rem] max-sm:px-4 max-sm:py-4";
 
-export const mobileMetricIconFrameClass = "max-sm:h-11 max-sm:w-11";
+export const mobileMetricIconFrameClass = "max-sm:h-10 max-sm:w-10";
 
-export const mobileMetricIconSizeClass = "max-sm:h-7 max-sm:w-7";
+export const mobileMetricIconSizeClass = "max-sm:h-6 max-sm:w-6";
 
 /** Phone portrait insight card padding/gap — used below lg only */
 export const mobileInsightCardSurfaceClass =
-  "max-sm:gap-4 max-sm:px-5 max-sm:py-5";
-
-/** Extra height for the primary Best Clear Skies insight card on phone portrait */
-export const mobileBestSunshineCardSurfaceClass =
-  "max-sm:min-h-[9rem] max-sm:py-6";
+  "max-sm:gap-3.5 max-sm:px-4 max-sm:py-4";
 
 export const mobileCardLabelClass =
-  "max-sm:text-[0.75rem] max-sm:tracking-[0.12em] max-sm:text-white/50";
+  "max-sm:text-[0.6875rem] max-sm:tracking-[0.13em] max-sm:text-white/48";
 
-export const mobileInsightIconFrameClass = "max-sm:h-14 max-sm:w-14";
+export const mobileInsightIconFrameClass = "max-sm:h-12 max-sm:w-12";
+
+/** Compact icon frame for mobile Best Right Now list rows */
+export const mobileListIconFrameClass = "max-sm:h-10 max-sm:w-10";
 
 export const desktopGlassCardClass = overlayGlassCardClass;
 

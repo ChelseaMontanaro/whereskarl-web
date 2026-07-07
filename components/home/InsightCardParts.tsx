@@ -7,6 +7,7 @@ import {
   desktopMistIconClass,
   mobileCardLabelClass,
   mobileInsightIconFrameClass,
+  mobileListIconFrameClass,
 } from "@/components/home/desktopGlass";
 
 export function CardLabel({
@@ -41,15 +42,21 @@ export function SunshineScoreBadge({ score }: { score: number }) {
 export function InsightIconFrame({
   children,
   tone = "mist",
+  size = "default",
 }: {
   children: ReactNode;
   tone?: "mist" | "gold";
+  size?: "default" | "compact";
 }) {
   const toneClass = tone === "gold" ? desktopGoldIconClass : desktopMistIconClass;
+  const sizeClass =
+    size === "compact"
+      ? `h-10 w-10 ${mobileListIconFrameClass}`
+      : `h-12 w-12 ${mobileInsightIconFrameClass}`;
 
   return (
     <div
-      className={`h-12 w-12 rounded-full ${mobileInsightIconFrameClass} ${desktopInsightIconFrameClass} ${toneClass}`}
+      className={`rounded-full ${sizeClass} ${desktopInsightIconFrameClass} ${toneClass}`}
     >
       {children}
     </div>
