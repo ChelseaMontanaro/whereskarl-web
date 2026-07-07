@@ -6,6 +6,8 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 
 import { FogCoverageIcon, MoonIcon, SunshineIcon } from "@/components/home/ConditionIcons";
+import { ClearestSpotBellCurve } from "@/components/home/ClearestSpotBellCurve";
+import { ClearSkiesScoreSlider } from "@/components/home/ClearSkiesScoreSlider";
 import { FogCoverageSlider } from "@/components/home/FogCoverageSlider";
 import { MetricDetailSheet } from "@/components/home/MetricDetailSheet";
 import {
@@ -17,7 +19,7 @@ import {
   desktopMistIconClass,
   mobileCardLabelClass,
   mobileMetricCardSurfaceClass,
-  mobileMetricIconFrameClass,
+  mobileMetricIconWrapperClass,
   mobileMetricIconSizeClass,
   mobileMetricPrimaryValueClass,
   mobileKarlStatusValueClass,
@@ -75,13 +77,8 @@ function MetricCardContent({
 }) {
   return (
     <div className="flex h-full w-full flex-col">
-      <div className="flex min-w-0 flex-1 items-center gap-3 max-sm:items-start max-sm:gap-3.5 lg:items-center lg:gap-3.5">
-        <div
-          className={`order-2 flex h-9 w-9 shrink-0 items-center justify-center self-center rounded-full border border-white/8 bg-white/4 max-sm:self-start max-sm:mt-0.5 ${mobileMetricIconFrameClass} lg:order-1 ${desktopMetricIconFrameClass} ${iconFrameClassName}`}
-        >
-          {icon}
-        </div>
-        <div className="order-1 flex min-w-0 flex-1 flex-col lg:order-2">
+      <div className="relative flex min-w-0 flex-1 max-sm:min-h-[3.75rem] lg:items-center lg:gap-3.5">
+        <div className="order-1 flex min-w-0 flex-1 flex-col max-sm:pr-7 lg:order-2">
           <CardLabel>{label}</CardLabel>
           <p
             className={`mt-1 line-clamp-2 text-[1.35rem] font-light leading-none max-sm:mt-1.5 ${mobileMetricPrimaryValueClass} lg:mt-1.5 lg:font-light ${valueClassName} ${
@@ -93,6 +90,12 @@ function MetricCardContent({
           <p className="mt-1 text-[0.6875rem] font-medium text-white/50 max-sm:mt-1.5 max-sm:text-xs max-sm:text-white/55 lg:mt-1.5 lg:text-xs lg:text-white/55">
             {detail}
           </p>
+        </div>
+        <div
+          className={`${mobileMetricIconWrapperClass} ${desktopMetricIconFrameClass} ${iconFrameClassName}`}
+          data-testid="metric-card-icon"
+        >
+          {icon}
         </div>
       </div>
       {mobileDetailAddon}
@@ -199,10 +202,11 @@ export function DashboardGrid({
   };
 
   const metricIconClassName = `${desktopMetricIconSizeClass} ${mobileMetricIconSizeClass}`;
+  const sunshineMetricIconClassName = `${metricIconClassName} max-sm:text-karl-gold`;
   const spotIcon = isNightPresentation ? (
-    <MoonIcon className={`${metricIconClassName} text-[#8CB8D8]`} />
+    <MoonIcon className={`${metricIconClassName} max-sm:text-[#8CB8D8]`} />
   ) : (
-    <SunshineIcon className={metricIconClassName} />
+    <SunshineIcon className={sunshineMetricIconClassName} />
   );
   const spotMapHref =
     !isLoading && bestSunshine?.locationID
@@ -250,10 +254,15 @@ export function DashboardGrid({
           value={isLoading || !current ? "--" : `${current.sunshineScore}`}
           detail={isLoading ? "Checking conditions" : "Bay Area average"}
           isLoading={isLoading}
-          icon={<SunshineIcon className={metricIconClassName} />}
+          icon={<SunshineIcon className={sunshineMetricIconClassName} />}
           iconFrameClassName={desktopGoldIconClass}
           detailKey="sunshine-score"
           onOpenDetail={openMetricDetail}
+          mobileDetailAddon={
+            !isLoading && current ? (
+              <ClearSkiesScoreSlider sunshineScore={current.sunshineScore} />
+            ) : null
+          }
         />
         <MetricCard
           label={MetricSpotLabel()}
@@ -272,6 +281,11 @@ export function DashboardGrid({
           }
           mapHref={spotMapHref}
           mapAriaLabel={spotMapAriaLabel}
+          mobileDetailAddon={
+            !isLoading && bestSunshine ? (
+              <ClearestSpotBellCurve score={bestSunshine.sunshineScore} />
+            ) : null
+          }
         />
       </div>
       <MetricDetailSheet metricKey={activeMetric} onClose={closeMetricDetail} />

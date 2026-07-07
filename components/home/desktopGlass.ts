@@ -16,6 +16,9 @@ export const mobileMetricCardSurfaceClass =
 
 export const mobileMetricIconFrameClass = "max-sm:h-10 max-sm:w-10";
 
+export const mobileMetricIconWrapperClass =
+  "order-2 flex shrink-0 items-center justify-center max-sm:absolute max-sm:right-0 max-sm:top-0 max-sm:h-auto max-sm:w-auto max-sm:rounded-none max-sm:border-0 max-sm:bg-transparent lg:order-1 lg:relative lg:right-auto lg:top-auto lg:self-center";
+
 export const mobileMetricIconSizeClass = "max-sm:h-[1.625rem] max-sm:w-[1.625rem]";
 
 /** Phone portrait insight card padding/gap — used below lg only */
@@ -40,13 +43,13 @@ export const mobileListIconFrameClass = "max-sm:h-10 max-sm:w-10";
 export const desktopGlassCardClass = overlayGlassCardClass;
 
 export const desktopMistIconClass =
-  "border-white/14 bg-white/6 text-white/88";
+  "lg:border-white/14 lg:bg-white/6 lg:text-white/88";
 
 export const desktopGoldIconClass =
-  "border-karl-gold/22 bg-karl-gold/8 text-karl-gold";
+  "lg:border-karl-gold/22 lg:bg-karl-gold/8 lg:text-karl-gold";
 
 export const desktopMetricIconFrameClass =
-  "flex shrink-0 items-center justify-center rounded-full border lg:h-12 lg:w-12";
+  "flex shrink-0 items-center justify-center lg:h-12 lg:w-12 lg:rounded-full lg:border";
 
 export const desktopInsightIconFrameClass =
   "flex shrink-0 items-center justify-center rounded-full border lg:h-14 lg:w-14";
