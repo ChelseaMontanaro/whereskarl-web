@@ -83,6 +83,9 @@ export const insightPlainIconFrameCompactClass =
 export const insightPlainIconAccentClass =
   "text-karl-gold/90 max-sm:text-karl-gold lg:text-karl-gold/82";
 
+/** Primary light icon color for plain icons on dark mobile insight cards */
+export const insightPlainIconLightClass = "text-white/88";
+
 export const desktopClickableCardLinkClass =
   "group block rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-karl-gold";
 

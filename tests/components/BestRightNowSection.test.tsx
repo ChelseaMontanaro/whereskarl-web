@@ -118,6 +118,37 @@ describe("BestRightNowSection", () => {
     expect(container.querySelector(".text-\\[1\\.75rem\\].text-karl-gold")).toBeTruthy();
   });
 
+  it("uses gold sun icons on mobile Best Right Now rows", () => {
+    const { container } = render(
+      <BestRightNowSection
+        items={items}
+        isNightPresentation={false}
+        layout="mobile"
+      />,
+    );
+
+    const sunIcons = container.querySelectorAll("ul li svg.text-karl-gold");
+    expect(sunIcons.length).toBe(3);
+  });
+
+  it("adds vertical spacing between mobile Best Right Now rows without dividers", () => {
+    const { container } = render(
+      <BestRightNowSection
+        items={items}
+        isNightPresentation={false}
+        layout="mobile"
+      />,
+    );
+
+    const list = container.querySelector("ul");
+    expect(list?.className).toContain("space-y-2");
+
+    const listItems = container.querySelectorAll("ul li");
+    for (const listItem of listItems) {
+      expect(listItem.className).not.toContain("border-t");
+    }
+  });
+
   it("renders a weather icon for every mobile Best Right Now list item", () => {
     const { container } = render(
       <BestRightNowSection

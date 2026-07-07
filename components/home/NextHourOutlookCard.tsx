@@ -3,7 +3,12 @@ import {
   CardLabel,
   InsightPlainIcon,
 } from "@/components/home/InsightCardParts";
-import { desktopInsightIconSizeClass, insightPlainIconAccentClass, mobileInsightCardSurfaceClass } from "@/components/home/desktopGlass";
+import {
+  desktopInsightIconSizeClass,
+  insightPlainIconAccentClass,
+  insightPlainIconLightClass,
+  mobileInsightCardSurfaceClass,
+} from "@/components/home/desktopGlass";
 import { GlassCard } from "@/components/ui/GlassCard";
 
 type NextHourOutlookCardProps = {
@@ -20,11 +25,14 @@ function NextHourCardBody({
   layout,
 }: NextHourOutlookCardProps) {
   const isDesktop = layout === "desktop";
+  const iconAccentClassName = isDesktop
+    ? insightPlainIconAccentClass
+    : insightPlainIconLightClass;
 
   if (isLoading) {
     return (
       <>
-        <InsightPlainIcon className={insightPlainIconAccentClass}>
+        <InsightPlainIcon className={iconAccentClassName}>
           <NextHourIcon className={desktopInsightIconSizeClass} />
         </InsightPlainIcon>
         <div className="min-w-0 flex-1">
@@ -47,7 +55,7 @@ function NextHourCardBody({
 
   return (
     <>
-      <InsightPlainIcon className={insightPlainIconAccentClass}>
+      <InsightPlainIcon className={iconAccentClassName}>
         <NextHourIcon className={desktopInsightIconSizeClass} />
       </InsightPlainIcon>
       <div className="min-w-0 flex-1">

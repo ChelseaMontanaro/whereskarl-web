@@ -4,7 +4,10 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { NextHourOutlookCard } from "@/components/home/NextHourOutlookCard";
-import { insightPlainIconAccentClass } from "@/components/home/desktopGlass";
+import {
+  insightPlainIconAccentClass,
+  insightPlainIconLightClass,
+} from "@/components/home/desktopGlass";
 
 describe("NextHourOutlookCard", () => {
   afterEach(() => {
@@ -51,8 +54,8 @@ describe("NextHourOutlookCard", () => {
     expect(iconWrapper?.className).not.toContain("border");
   });
 
-  it("uses the theme-safe accent class on the Future Outlook icon", () => {
-    const { container } = render(
+  it("uses a white icon on mobile and the gold accent on desktop", () => {
+    const { container: mobile } = render(
       <NextHourOutlookCard
         summary="Fog should lift near the coast by 6:20 PM."
         confidenceLabel="Medium"
@@ -61,7 +64,20 @@ describe("NextHourOutlookCard", () => {
       />,
     );
 
-    const iconWrapper = container.querySelector('[data-testid="insight-plain-icon"]');
-    expect(iconWrapper?.className).toContain(insightPlainIconAccentClass);
+    const { container: desktop } = render(
+      <NextHourOutlookCard
+        summary="Fog should lift near the coast by 6:20 PM."
+        confidenceLabel="Medium"
+        isLoading={false}
+        layout="desktop"
+      />,
+    );
+
+    const mobileIconWrapper = mobile.querySelector('[data-testid="insight-plain-icon"]');
+    const desktopIconWrapper = desktop.querySelector('[data-testid="insight-plain-icon"]');
+
+    expect(mobileIconWrapper?.className).toContain(insightPlainIconLightClass);
+    expect(mobileIconWrapper?.className).not.toContain(insightPlainIconAccentClass);
+    expect(desktopIconWrapper?.className).toContain(insightPlainIconAccentClass);
   });
 });

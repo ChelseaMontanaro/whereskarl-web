@@ -25,13 +25,17 @@ const preventLocationAutoLinkProps = {
 
 function BestRightNowSpotIcon({
   isNightPresentation,
+  sunIconClassName = "",
 }: {
   isNightPresentation: boolean;
+  sunIconClassName?: string;
 }) {
   return isNightPresentation ? (
     <MoonIcon className={`${desktopInsightIconSizeClass} text-[#8CB8D8]`} />
   ) : (
-    <SunshineIcon className={desktopInsightIconSizeClass} />
+    <SunshineIcon
+      className={`${desktopInsightIconSizeClass} ${sunIconClassName}`.trim()}
+    />
   );
 }
 
@@ -76,16 +80,19 @@ function MobileBestRightNowSection({
         Best Right Now
       </CardLabel>
       <ul
-        className="mt-3 max-sm:mt-3.5 space-y-0"
+        className="mt-3 max-sm:mt-3.5 space-y-2"
         {...preventLocationAutoLinkProps}
       >
         {items.map((item) => (
           <li
             key={item.locationId}
-            className="flex items-start gap-3 max-sm:gap-3.5 border-t border-white/8 pt-3 max-sm:pt-3.5 first:border-t-0 first:pt-0"
+            className="flex items-start gap-3 max-sm:gap-3.5"
           >
             <InsightPlainIcon size="compact">
-              <BestRightNowSpotIcon isNightPresentation={isNightPresentation} />
+              <BestRightNowSpotIcon
+                isNightPresentation={isNightPresentation}
+                sunIconClassName="text-karl-gold"
+              />
             </InsightPlainIcon>
             <div className="min-w-0 flex-1" {...preventLocationAutoLinkProps}>
               <BestRightNowLocationCopy
