@@ -12,12 +12,16 @@ export function FogCoverageSlider({ fogCoveragePercent }: FogCoverageSliderProps
 
   return (
     <div
-      className="mt-2.5 hidden max-sm:block"
+      className="mt-2.5 hidden w-full max-sm:block"
       role="img"
       aria-label={fogCoverageIndicatorAriaLabel(fogCoveragePercent)}
       data-testid="fog-coverage-slider"
     >
-      <div className="relative h-[5px] w-full" aria-hidden="true">
+      <div
+        className="relative h-[5px] w-full"
+        aria-hidden="true"
+        data-testid="fog-coverage-slider-track"
+      >
         <div className="absolute inset-0 rounded-full bg-white/22" />
         <div
           className="absolute inset-y-0 left-0 rounded-full bg-karl-navy"
@@ -31,8 +35,9 @@ export function FogCoverageSlider({ fogCoveragePercent }: FogCoverageSliderProps
         />
       </div>
       <div
-        className="mt-2 flex items-center justify-between text-[0.625rem] font-medium tracking-[0.02em] text-white/42"
+        className="mt-2 flex w-full items-center justify-between text-[0.625rem] font-medium tracking-[0.02em] text-white/42"
         aria-hidden="true"
+        data-testid="fog-coverage-slider-labels"
       >
         <span>Clear</span>
         <span>Thick</span>

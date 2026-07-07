@@ -150,27 +150,36 @@ describe("DashboardGrid", () => {
   it("renders a mobile-only fog coverage slider only on the Fog Coverage tile", () => {
     const { container } = render(
       <DashboardGrid
-        current={{ ...currentFixture, fogCoverage: 53 }}
+        current={{ ...currentFixture, fogCoverage: 56 }}
         bestSunshine={bestSunshineFixture}
         isLoading={false}
       />,
     );
 
     expect(
-      screen.getByRole("img", { name: fogCoverageIndicatorAriaLabel(53) }),
+      screen.getByRole("img", { name: fogCoverageIndicatorAriaLabel(56) }),
     ).toBeInTheDocument();
     expect(screen.queryAllByRole("img", { name: /Fog coverage:/ })).toHaveLength(1);
 
     const slider = screen.getByTestId("fog-coverage-slider");
     expect(slider.className).toContain("max-sm:block");
     expect(slider.className).toContain("hidden");
+    expect(slider.className).toContain("w-full");
+    expect(screen.getByTestId("fog-coverage-slider-track").className).toContain("w-full");
     expect(within(slider).getByText("Clear")).toBeInTheDocument();
     expect(within(slider).getByText("Thick")).toBeInTheDocument();
 
+    const labels = screen.getByTestId("fog-coverage-slider-labels");
+    expect(labels.className).toContain("justify-between");
+    expect(labels.className).toContain("w-full");
+
     const fill = screen.getByTestId("fog-coverage-slider-fill");
     const knob = screen.getByTestId("fog-coverage-slider-knob");
-    expect(fill.style.width).toBe(fogCoverageSliderFillWidth(53));
-    expect(knob.style.left).toBe(fogCoverageSliderFillWidth(53));
+    expect(fill.style.width).toBe(fogCoverageSliderFillWidth(56));
+    expect(knob.style.left).toBe(fogCoverageSliderFillWidth(56));
+
+    const bayAreaDetail = screen.getByText("Bay Area");
+    expect(bayAreaDetail.parentElement?.contains(slider)).toBe(false);
 
     const fogCoverageButton = screen.getByRole("button", {
       name: "Learn about Fog Coverage",
@@ -185,7 +194,7 @@ describe("DashboardGrid", () => {
   it.each([
     [0, "0%"],
     [25, "25%"],
-    [53, "53%"],
+    [56, "56%"],
     [75, "75%"],
     [100, "100%"],
   ])(

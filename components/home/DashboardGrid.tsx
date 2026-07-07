@@ -74,26 +74,28 @@ function MetricCardContent({
   mobileDetailAddon?: ReactNode;
 }) {
   return (
-    <div className="flex h-full items-center gap-3 max-sm:items-start max-sm:gap-3.5 lg:items-center lg:gap-3.5">
-      <div
-        className={`order-2 flex h-9 w-9 shrink-0 items-center justify-center self-center rounded-full border border-white/8 bg-white/4 max-sm:self-start max-sm:mt-0.5 ${mobileMetricIconFrameClass} lg:order-1 ${desktopMetricIconFrameClass} ${iconFrameClassName}`}
-      >
-        {icon}
-      </div>
-      <div className="order-1 flex min-w-0 flex-1 flex-col lg:order-2">
-        <CardLabel>{label}</CardLabel>
-        <p
-          className={`mt-1 line-clamp-2 text-[1.35rem] font-light leading-none max-sm:mt-1.5 ${mobileMetricPrimaryValueClass} lg:mt-1.5 lg:font-light ${valueClassName} ${
-            isLoading ? "opacity-35 text-white" : "text-white/94"
-          }`}
+    <div className="flex h-full w-full flex-col">
+      <div className="flex min-w-0 flex-1 items-center gap-3 max-sm:items-start max-sm:gap-3.5 lg:items-center lg:gap-3.5">
+        <div
+          className={`order-2 flex h-9 w-9 shrink-0 items-center justify-center self-center rounded-full border border-white/8 bg-white/4 max-sm:self-start max-sm:mt-0.5 ${mobileMetricIconFrameClass} lg:order-1 ${desktopMetricIconFrameClass} ${iconFrameClassName}`}
         >
-          {value}
-        </p>
-        <p className="mt-1 text-[0.6875rem] font-medium text-white/50 max-sm:mt-1.5 max-sm:text-xs max-sm:text-white/55 lg:mt-1.5 lg:text-xs lg:text-white/55">
-          {detail}
-        </p>
-        {mobileDetailAddon}
+          {icon}
+        </div>
+        <div className="order-1 flex min-w-0 flex-1 flex-col lg:order-2">
+          <CardLabel>{label}</CardLabel>
+          <p
+            className={`mt-1 line-clamp-2 text-[1.35rem] font-light leading-none max-sm:mt-1.5 ${mobileMetricPrimaryValueClass} lg:mt-1.5 lg:font-light ${valueClassName} ${
+              isLoading ? "opacity-35 text-white" : "text-white/94"
+            }`}
+          >
+            {value}
+          </p>
+          <p className="mt-1 text-[0.6875rem] font-medium text-white/50 max-sm:mt-1.5 max-sm:text-xs max-sm:text-white/55 lg:mt-1.5 lg:text-xs lg:text-white/55">
+            {detail}
+          </p>
+        </div>
       </div>
+      {mobileDetailAddon}
     </div>
   );
 }
