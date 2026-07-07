@@ -28,6 +28,10 @@ export const mobileCardLabelClass =
 /** Shared primary metric value typography for phone portrait metric tiles */
 export const mobileMetricPrimaryValueClass = "max-sm:text-[1.95rem]";
 
+/** Phrase-sized Karl Status value on phone portrait — smaller than numeric metrics */
+export const mobileKarlStatusValueClass =
+  "max-sm:!text-[1.5625rem] max-sm:!line-clamp-3 max-sm:leading-snug";
+
 export const mobileInsightIconFrameClass = "max-sm:h-12 max-sm:w-12";
 
 /** Compact icon frame for mobile Best Right Now list rows */

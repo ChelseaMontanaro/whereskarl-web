@@ -19,6 +19,7 @@ import {
   mobileMetricIconFrameClass,
   mobileMetricIconSizeClass,
   mobileMetricPrimaryValueClass,
+  mobileKarlStatusValueClass,
 } from "@/components/home/desktopGlass";
 import { GlassCard } from "@/components/ui/GlassCard";
 import {
@@ -226,7 +227,7 @@ export function DashboardGrid({
           isLoading={isLoading}
           icon={<FogCoverageIcon className={metricIconClassName} />}
           iconFrameClassName={desktopMistIconClass}
-          valueClassName="max-sm:!line-clamp-3 max-sm:leading-snug lg:text-[0.98rem] lg:leading-snug lg:tracking-[-0.01em]"
+          valueClassName={`${mobileKarlStatusValueClass} lg:text-[0.98rem] lg:leading-snug lg:tracking-[-0.01em]`}
           detailKey="karl-status"
           onOpenDetail={openMetricDetail}
         />

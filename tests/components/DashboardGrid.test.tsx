@@ -116,10 +116,10 @@ describe("DashboardGrid", () => {
     expect(container.querySelector(".max-sm\\:text-\\[1\\.95rem\\]")).toBeTruthy();
   });
 
-  it("uses the same primary metric value sizing for Karl Status as other metric tiles on phone portrait", () => {
+  it("uses a smaller phrase-sized mobile value for Karl Status than numeric metric tiles", () => {
     const statusFixture: CurrentResponse = {
       ...currentFixture,
-      status: "Patchy fog nearby",
+      status: "Karl is lingering",
     };
 
     render(
@@ -131,14 +131,16 @@ describe("DashboardGrid", () => {
     );
 
     const fogCoverageValue = screen.getByText("56%");
-    const karlStatusValue = screen.getByText("Patchy fog nearby");
+    const karlStatusValue = screen.getByText("Karl is lingering");
     const sunshineScoreValue = screen.getByText("44");
 
     expect(fogCoverageValue.className).toContain("max-sm:text-[1.95rem]");
-    expect(karlStatusValue.className).toContain("max-sm:text-[1.95rem]");
     expect(sunshineScoreValue.className).toContain("max-sm:text-[1.95rem]");
-    expect(karlStatusValue.className).not.toContain("1.1875rem");
+    expect(fogCoverageValue.className).not.toContain("max-sm:!text-[1.5625rem]");
+    expect(sunshineScoreValue.className).not.toContain("max-sm:!text-[1.5625rem]");
+    expect(karlStatusValue.className).toContain("max-sm:!text-[1.5625rem]");
     expect(karlStatusValue.className).toContain("max-sm:!line-clamp-3");
+    expect(karlStatusValue.className).toContain("max-sm:leading-snug");
   });
 
   it("renders premium weather icons alongside dashboard metrics", () => {
