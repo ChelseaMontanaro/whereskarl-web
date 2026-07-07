@@ -378,7 +378,7 @@ describe("DashboardGrid", () => {
     );
     expect(screen.getByTestId("clearest-spot-gauge-svg")).toHaveAttribute(
       "data-presentation-scale-y",
-      "0.4",
+      "0.46",
     );
     expect(gauge.className).not.toContain("max-sm:overflow-hidden");
     expect(screen.getByTestId("clearest-spot-gauge-frame").className).toContain("max-sm:w-full");
