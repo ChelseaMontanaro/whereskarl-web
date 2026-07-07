@@ -79,7 +79,7 @@ describe("ClearestSpotGauge", () => {
     expect(container.className).toBe(clearestSpotGaugeContainerClass);
     expect(container.className).toContain("max-sm:flex-1");
     expect(frame.className).toBe(clearestSpotGaugeFrameClass);
-    expect(frame.className).toContain("max-sm:h-[2.25rem]");
+    expect(frame.className).toContain("max-sm:h-[2.5rem]");
     expect(frame.className).toContain("max-sm:w-full");
     expect(frame.className).not.toContain("aspect-");
   });
@@ -103,7 +103,11 @@ describe("ClearestSpotGauge", () => {
       "data-viewbox-height",
       String(CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX.height),
     );
-    expect(svg.getAttribute("preserveAspectRatio")).toBe("xMidYMax meet");
+    expect(svg).toHaveAttribute(
+      "data-viewbox-min-y",
+      String(CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX.minY),
+    );
+    expect(svg.getAttribute("preserveAspectRatio")).toBe("xMidYMax slice");
     expect(svg.getAttribute("data-presentation-scale-y")).toBe(
       String(CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_Y),
     );

@@ -16,21 +16,28 @@ type ClearestSpotGaugeProps = {
   score: number;
 };
 
-export const CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_X = 1.1;
+export const CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_X = 1.22;
 
 export const CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_Y = 0.36;
 
 export const CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX = {
+  minX: 0,
+  minY: 26,
   width: CLEAREST_SPOT_GAUGE_VIEWBOX.width,
-  height: 50,
+  height: 24,
 } as const;
 
 export const clearestSpotGaugeFrameClass =
-  "max-sm:h-[2.25rem] max-sm:w-full max-sm:shrink-0 max-sm:overflow-hidden";
+  "max-sm:h-[2.5rem] max-sm:w-full max-sm:shrink-0 max-sm:overflow-hidden";
 
 export const clearestSpotGaugeContainerClass = `${mobileMetricIndicatorClass} flex max-sm:min-h-0 max-sm:flex-1 max-sm:flex-col max-sm:justify-end max-sm:w-full max-sm:!pt-0 max-sm:pb-0`;
 
-const CLEAREST_SPOT_GAUGE_LABEL_Y = CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX.height - 2;
+const CLEAREST_SPOT_GAUGE_LABEL_Y = 48;
+
+export function clearestSpotGaugeDisplayViewBox(): string {
+  const { minX, minY, width, height } = CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX;
+  return `${minX} ${minY} ${width} ${height}`;
+}
 
 export function clearestSpotGaugePresentationTransform(): string {
   return `translate(${CLEAREST_SPOT_GAUGE_CENTER_X} ${CLEAREST_SPOT_GAUGE_CENTER_Y}) scale(${CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_X} ${CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_Y}) translate(${-CLEAREST_SPOT_GAUGE_CENTER_X} ${-CLEAREST_SPOT_GAUGE_CENTER_Y})`;
@@ -63,11 +70,12 @@ export function ClearestSpotGauge({ score }: ClearestSpotGaugeProps) {
         data-testid="clearest-spot-gauge-frame"
       >
         <svg
-          viewBox={`0 0 ${CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX.width} ${CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX.height}`}
-          preserveAspectRatio="xMidYMax meet"
+          viewBox={clearestSpotGaugeDisplayViewBox()}
+          preserveAspectRatio="xMidYMax slice"
           className="h-full w-full"
           aria-hidden="true"
           data-testid="clearest-spot-gauge-svg"
+          data-viewbox-min-y={CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX.minY}
           data-viewbox-width={CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX.width}
           data-viewbox-height={CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX.height}
           data-presentation-scale-y={CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_Y}
