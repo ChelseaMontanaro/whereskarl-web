@@ -10,6 +10,10 @@ import {
 } from "@/components/home/ConditionIcons";
 import { DashboardGrid } from "@/components/home/DashboardGrid";
 import { MetricDetailSheet } from "@/components/home/MetricDetailSheet";
+import {
+  fogCoverageActiveMarkCount,
+  fogCoverageIndicatorAriaLabel,
+} from "@/lib/home/fogCoverageIndicator";
 import { METRIC_DETAILS } from "@/lib/home/metricDetails";
 import type { BestSunshineResponse, CurrentResponse } from "@/lib/schemas/weather";
 
@@ -143,6 +147,73 @@ describe("DashboardGrid", () => {
     expect(karlStatusValue.className).toContain("max-sm:leading-snug");
   });
 
+  it("renders a mobile-only fog density strip only on the Fog Coverage tile", () => {
+    const { container } = render(
+      <DashboardGrid
+        current={{ ...currentFixture, fogCoverage: 55 }}
+        bestSunshine={bestSunshineFixture}
+        isLoading={false}
+      />,
+    );
+
+    expect(fogCoverageActiveMarkCount(55)).toBe(3);
+    expect(
+      screen.getByRole("img", { name: fogCoverageIndicatorAriaLabel(55) }),
+    ).toBeInTheDocument();
+    expect(screen.queryAllByRole("img", { name: /Fog coverage:/ })).toHaveLength(1);
+
+    const strip = screen.getByRole("img", { name: fogCoverageIndicatorAriaLabel(55) });
+    expect(strip.className).toContain("max-sm:block");
+    expect(strip.className).toContain("hidden");
+
+    const markIcons = strip.querySelectorAll("svg");
+    expect(markIcons).toHaveLength(5);
+    expect(strip.querySelectorAll(".opacity-\\[0\\.72\\]")).toHaveLength(3);
+    expect(strip.querySelectorAll(".opacity-\\[0\\.22\\]")).toHaveLength(2);
+
+    const fogCoverageButton = screen.getByRole("button", {
+      name: "Learn about Fog Coverage",
+    });
+    expect(fogCoverageButton.contains(strip)).toBe(true);
+    expect(
+      screen.getByRole("button", { name: "Learn about Karl Status" }).contains(strip),
+    ).toBe(false);
+    expect(container.querySelectorAll('[role="img"][aria-label^="Fog coverage:"]')).toHaveLength(1);
+  });
+
+  it("derives fog density active marks from the live fog coverage percentage", () => {
+    expect(fogCoverageActiveMarkCount(0)).toBe(0);
+    expect(fogCoverageActiveMarkCount(20)).toBe(1);
+    expect(fogCoverageActiveMarkCount(55)).toBe(3);
+    expect(fogCoverageActiveMarkCount(100)).toBe(5);
+
+    render(
+      <DashboardGrid
+        current={{ ...currentFixture, fogCoverage: 20 }}
+        bestSunshine={bestSunshineFixture}
+        isLoading={false}
+      />,
+    );
+
+    const strip = screen.getByRole("img", {
+      name: fogCoverageIndicatorAriaLabel(20),
+    });
+    expect(strip.querySelectorAll(".opacity-\\[0\\.72\\]")).toHaveLength(1);
+    expect(strip.querySelectorAll(".opacity-\\[0\\.22\\]")).toHaveLength(4);
+  });
+
+  it("does not render the fog density strip while metrics are loading", () => {
+    render(
+      <DashboardGrid
+        current={null}
+        bestSunshine={null}
+        isLoading
+      />,
+    );
+
+    expect(screen.queryByRole("img", { name: /Fog coverage:/ })).not.toBeInTheDocument();
+  });
+
   it("renders premium weather icons alongside dashboard metrics", () => {
     const { container } = render(
       <DashboardGrid
@@ -157,7 +228,7 @@ describe("DashboardGrid", () => {
     expect(screen.getByText("Clear Skies Score")).toBeInTheDocument();
     expect(screen.getByText("Clearest Spot")).toBeInTheDocument();
     expect(screen.queryByText("What does this mean?")).not.toBeInTheDocument();
-    expect(container.querySelectorAll("svg")).toHaveLength(4);
+    expect(container.querySelectorAll(".rounded-full svg")).toHaveLength(4);
     expect(
       screen.getByRole("link", {
         name: "View clearest spot on map: Tiburon",

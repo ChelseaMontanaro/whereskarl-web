@@ -23,6 +23,11 @@ import {
 } from "@/components/home/desktopGlass";
 import { GlassCard } from "@/components/ui/GlassCard";
 import {
+  FOG_COVERAGE_DENSITY_MARK_COUNT,
+  fogCoverageActiveMarkCount,
+  fogCoverageIndicatorAriaLabel,
+} from "@/lib/home/fogCoverageIndicator";
+import {
   METRIC_DETAILS,
   metricDetailAriaLabel,
   type MetricDetailKey,
@@ -53,6 +58,35 @@ function MetricSpotLabel() {
   return "Clearest Spot";
 }
 
+function MobileFogCoverageDensityStrip({
+  fogCoveragePercent,
+}: {
+  fogCoveragePercent: number;
+}) {
+  const activeCount = fogCoverageActiveMarkCount(fogCoveragePercent);
+
+  return (
+    <div
+      className="mt-2.5 hidden max-sm:block"
+      role="img"
+      aria-label={fogCoverageIndicatorAriaLabel(fogCoveragePercent)}
+    >
+      <div className="flex items-center gap-1.5" aria-hidden="true">
+        {Array.from({ length: FOG_COVERAGE_DENSITY_MARK_COUNT }, (_, index) => (
+          <FogCoverageIcon
+            key={index}
+            className={
+              index < activeCount
+                ? "h-[0.875rem] w-[0.875rem] opacity-[0.72]"
+                : "h-[0.875rem] w-[0.875rem] opacity-[0.22]"
+            }
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function MetricCardContent({
   label,
   value,
@@ -61,6 +95,7 @@ function MetricCardContent({
   icon,
   iconFrameClassName,
   valueClassName = "lg:text-[1.65rem]",
+  mobileDetailAddon,
 }: {
   label: ReactNode;
   value: string;
@@ -69,6 +104,7 @@ function MetricCardContent({
   icon: ReactNode;
   iconFrameClassName: string;
   valueClassName?: string;
+  mobileDetailAddon?: ReactNode;
 }) {
   return (
     <div className="flex h-full items-center gap-3 max-sm:items-start max-sm:gap-3.5 lg:items-center lg:gap-3.5">
@@ -89,6 +125,7 @@ function MetricCardContent({
         <p className="mt-1 text-[0.6875rem] font-medium text-white/50 max-sm:mt-1.5 max-sm:text-xs max-sm:text-white/55 lg:mt-1.5 lg:text-xs lg:text-white/55">
           {detail}
         </p>
+        {mobileDetailAddon}
       </div>
     </div>
   );
@@ -106,6 +143,7 @@ function MetricCard({
   mapAriaLabel,
   detailKey,
   onOpenDetail,
+  mobileDetailAddon,
 }: {
   label: ReactNode;
   value: string;
@@ -118,6 +156,7 @@ function MetricCard({
   mapAriaLabel?: string | null;
   detailKey?: MetricDetailKey;
   onOpenDetail?: (key: MetricDetailKey, trigger: HTMLButtonElement) => void;
+  mobileDetailAddon?: ReactNode;
 }) {
   const isInteractive = Boolean((mapHref && mapAriaLabel) || (detailKey && onOpenDetail));
   const cardClassName = `${metricCardSurfaceClass}${
@@ -133,6 +172,7 @@ function MetricCard({
       icon={icon}
       iconFrameClassName={iconFrameClassName}
       valueClassName={valueClassName}
+      mobileDetailAddon={mobileDetailAddon}
     />
   );
 
@@ -219,6 +259,11 @@ export function DashboardGrid({
           iconFrameClassName={desktopMistIconClass}
           detailKey="fog-coverage"
           onOpenDetail={openMetricDetail}
+          mobileDetailAddon={
+            !isLoading && current ? (
+              <MobileFogCoverageDensityStrip fogCoveragePercent={current.fogCoverage} />
+            ) : null
+          }
         />
         <MetricCard
           label="Karl Status"
