@@ -3,9 +3,12 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  CLEAREST_SPOT_BELL_CURVE_BASELINE_Y,
   clampMetricPercent,
+  clearestSpotBellCurveLeftControlX,
   clearestSpotBellCurvePath,
   clearestSpotBellCurvePeakY,
+  clearestSpotBellCurveRightControlX,
   clearSkiesIndicatorAriaLabel,
   fogCoverageIndicatorAriaLabel,
   metricPercentFillWidth,
@@ -28,13 +31,36 @@ describe("metricPercent", () => {
     expect(clearSkiesIndicatorAriaLabel(41)).toBe("Clear skies score: 41 out of 100");
   });
 
-  it("builds a bell curve path peaking at the clamped score", () => {
-    const peakX = 81;
-    const peakY = clearestSpotBellCurvePeakY(peakX);
-    const path = clearestSpotBellCurvePath(peakX);
+  it.each([20, 50, 79, 100])(
+    "builds a smooth two-segment bell curve for score %i",
+    (score) => {
+      const peakX = clampMetricPercent(score);
+      const peakY = clearestSpotBellCurvePeakY(peakX);
+      const path = clearestSpotBellCurvePath(peakX);
 
-    expect(path).toContain(`${peakX} ${peakY}`);
-    expect(path.startsWith("M 0 42")).toBe(true);
-    expect(path.endsWith("100 42")).toBe(true);
+      expect(path.split(" C ").length).toBeGreaterThanOrEqual(2);
+      expect(path).toContain(`${peakX} ${peakY}`);
+
+      if (score > 0 && score < 100) {
+        const leftMid = clearestSpotBellCurveLeftControlX(peakX);
+        const rightMid = clearestSpotBellCurveRightControlX(peakX);
+
+        expect(path).toContain(`${leftMid} ${CLEAREST_SPOT_BELL_CURVE_BASELINE_Y}`);
+        expect(path).toContain(`${leftMid} ${peakY}`);
+        expect(path).toContain(`${rightMid} ${peakY}`);
+        expect(path).toContain(`${rightMid} ${CLEAREST_SPOT_BELL_CURVE_BASELINE_Y}`);
+        expect(rightMid).toBeGreaterThan(peakX);
+        expect(leftMid).toBeLessThan(peakX);
+      }
+
+      if (score >= 79 && score < 100) {
+        expect(clearestSpotBellCurveRightControlX(score)).toBeGreaterThan(score);
+      }
+    },
+  );
+
+  it("positions the bell curve peak dot x-coordinate from the live score", () => {
+    expect(clearestSpotBellCurvePath(79)).toContain(`79 ${clearestSpotBellCurvePeakY(79)}`);
+    expect(clearestSpotBellCurvePath(81)).toContain(`81 ${clearestSpotBellCurvePeakY(81)}`);
   });
 });

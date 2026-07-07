@@ -325,9 +325,9 @@ describe("DashboardGrid", () => {
     expect(screen.getByTestId("clearest-spot-bell-curve-peak")).toHaveAttribute("cx", "81");
     expect(screen.getByTestId("clearest-spot-bell-curve-svg")).toHaveAttribute(
       "data-viewbox-height",
-      "48",
+      "52",
     );
-    expect(screen.getByTestId("clearest-spot-bell-curve-svg").className).toContain("h-11");
+    expect(screen.getByTestId("clearest-spot-bell-curve-svg").className).toContain("h-12");
 
     const clearestSpotLink = screen.getByRole("link", {
       name: "View clearest spot on map: Tiburon",
@@ -336,6 +336,23 @@ describe("DashboardGrid", () => {
     expect(
       screen.getByRole("button", { name: "Learn about Clear Skies Score" }).contains(curve),
     ).toBe(false);
+  });
+
+  it("does not change fog or clear skies slider markup when clearest spot uses the bell curve", () => {
+    render(
+      <DashboardGrid
+        current={{ ...currentFixture, fogCoverage: 59, sunshineScore: 41 }}
+        bestSunshine={{ ...bestSunshineFixture, sunshineScore: 79 }}
+        isLoading={false}
+      />,
+    );
+
+    expect(screen.getByTestId("fog-coverage-slider-track").getAttribute("data-fill-percent")).toBe("59");
+    expect(screen.getByTestId("clear-skies-slider-track").getAttribute("data-fill-percent")).toBe("41");
+    expect(screen.getByTestId("clearest-spot-bell-curve-peak")).toHaveAttribute("cx", "79");
+    expect(screen.queryAllByTestId("clearest-spot-bell-curve")).toHaveLength(1);
+    expect(screen.queryAllByTestId("fog-coverage-slider")).toHaveLength(1);
+    expect(screen.queryAllByTestId("clear-skies-slider")).toHaveLength(1);
   });
 
   it.each([
