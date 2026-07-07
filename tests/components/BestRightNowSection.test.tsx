@@ -128,11 +128,55 @@ describe("BestRightNowSection", () => {
     );
 
     const listItems = container.querySelectorAll("ul li");
-    const iconFrames = container.querySelectorAll("ul li .rounded-full");
+    const plainIconFrames = container.querySelectorAll(
+      'ul li [data-testid="insight-plain-icon"]',
+    );
 
     expect(listItems.length).toBe(3);
-    expect(iconFrames.length).toBe(3);
+    expect(plainIconFrames.length).toBe(3);
     expect(container.querySelectorAll("ul li svg").length).toBe(3);
+    expect(
+      container.querySelectorAll('ul li [data-testid="insight-plain-icon"].rounded-full'),
+    ).toHaveLength(0);
+  });
+
+  it("does not render circular icon wrappers on mobile Best Right Now rows", () => {
+    const { container } = render(
+      <BestRightNowSection
+        items={items}
+        isNightPresentation={false}
+        layout="mobile"
+      />,
+    );
+
+    const iconWrappers = container.querySelectorAll(
+      'ul li [data-testid="insight-plain-icon"]',
+    );
+
+    for (const iconWrapper of iconWrappers) {
+      expect(iconWrapper.className).not.toContain("rounded-full");
+      expect(iconWrapper.className).not.toContain("border");
+      expect(iconWrapper.className).not.toContain("bg-black");
+    }
+  });
+
+  it("shows fog, wind, and temperature metadata when weather data is available", () => {
+    const itemsWithWeather: BestRightNowItem[] = [
+      {
+        ...items[0],
+        weatherMetadata: ["Fog: 26%", "Wind: W 7 mph", "72°F"],
+      },
+    ];
+
+    render(
+      <BestRightNowSection
+        items={itemsWithWeather}
+        isNightPresentation={false}
+        layout="mobile"
+      />,
+    );
+
+    expect(screen.getByText("Fog: 26% • Wind: W 7 mph • 72°F")).toBeInTheDocument();
   });
 
   it("does not render Best Right Now location names as map links or anchors", () => {

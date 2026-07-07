@@ -1,9 +1,9 @@
 import { NextHourIcon } from "@/components/home/ConditionIcons";
 import {
   CardLabel,
-  InsightIconFrame,
+  InsightPlainIcon,
 } from "@/components/home/InsightCardParts";
-import { desktopInsightIconSizeClass, mobileInsightCardSurfaceClass } from "@/components/home/desktopGlass";
+import { desktopInsightIconSizeClass, insightPlainIconAccentClass, mobileInsightCardSurfaceClass } from "@/components/home/desktopGlass";
 import { GlassCard } from "@/components/ui/GlassCard";
 
 type NextHourOutlookCardProps = {
@@ -24,9 +24,9 @@ function NextHourCardBody({
   if (isLoading) {
     return (
       <>
-        <InsightIconFrame tone="gold">
+        <InsightPlainIcon className={insightPlainIconAccentClass}>
           <NextHourIcon className={desktopInsightIconSizeClass} />
-        </InsightIconFrame>
+        </InsightPlainIcon>
         <div className="min-w-0 flex-1">
           <CardLabel>Future Outlook</CardLabel>
           <p
@@ -47,9 +47,9 @@ function NextHourCardBody({
 
   return (
     <>
-      <InsightIconFrame tone="gold">
+      <InsightPlainIcon className={insightPlainIconAccentClass}>
         <NextHourIcon className={desktopInsightIconSizeClass} />
-      </InsightIconFrame>
+      </InsightPlainIcon>
       <div className="min-w-0 flex-1">
         <CardLabel>Future Outlook</CardLabel>
         <p

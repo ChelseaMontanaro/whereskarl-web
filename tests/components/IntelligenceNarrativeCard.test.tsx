@@ -36,6 +36,25 @@ describe("IntelligenceNarrativeCard", () => {
     expect(container.querySelector("ellipse")).toBeNull();
   });
 
+  it("does not render a circular icon wrapper for Karl's Read", () => {
+    const intelligence = readFixture<KarlIntelligenceResponse>(
+      "karl-intelligence-mill-valley.json",
+    );
+
+    const { container } = render(
+      <IntelligenceNarrativeCard
+        intelligence={intelligence}
+        isLoading={false}
+        layout="mobile"
+      />,
+    );
+
+    const iconWrapper = container.querySelector('[data-testid="insight-plain-icon"]');
+    expect(iconWrapper).toBeTruthy();
+    expect(iconWrapper?.className).not.toContain("rounded-full");
+    expect(iconWrapper?.className).not.toContain("border");
+  });
+
   it("links Karl's Read to the map when focusLocationId is available", () => {
     const intelligence = readFixture<KarlIntelligenceResponse>(
       "karl-intelligence-mill-valley.json",

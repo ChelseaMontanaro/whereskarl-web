@@ -25,6 +25,7 @@ import { resolveHeroPresentation } from "@/lib/home/heroPresentation";
 import {
   bestRightNowItems,
   bestRightNowLocationItems,
+  enrichBestRightNowItemsWithLocationWeather,
   foggiestKarlLocation,
   formatUpdatedAt,
   heroConfidenceText,
@@ -129,7 +130,14 @@ export function HomeView() {
   const intelligence = intelligenceQuery.data ?? null;
 
   const heroPresentation = resolveHeroPresentation(intelligence?.heroImagery);
-  const bestRightNow = bestRightNowItems(intelligence, bestSunshine);
+  const bestRightNow = useMemo(
+    () =>
+      enrichBestRightNowItemsWithLocationWeather(
+        bestRightNowItems(intelligence, bestSunshine),
+        locationsQuery.data?.locations,
+      ),
+    [intelligence, bestSunshine, locationsQuery.data?.locations],
+  );
   const primaryClearestLocationId = bestSunshine?.locationID ?? null;
   const desktopBestRightNow = useMemo(
     () =>

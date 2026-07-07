@@ -72,6 +72,17 @@ export const desktopMetricIconSizeClass = "h-6 w-6 lg:h-7 lg:w-7";
 
 export const desktopInsightIconSizeClass = "h-7 w-7 lg:h-8 lg:w-8";
 
+/** Borderless lower-home insight icon frame — sizing only, no circular chrome */
+export const insightPlainIconFrameClass =
+  "flex shrink-0 items-center justify-center lg:h-14 lg:w-14";
+
+export const insightPlainIconFrameCompactClass =
+  "flex h-10 w-10 shrink-0 items-center justify-center max-sm:h-10 max-sm:w-10 lg:h-12 lg:w-12";
+
+/** Accent for icons that use currentColor on light and dark hero glass cards */
+export const insightPlainIconAccentClass =
+  "text-karl-gold/90 max-sm:text-karl-gold lg:text-karl-gold/82";
+
 export const desktopClickableCardLinkClass =
   "group block rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-karl-gold";
 

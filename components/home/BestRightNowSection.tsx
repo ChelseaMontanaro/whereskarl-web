@@ -1,7 +1,7 @@
 import { MoonIcon, SunshineIcon } from "@/components/home/ConditionIcons";
 import {
   CardLabel,
-  InsightIconFrame,
+  InsightPlainIcon,
 } from "@/components/home/InsightCardParts";
 import {
   desktopInsightIconSizeClass,
@@ -38,20 +38,27 @@ function BestRightNowSpotIcon({
 function BestRightNowLocationCopy({
   locationName,
   detail,
+  weatherMetadata,
   isDegraded,
   nameClassName,
   detailClassName,
+  metadataClassName,
 }: {
   locationName: string;
   detail: string;
+  weatherMetadata?: string[];
   isDegraded?: boolean;
   nameClassName: string;
   detailClassName: string;
+  metadataClassName: string;
 }) {
   return (
     <>
       <p className={nameClassName}>{locationName}</p>
       <p className={detailClassName}>{detail}</p>
+      {weatherMetadata && weatherMetadata.length > 0 ? (
+        <p className={metadataClassName}>{weatherMetadata.join(" • ")}</p>
+      ) : null}
       {isDegraded ? (
         <DegradedDataLabel variant="bestRightNow" className="mt-1.5" />
       ) : null}
@@ -77,19 +84,18 @@ function MobileBestRightNowSection({
             key={item.locationId}
             className="flex items-start gap-3 max-sm:gap-3.5 border-t border-white/8 pt-3 max-sm:pt-3.5 first:border-t-0 first:pt-0"
           >
-            <InsightIconFrame
-              tone={isNightPresentation ? "mist" : "gold"}
-              size="compact"
-            >
+            <InsightPlainIcon size="compact">
               <BestRightNowSpotIcon isNightPresentation={isNightPresentation} />
-            </InsightIconFrame>
+            </InsightPlainIcon>
             <div className="min-w-0 flex-1" {...preventLocationAutoLinkProps}>
               <BestRightNowLocationCopy
                 locationName={item.locationName}
                 detail={item.detail}
+                weatherMetadata={item.weatherMetadata}
                 isDegraded={item.isDegraded}
                 nameClassName="text-base max-sm:text-[1.0625rem] font-semibold text-white"
                 detailClassName="mt-1 max-sm:mt-1.5 text-sm max-sm:text-[0.9375rem] leading-snug text-white/65"
+                metadataClassName="mt-1 max-sm:mt-1 text-[0.6875rem] max-sm:text-xs font-medium leading-snug text-white/48"
               />
             </div>
             {item.score != null ? (
@@ -131,17 +137,19 @@ function DesktopBestRightNowCard({
 }) {
   return (
     <GlassCard variant="desktop" className="flex h-full items-center gap-4 px-5 py-5">
-      <InsightIconFrame tone={isNightPresentation ? "mist" : "gold"}>
+      <InsightPlainIcon>
         <BestRightNowSpotIcon isNightPresentation={isNightPresentation} />
-      </InsightIconFrame>
+      </InsightPlainIcon>
       <div className="min-w-0 flex-1" {...preventLocationAutoLinkProps}>
         <CardLabel>Best Right Now</CardLabel>
         <BestRightNowLocationCopy
           locationName={item.locationName}
           detail={item.detail}
+          weatherMetadata={item.weatherMetadata}
           isDegraded={item.isDegraded}
           nameClassName="mt-1.5 text-lg font-semibold text-white lg:text-xl"
           detailClassName="mt-1 text-sm leading-relaxed text-white/68"
+          metadataClassName="mt-1.5 text-[0.65rem] font-medium text-white/48"
         />
       </div>
       {item.score != null ? (

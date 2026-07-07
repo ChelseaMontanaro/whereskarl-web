@@ -5,6 +5,8 @@ import {
   desktopGoldIconClass,
   desktopInsightIconFrameClass,
   desktopMistIconClass,
+  insightPlainIconFrameClass,
+  insightPlainIconFrameCompactClass,
   mobileCardLabelClass,
   mobileInsightIconFrameClass,
   mobileListIconFrameClass,
@@ -57,6 +59,30 @@ export function InsightIconFrame({
   return (
     <div
       className={`rounded-full ${sizeClass} ${desktopInsightIconFrameClass} ${toneClass}`}
+    >
+      {children}
+    </div>
+  );
+}
+
+export function InsightPlainIcon({
+  children,
+  size = "default",
+  className = "",
+}: {
+  children: ReactNode;
+  size?: "default" | "compact";
+  className?: string;
+}) {
+  const sizeClass =
+    size === "compact"
+      ? insightPlainIconFrameCompactClass
+      : `${insightPlainIconFrameClass} h-12 w-12 max-sm:h-12 max-sm:w-12`;
+
+  return (
+    <div
+      data-testid="insight-plain-icon"
+      className={`${sizeClass} ${className}`.trim()}
     >
       {children}
     </div>

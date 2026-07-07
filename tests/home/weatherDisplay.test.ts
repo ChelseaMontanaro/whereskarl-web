@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   bestRightNowLocationItems,
+  enrichBestRightNowItemsWithLocationWeather,
   heroConfidenceText,
   heroSubheadline,
   movementPhrase,
@@ -128,7 +129,68 @@ describe("bestRightNowLocationItems", () => {
         locationName: "Sausalito",
         score: 74,
         detail: "Clearing",
+        weatherMetadata: ["Fog: 41%", "Wind: W 9 mph", "68°F"],
       }),
+    ]);
+  });
+});
+
+describe("enrichBestRightNowItemsWithLocationWeather", () => {
+  it("attaches fog, wind, and temperature metadata from live location data", () => {
+    const items = enrichBestRightNowItemsWithLocationWeather(
+      [
+        {
+          locationId: "tiburon",
+          locationName: "Tiburon",
+          detail: "Clear skies holding.",
+          score: 82,
+          rank: 1,
+        },
+      ],
+      [
+        {
+          id: "tiburon",
+          name: "Tiburon",
+          latitude: 0,
+          longitude: 0,
+          distanceText: "9 mi",
+          status: "Mostly Sunny",
+          temperature: 72,
+          sunshineScore: 82,
+          cloudCover: 22,
+          visibility: 9,
+          humidity: 58,
+          windSpeed: 7,
+          windDirection: "W",
+          weatherCode: 1,
+          iconName: "sun.max.fill",
+          fogScore: 26,
+          karlReason: "Clear",
+          primaryDrivers: [],
+          microclimateFactors: [],
+          updatedAt: "2026-07-01T16:00:00.000Z",
+          confidenceScore: 0,
+          confidenceLabel: "Unavailable",
+          confidenceExplanation: "Unavailable",
+          confidenceComponents: {
+            freshness: 0,
+            observationQuality: 0,
+            fieldCompleteness: 0,
+            sourceReliability: 0,
+          },
+          prediction: {
+            predictionConfidenceScore: 0,
+            predictionConfidenceLabel: "Unavailable",
+            predictionReason: "Unavailable",
+          },
+        },
+      ],
+    );
+
+    expect(items[0]?.weatherMetadata).toEqual([
+      "Fog: 26%",
+      "Wind: W 7 mph",
+      "72°F",
     ]);
   });
 });

@@ -4,7 +4,7 @@ import { KarlLogo } from "@/components/brand/KarlLogo";
 import {
   CardLabel,
   InsightCardChevron,
-  InsightIconFrame,
+  InsightPlainIcon,
 } from "@/components/home/InsightCardParts";
 import {
   desktopClickableCardHoverClass,
@@ -36,9 +36,9 @@ function MobileIntelligenceNarrativeCard({
   if (isLoading) {
     return (
       <GlassCard variant="insight" className={`flex items-start gap-3 px-4 py-4 ${mobileInsightCardSurfaceClass}`}>
-        <InsightIconFrame>
+        <InsightPlainIcon>
           <KarlReadIcon />
-        </InsightIconFrame>
+        </InsightPlainIcon>
         <div className="min-w-0 flex-1">
           <CardLabel>Karl&apos;s Read</CardLabel>
           <p className="mt-2 text-lg max-sm:text-[1.3125rem] font-semibold text-white/50">
@@ -64,9 +64,9 @@ function MobileIntelligenceNarrativeCard({
 
   return (
     <GlassCard variant="insight" className={`flex items-start gap-3 px-4 py-4 ${mobileInsightCardSurfaceClass}`}>
-      <InsightIconFrame>
+      <InsightPlainIcon>
         <KarlReadIcon />
-      </InsightIconFrame>
+      </InsightPlainIcon>
       <div className="min-w-0 flex-1">
         <CardLabel>Karl&apos;s Read</CardLabel>
         <h2 className="mt-2 max-sm:mt-2.5 text-lg max-sm:text-[1.3125rem] font-semibold leading-snug text-white">
@@ -93,9 +93,9 @@ function DesktopIntelligenceNarrativeCard({
   if (isLoading) {
     return (
       <GlassCard variant="desktop" className="flex items-center gap-4 px-5 py-5">
-        <InsightIconFrame>
+        <InsightPlainIcon>
           <KarlReadIcon />
-        </InsightIconFrame>
+        </InsightPlainIcon>
         <div className="min-w-0 flex-1">
           <CardLabel>Karl&apos;s Read</CardLabel>
           <p className="mt-2 text-lg font-semibold text-white/50">
@@ -128,9 +128,9 @@ function DesktopIntelligenceNarrativeCard({
 
   const cardBody = (
     <>
-      <InsightIconFrame>
+      <InsightPlainIcon>
         <KarlReadIcon />
-      </InsightIconFrame>
+      </InsightPlainIcon>
       <div className="min-w-0 flex-1">
         <CardLabel>Karl&apos;s Read</CardLabel>
         <h2 className="mt-1.5 text-lg font-semibold leading-snug text-white lg:text-xl">
