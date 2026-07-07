@@ -13,6 +13,7 @@ import {
   resolveRawLocationFogIntensity,
   type LocationConditionInput,
 } from "@/lib/map/conditions";
+import { locationWeatherMetadataItems } from "@/lib/map/locationMetadata";
 
 export type BestRightNowItem = {
   locationId: string;
@@ -22,6 +23,7 @@ export type BestRightNowItem = {
   scoreLabel?: string | null;
   rank: number | null;
   isDegraded?: boolean;
+  weatherMetadata?: string[];
 };
 
 export type KarlReadPresentation = {
@@ -63,7 +65,35 @@ export function bestRightNowLocationItems(
       scoreLabel: getBestRightNowScoreLabel(location),
       rank: index + 1,
       isDegraded: isLocationDataDegraded(location.dataStatus),
+      weatherMetadata: locationWeatherMetadataItems(location),
     }));
+}
+
+export function enrichBestRightNowItemsWithLocationWeather(
+  items: BestRightNowItem[],
+  locations: LocationWeather[] | undefined,
+): BestRightNowItem[] {
+  if (!locations?.length) {
+    return items;
+  }
+
+  const locationById = new Map(
+    locations.map((location) => [normalizeLocationId(location.id), location]),
+  );
+
+  return items.map((item) => {
+    if (item.weatherMetadata?.length) {
+      return item;
+    }
+
+    const location = locationById.get(normalizeLocationId(item.locationId));
+    if (!location) {
+      return item;
+    }
+
+    const weatherMetadata = locationWeatherMetadataItems(location);
+    return weatherMetadata.length > 0 ? { ...item, weatherMetadata } : item;
+  });
 }
 
 export function foggiestKarlLocation(
