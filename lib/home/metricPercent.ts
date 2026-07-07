@@ -20,12 +20,12 @@ export function clearestSpotBellCurveAriaLabel(score: number): string {
 
 export const CLEAREST_SPOT_BELL_CURVE_VIEWBOX = {
   width: 100,
-  height: 52,
+  height: 64,
 } as const;
 
-export const CLEAREST_SPOT_BELL_CURVE_BASELINE_Y = 44;
+export const CLEAREST_SPOT_BELL_CURVE_BASELINE_Y = 56;
 
-export const CLEAREST_SPOT_BELL_CURVE_PEAK_Y = 12;
+export const CLEAREST_SPOT_BELL_CURVE_PEAK_Y = 6;
 
 export const CLEAREST_SPOT_BELL_CURVE_START_X = 18;
 
@@ -64,25 +64,45 @@ export function clearestSpotBellCurveControlPoints(score: number): {
   peakX: number;
   peakY: number;
   c1x: number;
+  c1y: number;
   c2x: number;
+  c2y: number;
+  c3x: number;
+  c3y: number;
+  c4x: number;
+  c4y: number;
 } {
   const peakX = clearestSpotBellCurveVisualX(score);
   const startX = CLEAREST_SPOT_BELL_CURVE_START_X;
   const endX = CLEAREST_SPOT_BELL_CURVE_END_X;
+  const baselineY = CLEAREST_SPOT_BELL_CURVE_BASELINE_Y;
+  const peakY = CLEAREST_SPOT_BELL_CURVE_PEAK_Y;
+  const amplitude = baselineY - peakY;
+  const peakRoundness = amplitude * 0.14;
+
+  const leftSpan = peakX - startX;
+  const rightSpan = endX - peakX;
 
   return {
     peakX,
-    peakY: CLEAREST_SPOT_BELL_CURVE_PEAK_Y,
-    c1x: startX + (peakX - startX) * 0.5,
-    c2x: peakX + (endX - peakX) * 0.5,
+    peakY,
+    c1x: startX + leftSpan * 0.52,
+    c1y: baselineY,
+    c2x: peakX - leftSpan * 0.24,
+    c2y: peakY + peakRoundness,
+    c3x: peakX + rightSpan * 0.24,
+    c3y: peakY + peakRoundness,
+    c4x: endX - rightSpan * 0.52,
+    c4y: baselineY,
   };
 }
 
 export function clearestSpotBellCurvePath(score: number): string {
   const baselineY = CLEAREST_SPOT_BELL_CURVE_BASELINE_Y;
-  const { peakX, peakY, c1x, c2x } = clearestSpotBellCurveControlPoints(score);
+  const { peakX, peakY, c1x, c1y, c2x, c2y, c3x, c3y, c4x, c4y } =
+    clearestSpotBellCurveControlPoints(score);
   const startX = CLEAREST_SPOT_BELL_CURVE_START_X;
   const width = CLEAREST_SPOT_BELL_CURVE_VIEWBOX.width;
 
-  return `M 0 ${baselineY} H ${startX} C ${c1x} ${baselineY}, ${c1x} ${peakY}, ${peakX} ${peakY} C ${c2x} ${peakY}, ${c2x} ${baselineY}, ${width} ${baselineY}`;
+  return `M 0 ${baselineY} H ${startX} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${peakX} ${peakY} C ${c3x} ${c3y}, ${c4x} ${c4y}, ${width} ${baselineY}`;
 }

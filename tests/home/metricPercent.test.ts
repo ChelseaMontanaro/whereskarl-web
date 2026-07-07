@@ -47,19 +47,22 @@ describe("metricPercent", () => {
   it.each([20, 50, 79, 100])(
     "builds the approved smooth bell curve path for score %i",
     (score) => {
-      const { peakX, peakY, c1x, c2x } = clearestSpotBellCurveControlPoints(score);
+      const { peakX, peakY, c1x, c1y, c2x, c2y, c3x, c3y, c4x, c4y } =
+        clearestSpotBellCurveControlPoints(score);
       const path = clearestSpotBellCurvePath(score);
 
       expect(path).toBe(
-        `M 0 ${CLEAREST_SPOT_BELL_CURVE_BASELINE_Y} H ${CLEAREST_SPOT_BELL_CURVE_START_X} C ${c1x} ${CLEAREST_SPOT_BELL_CURVE_BASELINE_Y}, ${c1x} ${peakY}, ${peakX} ${peakY} C ${c2x} ${peakY}, ${c2x} ${CLEAREST_SPOT_BELL_CURVE_BASELINE_Y}, 100 ${CLEAREST_SPOT_BELL_CURVE_BASELINE_Y}`,
+        `M 0 ${CLEAREST_SPOT_BELL_CURVE_BASELINE_Y} H ${CLEAREST_SPOT_BELL_CURVE_START_X} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${peakX} ${peakY} C ${c3x} ${c3y}, ${c4x} ${c4y}, 100 ${CLEAREST_SPOT_BELL_CURVE_BASELINE_Y}`,
       );
       expect(path).not.toContain(" V ");
       expect(path.match(/ C /g)?.length).toBe(2);
       expect(peakY).toBe(CLEAREST_SPOT_BELL_CURVE_PEAK_Y);
       expect(peakX).toBeGreaterThanOrEqual(CLEAREST_SPOT_BELL_CURVE_START_X);
       expect(peakX).toBeLessThanOrEqual(CLEAREST_SPOT_BELL_CURVE_END_X);
+      expect(c1x).not.toBe(c2x);
       if (score < 100) {
-        expect(c2x).toBeGreaterThan(peakX);
+        expect(c3x).not.toBe(c4x);
+        expect(c3x).toBeGreaterThan(peakX);
       }
     },
   );
@@ -71,6 +74,6 @@ describe("metricPercent", () => {
     expect(score79.peakX).toBeGreaterThan(50);
     expect(score79.peakX).toBeLessThan(CLEAREST_SPOT_BELL_CURVE_END_X);
     expect(score81.peakX).toBeGreaterThan(score79.peakX);
-    expect(score81.c2x).toBeLessThanOrEqual(CLEAREST_SPOT_BELL_CURVE_END_X);
+    expect(score81.c3x).toBeLessThanOrEqual(CLEAREST_SPOT_BELL_CURVE_END_X);
   });
 });

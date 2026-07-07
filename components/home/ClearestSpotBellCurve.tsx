@@ -18,14 +18,14 @@ export function ClearestSpotBellCurve({ score }: ClearestSpotBellCurveProps) {
 
   return (
     <div
-      className={`${mobileMetricIndicatorClass} max-sm:flex max-sm:min-h-[3.25rem] max-sm:items-end max-sm:justify-center`}
+      className={`${mobileMetricIndicatorClass} max-sm:flex max-sm:min-h-[4rem] max-sm:items-end max-sm:justify-center`}
       role="img"
       aria-label={clearestSpotBellCurveAriaLabel(score)}
       data-testid="clearest-spot-bell-curve"
     >
       <svg
         viewBox={`0 0 ${CLEAREST_SPOT_BELL_CURVE_VIEWBOX.width} ${CLEAREST_SPOT_BELL_CURVE_VIEWBOX.height}`}
-        className="h-12 w-full"
+        className="h-16 w-full"
         aria-hidden="true"
         data-testid="clearest-spot-bell-curve-svg"
         data-viewbox-height={CLEAREST_SPOT_BELL_CURVE_VIEWBOX.height}
@@ -54,7 +54,7 @@ export function ClearestSpotBellCurve({ score }: ClearestSpotBellCurveProps) {
           d={curvePath}
           fill="none"
           stroke="#6BA3D6"
-          strokeWidth="2.25"
+          strokeWidth="2.5"
           strokeLinejoin="round"
           strokeLinecap="round"
           data-testid="clearest-spot-bell-curve-path"
@@ -62,7 +62,7 @@ export function ClearestSpotBellCurve({ score }: ClearestSpotBellCurveProps) {
         <circle
           cx={visualPeakX}
           cy={CLEAREST_SPOT_BELL_CURVE_PEAK_Y}
-          r="3.4"
+          r="4"
           fill="white"
           filter="url(#clearest-spot-peak-glow)"
           data-testid="clearest-spot-bell-curve-peak"

@@ -54,6 +54,6 @@ describe("ClearestSpotBellCurve", () => {
       "data-viewbox-height",
       String(CLEAREST_SPOT_BELL_CURVE_VIEWBOX.height),
     );
-    expect(screen.getByTestId("clearest-spot-bell-curve-svg").className).toContain("h-12");
+    expect(screen.getByTestId("clearest-spot-bell-curve-svg").className).toContain("h-16");
   });
 });

@@ -3,6 +3,10 @@ import {
   metricPercentFillWidth,
 } from "@/lib/home/metricPercent";
 import {
+  fogCoverageSliderFillColor,
+  fogCoverageSliderKnobBorderClass,
+} from "@/lib/home/fogCoverageIndicator";
+import {
   mobileMetricIndicatorClass,
   mobileMetricSliderTrackClass,
 } from "@/components/home/desktopGlass";
@@ -20,8 +24,8 @@ type MetricPercentSliderProps = {
 
 const variantColors: Record<MetricPercentSliderVariant, { fill: string; knob: string }> = {
   fog: {
-    fill: "rgb(3 11 20)",
-    knob: "border-karl-navy",
+    fill: fogCoverageSliderFillColor,
+    knob: fogCoverageSliderKnobBorderClass,
   },
   sunshine: {
     fill: "rgb(242 163 38)",

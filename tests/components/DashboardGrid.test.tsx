@@ -329,9 +329,9 @@ describe("DashboardGrid", () => {
     );
     expect(screen.getByTestId("clearest-spot-bell-curve-svg")).toHaveAttribute(
       "data-viewbox-height",
-      "52",
+      "64",
     );
-    expect(screen.getByTestId("clearest-spot-bell-curve-svg").className).toContain("h-12");
+    expect(screen.getByTestId("clearest-spot-bell-curve-svg").className).toContain("h-16");
 
     const clearestSpotLink = screen.getByRole("link", {
       name: "View clearest spot on map: Tiburon",

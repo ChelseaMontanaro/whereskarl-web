@@ -5,7 +5,9 @@ import { describe, expect, it } from "vitest";
 import {
   clampFogCoveragePercent,
   fogCoverageIndicatorAriaLabel,
+  fogCoverageSliderFillColor,
   fogCoverageSliderFillWidth,
+  fogCoverageSliderKnobBorderClass,
 } from "@/lib/home/fogCoverageIndicator";
 
 describe("fogCoverageIndicator", () => {
@@ -25,5 +27,14 @@ describe("fogCoverageIndicator", () => {
   it("builds an accessible fog coverage label", () => {
     expect(fogCoverageIndicatorAriaLabel(53)).toBe("Fog coverage: 53 percent");
     expect(fogCoverageIndicatorAriaLabel(140)).toBe("Fog coverage: 100 percent");
+  });
+
+  it("uses a light mist fill color visible on dark hero backgrounds", () => {
+    expect(fogCoverageSliderFillColor).toBe("rgb(140 184 216)");
+    expect(fogCoverageSliderFillColor).not.toContain("3 11 20");
+  });
+
+  it("uses a high-contrast knob border token for the fog slider", () => {
+    expect(fogCoverageSliderKnobBorderClass).toBe("border-[#8CB8D8]");
   });
 });
