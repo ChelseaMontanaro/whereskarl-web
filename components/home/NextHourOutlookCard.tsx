@@ -30,7 +30,7 @@ function NextHourCardBody({
         <div className="min-w-0 flex-1">
           <CardLabel>Future Outlook</CardLabel>
           <p
-            className={`mt-2 max-sm:mt-2.5 text-sm max-sm:text-[0.9375rem] text-white/55 ${
+            className={`mt-2 max-sm:mt-2.5 text-sm max-sm:text-base text-white/55 ${
               isDesktop ? "lg:mt-1.5 lg:text-base" : ""
             }`}
           >
@@ -53,7 +53,7 @@ function NextHourCardBody({
       <div className="min-w-0 flex-1">
         <CardLabel>Future Outlook</CardLabel>
         <p
-          className={`mt-2 max-sm:mt-2.5 text-sm max-sm:text-[0.9375rem] leading-relaxed text-white/75 ${
+          className={`mt-2 max-sm:mt-2.5 text-sm max-sm:text-base leading-relaxed text-white/75 ${
             isDesktop ? "lg:mt-1.5 lg:text-base lg:leading-relaxed" : ""
           }`}
         >

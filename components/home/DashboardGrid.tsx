@@ -78,7 +78,7 @@ function MetricCardContent({
       <div className="order-1 flex min-w-0 flex-1 flex-col lg:order-2">
         <CardLabel>{label}</CardLabel>
         <p
-          className={`mt-1 line-clamp-2 text-[1.35rem] font-light leading-none max-sm:mt-1.5 max-sm:text-[1.875rem] lg:mt-1.5 lg:font-light ${valueClassName} ${
+          className={`mt-1 line-clamp-2 text-[1.35rem] font-light leading-none max-sm:mt-1.5 max-sm:text-[1.95rem] lg:mt-1.5 lg:font-light ${valueClassName} ${
             isLoading ? "opacity-35 text-white" : "text-white/94"
           }`}
         >
@@ -225,7 +225,7 @@ export function DashboardGrid({
           isLoading={isLoading}
           icon={<FogCoverageIcon className={metricIconClassName} />}
           iconFrameClassName={desktopMistIconClass}
-          valueClassName="max-sm:!text-[1.2rem] max-sm:!line-clamp-3 max-sm:leading-snug max-sm:tracking-[-0.01em] lg:text-[0.98rem] lg:leading-snug lg:tracking-[-0.01em]"
+          valueClassName="max-sm:!text-[1.1875rem] max-sm:!line-clamp-3 max-sm:leading-snug max-sm:tracking-[-0.01em] lg:text-[0.98rem] lg:leading-snug lg:tracking-[-0.01em]"
           detailKey="karl-status"
           onOpenDetail={openMetricDetail}
         />

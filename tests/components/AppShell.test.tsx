@@ -139,6 +139,8 @@ describe("AppShell", () => {
       "pb-[calc(4.25rem+env(safe-area-inset-bottom,0.5rem))]",
     );
     expect(main?.className).not.toContain("pb-24");
+    expect(main?.className).not.toContain("flex-1");
+    expect(screen.getByText("Placeholder content").closest("div.min-h-screen")).toBeNull();
     expect(screen.queryByLabelText("Conditions status")).not.toBeInTheDocument();
     expect(screen.queryByRole("navigation", { name: "Legal and support" })).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Developer status")).not.toBeInTheDocument();

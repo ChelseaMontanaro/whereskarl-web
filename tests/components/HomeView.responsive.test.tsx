@@ -13,6 +13,12 @@ import * as intelligenceApi from "@/lib/api/intelligence";
 import * as weatherApi from "@/lib/api/weather";
 import type { LocationsResponse } from "@/lib/schemas/weather";
 
+const useMinWidthMock = vi.hoisted(() => vi.fn(() => false));
+
+vi.mock("@/lib/hooks/useMinWidth", () => ({
+  useMinWidth: () => useMinWidthMock(),
+}));
+
 const FIXTURES_DIR = join(process.cwd(), "tests/fixtures");
 
 function readFixture<T>(filename: string): T {
@@ -45,6 +51,7 @@ describe("HomeView responsive polish", () => {
   });
 
   beforeEach(() => {
+    useMinWidthMock.mockReturnValue(false);
     vi.spyOn(weatherApi, "getCurrent").mockResolvedValue(readFixture("current.json"));
     vi.spyOn(weatherApi, "getLocations").mockResolvedValue(readFixture("locations.json"));
     vi.spyOn(weatherApi, "getBestSunshine").mockResolvedValue(
@@ -58,9 +65,7 @@ describe("HomeView responsive polish", () => {
   it("adds a mobile content vignette without excessive bottom spacer", () => {
     const { container } = renderHomeView();
 
-    expect(
-      container.querySelector(".bg-gradient-to-b.from-transparent"),
-    ).toBeInTheDocument();
+    expect(container.querySelector(".max-sm\\:backdrop-blur-lg")).toBeInTheDocument();
     expect(container.querySelector(".pb-28")).toBeNull();
     expect(container.querySelector(".pb-4")).toBeNull();
     expect(container.querySelector(".max-sm\\:pb-0")).toBeInTheDocument();
@@ -83,7 +88,7 @@ describe("HomeView responsive polish", () => {
 
     await screen.findAllByText("Karl's Read");
 
-    const mobileStack = container.querySelector(".flex.flex-col.gap-3\\.5.lg\\:hidden");
+    const mobileStack = container.querySelector(".flex.flex-col.gap-3\\.5.max-sm\\:gap-4");
     expect(mobileStack).toBeTruthy();
     expect(mobileStack?.textContent).not.toMatch(/BEST CLEAR SKIES/i);
     expect(mobileStack?.textContent).not.toMatch(/Brightest Spot/i);
@@ -115,7 +120,7 @@ describe("HomeView responsive polish", () => {
     await screen.findAllByText(/Karl's Read/i);
     await screen.findAllByText(/6:20 PM/);
 
-    const mobileStack = container.querySelector(".flex.flex-col.gap-3\\.5.lg\\:hidden");
+    const mobileStack = container.querySelector(".flex.flex-col.gap-3\\.5.max-sm\\:gap-4");
     const children = Array.from(mobileStack?.children ?? []);
     const labels = children.map((child) => child.textContent ?? "");
 
@@ -128,10 +133,19 @@ describe("HomeView responsive polish", () => {
     expect(futureOutlookIndex).toBeGreaterThan(bestRightNowIndex);
   });
 
+  it("does not mount the desktop Home stack while phone portrait layout is active", () => {
+    useMinWidthMock.mockReturnValue(false);
+    const { container } = renderHomeView();
+
+    expect(container.querySelector(".mt-5.hidden.flex-col.gap-5.lg\\:flex")).toBeNull();
+    expect(container.querySelector(".mt-5.flex.flex-col.gap-5")).toBeNull();
+    expect(container.querySelector(".flex.flex-col.gap-3\\.5.max-sm\\:gap-4")).toBeTruthy();
+  });
+
   it("uses subtle mobile insight glass depth without opaque card fills", () => {
     const { container } = renderHomeView();
 
-    const mobileCards = container.querySelector(".flex.flex-col.gap-3\\.5.lg\\:hidden");
+    const mobileCards = container.querySelector(".flex.flex-col.gap-3\\.5.max-sm\\:gap-4");
     const insightCard = mobileCards?.querySelector(".max-sm\\:backdrop-blur-lg");
     const highlight = mobileCards?.querySelector(".from-white\\/\\[0\\.05\\]");
 
@@ -143,11 +157,19 @@ describe("HomeView responsive polish", () => {
   it("renders Future Outlook on mobile and desktop layouts", async () => {
     renderHomeView();
 
-    const futureOutlookLabels = await screen.findAllByText("Future Outlook");
-    expect(futureOutlookLabels.length).toBeGreaterThanOrEqual(2);
+    const mobileFutureOutlookLabels = await screen.findAllByText("Future Outlook");
+    expect(mobileFutureOutlookLabels.length).toBeGreaterThanOrEqual(1);
+
+    cleanup();
+    useMinWidthMock.mockReturnValue(true);
+    renderHomeView();
+
+    const desktopFutureOutlookLabels = await screen.findAllByText("Future Outlook");
+    expect(desktopFutureOutlookLabels.length).toBeGreaterThanOrEqual(1);
   });
 
   it("places desktop Future Outlook below Best Right Now", async () => {
+    useMinWidthMock.mockReturnValue(true);
     const locationsFixture = readFixture<LocationsResponse>("locations.json");
     const sausalito = locationsFixture.locations[1];
 
@@ -169,7 +191,7 @@ describe("HomeView responsive polish", () => {
 
     await screen.findAllByText(/6:20 PM/);
 
-    const desktopSection = container.querySelector(".mt-5.hidden.flex-col.gap-5.lg\\:flex");
+    const desktopSection = container.querySelector(".mt-5.flex.flex-col.gap-5");
     const children = Array.from(desktopSection?.children ?? []);
     const bestRightNowIndex = children.findIndex((child) =>
       child.classList.contains("grid"),
@@ -188,7 +210,7 @@ describe("HomeView responsive polish", () => {
 
     await screen.findAllByText("Best Right Now");
 
-    const mobileCards = container.querySelector(".flex.flex-col.gap-3\\.5.lg\\:hidden");
+    const mobileCards = container.querySelector(".flex.flex-col.gap-3\\.5.max-sm\\:gap-4");
     expect(mobileCards?.querySelector(".rounded-full.border.border-karl-gold")).toBeNull();
     expect(mobileCards?.querySelector(".text-\\[1\\.75rem\\].text-karl-gold")).toBeTruthy();
   });
@@ -201,17 +223,25 @@ describe("HomeView responsive polish", () => {
     const dashboard = container.querySelector('[aria-label="Bay Area conditions dashboard"]');
     expect(dashboard?.className).toContain("max-sm:gap-3");
 
-    const metricSurfaces = container.querySelectorAll(".max-sm\\:min-h-\\[7\\.5rem\\]");
+    const metricSurfaces = container.querySelectorAll(".max-sm\\:min-h-\\[8rem\\]");
     expect(metricSurfaces.length).toBe(4);
-    expect(container.querySelector(".max-sm\\:text-\\[1\\.875rem\\]")).toBeTruthy();
+    expect(container.querySelector(".max-sm\\:text-\\[1\\.95rem\\]")).toBeTruthy();
     expect(container.querySelector(".max-sm\\:min-h-\\[8\\.75rem\\]")).toBeNull();
   });
 
   it("adds phone portrait spacing between mobile insight cards", () => {
     const { container } = renderHomeView();
 
-    const mobileStack = container.querySelector(".max-sm\\:gap-3\\.5.lg\\:hidden");
+    const mobileStack = container.querySelector(".max-sm\\:gap-4");
     expect(mobileStack).toBeTruthy();
     expect(mobileStack?.className).toContain("max-sm:mt-5");
+  });
+
+  it("avoids stacking duplicate desktop Home sections that inflate scroll height", () => {
+    useMinWidthMock.mockReturnValue(false);
+    const { container } = renderHomeView();
+
+    expect(container.querySelectorAll(".mt-5.flex.flex-col.gap-5")).toHaveLength(0);
+    expect(container.querySelector(".absolute.inset-x-0.-top-20.bottom-0")).toBeNull();
   });
 });

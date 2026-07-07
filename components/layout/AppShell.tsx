@@ -44,13 +44,18 @@ export function AppShell({ children }: { children: ReactNode }) {
   const mainBottomClass = isPhonePortraitHome
     ? "pb-[calc(4.25rem+env(safe-area-inset-bottom,0.5rem))]"
     : "max-lg:pb-24 lg:pb-0";
+  const shellClassName = isPhonePortraitHome
+    ? "bg-karl-navy"
+    : "min-h-screen bg-karl-navy";
 
   return (
     <ClearSkiesNavProvider>
-      <div className="min-h-screen bg-karl-navy">
+      <div className={shellClassName}>
         <DesktopTopNav />
         <div className="flex flex-col">
-          <main className={`flex-1 ${mainBottomClass}`}>{children}</main>
+          <main className={isPhonePortraitHome ? mainBottomClass : `flex-1 ${mainBottomClass}`}>
+            {children}
+          </main>
           {isPhonePortraitHome ? null : <ConditionsFooter />}
           {isPhonePortraitHome ? null : <MobileSecondaryLinks />}
           {isPhonePortraitHome ? null : <DevStatusFooter />}

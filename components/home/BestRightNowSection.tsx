@@ -49,7 +49,7 @@ function MobileBestRightNowSection({
         {items.map((item) => (
           <li
             key={item.locationId}
-            className="flex items-start gap-3 border-t border-white/8 pt-3 first:border-t-0 first:pt-0"
+            className="flex items-start gap-3 max-sm:gap-3.5 border-t border-white/8 pt-3 max-sm:pt-3.5 first:border-t-0 first:pt-0"
           >
             <InsightIconFrame
               tone={isNightPresentation ? "mist" : "gold"}
@@ -58,10 +58,10 @@ function MobileBestRightNowSection({
               <BestRightNowSpotIcon isNightPresentation={isNightPresentation} />
             </InsightIconFrame>
             <div className="min-w-0 flex-1">
-              <p className="text-base font-semibold text-white">
+              <p className="text-base max-sm:text-[1.0625rem] font-semibold text-white">
                 {item.locationName}
               </p>
-              <p className="mt-1 text-sm text-white/65">{item.detail}</p>
+              <p className="mt-1 max-sm:mt-1.5 text-sm max-sm:text-[0.9375rem] leading-snug text-white/65">{item.detail}</p>
               {item.isDegraded ? (
                 <DegradedDataLabel variant="bestRightNow" className="mt-1.5" />
               ) : null}

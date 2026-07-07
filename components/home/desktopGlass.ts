@@ -12,18 +12,18 @@ export const mobileInsightGlassHighlightClass =
 
 /** Phone portrait (max-sm) metric tile sizing — balanced, not oversized */
 export const mobileMetricCardSurfaceClass =
-  "max-sm:min-h-[7.5rem] max-sm:px-4 max-sm:py-4";
+  "max-sm:min-h-[8rem] max-sm:px-4 max-sm:py-4";
 
 export const mobileMetricIconFrameClass = "max-sm:h-10 max-sm:w-10";
 
-export const mobileMetricIconSizeClass = "max-sm:h-6 max-sm:w-6";
+export const mobileMetricIconSizeClass = "max-sm:h-[1.625rem] max-sm:w-[1.625rem]";
 
 /** Phone portrait insight card padding/gap — used below lg only */
 export const mobileInsightCardSurfaceClass =
-  "max-sm:gap-3.5 max-sm:px-4 max-sm:py-4";
+  "max-sm:gap-4 max-sm:px-4 max-sm:py-[1.125rem]";
 
 export const mobileCardLabelClass =
-  "max-sm:text-[0.6875rem] max-sm:tracking-[0.13em] max-sm:text-white/48";
+  "max-sm:text-[0.6875rem] max-sm:tracking-[0.12em] max-sm:text-white/50";
 
 export const mobileInsightIconFrameClass = "max-sm:h-12 max-sm:w-12";
 
