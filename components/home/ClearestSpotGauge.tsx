@@ -16,21 +16,21 @@ type ClearestSpotGaugeProps = {
   score: number;
 };
 
-export const CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_X = 1.22;
+export const CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_X = 1.18;
 
-export const CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_Y = 0.36;
+export const CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_Y = 0.4;
 
 export const CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX = {
   minX: 0,
   minY: 26,
   width: CLEAREST_SPOT_GAUGE_VIEWBOX.width,
-  height: 24,
+  height: 27,
 } as const;
 
 export const clearestSpotGaugeFrameClass =
-  "max-sm:h-[2.5rem] max-sm:w-full max-sm:shrink-0 max-sm:overflow-hidden";
+  "max-sm:h-[2.625rem] max-sm:w-full max-sm:shrink-0 max-sm:overflow-hidden";
 
-export const clearestSpotGaugeContainerClass = `${mobileMetricIndicatorClass} flex max-sm:min-h-0 max-sm:flex-1 max-sm:flex-col max-sm:justify-end max-sm:w-full max-sm:!pt-0 max-sm:pb-0`;
+export const clearestSpotGaugeContainerClass = `${mobileMetricIndicatorClass} max-sm:shrink-0 max-sm:w-full max-sm:!pt-0 max-sm:pb-0.5`;
 
 const CLEAREST_SPOT_GAUGE_LABEL_Y = 48;
 

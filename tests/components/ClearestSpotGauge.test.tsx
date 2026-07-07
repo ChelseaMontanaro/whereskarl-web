@@ -77,9 +77,10 @@ describe("ClearestSpotGauge", () => {
     const frame = screen.getByTestId("clearest-spot-gauge-frame");
 
     expect(container.className).toBe(clearestSpotGaugeContainerClass);
-    expect(container.className).toContain("max-sm:flex-1");
+    expect(container.className).toContain("max-sm:shrink-0");
+    expect(container.className).not.toContain("max-sm:flex-1");
     expect(frame.className).toBe(clearestSpotGaugeFrameClass);
-    expect(frame.className).toContain("max-sm:h-[2.5rem]");
+    expect(frame.className).toContain("max-sm:h-[2.625rem]");
     expect(frame.className).toContain("max-sm:w-full");
     expect(frame.className).not.toContain("aspect-");
   });
