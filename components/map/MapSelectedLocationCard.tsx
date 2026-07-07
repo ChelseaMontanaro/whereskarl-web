@@ -5,9 +5,9 @@ import { useCallback, useEffect, useState } from "react";
 import { MapLocationConditionIcon } from "@/components/map/MapLocationConditionIcon";
 import { desktopGlassCardClass } from "@/components/home/desktopGlass";
 import {
-  resolveFogScore,
   resolveLocationFogIntensity,
 } from "@/lib/map/conditions";
+import { locationWeatherMetadataItems } from "@/lib/map/locationMetadata";
 import {
   isFavoriteLocation,
   toggleFavoriteLocation,
@@ -20,40 +20,6 @@ type MapSelectedLocationCardProps = {
   location: LocationWeather;
   onClose: () => void;
 };
-
-function formatFogPercent(location: LocationWeather): string | null {
-  const fogScore = resolveFogScore(location);
-  if (fogScore === null) {
-    return null;
-  }
-
-  return `Fog: ${fogScore}%`;
-}
-
-function formatWind(location: LocationWeather): string | null {
-  if (
-    typeof location.windSpeed !== "number" ||
-    !Number.isFinite(location.windSpeed)
-  ) {
-    return null;
-  }
-
-  const direction = location.windDirection?.trim();
-  return direction
-    ? `Wind: ${direction} ${location.windSpeed} mph`
-    : `Wind: ${location.windSpeed} mph`;
-}
-
-function formatTemperature(location: LocationWeather): string | null {
-  if (
-    typeof location.temperature !== "number" ||
-    !Number.isFinite(location.temperature)
-  ) {
-    return null;
-  }
-
-  return `${location.temperature}°F`;
-}
 
 function FavoriteHeartIcon({
   filled,
@@ -97,12 +63,7 @@ export function MapSelectedLocationCard({
 }: MapSelectedLocationCardProps) {
   const conditionSentence = getConditionSentence(location);
   const isDegraded = isLocationDataDegraded(location.dataStatus);
-  const fogPercent = formatFogPercent(location);
-  const wind = formatWind(location);
-  const temperature = formatTemperature(location);
-  const metadataItems = [fogPercent, wind, temperature].filter(
-    (item): item is string => Boolean(item),
-  );
+  const metadataItems = locationWeatherMetadataItems(location);
 
   const [isFavorite, setIsFavorite] = useState(() =>
     isFavoriteLocation(location.id),

@@ -5,6 +5,7 @@ import {
   MoonIcon,
   SunshineIcon,
 } from "@/components/home/ConditionIcons";
+import { InsightPlainIcon } from "@/components/home/InsightCardParts";
 import {
   desktopGoldIconClass,
   desktopInsightIconFrameClass,
@@ -39,19 +40,32 @@ export function MapLocationConditionIcon({
     const isNight = isNighttime(new Date().getHours());
 
     return (
-      <span
-        className={`${frameClass} ${
-          isNight
-            ? `${desktopMistIconClass} shadow-[0_0_0_1px_rgb(255_255_255_/_0.08)]`
-            : `${desktopGoldIconClass} shadow-[0_0_0_1px_rgb(242_163_38_/_0.18),0_8px_24px_rgb(242_163_38_/_0.12)]`
-        }`}
-      >
-        {isNight ? (
-          <MoonIcon className={iconClass} />
-        ) : (
-          <SunshineIcon className={iconClass} />
-        )}
-      </span>
+      <>
+        <InsightPlainIcon size="compact" className={`lg:hidden ${className}`.trim()}>
+          {isNight ? (
+            <MoonIcon
+              className={`${desktopInsightIconSizeClass} text-[#8CB8D8]`}
+            />
+          ) : (
+            <SunshineIcon
+              className={`${desktopInsightIconSizeClass} text-karl-gold`}
+            />
+          )}
+        </InsightPlainIcon>
+        <span
+          className={`hidden lg:flex ${frameClass} ${
+            isNight
+              ? `${desktopMistIconClass} shadow-[0_0_0_1px_rgb(255_255_255_/_0.08)]`
+              : `${desktopGoldIconClass} shadow-[0_0_0_1px_rgb(242_163_38_/_0.18),0_8px_24px_rgb(242_163_38_/_0.12)]`
+          } ${className}`.trim()}
+        >
+          {isNight ? (
+            <MoonIcon className={iconClass} />
+          ) : (
+            <SunshineIcon className={iconClass} />
+          )}
+        </span>
+      </>
     );
   }
 

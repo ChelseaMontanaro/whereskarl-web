@@ -409,6 +409,77 @@ describe("createMapMarkerElement", () => {
     expect(marker.querySelector(".karl-map-marker__label")).toBeNull();
   });
 
+  it("adds portable styling for clear markers on immersive layout", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-03T12:00:00"));
+
+    const marker = createMapMarkerElement({
+      location: {
+        id: "mountain-view",
+        name: "Mountain View",
+        latitude: 37.3861,
+        longitude: -122.0839,
+        fogScore: 10,
+        sunshineScore: 90,
+        status: "Clear",
+      },
+      isSelected: false,
+      fogLayerEnabled: true,
+      layout: "immersive",
+      onSelect: vi.fn(),
+    });
+
+    expect(marker.className).toContain("karl-map-marker--portable");
+    expect(marker.className).toContain("karl-map-marker--clear");
+    expect(marker.innerHTML).toContain('circle cx="12" cy="12"');
+  });
+
+  it("does not add portable styling for clear markers on desktop layout", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-03T12:00:00"));
+
+    const marker = createMapMarkerElement({
+      location: {
+        id: "mountain-view",
+        name: "Mountain View",
+        latitude: 37.3861,
+        longitude: -122.0839,
+        fogScore: 10,
+        sunshineScore: 90,
+        status: "Clear",
+      },
+      isSelected: false,
+      fogLayerEnabled: true,
+      layout: "desktop",
+      onSelect: vi.fn(),
+    });
+
+    expect(marker.className).not.toContain("karl-map-marker--portable");
+    expect(marker.className).toContain("karl-map-marker--clear");
+  });
+
+  it("keeps fog marker chrome on portable layout", () => {
+    const marker = createMapMarkerElement({
+      location: {
+        id: "sausalito",
+        name: "Sausalito",
+        latitude: 37.8591,
+        longitude: -122.4853,
+        fogScore: 60,
+        sunshineScore: 40,
+        status: "Foggy",
+      },
+      isSelected: false,
+      fogLayerEnabled: true,
+      layout: "immersive",
+      onSelect: vi.fn(),
+    });
+
+    expect(marker.className).toContain("karl-map-marker--portable");
+    expect(marker.className).toContain("karl-map-marker--foggy");
+    expect(marker.innerHTML).toContain('stroke="#93B8D8"');
+  });
+
   it("preserves selected halo styling on labeled foggy desktop markers", () => {
     const marker = createMapMarkerElement({
       location: {

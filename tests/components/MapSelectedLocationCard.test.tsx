@@ -60,7 +60,12 @@ describe("MapSelectedLocationCard", () => {
   });
 
   it("renders the selected location details in a polished info card", () => {
-    render(<MapSelectedLocationCard location={location} onClose={vi.fn()} />);
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-03T12:00:00"));
+
+    const { container } = render(
+      <MapSelectedLocationCard location={location} onClose={vi.fn()} />,
+    );
 
     expect(screen.getByText("Tiburon")).toBeInTheDocument();
     expect(screen.getByText("Mostly clear across Tiburon.")).toBeInTheDocument();
@@ -68,6 +73,16 @@ describe("MapSelectedLocationCard", () => {
       screen.getByText("Fog: 18% • Wind: W 8 mph • 68°F"),
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Close selected location" })).toBeInTheDocument();
+
+    const mobileSun = container.querySelector(
+      '[data-testid="insight-plain-icon"] svg.text-karl-gold',
+    );
+    expect(mobileSun).toBeTruthy();
+    expect(
+      container.querySelector(
+        '[data-testid="insight-plain-icon"].rounded-full',
+      ),
+    ).toBeNull();
   });
 
   it("renders metrics with explicit Fog, Wind, and Fahrenheit labels", () => {
