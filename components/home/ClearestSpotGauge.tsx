@@ -18,11 +18,9 @@ type ClearestSpotGaugeProps = {
 
 export const CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_X = 1.18;
 
-export const CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_Y = 0.44;
+export const CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_Y = 0.42;
 
 export const CLEAREST_SPOT_GAUGE_PRESENTATION_TRANSLATE_Y = -2;
-
-export const CLEAREST_SPOT_GAUGE_INSTRUMENT_TRANSLATE_Y = -3;
 
 export const CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX = {
   minX: 0,
@@ -49,10 +47,6 @@ export function clearestSpotGaugeDisplayViewBox(): string {
 
 export function clearestSpotGaugePresentationTransform(): string {
   return `translate(${CLEAREST_SPOT_GAUGE_CENTER_X} ${CLEAREST_SPOT_GAUGE_CENTER_Y}) scale(${CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_X} ${CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_Y}) translate(${-CLEAREST_SPOT_GAUGE_CENTER_X} ${-CLEAREST_SPOT_GAUGE_CENTER_Y}) translate(0 ${CLEAREST_SPOT_GAUGE_PRESENTATION_TRANSLATE_Y})`;
-}
-
-export function clearestSpotGaugeInstrumentTransform(): string {
-  return `translate(0 ${CLEAREST_SPOT_GAUGE_INSTRUMENT_TRANSLATE_Y})`;
 }
 
 export function clearestSpotGaugePresentationLabelX(x: number): number {
@@ -92,7 +86,6 @@ export function ClearestSpotGauge({ score }: ClearestSpotGaugeProps) {
           data-viewbox-height={CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX.height}
           data-presentation-scale-y={CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_Y}
           data-presentation-translate-y={CLEAREST_SPOT_GAUGE_PRESENTATION_TRANSLATE_Y}
-          data-instrument-translate-y={CLEAREST_SPOT_GAUGE_INSTRUMENT_TRANSLATE_Y}
         >
           <defs>
             <linearGradient
@@ -108,13 +101,9 @@ export function ClearestSpotGauge({ score }: ClearestSpotGaugeProps) {
             </linearGradient>
           </defs>
           <g
-            transform={clearestSpotGaugeInstrumentTransform()}
-            data-testid="clearest-spot-gauge-instrument-group"
+            transform={clearestSpotGaugePresentationTransform()}
+            data-testid="clearest-spot-gauge-arc-group"
           >
-            <g
-              transform={clearestSpotGaugePresentationTransform()}
-              data-testid="clearest-spot-gauge-arc-group"
-            >
             {inactiveArcPath ? (
               <path
                 d={inactiveArcPath}
@@ -196,7 +185,6 @@ export function ClearestSpotGauge({ score }: ClearestSpotGaugeProps) {
           >
             BEST
           </text>
-          </g>
         </svg>
       </div>
     </div>
