@@ -75,10 +75,18 @@ describe("HomeView", () => {
   it("renders loaded Home content from fixtures", async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     vi.setSystemTime(new Date("2026-07-03T12:00:00"));
+    vi.spyOn(weatherApi, "getCurrent").mockResolvedValue({
+      ...readFixture("current.json"),
+      status: "Karl is here",
+    });
 
     renderHome();
 
     expect(await screen.findByText("56%")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Learn about Karl Status" }),
+    ).toHaveTextContent("Karl is picking favorites across the Bay");
+    expect(screen.queryByText("Karl is here")).not.toBeInTheDocument();
     expect(screen.getAllByText(/Karl's Read/i).length).toBeGreaterThan(0);
     expect(
       screen.getAllByText("Karl is picking favorites across the Bay").length,

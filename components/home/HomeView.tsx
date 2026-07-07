@@ -271,6 +271,7 @@ export function HomeView() {
         <DashboardGrid
           current={current}
           bestSunshine={bestSunshine}
+          intelligence={intelligence}
           isLoading={!hasLoadedCoreWeather}
           isNightPresentation={isNightPresentation}
         />

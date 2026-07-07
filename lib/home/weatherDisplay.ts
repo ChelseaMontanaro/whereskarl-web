@@ -34,6 +34,36 @@ export type KarlReadPresentation = {
 export const KARL_READ_GENERIC_CLEARING =
   "Some inland corridors are clearing while Karl lingers closer to the coast.";
 
+export const KARL_STATUS_GENERIC_FALLBACK = "Karl is here";
+
+export function isGenericKarlStatusPhrase(status: string): boolean {
+  return status.trim().toLowerCase() === KARL_STATUS_GENERIC_FALLBACK.toLowerCase();
+}
+
+export function resolveKarlStatusPhrase(input: {
+  current: CurrentResponse | null;
+  intelligence?: KarlIntelligenceResponse | null;
+}): string | null {
+  const intelligenceHeadline = trimmedNonEmpty(input.intelligence?.narrative.headline);
+  if (intelligenceHeadline) {
+    return intelligenceHeadline;
+  }
+
+  const movementNarrative = trimmedNonEmpty(
+    input.intelligence?.narrative.movementNarrative,
+  );
+  if (movementNarrative) {
+    return movementNarrative;
+  }
+
+  const currentStatus = trimmedNonEmpty(input.current?.status);
+  if (currentStatus && !isGenericKarlStatusPhrase(currentStatus)) {
+    return currentStatus;
+  }
+
+  return currentStatus;
+}
+
 function normalizeLocationId(locationId: string | null | undefined): string | null {
   const normalized = locationId?.trim().toLowerCase() ?? "";
   return normalized.length > 0 ? normalized : null;

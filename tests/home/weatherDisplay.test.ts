@@ -7,8 +7,10 @@ import {
   enrichBestRightNowItemsWithLocationWeather,
   heroConfidenceText,
   heroSubheadline,
+  isGenericKarlStatusPhrase,
   movementPhrase,
   resolveKarlReadPresentation,
+  resolveKarlStatusPhrase,
   sunshineResultTitle,
 } from "@/lib/home/weatherDisplay";
 import { karlIntelligenceResponseSchema } from "@/lib/schemas/intelligence";
@@ -282,6 +284,49 @@ describe("sunshineResultTitle", () => {
     expect(
       sunshineResultTitle(55, false, { fogScore: 35, sunshineScore: 55 }),
     ).toBe("BEST BREAK IN THE FOG");
+  });
+});
+
+describe("resolveKarlStatusPhrase", () => {
+  const intelligence = karlIntelligenceResponseSchema.parse(
+    JSON.parse(
+      readFileSync(
+        join(FIXTURES_DIR, "karl-intelligence-mill-valley.json"),
+        "utf8",
+      ),
+    ),
+  );
+
+  it("prefers intelligence headline over the generic current status fallback", () => {
+    expect(
+      resolveKarlStatusPhrase({
+        current: { ...currentFixture, status: "Karl is here" },
+        intelligence,
+      }),
+    ).toBe("Karl is picking favorites across the Bay");
+  });
+
+  it("uses a non-generic current status when intelligence is unavailable", () => {
+    expect(
+      resolveKarlStatusPhrase({
+        current: { ...currentFixture, status: "Karl is lingering" },
+        intelligence: null,
+      }),
+    ).toBe("Karl is lingering");
+  });
+
+  it("keeps the generic fallback only when no richer status is available", () => {
+    expect(
+      resolveKarlStatusPhrase({
+        current: { ...currentFixture, status: "Karl is here" },
+        intelligence: null,
+      }),
+    ).toBe("Karl is here");
+  });
+
+  it("detects the generic Karl is here fallback phrase", () => {
+    expect(isGenericKarlStatusPhrase("Karl is here")).toBe(true);
+    expect(isGenericKarlStatusPhrase("Karl is lingering")).toBe(false);
   });
 });
 

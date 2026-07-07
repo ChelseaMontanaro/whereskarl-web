@@ -1,5 +1,7 @@
 // @vitest-environment happy-dom
 
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -18,6 +20,7 @@ import {
 import { clearestSpotGaugeAriaLabel } from "@/lib/home/clearestSpotGauge";
 import { fogCoverageSliderFillWidth } from "@/lib/home/fogCoverageIndicator";
 import { METRIC_DETAILS } from "@/lib/home/metricDetails";
+import { karlIntelligenceResponseSchema } from "@/lib/schemas/intelligence";
 import type { BestSunshineResponse, CurrentResponse } from "@/lib/schemas/weather";
 
 const currentFixture: CurrentResponse = {
@@ -121,6 +124,41 @@ describe("DashboardGrid", () => {
     const metricSurfaces = container.querySelectorAll(".max-sm\\:min-h-\\[9\\.25rem\\]");
     expect(metricSurfaces.length).toBe(4);
     expect(container.querySelector(".max-sm\\:text-\\[1\\.95rem\\]")).toBeTruthy();
+  });
+
+  it("prefers intelligence headline status over the generic Karl is here fallback", () => {
+    const intelligence = karlIntelligenceResponseSchema.parse(
+      JSON.parse(
+        readFileSync(
+          join(process.cwd(), "tests/fixtures/karl-intelligence-mill-valley.json"),
+          "utf8",
+        ),
+      ),
+    );
+
+    render(
+      <DashboardGrid
+        current={{ ...currentFixture, status: "Karl is here" }}
+        bestSunshine={bestSunshineFixture}
+        intelligence={intelligence}
+        isLoading={false}
+      />,
+    );
+
+    expect(screen.getByText("Karl is picking favorites across the Bay")).toBeInTheDocument();
+    expect(screen.queryByText("Karl is here")).not.toBeInTheDocument();
+  });
+
+  it("uses the generic Karl is here fallback only when no intelligence status is available", () => {
+    render(
+      <DashboardGrid
+        current={{ ...currentFixture, status: "Karl is here" }}
+        bestSunshine={bestSunshineFixture}
+        isLoading={false}
+      />,
+    );
+
+    expect(screen.getByText("Karl is here")).toBeInTheDocument();
   });
 
   it("uses a smaller phrase-sized mobile value for Karl Status than numeric metric tiles", () => {
@@ -328,13 +366,20 @@ describe("DashboardGrid", () => {
       "data-viewbox-height",
       "56",
     );
-    expect(screen.getByTestId("clearest-spot-gauge-svg").getAttribute("preserveAspectRatio")).toBe(
-      "xMidYMax meet",
+    expect(screen.getByTestId("clearest-spot-gauge-svg")).toHaveAttribute(
+      "data-viewbox-width",
+      "100",
     );
-    expect(gauge.className).toContain("max-sm:overflow-hidden");
-    expect(screen.getByTestId("clearest-spot-gauge-frame").className).toContain("max-sm:h-12");
-    expect(within(gauge).getByText("Low")).toBeInTheDocument();
-    expect(within(gauge).getByText("Best")).toBeInTheDocument();
+    expect(screen.getByTestId("clearest-spot-gauge-svg").getAttribute("preserveAspectRatio")).toBe(
+      "xMidYMid meet",
+    );
+    expect(gauge.className).not.toContain("max-sm:overflow-hidden");
+    expect(screen.getByTestId("clearest-spot-gauge-frame").className).toContain("max-sm:w-full");
+    expect(screen.getByTestId("clearest-spot-gauge-frame").className).toContain(
+      "max-sm:aspect-[100/56]",
+    );
+    expect(within(gauge).getByText("LOW")).toBeInTheDocument();
+    expect(within(gauge).getByText("BEST")).toBeInTheDocument();
 
     const clearestSpotLink = screen.getByRole("link", {
       name: "View clearest spot on map: Tiburon",
@@ -362,8 +407,9 @@ describe("DashboardGrid", () => {
 
     expect(clearestSpotLink.contains(gauge)).toBe(true);
     expect(gauge.contains(frame)).toBe(true);
-    expect(gauge.className).toContain("max-sm:overflow-hidden");
-    expect(frame.className).toContain("max-sm:h-12");
+    expect(gauge.className).not.toContain("max-sm:overflow-hidden");
+    expect(frame.className).toContain("max-sm:w-full");
+    expect(frame.className).toContain("max-sm:max-h-[4.75rem]");
     expect(screen.getByTestId("fog-coverage-slider").className).not.toContain("overflow-hidden");
     expect(screen.getByTestId("clear-skies-slider").className).not.toContain("overflow-hidden");
   });

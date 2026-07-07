@@ -31,12 +31,15 @@ import {
   metricDetailAriaLabel,
   type MetricDetailKey,
 } from "@/lib/home/metricDetails";
+import { resolveKarlStatusPhrase } from "@/lib/home/weatherDisplay";
 import { buildMapHref } from "@/lib/map/routing";
+import type { KarlIntelligenceResponse } from "@/lib/schemas/intelligence";
 import type { BestSunshineResponse, CurrentResponse } from "@/lib/schemas/weather";
 
 type DashboardGridProps = {
   current: CurrentResponse | null;
   bestSunshine: BestSunshineResponse | null;
+  intelligence?: KarlIntelligenceResponse | null;
   isLoading: boolean;
   isNightPresentation?: boolean;
 };
@@ -180,6 +183,7 @@ function MetricCard({
 export function DashboardGrid({
   current,
   bestSunshine,
+  intelligence = null,
   isLoading,
   isNightPresentation = false,
 }: DashboardGridProps) {
@@ -235,7 +239,11 @@ export function DashboardGrid({
         />
         <MetricCard
           label="Karl Status"
-          value={isLoading || !current ? "--" : current.status}
+          value={
+            isLoading || !current
+              ? "--"
+              : resolveKarlStatusPhrase({ current, intelligence }) ?? "--"
+          }
           detail={isLoading ? "Checking conditions" : "Across the Bay"}
           isLoading={isLoading}
           icon={<FogCoverageIcon className={metricIconClassName} />}

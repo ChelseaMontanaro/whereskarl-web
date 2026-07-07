@@ -1,4 +1,4 @@
-import { mobileMetricIndicatorClass } from "@/components/home/desktopGlass";
+import { mobileCardLabelClass, mobileMetricIndicatorClass } from "@/components/home/desktopGlass";
 import {
   CLEAREST_SPOT_GAUGE_CENTER_X,
   CLEAREST_SPOT_GAUGE_CENTER_Y,
@@ -14,9 +14,12 @@ type ClearestSpotGaugeProps = {
   score: number;
 };
 
-export const clearestSpotGaugeFrameClass = "max-sm:h-12 max-sm:w-full";
+export const clearestSpotGaugeFrameClass =
+  "max-sm:aspect-[100/56] max-sm:h-auto max-sm:max-h-[4.75rem] max-sm:w-full";
 
-export const clearestSpotGaugeContainerClass = `${mobileMetricIndicatorClass} max-sm:shrink-0 max-sm:-mt-2 max-sm:overflow-hidden max-sm:!pt-1 max-sm:pb-1.5`;
+export const clearestSpotGaugeContainerClass = `${mobileMetricIndicatorClass} max-sm:shrink-0 max-sm:w-full max-sm:px-1 max-sm:pb-2`;
+
+export const clearestSpotGaugeLabelClass = `text-[0.625rem] font-bold uppercase tracking-[0.14em] text-white/42 ${mobileCardLabelClass}`;
 
 export function ClearestSpotGauge({ score }: ClearestSpotGaugeProps) {
   const marker = clearestSpotGaugeMarkerPoint(score);
@@ -37,23 +40,14 @@ export function ClearestSpotGauge({ score }: ClearestSpotGaugeProps) {
       >
         <svg
           viewBox={`0 0 ${CLEAREST_SPOT_GAUGE_VIEWBOX.width} ${CLEAREST_SPOT_GAUGE_VIEWBOX.height}`}
-          preserveAspectRatio="xMidYMax meet"
+          preserveAspectRatio="xMidYMid meet"
           className="h-full w-full"
           aria-hidden="true"
           data-testid="clearest-spot-gauge-svg"
+          data-viewbox-width={CLEAREST_SPOT_GAUGE_VIEWBOX.width}
           data-viewbox-height={CLEAREST_SPOT_GAUGE_VIEWBOX.height}
         >
-          <defs>
-            <clipPath id="clearest-spot-gauge-clip">
-              <rect
-                x="0"
-                y="0"
-                width={CLEAREST_SPOT_GAUGE_VIEWBOX.width}
-                height={CLEAREST_SPOT_GAUGE_VIEWBOX.height}
-              />
-            </clipPath>
-          </defs>
-          <g clipPath="url(#clearest-spot-gauge-clip)">
+          <g>
             {inactiveArcPath ? (
               <path
                 d={inactiveArcPath}
@@ -114,12 +108,12 @@ export function ClearestSpotGauge({ score }: ClearestSpotGaugeProps) {
         </svg>
       </div>
       <div
-        className="mt-1.5 flex w-full items-center justify-between text-[0.625rem] font-medium tracking-[0.02em] text-white/42"
+        className={`mt-1 flex w-full items-center justify-between ${clearestSpotGaugeLabelClass}`}
         aria-hidden="true"
         data-testid="clearest-spot-gauge-labels"
       >
-        <span>Low</span>
-        <span>Best</span>
+        <span>LOW</span>
+        <span>BEST</span>
       </div>
     </div>
   );
