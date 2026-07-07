@@ -7,6 +7,7 @@ import {
   ClearestSpotGauge,
   clearestSpotGaugeContainerClass,
   clearestSpotGaugeFrameClass,
+  clearestSpotGaugeLabelsClass,
 } from "@/components/home/ClearestSpotGauge";
 import {
   CLEAREST_SPOT_GAUGE_CENTER_X,
@@ -55,19 +56,34 @@ describe("ClearestSpotGauge", () => {
     },
   );
 
-  it("renders LOW and BEST labels below the arc endpoints", () => {
+  it("renders LOW and BEST labels inside the gauge component", () => {
     render(<ClearestSpotGauge score={60} />);
 
+    const gauge = screen.getByTestId("clearest-spot-gauge");
     const labels = screen.getByTestId("clearest-spot-gauge-labels");
+
+    expect(gauge.contains(labels)).toBe(true);
     expect(within(labels).getByText("LOW")).toBeInTheDocument();
     expect(within(labels).getByText("BEST")).toBeInTheDocument();
-    expect(labels.className).toContain("justify-between");
+    expect(labels.className).toContain(clearestSpotGaugeLabelsClass);
     expect(labels.className).toContain("uppercase");
     expect(labels.className).toContain("tracking-[0.14em]");
     expect(labels.className).toContain("font-bold");
   });
 
-  it("uses a wider centered gauge frame without clipping the arc or labels", () => {
+  it("uses a bounded fixed mobile gauge frame height", () => {
+    render(<ClearestSpotGauge score={60} />);
+
+    const frame = screen.getByTestId("clearest-spot-gauge-frame");
+
+    expect(frame.className).toBe(clearestSpotGaugeFrameClass);
+    expect(frame.className).toContain("max-sm:h-[3.5rem]");
+    expect(frame.className).toContain("max-sm:w-[84%]");
+    expect(frame.className).not.toContain("aspect-");
+    expect(frame.className).not.toContain("h-auto");
+  });
+
+  it("does not use negative margin to position the gauge", () => {
     render(<ClearestSpotGauge score={60} />);
 
     const container = screen.getByTestId("clearest-spot-gauge");
@@ -75,15 +91,14 @@ describe("ClearestSpotGauge", () => {
     const svg = screen.getByTestId("clearest-spot-gauge-svg");
 
     expect(container.className).toBe(clearestSpotGaugeContainerClass);
-    expect(container.className).not.toContain("max-sm:overflow-hidden");
-    expect(frame.className).toBe(clearestSpotGaugeFrameClass);
-    expect(frame.className).toContain("max-sm:w-full");
-    expect(frame.className).toContain("max-sm:aspect-[100/56]");
-    expect(frame.className).toContain("max-sm:max-h-[4.75rem]");
+    expect(container.className).not.toMatch(/-mt-/);
+    expect(container.className).toContain("max-sm:pt-1");
+    expect(container.className).toContain("max-sm:pb-1.5");
+    expect(frame.className).toContain("max-sm:mx-auto");
+    expect(frame.className).toContain("max-sm:overflow-hidden");
     expect(svg).toHaveAttribute("data-viewbox-width", String(CLEAREST_SPOT_GAUGE_VIEWBOX.width));
     expect(svg).toHaveAttribute("data-viewbox-height", String(CLEAREST_SPOT_GAUGE_VIEWBOX.height));
-    expect(svg.getAttribute("preserveAspectRatio")).toBe("xMidYMid meet");
-    expect(svg.querySelector("#clearest-spot-gauge-clip")).toBeNull();
+    expect(svg.getAttribute("preserveAspectRatio")).toBe("xMidYMax meet");
     expect(container.contains(frame)).toBe(true);
     expect(container.contains(screen.getByTestId("clearest-spot-gauge-labels"))).toBe(true);
   });

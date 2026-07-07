@@ -15,9 +15,11 @@ type ClearestSpotGaugeProps = {
 };
 
 export const clearestSpotGaugeFrameClass =
-  "max-sm:aspect-[100/56] max-sm:h-auto max-sm:max-h-[4.75rem] max-sm:w-full";
+  "max-sm:mx-auto max-sm:h-[3.5rem] max-sm:w-[84%] max-sm:max-w-full max-sm:overflow-hidden";
 
-export const clearestSpotGaugeContainerClass = `${mobileMetricIndicatorClass} max-sm:shrink-0 max-sm:w-full max-sm:px-1 max-sm:pb-2`;
+export const clearestSpotGaugeContainerClass = `${mobileMetricIndicatorClass} max-sm:shrink-0 max-sm:w-full max-sm:pt-1 max-sm:pb-1.5`;
+
+export const clearestSpotGaugeLabelsClass = `mt-1 flex w-[84%] max-sm:mx-auto items-center justify-between`;
 
 export const clearestSpotGaugeLabelClass = `text-[0.625rem] font-bold uppercase tracking-[0.14em] text-white/42 ${mobileCardLabelClass}`;
 
@@ -40,7 +42,7 @@ export function ClearestSpotGauge({ score }: ClearestSpotGaugeProps) {
       >
         <svg
           viewBox={`0 0 ${CLEAREST_SPOT_GAUGE_VIEWBOX.width} ${CLEAREST_SPOT_GAUGE_VIEWBOX.height}`}
-          preserveAspectRatio="xMidYMid meet"
+          preserveAspectRatio="xMidYMax meet"
           className="h-full w-full"
           aria-hidden="true"
           data-testid="clearest-spot-gauge-svg"
@@ -108,7 +110,7 @@ export function ClearestSpotGauge({ score }: ClearestSpotGaugeProps) {
         </svg>
       </div>
       <div
-        className={`mt-1 flex w-full items-center justify-between ${clearestSpotGaugeLabelClass}`}
+        className={`${clearestSpotGaugeLabelsClass} ${clearestSpotGaugeLabelClass}`}
         aria-hidden="true"
         data-testid="clearest-spot-gauge-labels"
       >
