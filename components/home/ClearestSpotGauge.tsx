@@ -16,17 +16,32 @@ type ClearestSpotGaugeProps = {
   score: number;
 };
 
+export const CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_X = 1.1;
+
+export const CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_Y = 0.36;
+
 export const CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX = {
   width: CLEAREST_SPOT_GAUGE_VIEWBOX.width,
-  height: 62,
+  height: 50,
 } as const;
 
 export const clearestSpotGaugeFrameClass =
-  "max-sm:h-[3.375rem] max-sm:w-full max-sm:shrink-0 max-sm:overflow-hidden";
+  "max-sm:h-[2.25rem] max-sm:w-full max-sm:shrink-0 max-sm:overflow-hidden";
 
-export const clearestSpotGaugeContainerClass = `${mobileMetricIndicatorClass} flex max-sm:min-h-0 max-sm:flex-1 max-sm:flex-col max-sm:justify-end max-sm:w-full max-sm:!pt-0 max-sm:pl-4 max-sm:pr-1 max-sm:pb-0`;
+export const clearestSpotGaugeContainerClass = `${mobileMetricIndicatorClass} flex max-sm:min-h-0 max-sm:flex-1 max-sm:flex-col max-sm:justify-end max-sm:w-full max-sm:!pt-0 max-sm:pb-0`;
 
-const CLEAREST_SPOT_GAUGE_LABEL_Y = CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX.height - 2.5;
+const CLEAREST_SPOT_GAUGE_LABEL_Y = CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX.height - 2;
+
+export function clearestSpotGaugePresentationTransform(): string {
+  return `translate(${CLEAREST_SPOT_GAUGE_CENTER_X} ${CLEAREST_SPOT_GAUGE_CENTER_Y}) scale(${CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_X} ${CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_Y}) translate(${-CLEAREST_SPOT_GAUGE_CENTER_X} ${-CLEAREST_SPOT_GAUGE_CENTER_Y})`;
+}
+
+export function clearestSpotGaugePresentationLabelX(x: number): number {
+  return (
+    CLEAREST_SPOT_GAUGE_CENTER_X +
+    (x - CLEAREST_SPOT_GAUGE_CENTER_X) * CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_X
+  );
+}
 
 export function ClearestSpotGauge({ score }: ClearestSpotGaugeProps) {
   const marker = clearestSpotGaugeMarkerPoint(score);
@@ -49,12 +64,13 @@ export function ClearestSpotGauge({ score }: ClearestSpotGaugeProps) {
       >
         <svg
           viewBox={`0 0 ${CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX.width} ${CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX.height}`}
-          preserveAspectRatio="xMidYMax slice"
+          preserveAspectRatio="xMidYMax meet"
           className="h-full w-full"
           aria-hidden="true"
           data-testid="clearest-spot-gauge-svg"
           data-viewbox-width={CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX.width}
           data-viewbox-height={CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX.height}
+          data-presentation-scale-y={CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_Y}
         >
           <defs>
             <linearGradient
@@ -69,7 +85,10 @@ export function ClearestSpotGauge({ score }: ClearestSpotGaugeProps) {
               <stop offset="100%" stopColor="#9AD4FF" />
             </linearGradient>
           </defs>
-          <g>
+          <g
+            transform={clearestSpotGaugePresentationTransform()}
+            data-testid="clearest-spot-gauge-arc-group"
+          >
             {inactiveArcPath ? (
               <path
                 d={inactiveArcPath}
@@ -126,31 +145,31 @@ export function ClearestSpotGauge({ score }: ClearestSpotGaugeProps) {
               data-marker-x={marker.x}
               data-marker-y={marker.y}
             />
-            <text
-              x={arcStart.x}
-              y={CLEAREST_SPOT_GAUGE_LABEL_Y}
-              textAnchor="middle"
-              fill="rgba(255,255,255,0.42)"
-              fontSize="4.5"
-              fontWeight="700"
-              letterSpacing="0.08em"
-              data-testid="clearest-spot-gauge-label-low"
-            >
-              LOW
-            </text>
-            <text
-              x={arcEnd.x}
-              y={CLEAREST_SPOT_GAUGE_LABEL_Y}
-              textAnchor="middle"
-              fill="rgba(255,255,255,0.42)"
-              fontSize="4.5"
-              fontWeight="700"
-              letterSpacing="0.08em"
-              data-testid="clearest-spot-gauge-label-best"
-            >
-              BEST
-            </text>
           </g>
+          <text
+            x={clearestSpotGaugePresentationLabelX(arcStart.x)}
+            y={CLEAREST_SPOT_GAUGE_LABEL_Y}
+            textAnchor="middle"
+            fill="rgba(255,255,255,0.42)"
+            fontSize="4.5"
+            fontWeight="700"
+            letterSpacing="0.08em"
+            data-testid="clearest-spot-gauge-label-low"
+          >
+            LOW
+          </text>
+          <text
+            x={clearestSpotGaugePresentationLabelX(arcEnd.x)}
+            y={CLEAREST_SPOT_GAUGE_LABEL_Y}
+            textAnchor="middle"
+            fill="rgba(255,255,255,0.42)"
+            fontSize="4.5"
+            fontWeight="700"
+            letterSpacing="0.08em"
+            data-testid="clearest-spot-gauge-label-best"
+          >
+            BEST
+          </text>
         </svg>
       </div>
     </div>

@@ -6,8 +6,10 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   ClearestSpotGauge,
   CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX,
+  CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_Y,
   clearestSpotGaugeContainerClass,
   clearestSpotGaugeFrameClass,
+  clearestSpotGaugePresentationTransform,
 } from "@/components/home/ClearestSpotGauge";
 import {
   CLEAREST_SPOT_GAUGE_CENTER_X,
@@ -77,22 +79,21 @@ describe("ClearestSpotGauge", () => {
     expect(container.className).toBe(clearestSpotGaugeContainerClass);
     expect(container.className).toContain("max-sm:flex-1");
     expect(frame.className).toBe(clearestSpotGaugeFrameClass);
-    expect(frame.className).toContain("max-sm:h-[3.375rem]");
+    expect(frame.className).toContain("max-sm:h-[2.25rem]");
     expect(frame.className).toContain("max-sm:w-full");
     expect(frame.className).not.toContain("aspect-");
   });
 
-  it("does not use negative margin to position the gauge", () => {
+  it("flattens the arc presentation so the curve stays below the card text", () => {
     render(<ClearestSpotGauge score={60} />);
 
     const container = screen.getByTestId("clearest-spot-gauge");
     const frame = screen.getByTestId("clearest-spot-gauge-frame");
     const svg = screen.getByTestId("clearest-spot-gauge-svg");
+    const arcGroup = screen.getByTestId("clearest-spot-gauge-arc-group");
 
     expect(container.className).not.toMatch(/-mt-/);
-    expect(container.className).toContain("max-sm:pl-4");
-    expect(container.className).toContain("max-sm:pr-1");
-    expect(frame.className).not.toContain("max-sm:mx-auto");
+    expect(container.className).not.toContain("max-sm:pl-4");
     expect(frame.className).toContain("max-sm:overflow-hidden");
     expect(svg).toHaveAttribute(
       "data-viewbox-width",
@@ -102,7 +103,11 @@ describe("ClearestSpotGauge", () => {
       "data-viewbox-height",
       String(CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX.height),
     );
-    expect(svg.getAttribute("preserveAspectRatio")).toBe("xMidYMax slice");
+    expect(svg.getAttribute("preserveAspectRatio")).toBe("xMidYMax meet");
+    expect(svg.getAttribute("data-presentation-scale-y")).toBe(
+      String(CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_Y),
+    );
+    expect(arcGroup.getAttribute("transform")).toBe(clearestSpotGaugePresentationTransform());
     expect(svg.querySelector("#clearest-spot-gauge-active-gradient")).not.toBeNull();
     expect(container.contains(frame)).toBe(true);
     expect(container.contains(screen.getByTestId("clearest-spot-gauge-label-low"))).toBe(true);
