@@ -370,10 +370,10 @@ describe("DashboardGrid", () => {
       "100",
     );
     expect(screen.getByTestId("clearest-spot-gauge-svg").getAttribute("preserveAspectRatio")).toBe(
-      "xMidYMax meet",
+      "xMidYMax slice",
     );
     expect(gauge.className).not.toContain("max-sm:overflow-hidden");
-    expect(screen.getByTestId("clearest-spot-gauge-frame").className).toContain("max-sm:w-[88%]");
+    expect(screen.getByTestId("clearest-spot-gauge-frame").className).toContain("max-sm:w-full");
     expect(screen.getByTestId("clearest-spot-gauge-frame").className).toContain(
       "max-sm:h-[3.375rem]",
     );
@@ -408,7 +408,7 @@ describe("DashboardGrid", () => {
     expect(gauge.contains(frame)).toBe(true);
     expect(gauge.className).not.toContain("max-sm:overflow-hidden");
     expect(gauge.className).toContain("max-sm:flex-1");
-    expect(frame.className).toContain("max-sm:w-[88%]");
+    expect(frame.className).toContain("max-sm:w-full");
     expect(frame.className).toContain("max-sm:h-[3.375rem]");
     expect(screen.getByTestId("fog-coverage-slider").className).not.toContain("overflow-hidden");
     expect(screen.getByTestId("clear-skies-slider").className).not.toContain("overflow-hidden");

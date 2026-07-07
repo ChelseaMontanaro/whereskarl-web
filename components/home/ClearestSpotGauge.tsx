@@ -22,7 +22,7 @@ export const CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX = {
 } as const;
 
 export const clearestSpotGaugeFrameClass =
-  "max-sm:mx-auto max-sm:h-[3.375rem] max-sm:w-[88%] max-sm:max-w-full max-sm:shrink-0 max-sm:overflow-hidden";
+  "max-sm:h-[3.375rem] max-sm:w-full max-sm:shrink-0 max-sm:overflow-hidden";
 
 export const clearestSpotGaugeContainerClass = `${mobileMetricIndicatorClass} flex max-sm:min-h-0 max-sm:flex-1 max-sm:flex-col max-sm:justify-end max-sm:w-full max-sm:!pt-0 max-sm:pb-0`;
 
@@ -49,7 +49,7 @@ export function ClearestSpotGauge({ score }: ClearestSpotGaugeProps) {
       >
         <svg
           viewBox={`0 0 ${CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX.width} ${CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX.height}`}
-          preserveAspectRatio="xMidYMax meet"
+          preserveAspectRatio="xMidYMax slice"
           className="h-full w-full"
           aria-hidden="true"
           data-testid="clearest-spot-gauge-svg"
