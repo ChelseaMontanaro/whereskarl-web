@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import { BestRightNowSection } from "@/components/home/BestRightNowSection";
 import type { BestRightNowItem } from "@/lib/home/weatherDisplay";
+import { buildMapHref } from "@/lib/map/routing";
 import { DEGRADED_BEST_RIGHT_NOW_LABEL } from "@/lib/weather/dataStatus";
 
 const items: BestRightNowItem[] = [
@@ -210,8 +211,8 @@ describe("BestRightNowSection", () => {
     expect(screen.getByText("Fog: 26% • Wind: W 7 mph • 72°F")).toBeInTheDocument();
   });
 
-  it("does not render Best Right Now location names as map links or anchors", () => {
-    const { container } = render(
+  it("renders each mobile Best Right Now row as a map link when the location ID is valid", () => {
+    render(
       <BestRightNowSection
         items={items}
         isNightPresentation={false}
@@ -219,15 +220,52 @@ describe("BestRightNowSection", () => {
       />,
     );
 
-    expect(screen.getByText("San Jose")).toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: /San Jose/i })).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "View Tiburon on map" }),
+    ).toHaveAttribute("href", buildMapHref("tiburon"));
+    expect(
+      screen.getByRole("link", { name: "View Oakland on map" }),
+    ).toHaveAttribute("href", buildMapHref("oakland"));
+    expect(
+      screen.getByRole("link", { name: "View San Jose on map" }),
+    ).toHaveAttribute("href", buildMapHref("san-jose"));
+  });
+
+  it("keeps mobile Best Right Now rows without a valid location ID non-interactive", () => {
+    const itemsWithInvalidLocation: BestRightNowItem[] = [
+      {
+        ...items[0],
+        locationId: "  ",
+        locationName: "Unknown Spot",
+      },
+    ];
+
+    render(
+      <BestRightNowSection
+        items={itemsWithInvalidLocation}
+        isNightPresentation={false}
+        layout="mobile"
+      />,
+    );
+
+    expect(screen.getByText("Unknown Spot")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "View Unknown Spot on map" }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+  });
+
+  it("does not render mobile Best Right Now map links on desktop cards", () => {
+    const { container } = render(
+      <BestRightNowSection
+        items={items}
+        isNightPresentation={false}
+        layout="desktop"
+      />,
+    );
+
     expect(screen.queryByRole("link", { name: /View .* on map/i })).not.toBeInTheDocument();
     expect(container.querySelector('a[href*="/map"]')).toBeNull();
-    expect(container.querySelector('a[href*="google"]')).toBeNull();
-
-    const sanJoseName = screen.getByText("San Jose");
-    expect(sanJoseName.tagName).toBe("P");
-    expect(sanJoseName.closest("a")).toBeNull();
   });
 
   it("disables iOS location auto-linking on Best Right Now text rows", () => {

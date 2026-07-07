@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { MoonIcon, SunshineIcon } from "@/components/home/ConditionIcons";
 import {
   CardLabel,
@@ -10,6 +12,7 @@ import {
 import { GlassCard } from "@/components/ui/GlassCard";
 import { DegradedDataLabel } from "@/components/weather/DegradedDataLabel";
 import type { BestRightNowItem } from "@/lib/home/weatherDisplay";
+import { buildMapHref, normalizeLocationId } from "@/lib/map/routing";
 
 type BestRightNowSectionProps = {
   items: BestRightNowItem[];
@@ -70,6 +73,65 @@ function BestRightNowLocationCopy({
   );
 }
 
+function bestRightNowMapLabel(locationName: string): string {
+  return `View ${locationName} on map`;
+}
+
+const mobileBestRightNowRowClassName =
+  "flex w-full items-start gap-3 max-sm:gap-3.5 rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-karl-gold motion-reduce:transition-none";
+
+function MobileBestRightNowRow({
+  item,
+  isNightPresentation,
+}: {
+  item: BestRightNowItem;
+  isNightPresentation: boolean;
+}) {
+  const mapHref = normalizeLocationId(item.locationId)
+    ? buildMapHref(item.locationId)
+    : null;
+  const rowContent = (
+    <>
+      <InsightPlainIcon size="compact">
+        <BestRightNowSpotIcon
+          isNightPresentation={isNightPresentation}
+          sunIconClassName="text-karl-gold"
+        />
+      </InsightPlainIcon>
+      <div className="min-w-0 flex-1" {...preventLocationAutoLinkProps}>
+        <BestRightNowLocationCopy
+          locationName={item.locationName}
+          detail={item.detail}
+          weatherMetadata={item.weatherMetadata}
+          isDegraded={item.isDegraded}
+          nameClassName="text-base max-sm:text-[1.0625rem] font-semibold text-white"
+          detailClassName="mt-1 max-sm:mt-1.5 text-sm max-sm:text-[0.9375rem] leading-snug text-white/65"
+          metadataClassName="mt-1 max-sm:mt-1 text-[0.6875rem] max-sm:text-xs font-medium leading-snug text-white/48"
+        />
+      </div>
+      {item.score != null ? (
+        <BestRightNowScore score={item.score} size="mobile" />
+      ) : null}
+    </>
+  );
+
+  if (!mapHref) {
+    return <li className={mobileBestRightNowRowClassName}>{rowContent}</li>;
+  }
+
+  return (
+    <li>
+      <Link
+        href={mapHref}
+        aria-label={bestRightNowMapLabel(item.locationName)}
+        className={mobileBestRightNowRowClassName}
+      >
+        {rowContent}
+      </Link>
+    </li>
+  );
+}
+
 function MobileBestRightNowSection({
   items,
   isNightPresentation = false,
@@ -84,31 +146,11 @@ function MobileBestRightNowSection({
         {...preventLocationAutoLinkProps}
       >
         {items.map((item) => (
-          <li
+          <MobileBestRightNowRow
             key={item.locationId}
-            className="flex items-start gap-3 max-sm:gap-3.5"
-          >
-            <InsightPlainIcon size="compact">
-              <BestRightNowSpotIcon
-                isNightPresentation={isNightPresentation}
-                sunIconClassName="text-karl-gold"
-              />
-            </InsightPlainIcon>
-            <div className="min-w-0 flex-1" {...preventLocationAutoLinkProps}>
-              <BestRightNowLocationCopy
-                locationName={item.locationName}
-                detail={item.detail}
-                weatherMetadata={item.weatherMetadata}
-                isDegraded={item.isDegraded}
-                nameClassName="text-base max-sm:text-[1.0625rem] font-semibold text-white"
-                detailClassName="mt-1 max-sm:mt-1.5 text-sm max-sm:text-[0.9375rem] leading-snug text-white/65"
-                metadataClassName="mt-1 max-sm:mt-1 text-[0.6875rem] max-sm:text-xs font-medium leading-snug text-white/48"
-              />
-            </div>
-            {item.score != null ? (
-              <BestRightNowScore score={item.score} size="mobile" />
-            ) : null}
-          </li>
+            item={item}
+            isNightPresentation={isNightPresentation}
+          />
         ))}
       </ul>
     </GlassCard>
