@@ -18,7 +18,7 @@ type ClearestSpotGaugeProps = {
 
 export const CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_X = 1.18;
 
-export const CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_Y = 0.42;
+export const CLEAREST_SPOT_GAUGE_PRESENTATION_SCALE_Y = 0.44;
 
 export const CLEAREST_SPOT_GAUGE_PRESENTATION_TRANSLATE_Y = -2;
 
@@ -26,13 +26,13 @@ export const CLEAREST_SPOT_GAUGE_DISPLAY_VIEWBOX = {
   minX: 0,
   minY: 27,
   width: CLEAREST_SPOT_GAUGE_VIEWBOX.width,
-  height: 25,
+  height: 26,
 } as const;
 
 export const clearestSpotGaugeFrameClass =
-  "max-sm:h-[2.375rem] max-sm:w-full max-sm:shrink-0 max-sm:overflow-hidden";
+  "max-sm:h-[2.5rem] max-sm:w-full max-sm:shrink-0 max-sm:overflow-hidden";
 
-export const clearestSpotGaugeContainerClass = `${mobileMetricIndicatorClass} max-sm:shrink-0 max-sm:w-full max-sm:!pt-0.5 max-sm:pb-1`;
+export const clearestSpotGaugeContainerClass = `${mobileMetricIndicatorClass} max-sm:mt-2.5 max-sm:shrink-0 max-sm:w-full max-sm:!pt-0 max-sm:pb-1`;
 
 export const CLEAREST_SPOT_GAUGE_LABEL_Y = 51;
 
@@ -77,7 +77,7 @@ export function ClearestSpotGauge({ score }: ClearestSpotGaugeProps) {
       >
         <svg
           viewBox={clearestSpotGaugeDisplayViewBox()}
-          preserveAspectRatio="xMidYMax slice"
+          preserveAspectRatio="xMidYMax meet"
           className="h-full w-full"
           aria-hidden="true"
           data-testid="clearest-spot-gauge-svg"

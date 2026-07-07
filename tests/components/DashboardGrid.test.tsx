@@ -363,7 +363,7 @@ describe("DashboardGrid", () => {
     expect(screen.getByTestId("clearest-spot-gauge-needle")).toBeInTheDocument();
     expect(screen.getByTestId("clearest-spot-gauge-svg")).toHaveAttribute(
       "data-viewbox-height",
-      "25",
+      "26",
     );
     expect(screen.getByTestId("clearest-spot-gauge-svg")).toHaveAttribute(
       "data-viewbox-min-y",
@@ -374,11 +374,11 @@ describe("DashboardGrid", () => {
       "100",
     );
     expect(screen.getByTestId("clearest-spot-gauge-svg").getAttribute("preserveAspectRatio")).toBe(
-      "xMidYMax slice",
+      "xMidYMax meet",
     );
     expect(screen.getByTestId("clearest-spot-gauge-svg")).toHaveAttribute(
       "data-presentation-scale-y",
-      "0.42",
+      "0.44",
     );
     expect(screen.getByTestId("clearest-spot-gauge-svg")).toHaveAttribute(
       "data-presentation-translate-y",
@@ -387,7 +387,7 @@ describe("DashboardGrid", () => {
     expect(gauge.className).not.toContain("max-sm:overflow-hidden");
     expect(screen.getByTestId("clearest-spot-gauge-frame").className).toContain("max-sm:w-full");
     expect(screen.getByTestId("clearest-spot-gauge-frame").className).toContain(
-      "max-sm:h-[2.375rem]",
+      "max-sm:h-[2.5rem]",
     );
     expect(screen.getByTestId("clearest-spot-gauge-label-low")).toBeInTheDocument();
     expect(screen.getByTestId("clearest-spot-gauge-label-best")).toBeInTheDocument();
@@ -422,7 +422,7 @@ describe("DashboardGrid", () => {
     expect(gauge.className).toContain("max-sm:shrink-0");
     expect(gauge.className).not.toContain("max-sm:flex-1");
     expect(frame.className).toContain("max-sm:w-full");
-    expect(frame.className).toContain("max-sm:h-[2.375rem]");
+    expect(frame.className).toContain("max-sm:h-[2.5rem]");
     expect(screen.getByTestId("fog-coverage-slider").className).not.toContain("overflow-hidden");
     expect(screen.getByTestId("clear-skies-slider").className).not.toContain("overflow-hidden");
   });
