@@ -207,4 +207,17 @@ describe("MapSelectedLocationCard", () => {
       screen.queryByText(DEGRADED_LOCATION_STATUS_LABEL),
     ).not.toBeInTheDocument();
   });
+
+  it("uses larger mobile clear skies score typography", () => {
+    render(<MapSelectedLocationCard location={location} onClose={vi.fn()} />);
+
+    const label = screen.getByText("Clear Skies Score");
+    const score = label.nextElementSibling;
+
+    expect(label.className).toContain("max-lg:text-[0.625rem]");
+    expect(score?.textContent).toBe("82");
+    expect(score?.className).toContain("max-lg:text-[2rem]");
+    expect(score?.className).toContain("text-karl-gold");
+    expect(score?.className).toContain("text-[1.35rem]");
+  });
 });
