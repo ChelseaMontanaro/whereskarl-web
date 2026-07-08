@@ -437,7 +437,7 @@ describe("createMapMarkerElement", () => {
     expect(marker.innerHTML).toContain('circle cx="12" cy="12"');
   });
 
-  it("uses text-karl-gold and plain styling for clear markers on desktop layout", () => {
+  it("keeps desktop clear markers on the default circular marker chrome", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-03T12:00:00"));
 
@@ -459,10 +459,10 @@ describe("createMapMarkerElement", () => {
 
     expect(marker.className).not.toContain("karl-map-marker--portable");
     expect(marker.className).toContain("karl-map-marker--clear");
-    expect(marker.className).toContain("text-karl-gold");
+    expect(marker.className).not.toContain("text-karl-gold");
   });
 
-  it("does not apply a selected ring to clear sunny markers", () => {
+  it("does not apply a selected ring to portable clear sunny markers", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-03T12:00:00"));
 
@@ -491,9 +491,11 @@ describe("createMapMarkerElement", () => {
     expect(marker.className).toContain("karl-map-marker--clear");
     expect(marker.className).toContain("text-karl-gold");
     expect(marker.className).toContain("karl-map-marker--portable");
-    expect(markerCss).toContain(".karl-map-marker--clear.is-selected");
+    expect(markerCss).toContain(
+      ".karl-map-marker--portable.karl-map-marker--clear.is-selected",
+    );
     expect(markerCss).toMatch(
-      /\.karl-map-marker--clear\.is-selected[\s\S]*box-shadow: none;/,
+      /\.karl-map-marker--portable\.karl-map-marker--clear\.is-selected[\s\S]*box-shadow: none;/,
     );
   });
 
@@ -527,7 +529,10 @@ describe("createMapMarkerElement", () => {
     expect(marker.className).toContain("text-karl-gold");
     expect(marker.querySelector(".karl-map-marker__svg")).toBeTruthy();
     expect(markerCss).toMatch(
-      /\.karl-map-marker--portable\.karl-map-marker--clear[\s\S]*height: 2\.75rem;/,
+      /\.karl-map-marker--portable\.karl-map-marker--clear[\s\S]*height: 3rem;/,
+    );
+    expect(markerCss).toMatch(
+      /\.karl-map-marker--portable\.karl-map-marker--clear[\s\S]*border-radius: 0;/,
     );
   });
 

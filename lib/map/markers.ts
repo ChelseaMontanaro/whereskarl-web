@@ -197,13 +197,13 @@ export function createMapMarkerElement(input: {
   });
   const isPortableLayout =
     input.layout === "mobile" || input.layout === "immersive";
-  const isClearMarker = intensity === "clear";
+  const isPortableClearMarker = isPortableLayout && intensity === "clear";
   const button = document.createElement("button");
   button.type = "button";
   button.className = [
     "karl-map-marker",
     getMarkerIntensityClass(input.location),
-    isClearMarker ? "text-karl-gold" : "",
+    isPortableClearMarker ? "text-karl-gold" : "",
     isPortableLayout ? "karl-map-marker--portable" : "",
     input.isSelected ? "is-selected" : "",
     isFilteredOut ? "is-filtered-out" : "",
