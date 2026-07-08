@@ -8,6 +8,7 @@ type MapBestRightNowTrayProps = {
   selectedLocationId?: string | null;
   onSelectLocation: (locationId: string) => void;
   isLoading?: boolean;
+  variant?: 'desktop' | 'mobile';
 };
 
 export function MapBestRightNowTray({
@@ -15,10 +16,13 @@ export function MapBestRightNowTray({
   selectedLocationId = null,
   onSelectLocation,
   isLoading = false,
+  variant = 'desktop',
 }: MapBestRightNowTrayProps) {
+  const isMobile = variant === 'mobile';
+
   if (isLoading) {
     return (
-      <View style={styles.panel}>
+      <View style={[styles.panel, isMobile && styles.panelMobile]}>
         <Text style={styles.loadingText}>Finding best spots…</Text>
       </View>
     );
@@ -29,8 +33,12 @@ export function MapBestRightNowTray({
   }
 
   return (
-    <View style={styles.panel} accessibilityLabel="Best right now">
-      <Text style={styles.title}>Best Right Now</Text>
+    <View
+      style={[styles.panel, isMobile && styles.panelMobile]}
+      accessibilityLabel="Best right now">
+      <Text style={[styles.title, isMobile && styles.titleMobile]}>
+        Best Right Now
+      </Text>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -50,14 +58,21 @@ export function MapBestRightNowTray({
               onPress={() => onSelectLocation(item.locationId)}
               style={({ pressed }) => [
                 styles.card,
+                isMobile && styles.cardMobile,
                 isSelected && styles.cardSelected,
                 pressed && styles.cardPressed,
               ]}>
-              <Text style={styles.cardName} numberOfLines={1}>
+              <Text
+                style={[styles.cardName, isMobile && styles.cardNameMobile]}
+                numberOfLines={1}>
                 {item.locationName}
               </Text>
-              <Text style={styles.cardScore}>{item.score}</Text>
-              <Text style={styles.cardDetail} numberOfLines={1}>
+              <Text style={[styles.cardScore, isMobile && styles.cardScoreMobile]}>
+                {item.score}
+              </Text>
+              <Text
+                style={[styles.cardDetail, isMobile && styles.cardDetailMobile]}
+                numberOfLines={1}>
                 {item.scoreLabel}
               </Text>
             </Pressable>
@@ -72,12 +87,21 @@ const styles = StyleSheet.create({
   panel: {
     borderRadius: Radius.lg,
     borderWidth: 1,
-    borderColor: Colors.glassBorder,
-    backgroundColor: 'rgba(3, 11, 20, 0.88)',
+    borderColor: 'rgba(255, 255, 255, 0.14)',
+    backgroundColor: 'rgba(3, 11, 20, 0.94)',
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.sm,
     gap: Spacing.sm,
     pointerEvents: 'auto',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.24,
+    shadowRadius: 12,
+    elevation: 5,
+  },
+  panelMobile: {
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
   },
   title: {
     fontSize: 10,
@@ -86,6 +110,10 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     color: Colors.textMuted,
     paddingHorizontal: 4,
+  },
+  titleMobile: {
+    fontSize: 11,
+    color: 'rgba(255, 255, 255, 0.52)',
   },
   loadingText: {
     fontSize: 12,
@@ -102,14 +130,18 @@ const styles = StyleSheet.create({
     borderRadius: Radius.md,
     borderWidth: 1,
     borderColor: Colors.glassBorder,
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.sm,
     gap: 2,
   },
+  cardMobile: {
+    width: 104,
+    paddingVertical: 10,
+  },
   cardSelected: {
-    borderColor: 'rgba(242, 163, 38, 0.35)',
-    backgroundColor: 'rgba(242, 163, 38, 0.08)',
+    borderColor: 'rgba(242, 163, 38, 0.4)',
+    backgroundColor: 'rgba(242, 163, 38, 0.1)',
   },
   cardPressed: {
     opacity: 0.88,
@@ -119,15 +151,25 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.textPrimary,
   },
+  cardNameMobile: {
+    fontSize: 13,
+  },
   cardScore: {
     fontSize: 22,
     fontWeight: '300',
     color: Colors.gold,
     lineHeight: 24,
   },
+  cardScoreMobile: {
+    fontSize: 24,
+    lineHeight: 26,
+  },
   cardDetail: {
     fontSize: 11,
     fontWeight: '500',
     color: Colors.textMuted,
+  },
+  cardDetailMobile: {
+    fontSize: 11,
   },
 });

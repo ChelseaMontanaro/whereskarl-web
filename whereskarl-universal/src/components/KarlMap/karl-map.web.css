@@ -1,52 +1,116 @@
-.karl-universal-map-marker {
+.karl-universal-map-marker-root {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.2rem;
-  border: none;
-  background: transparent;
+  gap: 0.15rem;
+  pointer-events: none;
+}
+
+.karl-universal-map-marker-root.is-portable {
+  gap: 0.1rem;
+}
+
+.karl-universal-map-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.15rem;
+  height: 2.15rem;
   padding: 0;
-  cursor: pointer;
-  transform: scale(var(--marker-scale, 1));
-  transition: transform 160ms ease;
-}
-
-.karl-universal-map-marker__dot {
-  display: block;
-  width: 1rem;
-  height: 1rem;
-  border-radius: 999px;
   border: 2px solid var(--marker-border, rgb(242 163 38));
-  background: var(--marker-fill, rgb(242 163 38));
-  box-shadow: 0 1px 4px rgb(0 0 0 / 0.38);
+  border-radius: 999px;
+  background: rgb(3 11 20 / 0.78);
+  cursor: pointer;
+  pointer-events: auto;
+  transform: scale(var(--marker-scale, 1));
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.42);
 }
 
-.karl-universal-map-marker.is-selected .karl-universal-map-marker__dot {
+.karl-universal-map-marker--portable {
+  width: 2rem;
+  height: 2rem;
+}
+
+.karl-universal-map-marker__svg {
+  display: block;
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.karl-universal-map-marker--clear {
+  color: rgb(242 163 38);
+}
+
+.karl-universal-map-marker--portable.karl-universal-map-marker--clear {
+  width: 2.35rem;
+  height: 2.35rem;
+  border-width: 2px;
+  background: rgb(3 11 20 / 0.82);
+}
+
+.karl-universal-map-marker--portable.karl-universal-map-marker--clear
+  .karl-universal-map-marker__svg {
+  width: 1.55rem;
+  height: 1.55rem;
+}
+
+.karl-universal-map-marker.is-selected {
+  border-color: rgb(242 163 38);
   box-shadow:
     0 0 0 2px rgb(242 163 38 / 0.35),
-    0 1px 6px rgb(0 0 0 / 0.45);
+    0 0 0 6px rgb(242 163 38 / 0.14),
+    0 2px 10px rgb(0 0 0 / 0.45);
+  transform: scale(calc(var(--marker-scale, 1) * 1.04));
+}
+
+.karl-universal-map-marker__score {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.45rem;
+  padding: 0.08rem 0.34rem;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  background: rgb(3 11 20 / 0.9);
+  color: var(--score-color, rgb(242 163 38));
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  pointer-events: none;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
+}
+
+.karl-universal-map-marker-root.is-selected .karl-universal-map-marker__score,
+.karl-universal-map-marker.is-selected + .karl-universal-map-marker__score {
+  border-color: rgb(242 163 38 / 0.35);
+  background: rgb(242 163 38 / 0.1);
 }
 
 .karl-universal-map-marker__label {
-  max-width: 7.5rem;
+  max-width: 8rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 0.68rem;
+  padding: 0.12rem 0.42rem;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  background: rgb(3 11 20 / 0.78);
+  color: rgb(255 255 255 / 0.88);
+  font-size: 0.62rem;
   font-weight: 600;
-  letter-spacing: 0.02em;
-  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.2;
+  pointer-events: none;
   text-shadow: 0 1px 3px rgb(0 0 0 / 0.65);
 }
 
-.karl-universal-map-marker--clear .karl-universal-map-marker__dot {
-  width: 1.1rem;
-  height: 1.1rem;
-}
-
-.karl-universal-map-marker--karlTerritory .karl-universal-map-marker__dot {
-  width: 1.15rem;
-  height: 1.15rem;
+.karl-universal-map-marker:focus-visible {
+  outline: 2px solid rgb(242 163 38);
+  outline-offset: 3px;
 }
 
 .maplibregl-ctrl-attrib,
@@ -62,4 +126,14 @@
 
 .maplibregl-ctrl-group button {
   filter: invert(1);
+}
+
+.maplibregl-ctrl-top-right {
+  top: 4.5rem;
+}
+
+@media (min-width: 900px) {
+  .maplibregl-ctrl-top-right {
+    top: 0.75rem;
+  }
 }

@@ -5,18 +5,25 @@ import type { Map as MapLibreMap, Marker as MapLibreMarker } from 'maplibre-gl';
 
 import { KarlMapOverlayState } from '@/components/KarlMap/KarlMapOverlayState';
 import type { KarlMapProps } from '@/components/KarlMap/KarlMap.types';
-import {
-  BAY_AREA_CENTER,
-  BAY_AREA_DEFAULT_BOUNDS,
-  BAY_AREA_LOCATION_ZOOM,
-  BAY_AREA_MAP_STYLE_URL,
-  BAY_AREA_MAX_BOUNDS,
-} from '@/lib/map/mapConfig';
+import { Colors } from '@/constants/theme';
 import {
   getMarkerAccessibilityLabel,
   getMarkerVisualState,
+  getScoreBadgeColor,
 } from '@/lib/map/markerAppearance';
-import { Colors } from '@/constants/theme';
+import { getMarkerIconMarkup } from '@/lib/map/markerIcons';
+import {
+  BAY_AREA_CENTER,
+  BAY_AREA_LOCATION_ZOOM,
+  BAY_AREA_MAP_STYLE_URL,
+  BAY_AREA_MAX_BOUNDS,
+  BAY_AREA_MOBILE_CENTER,
+  getMapBoundsForLayout,
+  getMapDefaultMaxZoomForLayout,
+  getMapViewportPaddingForLayout,
+  normalizeViewportPadding,
+  type KarlMapLayoutMode,
+} from '@/lib/map/mapConfig';
 
 import 'maplibre-gl/dist/maplibre-gl.css';
 import '@/components/KarlMap/karl-map.web.css';
@@ -24,55 +31,75 @@ import '@/components/KarlMap/karl-map.web.css';
 function createMarkerElement(
   location: KarlMapProps['locations'][number],
   isSelected: boolean,
+  layout: KarlMapLayoutMode,
   showLocationLabel: boolean,
   onSelect: (locationId: string) => void,
-): HTMLButtonElement {
+): HTMLDivElement {
   const visual = getMarkerVisualState(location, isSelected);
+  const score = Math.round(location.sunshineScore);
+  const scoreColor = getScoreBadgeColor(score);
+  const isPortable = layout === 'mobile';
+
+  const root = document.createElement('div');
+  root.className = [
+    'karl-universal-map-marker-root',
+    showLocationLabel ? 'has-label' : '',
+    isPortable ? 'is-portable' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+  root.dataset.locationId = location.id;
+
   const button = document.createElement('button');
   button.type = 'button';
   button.className = [
     'karl-universal-map-marker',
     `karl-universal-map-marker--${visual.intensity}`,
+    isPortable ? 'karl-universal-map-marker--portable' : '',
     isSelected ? 'is-selected' : '',
-    showLocationLabel ? 'has-label' : '',
   ]
     .filter(Boolean)
     .join(' ');
   button.style.setProperty('--marker-fill', visual.fillColor);
   button.style.setProperty('--marker-border', visual.borderColor);
   button.style.setProperty('--marker-scale', String(visual.scale));
+  button.style.setProperty('--score-color', scoreColor);
   button.dataset.locationId = location.id;
   button.setAttribute(
     'aria-label',
     getMarkerAccessibilityLabel(location, isSelected),
   );
   button.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+  button.innerHTML = getMarkerIconMarkup(visual.intensity);
 
-  const dot = document.createElement('span');
-  dot.className = 'karl-universal-map-marker__dot';
-  button.append(dot);
-
-  if (showLocationLabel) {
-    const label = document.createElement('span');
-    label.className = 'karl-universal-map-marker__label';
-    label.textContent = location.name;
-    label.setAttribute('aria-hidden', 'true');
-    button.append(label);
-  }
+  const scoreBadge = document.createElement('span');
+  scoreBadge.className = 'karl-universal-map-marker__score';
+  scoreBadge.textContent = String(score);
+  scoreBadge.setAttribute('aria-hidden', 'true');
 
   button.addEventListener('click', (event) => {
     event.stopPropagation();
     onSelect(location.id);
   });
 
-  return button;
+  root.append(button, scoreBadge);
+
+  if (showLocationLabel) {
+    const label = document.createElement('span');
+    label.className = 'karl-universal-map-marker__label';
+    label.textContent = location.name;
+    label.setAttribute('aria-hidden', 'true');
+    root.append(label);
+  }
+
+  return root;
 }
 
-function fitBayAreaBounds(map: MapLibreMap) {
-  map.fitBounds(BAY_AREA_DEFAULT_BOUNDS, {
-    padding: 36,
+function fitMapViewport(map: MapLibreMap, layout: KarlMapLayoutMode) {
+  map.fitBounds(getMapBoundsForLayout(layout), {
+    padding: normalizeViewportPadding(getMapViewportPaddingForLayout(layout)),
     duration: 0,
-    maxZoom: 10.2,
+    maxZoom: getMapDefaultMaxZoomForLayout(layout),
   });
 }
 
@@ -90,8 +117,10 @@ export default function KarlMap({
   const mapRef = useRef<MapLibreMap | null>(null);
   const markersRef = useRef<Map<string, MapLibreMarker>>(new Map());
   const onSelectRef = useRef(onSelectLocation);
+  const layoutRef = useRef(layout);
 
   onSelectRef.current = onSelectLocation;
+  layoutRef.current = layout;
 
   const shouldShowLabels =
     showLocationLabels ?? layout === 'desktop';
@@ -125,11 +154,15 @@ export default function KarlMap({
         return;
       }
 
+      const initialLayout = layoutRef.current;
+      const initialCenter =
+        initialLayout === 'mobile' ? BAY_AREA_MOBILE_CENTER : BAY_AREA_CENTER;
+
       map = new maplibregl.Map({
         container: host,
         style: BAY_AREA_MAP_STYLE_URL,
-        center: [BAY_AREA_CENTER.longitude, BAY_AREA_CENTER.latitude],
-        zoom: 8,
+        center: [initialCenter.longitude, initialCenter.latitude],
+        zoom: initialLayout === 'mobile' ? 10.2 : 8,
         maxBounds: BAY_AREA_MAX_BOUNDS,
         attributionControl: { compact: true },
       });
@@ -144,7 +177,7 @@ export default function KarlMap({
           return;
         }
 
-        fitBayAreaBounds(map);
+        fitMapViewport(map, initialLayout);
         map.resize();
       });
 
@@ -184,6 +217,22 @@ export default function KarlMap({
       return;
     }
 
+    const refit = () => fitMapViewport(map!, layout);
+
+    if (map.isStyleLoaded()) {
+      refit();
+      return;
+    }
+
+    map.once('load', refit);
+  }, [layout]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) {
+      return;
+    }
+
     const nextIds = new Set(locations.map((location) => location.id));
 
     markersRef.current.forEach((marker, locationId) => {
@@ -206,18 +255,19 @@ export default function KarlMap({
         element: createMarkerElement(
           location,
           isSelected,
+          layout,
           shouldShowLabels,
           (locationId) => onSelectRef.current(locationId),
         ),
-        anchor: shouldShowLabels ? 'center' : 'center',
-        offset: shouldShowLabels ? [0, -11] : [0, 0],
+        anchor: 'center',
+        offset: shouldShowLabels ? [0, -16] : [0, -4],
       })
         .setLngLat([location.longitude, location.latitude])
         .addTo(map);
 
       markersRef.current.set(location.id, marker);
     }
-  }, [locations, selectedLocationId, shouldShowLabels]);
+  }, [layout, locations, selectedLocationId, shouldShowLabels]);
 
   useEffect(() => {
     const map = mapRef.current;

@@ -60,75 +60,87 @@ export function MapFilterPanel({
         isMobile ? styles.panelMobile : styles.panelDesktop,
       ]}
       accessibilityLabel="Bay Area map filters">
-      <Text style={styles.eyebrow}>Karl around the Bay</Text>
+      <Text style={[styles.eyebrow, isMobile && styles.eyebrowMobile]}>
+        Karl around the Bay
+      </Text>
       <Text style={[styles.status, isMobile && styles.statusMobile]}>
         {statusSummary}
       </Text>
 
-      {isMobile ? (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.chipRowScroll}
-          keyboardShouldPersistTaps="handled">
-          {BAY_AREA_PRODUCT_REGIONS.map((region) => (
-            <FilterChip
-              key={region.id}
-              label={region.chipLabel}
-              isActive={selectedRegionId === region.id}
-              onPress={() => onSelectRegion(region.id)}
-              compact
-            />
-          ))}
-        </ScrollView>
-      ) : (
-        <View style={styles.chipRowWrap}>
-          {BAY_AREA_PRODUCT_REGIONS.map((region) => (
-            <FilterChip
-              key={region.id}
-              label={region.chipLabel}
-              isActive={selectedRegionId === region.id}
-              onPress={() => onSelectRegion(region.id)}
-            />
-          ))}
-        </View>
-      )}
+      <View style={styles.section}>
+        {!isMobile ? (
+          <Text style={styles.sectionLabel}>Regions</Text>
+        ) : null}
+        {isMobile ? (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.chipRowScroll}
+            keyboardShouldPersistTaps="handled">
+            {BAY_AREA_PRODUCT_REGIONS.map((region) => (
+              <FilterChip
+                key={region.id}
+                label={region.chipLabel}
+                isActive={selectedRegionId === region.id}
+                onPress={() => onSelectRegion(region.id)}
+                mobile
+              />
+            ))}
+          </ScrollView>
+        ) : (
+          <View style={styles.chipRowWrap}>
+            {BAY_AREA_PRODUCT_REGIONS.map((region) => (
+              <FilterChip
+                key={region.id}
+                label={region.chipLabel}
+                isActive={selectedRegionId === region.id}
+                onPress={() => onSelectRegion(region.id)}
+              />
+            ))}
+          </View>
+        )}
+      </View>
 
-      {isMobile ? (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.chipRowScroll}
-          keyboardShouldPersistTaps="handled">
-          {CONDITION_OPTIONS.map((option) => (
-            <ConditionChip
-              key={option.id}
-              label={getFogIntensityLabel(option.id)}
-              swatchColor={option.swatchColor}
-              isActive={conditionFilter === option.id}
-              onPress={() => onSelectCondition(option.id)}
-              compact
-            />
-          ))}
-        </ScrollView>
-      ) : (
-        <View style={styles.conditionGrid}>
-          {CONDITION_OPTIONS.map((option) => (
-            <ConditionChip
-              key={option.id}
-              label={getFogIntensityLabel(option.id)}
-              swatchColor={option.swatchColor}
-              isActive={conditionFilter === option.id}
-              onPress={() => onSelectCondition(option.id)}
-            />
-          ))}
-        </View>
-      )}
+      <View style={styles.section}>
+        {!isMobile ? (
+          <Text style={styles.sectionLabel}>Conditions</Text>
+        ) : null}
+        {isMobile ? (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.chipRowScroll}
+            keyboardShouldPersistTaps="handled">
+            {CONDITION_OPTIONS.map((option) => (
+              <ConditionChip
+                key={option.id}
+                label={getFogIntensityLabel(option.id)}
+                swatchColor={option.swatchColor}
+                isActive={conditionFilter === option.id}
+                onPress={() => onSelectCondition(option.id)}
+                mobile
+              />
+            ))}
+          </ScrollView>
+        ) : (
+          <View style={styles.conditionGrid}>
+            {CONDITION_OPTIONS.map((option) => (
+              <ConditionChip
+                key={option.id}
+                label={getFogIntensityLabel(option.id)}
+                swatchColor={option.swatchColor}
+                isActive={conditionFilter === option.id}
+                onPress={() => onSelectCondition(option.id)}
+              />
+            ))}
+          </View>
+        )}
+      </View>
 
       <View style={styles.footer}>
         <View style={styles.updatedRow}>
           <View style={styles.statusDot} />
-          <Text style={styles.updatedLabel}>
+          <Text style={[styles.updatedLabel, isMobile && styles.updatedLabelMobile]}>
             {updatedLabel}
             {showCachedHint ? ' · cached' : ''}
           </Text>
@@ -149,10 +161,10 @@ type FilterChipProps = {
   label: string;
   isActive: boolean;
   onPress: () => void;
-  compact?: boolean;
+  mobile?: boolean;
 };
 
-function FilterChip({ label, isActive, onPress, compact = false }: FilterChipProps) {
+function FilterChip({ label, isActive, onPress, mobile = false }: FilterChipProps) {
   return (
     <Pressable
       accessibilityRole="button"
@@ -160,14 +172,14 @@ function FilterChip({ label, isActive, onPress, compact = false }: FilterChipPro
       onPress={onPress}
       style={({ pressed }) => [
         styles.chip,
-        compact && styles.chipCompact,
+        mobile && styles.chipMobile,
         isActive && styles.chipActive,
         pressed && styles.chipPressed,
       ]}>
       <Text
         style={[
           styles.chipLabel,
-          compact && styles.chipLabelCompact,
+          mobile && styles.chipLabelMobile,
           isActive && styles.chipLabelActive,
         ]}>
         {label}
@@ -181,7 +193,7 @@ type ConditionChipProps = {
   swatchColor: string;
   isActive: boolean;
   onPress: () => void;
-  compact?: boolean;
+  mobile?: boolean;
 };
 
 function ConditionChip({
@@ -189,7 +201,7 @@ function ConditionChip({
   swatchColor,
   isActive,
   onPress,
-  compact = false,
+  mobile = false,
 }: ConditionChipProps) {
   return (
     <Pressable
@@ -198,21 +210,21 @@ function ConditionChip({
       onPress={onPress}
       style={({ pressed }) => [
         styles.conditionChip,
-        compact && styles.conditionChipCompact,
+        mobile && styles.conditionChipMobile,
         isActive && styles.chipActive,
         pressed && styles.chipPressed,
       ]}>
       <View
         style={[
           styles.swatch,
-          compact && styles.swatchCompact,
+          mobile && styles.swatchMobile,
           { backgroundColor: swatchColor },
         ]}
       />
       <Text
         style={[
           styles.conditionLabel,
-          compact && styles.conditionLabelCompact,
+          mobile && styles.conditionLabelMobile,
           isActive && styles.chipLabelActive,
         ]}
         numberOfLines={1}>
@@ -226,9 +238,14 @@ const styles = StyleSheet.create({
   panel: {
     borderRadius: Radius.lg,
     borderWidth: 1,
-    borderColor: Colors.glassBorder,
-    backgroundColor: 'rgba(3, 11, 20, 0.88)',
+    borderColor: 'rgba(255, 255, 255, 0.14)',
+    backgroundColor: 'rgba(3, 11, 20, 0.94)',
     pointerEvents: 'auto',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.28,
+    shadowRadius: 16,
+    elevation: 6,
   },
   panelDesktop: {
     width: 300,
@@ -238,9 +255,9 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   panelMobile: {
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.sm,
-    gap: Spacing.xs,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.md,
+    gap: Spacing.sm,
   },
   eyebrow: {
     fontSize: 10,
@@ -249,50 +266,65 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     color: Colors.gold,
   },
+  eyebrowMobile: {
+    fontSize: 11,
+    letterSpacing: 1.5,
+  },
   status: {
     fontSize: 13,
     fontWeight: '500',
-    lineHeight: 18,
+    lineHeight: 19,
     color: Colors.textSecondary,
   },
   statusMobile: {
-    fontSize: 11,
-    lineHeight: 15,
+    fontSize: 14,
+    lineHeight: 20,
+    color: 'rgba(255, 255, 255, 0.84)',
+  },
+  section: {
+    gap: Spacing.xs,
+  },
+  sectionLabel: {
+    fontSize: 9,
+    fontWeight: '700',
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+    color: Colors.textMuted,
   },
   chipRowWrap: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
+    gap: 8,
   },
   chipRowScroll: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
     paddingVertical: 2,
   },
   conditionGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
+    gap: 8,
   },
   chip: {
     borderRadius: Radius.pill,
     borderWidth: 1,
     borderColor: Colors.glassBorder,
-    backgroundColor: 'rgba(0, 0, 0, 0.28)',
-    paddingHorizontal: 10,
-    paddingVertical: 7,
-    minHeight: 34,
-    justifyContent: 'center',
-  },
-  chipCompact: {
-    paddingHorizontal: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.32)',
+    paddingHorizontal: 12,
     paddingVertical: 8,
     minHeight: 36,
+    justifyContent: 'center',
+  },
+  chipMobile: {
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    minHeight: 40,
   },
   chipActive: {
-    borderColor: 'rgba(242, 163, 38, 0.4)',
-    backgroundColor: 'rgba(242, 163, 38, 0.12)',
+    borderColor: 'rgba(242, 163, 38, 0.45)',
+    backgroundColor: 'rgba(242, 163, 38, 0.14)',
   },
   chipPressed: {
     opacity: 0.86,
@@ -302,8 +334,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.textSecondary,
   },
-  chipLabelCompact: {
-    fontSize: 12,
+  chipLabelMobile: {
+    fontSize: 13,
   },
   chipLabelActive: {
     color: Colors.gold,
@@ -311,34 +343,34 @@ const styles = StyleSheet.create({
   conditionChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 7,
     borderRadius: Radius.md,
     borderWidth: 1,
     borderColor: Colors.glassBorder,
-    backgroundColor: 'rgba(0, 0, 0, 0.28)',
-    paddingHorizontal: 8,
-    paddingVertical: 7,
-    minHeight: 34,
-    minWidth: '47%',
-    flexGrow: 1,
-  },
-  conditionChipCompact: {
-    minWidth: 0,
-    flexGrow: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.32)',
     paddingHorizontal: 10,
     paddingVertical: 8,
     minHeight: 36,
+    minWidth: '47%',
+    flexGrow: 1,
+  },
+  conditionChipMobile: {
+    minWidth: 0,
+    flexGrow: 0,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    minHeight: 40,
   },
   swatch: {
-    width: 10,
-    height: 10,
+    width: 11,
+    height: 11,
     borderRadius: Radius.pill,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
+    borderColor: 'rgba(255, 255, 255, 0.14)',
   },
-  swatchCompact: {
-    width: 9,
-    height: 9,
+  swatchMobile: {
+    width: 12,
+    height: 12,
   },
   conditionLabel: {
     flexShrink: 1,
@@ -346,8 +378,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.textSecondary,
   },
-  conditionLabelCompact: {
-    fontSize: 11,
+  conditionLabelMobile: {
+    fontSize: 12,
   },
   footer: {
     flexDirection: 'row',
@@ -355,16 +387,19 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: Spacing.sm,
     marginTop: Spacing.xs,
+    paddingTop: Spacing.xs,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.08)',
   },
   updatedRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 7,
     flex: 1,
   },
   statusDot: {
-    width: 7,
-    height: 7,
+    width: 8,
+    height: 8,
     borderRadius: Radius.pill,
     backgroundColor: '#4ADE80',
   },
@@ -373,6 +408,9 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '600',
     color: Colors.textMuted,
+  },
+  updatedLabelMobile: {
+    fontSize: 11,
   },
   countLabel: {
     fontSize: 10,

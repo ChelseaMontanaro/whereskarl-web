@@ -284,8 +284,8 @@ export default function MapScreen() {
 
   return (
     <View style={styles.root}>
-      <View style={styles.glowTop} />
-      <View style={styles.vignette} />
+      {!isMobileMap ? <View style={styles.glowTop} /> : null}
+      {!isMobileMap ? <View style={styles.vignette} /> : null}
 
       <SafeAreaView
         style={styles.safeArea}
@@ -421,6 +421,23 @@ export default function MapScreen() {
                 {filterPanel}
               </View>
 
+              {!selectedLocation && bestRightNowItems.length > 0 ? (
+                <View
+                  style={[
+                    styles.mobileMapBestRightNow,
+                    { bottom: Math.max(insets.bottom, Spacing.sm) + Spacing.sm },
+                  ]}
+                  pointerEvents="box-none">
+                  <MapBestRightNowTray
+                    items={bestRightNowItems}
+                    selectedLocationId={selectedLocationId}
+                    onSelectLocation={handleSelectLocation}
+                    isLoading={isLoading && locations.length === 0}
+                    variant="mobile"
+                  />
+                </View>
+              ) : null}
+
               {selectedLocation ? (
                 <View
                   style={[
@@ -487,6 +504,7 @@ export default function MapScreen() {
                   selectedLocationId={selectedLocationId}
                   onSelectLocation={handleSelectLocation}
                   isLoading={isLoading && locations.length === 0}
+                  variant="desktop"
                 />
               </View>
 
@@ -613,8 +631,8 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 4,
-    paddingHorizontal: Spacing.sm,
-    gap: Spacing.xs,
+    paddingHorizontal: Spacing.md,
+    gap: Spacing.sm,
   },
   mobileMapTopBar: {
     flexDirection: 'row',
@@ -622,11 +640,16 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
     borderRadius: Radius.lg,
     borderWidth: 1,
-    borderColor: Colors.glassBorder,
-    backgroundColor: 'rgba(3, 11, 20, 0.82)',
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.xs,
+    borderColor: 'rgba(255, 255, 255, 0.14)',
+    backgroundColor: 'rgba(3, 11, 20, 0.92)',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
     pointerEvents: 'auto',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.22,
+    shadowRadius: 12,
+    elevation: 5,
   },
   mobileMapTopBarCenter: {
     flex: 1,
@@ -638,7 +661,14 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    zIndex: 4,
+    zIndex: 5,
+    pointerEvents: 'box-none',
+  },
+  mobileMapBestRightNow: {
+    position: 'absolute',
+    left: Spacing.md,
+    right: Spacing.md,
+    zIndex: 3,
     pointerEvents: 'box-none',
   },
   desktopMapOverlayLeft: {

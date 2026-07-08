@@ -64,8 +64,24 @@ export function getMarkerVisualState(
     fillColor: palette.fill,
     borderColor: isSelected ? Colors.gold : palette.border,
     labelColor: palette.label,
-    scale: isSelected ? 1.12 : intensity === 'clear' ? 1.04 : 1,
+    scale: isSelected ? 1.1 : intensity === 'clear' ? 1.05 : 1,
   };
+}
+
+export function getScoreBadgeColor(sunshineScore: number): string {
+  if (sunshineScore >= 70) {
+    return Colors.gold;
+  }
+
+  if (sunshineScore >= 45) {
+    return '#E8C547';
+  }
+
+  if (sunshineScore >= 30) {
+    return '#F0A060';
+  }
+
+  return '#E86A6A';
 }
 
 export function getMarkerAccessibilityLabel(

@@ -1,10 +1,11 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { MapConditionIcon } from '@/components/KarlMap/KarlMapMarkerView';
 import { HomeLocationBadge } from '@/components/HomeLocationBadge';
 import { Colors, Fonts, Radius, Spacing } from '@/constants/theme';
 import { locationWeatherMetadataItems } from '@/lib/map/locationMetadata';
 import { getSelectedLocationSubtitle } from '@/lib/map/mapPanelDisplay';
-import { getMarkerVisualState } from '@/lib/map/markerAppearance';
+import { getScoreBadgeColor } from '@/lib/map/markerAppearance';
 import type { LocationWeather } from '@/types/weather';
 
 type SelectedLocationPreviewProps = {
@@ -29,10 +30,10 @@ export function SelectedLocationPreview({
   }
 
   const isSheet = variant === 'sheet';
-  const markerVisual = getMarkerVisualState(location, isSelected);
   const subtitle = getSelectedLocationSubtitle(location);
   const metadata = locationWeatherMetadataItems(location).join(' • ');
   const score = Math.round(location.sunshineScore);
+  const scoreColor = getScoreBadgeColor(score);
 
   return (
     <View
@@ -51,6 +52,7 @@ export function SelectedLocationPreview({
           onPress={onDismiss}
           style={({ pressed }) => [
             styles.closeButton,
+            isSheet && styles.closeButtonSheet,
             pressed && styles.buttonPressed,
           ]}>
           <Text style={styles.closeLabel}>×</Text>
@@ -58,38 +60,36 @@ export function SelectedLocationPreview({
       ) : null}
 
       <View style={styles.mainRow}>
-        <View
-          style={[
-            styles.iconCircle,
-            { backgroundColor: `${markerVisual.fillColor}22` },
-          ]}>
-          <View
-            style={[
-              styles.iconDot,
-              {
-                backgroundColor: markerVisual.fillColor,
-                borderColor: markerVisual.borderColor,
-              },
-            ]}
-          />
-        </View>
+        <MapConditionIcon
+          location={location}
+          isSelected={isSelected}
+          size={isSheet ? 52 : 44}
+        />
 
         <View style={styles.contentBlock}>
           {isHomeLocation ? <HomeLocationBadge /> : null}
-          <Text style={styles.name}>{location.name}</Text>
-          <Text style={styles.subtitle} numberOfLines={2}>
+          <Text style={[styles.name, isSheet && styles.nameSheet]}>
+            {location.name}
+          </Text>
+          <Text
+            style={[styles.subtitle, isSheet && styles.subtitleSheet]}
+            numberOfLines={2}>
             {subtitle}
           </Text>
           {metadata ? (
-            <Text style={styles.metadata} numberOfLines={2}>
+            <Text
+              style={[styles.metadata, isSheet && styles.metadataSheet]}
+              numberOfLines={2}>
               {metadata}
             </Text>
           ) : null}
         </View>
 
-        <View style={styles.scoreBlock}>
+        <View style={[styles.scoreBlock, isSheet && styles.scoreBlockSheet]}>
           <Text style={styles.scoreEyebrow}>Clear Skies Score</Text>
-          <Text style={styles.scoreValue}>{score}</Text>
+          <Text style={[styles.scoreValue, { color: scoreColor }]}>
+            {score}
+          </Text>
         </View>
       </View>
 
@@ -115,77 +115,72 @@ const styles = StyleSheet.create({
     borderRadius: Radius.lg,
     borderWidth: 1,
     borderColor: Colors.glassBorder,
-    backgroundColor: 'rgba(3, 11, 20, 0.92)',
+    backgroundColor: 'rgba(3, 11, 20, 0.94)',
     padding: Spacing.md,
     pointerEvents: 'auto',
     position: 'relative',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.28,
-    shadowRadius: 18,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.32,
+    shadowRadius: 20,
+    elevation: 10,
   },
   containerSelected: {
-    borderColor: 'rgba(242, 163, 38, 0.35)',
+    borderColor: 'rgba(242, 163, 38, 0.42)',
   },
   containerSheet: {
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
-    borderTopLeftRadius: Radius.lg + 4,
-    borderTopRightRadius: Radius.lg + 4,
-    paddingTop: Spacing.sm,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingTop: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: Spacing.lg,
+    gap: Spacing.md,
   },
   containerSheetSelected: {
-    backgroundColor: 'rgba(9, 22, 34, 0.98)',
+    backgroundColor: 'rgba(6, 18, 30, 0.98)',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(242, 163, 38, 0.18)',
   },
   sheetHandle: {
     alignSelf: 'center',
-    width: 36,
-    height: 4,
+    width: 42,
+    height: 5,
     borderRadius: Radius.pill,
-    backgroundColor: 'rgba(255, 255, 255, 0.22)',
+    backgroundColor: 'rgba(255, 255, 255, 0.28)',
     marginBottom: Spacing.xs,
   },
   closeButton: {
     position: 'absolute',
     top: 10,
-    right: 10,
+    right: 12,
     zIndex: 2,
-    width: 24,
-    height: 24,
+    width: 28,
+    height: 28,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: Radius.pill,
   },
+  closeButtonSheet: {
+    top: 14,
+  },
   closeLabel: {
-    fontSize: 18,
-    lineHeight: 20,
+    fontSize: 20,
+    lineHeight: 22,
     fontWeight: '400',
     color: 'rgba(255, 255, 255, 0.45)',
   },
   mainRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.sm,
+    gap: Spacing.md,
     paddingRight: Spacing.lg,
-  },
-  iconCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: Radius.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconDot: {
-    width: 18,
-    height: 18,
-    borderRadius: Radius.pill,
-    borderWidth: 2,
   },
   contentBlock: {
     flex: 1,
     minWidth: 0,
-    gap: 2,
+    gap: 3,
   },
   name: {
     fontFamily: Fonts?.serif,
@@ -193,11 +188,18 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.textPrimary,
   },
+  nameSheet: {
+    fontSize: 21,
+  },
   subtitle: {
     fontSize: 12,
     fontWeight: '500',
     lineHeight: 16,
     color: Colors.textSecondary,
+  },
+  subtitleSheet: {
+    fontSize: 13,
+    lineHeight: 18,
   },
   metadata: {
     marginTop: 2,
@@ -205,36 +207,44 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: Colors.textMuted,
   },
+  metadataSheet: {
+    fontSize: 12,
+    lineHeight: 16,
+  },
   scoreBlock: {
     alignItems: 'center',
     justifyContent: 'center',
     paddingLeft: Spacing.sm,
     borderLeftWidth: 1,
     borderLeftColor: Colors.glassBorder,
-    minWidth: 72,
+    minWidth: 76,
+  },
+  scoreBlockSheet: {
+    minWidth: 82,
+    paddingLeft: Spacing.md,
   },
   scoreEyebrow: {
     fontSize: 8,
     fontWeight: '700',
-    letterSpacing: 0.8,
+    letterSpacing: 0.9,
     textTransform: 'uppercase',
     color: Colors.textMuted,
     textAlign: 'center',
   },
   scoreValue: {
     marginTop: 2,
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: '300',
-    lineHeight: 30,
+    lineHeight: 32,
     color: Colors.gold,
   },
   detailLink: {
     alignSelf: 'flex-end',
-    paddingVertical: 2,
+    paddingVertical: 4,
     paddingHorizontal: 2,
   },
   detailLinkLabel: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '600',
     color: Colors.textSecondary,
   },

@@ -2,42 +2,27 @@ import { useEffect, useMemo, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import MapView, { Marker, PROVIDER_DEFAULT } from 'react-native-maps';
 
+import { KarlMapMarkerView } from '@/components/KarlMap/KarlMapMarkerView';
 import { KarlMapOverlayState } from '@/components/KarlMap/KarlMapOverlayState';
 import type { KarlMapProps } from '@/components/KarlMap/KarlMap.types';
-import { BAY_AREA_DEFAULT_BOUNDS } from '@/lib/map/mapConfig';
-import {
-  getMarkerAccessibilityLabel,
-  getMarkerVisualState,
-} from '@/lib/map/markerAppearance';
 import { Colors } from '@/constants/theme';
-
-function boundsToRegion(): {
-  latitude: number;
-  longitude: number;
-  latitudeDelta: number;
-  longitudeDelta: number;
-} {
-  const [[west, south], [east, north]] = BAY_AREA_DEFAULT_BOUNDS;
-
-  return {
-    latitude: (north + south) / 2,
-    longitude: (east + west) / 2,
-    latitudeDelta: north - south,
-    longitudeDelta: east - west,
-  };
-}
+import { getMarkerAccessibilityLabel } from '@/lib/map/markerAppearance';
+import {
+  boundsToRegion,
+  getMapBoundsForLayout,
+} from '@/lib/map/mapConfig';
 
 function KarlMapMarker({
   location,
   isSelected,
+  layout,
   onSelect,
 }: {
   location: KarlMapProps['locations'][number];
   isSelected: boolean;
+  layout: KarlMapProps['layout'];
   onSelect: (locationId: string) => void;
 }) {
-  const visual = getMarkerVisualState(location, isSelected);
-
   return (
     <Marker
       identifier={location.id}
@@ -47,24 +32,13 @@ function KarlMapMarker({
       }}
       onPress={() => onSelect(location.id)}
       accessibilityLabel={getMarkerAccessibilityLabel(location, isSelected)}
+      anchor={{ x: 0.5, y: 0.92 }}
       tracksViewChanges={false}>
-      <View
-        style={[
-          styles.markerOuter,
-          {
-            borderColor: visual.borderColor,
-            transform: [{ scale: visual.scale }],
-          },
-          isSelected && styles.markerOuterSelected,
-        ]}>
-        <View
-          style={[
-            styles.markerInner,
-            { backgroundColor: visual.fillColor },
-            visual.intensity === 'karlTerritory' && styles.markerKarl,
-          ]}
-        />
-      </View>
+      <KarlMapMarkerView
+        location={location}
+        isSelected={isSelected}
+        size={layout === 'mobile' ? 'compact' : 'regular'}
+      />
     </Marker>
   );
 }
@@ -75,10 +49,14 @@ export default function KarlMap({
   onSelectLocation,
   isLoading = false,
   error = null,
+  layout = 'mobile',
   searchQuery = '',
 }: KarlMapProps) {
   const mapRef = useRef<MapView>(null);
-  const initialRegion = useMemo(() => boundsToRegion(), []);
+  const initialRegion = useMemo(
+    () => boundsToRegion(getMapBoundsForLayout(layout ?? 'mobile')),
+    [layout],
+  );
 
   useEffect(() => {
     if (!selectedLocationId || !mapRef.current) {
@@ -94,8 +72,8 @@ export default function KarlMap({
       {
         latitude: selected.latitude,
         longitude: selected.longitude,
-        latitudeDelta: 0.35,
-        longitudeDelta: 0.35,
+        latitudeDelta: 0.22,
+        longitudeDelta: 0.22,
       },
       350,
     );
@@ -133,12 +111,18 @@ export default function KarlMap({
         showsCompass={false}
         showsBuildings={false}
         showsTraffic={false}
-        mapPadding={{ top: 12, right: 12, bottom: 12, left: 12 }}>
+        mapPadding={{
+          top: layout === 'mobile' ? 168 : 12,
+          right: 12,
+          bottom: layout === 'mobile' ? 120 : 12,
+          left: 12,
+        }}>
         {locations.map((location) => (
           <KarlMapMarker
             key={location.id}
             location={location}
             isSelected={selectedLocationId === location.id}
+            layout={layout}
             onSelect={onSelectLocation}
           />
         ))}
@@ -162,30 +146,5 @@ const styles = StyleSheet.create({
   },
   map: {
     ...StyleSheet.absoluteFill,
-  },
-  markerOuter: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    borderWidth: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(3, 11, 20, 0.55)',
-  },
-  markerOuterSelected: {
-    shadowColor: Colors.gold,
-    shadowOpacity: 0.45,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 0 },
-  },
-  markerInner: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-  },
-  markerKarl: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
   },
 });
