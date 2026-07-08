@@ -264,7 +264,7 @@ export default function MapScreen() {
       isHomeLocation={isHomeSelected}
       onDismiss={handleClearSelection}
       onOpenDetail={handleOpenLocationDetail}
-      variant={isMobileMap ? 'sheet' : 'card'}
+      variant={isMobileMap ? 'compact' : 'card'}
     />
   );
 
@@ -421,31 +421,23 @@ export default function MapScreen() {
                 {filterPanel}
               </View>
 
-              {!selectedLocation && bestRightNowItems.length > 0 ? (
+              {bestRightNowItems.length > 0 || selectedLocation ? (
                 <View
                   style={[
-                    styles.mobileMapBestRightNow,
+                    styles.mobileMapBottomStack,
                     { bottom: Math.max(insets.bottom, Spacing.sm) + Spacing.sm },
                   ]}
                   pointerEvents="box-none">
-                  <MapBestRightNowTray
-                    items={bestRightNowItems}
-                    selectedLocationId={selectedLocationId}
-                    onSelectLocation={handleSelectLocation}
-                    isLoading={isLoading && locations.length === 0}
-                    variant="mobile"
-                  />
-                </View>
-              ) : null}
-
-              {selectedLocation ? (
-                <View
-                  style={[
-                    styles.mobileMapBottomSheet,
-                    { paddingBottom: Math.max(insets.bottom, Spacing.sm) },
-                  ]}
-                  pointerEvents="box-none">
-                  {selectedPreview}
+                  {bestRightNowItems.length > 0 ? (
+                    <MapBestRightNowTray
+                      items={bestRightNowItems}
+                      selectedLocationId={selectedLocationId}
+                      onSelectLocation={handleSelectLocation}
+                      isLoading={isLoading && locations.length === 0}
+                      variant="mobile"
+                    />
+                  ) : null}
+                  {selectedLocation ? selectedPreview : null}
                 </View>
               ) : null}
             </View>
@@ -656,19 +648,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     minWidth: 0,
   },
-  mobileMapBottomSheet: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 5,
-    pointerEvents: 'box-none',
-  },
-  mobileMapBestRightNow: {
+  mobileMapBottomStack: {
     position: 'absolute',
     left: Spacing.md,
     right: Spacing.md,
-    zIndex: 3,
+    zIndex: 5,
+    gap: Spacing.sm,
     pointerEvents: 'box-none',
   },
   desktopMapOverlayLeft: {

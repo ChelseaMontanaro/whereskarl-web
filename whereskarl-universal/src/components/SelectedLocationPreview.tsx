@@ -14,8 +14,10 @@ type SelectedLocationPreviewProps = {
   isHomeLocation?: boolean;
   onOpenDetail?: (locationId: string) => void;
   onDismiss?: () => void;
-  variant?: 'card' | 'sheet';
+  variant?: 'card' | 'compact';
 };
+
+const detailLinkBlue = 'rgba(96, 165, 250, 0.95)';
 
 export function SelectedLocationPreview({
   location,
@@ -29,22 +31,40 @@ export function SelectedLocationPreview({
     return null;
   }
 
-  const isSheet = variant === 'sheet';
+  const isCompact = variant === 'compact';
   const subtitle = getSelectedLocationSubtitle(location);
   const metadata = locationWeatherMetadataItems(location).join(' • ');
   const score = Math.round(location.sunshineScore);
   const scoreColor = getScoreBadgeColor(score);
+
+  const detailLink = onOpenDetail ? (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`Open details for ${location.name}`}
+      onPress={() => onOpenDetail(location.id)}
+      style={({ pressed }) => [
+        styles.detailLink,
+        isCompact && styles.detailLinkCompact,
+        pressed && styles.buttonPressed,
+      ]}>
+      <Text
+        style={[
+          styles.detailLinkLabel,
+          isCompact && styles.detailLinkLabelCompact,
+        ]}>
+        View details ›
+      </Text>
+    </Pressable>
+  ) : null;
 
   return (
     <View
       style={[
         styles.container,
         isSelected && styles.containerSelected,
-        isSheet && styles.containerSheet,
-        isSheet && isSelected && styles.containerSheetSelected,
+        isCompact && styles.containerCompact,
+        isCompact && isSelected && styles.containerCompactSelected,
       ]}>
-      {isSheet ? <View style={styles.sheetHandle} accessibilityElementsHidden /> : null}
-
       {onDismiss ? (
         <Pressable
           accessibilityRole="button"
@@ -52,59 +72,54 @@ export function SelectedLocationPreview({
           onPress={onDismiss}
           style={({ pressed }) => [
             styles.closeButton,
-            isSheet && styles.closeButtonSheet,
+            isCompact && styles.closeButtonCompact,
             pressed && styles.buttonPressed,
           ]}>
           <Text style={styles.closeLabel}>×</Text>
         </Pressable>
       ) : null}
 
-      <View style={styles.mainRow}>
+      <View style={[styles.mainRow, isCompact && styles.mainRowCompact]}>
         <MapConditionIcon
           location={location}
           isSelected={isSelected}
-          size={isSheet ? 52 : 44}
+          size={isCompact ? 40 : 44}
         />
 
         <View style={styles.contentBlock}>
           {isHomeLocation ? <HomeLocationBadge /> : null}
-          <Text style={[styles.name, isSheet && styles.nameSheet]}>
+          <Text style={[styles.name, isCompact && styles.nameCompact]}>
             {location.name}
           </Text>
           <Text
-            style={[styles.subtitle, isSheet && styles.subtitleSheet]}
-            numberOfLines={2}>
+            style={[styles.subtitle, isCompact && styles.subtitleCompact]}
+            numberOfLines={isCompact ? 1 : 2}>
             {subtitle}
           </Text>
           {metadata ? (
             <Text
-              style={[styles.metadata, isSheet && styles.metadataSheet]}
-              numberOfLines={2}>
+              style={[styles.metadata, isCompact && styles.metadataCompact]}
+              numberOfLines={isCompact ? 1 : 2}>
               {metadata}
             </Text>
           ) : null}
         </View>
 
-        <View style={[styles.scoreBlock, isSheet && styles.scoreBlockSheet]}>
+        <View style={[styles.scoreBlock, isCompact && styles.scoreBlockCompact]}>
           <Text style={styles.scoreEyebrow}>Clear Skies Score</Text>
-          <Text style={[styles.scoreValue, { color: scoreColor }]}>
+          <Text
+            style={[
+              styles.scoreValue,
+              isCompact && styles.scoreValueCompact,
+              { color: scoreColor },
+            ]}>
             {score}
           </Text>
+          {isCompact ? detailLink : null}
         </View>
       </View>
 
-      {onOpenDetail ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`Open details for ${location.name}`}
-          onPress={() => onOpenDetail(location.id)}
-          style={({ pressed }) => [
-            styles.detailLink,
-            pressed && styles.buttonPressed,
-          ]}>
-          <Text style={styles.detailLinkLabel}>View details ›</Text>
-        </Pressable>
-      ) : null}
+      {!isCompact ? detailLink : null}
     </View>
   );
 }
@@ -128,28 +143,20 @@ const styles = StyleSheet.create({
   containerSelected: {
     borderColor: 'rgba(242, 163, 38, 0.42)',
   },
-  containerSheet: {
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingTop: Spacing.md,
-    paddingHorizontal: Spacing.lg,
-    paddingBottom: Spacing.lg,
-    gap: Spacing.md,
+  containerCompact: {
+    borderRadius: Radius.lg,
+    paddingTop: 10,
+    paddingBottom: 10,
+    paddingHorizontal: Spacing.sm,
+    gap: 0,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.24,
+    shadowRadius: 12,
+    elevation: 6,
   },
-  containerSheetSelected: {
+  containerCompactSelected: {
     backgroundColor: 'rgba(6, 18, 30, 0.98)',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(242, 163, 38, 0.18)',
-  },
-  sheetHandle: {
-    alignSelf: 'center',
-    width: 42,
-    height: 5,
-    borderRadius: Radius.pill,
-    backgroundColor: 'rgba(255, 255, 255, 0.28)',
-    marginBottom: Spacing.xs,
+    borderColor: 'rgba(242, 163, 38, 0.42)',
   },
   closeButton: {
     position: 'absolute',
@@ -162,8 +169,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: Radius.pill,
   },
-  closeButtonSheet: {
-    top: 14,
+  closeButtonCompact: {
+    top: 6,
+    right: 8,
+    width: 32,
+    height: 32,
   },
   closeLabel: {
     fontSize: 20,
@@ -177,6 +187,11 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
     paddingRight: Spacing.lg,
   },
+  mainRowCompact: {
+    alignItems: 'flex-start',
+    gap: Spacing.sm,
+    paddingRight: Spacing.xl,
+  },
   contentBlock: {
     flex: 1,
     minWidth: 0,
@@ -188,8 +203,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.textPrimary,
   },
-  nameSheet: {
-    fontSize: 21,
+  nameCompact: {
+    fontSize: 17,
+    lineHeight: 20,
   },
   subtitle: {
     fontSize: 12,
@@ -197,9 +213,9 @@ const styles = StyleSheet.create({
     lineHeight: 16,
     color: Colors.textSecondary,
   },
-  subtitleSheet: {
-    fontSize: 13,
-    lineHeight: 18,
+  subtitleCompact: {
+    fontSize: 12,
+    lineHeight: 15,
   },
   metadata: {
     marginTop: 2,
@@ -207,9 +223,9 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: Colors.textMuted,
   },
-  metadataSheet: {
-    fontSize: 12,
-    lineHeight: 16,
+  metadataCompact: {
+    fontSize: 10,
+    lineHeight: 13,
   },
   scoreBlock: {
     alignItems: 'center',
@@ -219,9 +235,13 @@ const styles = StyleSheet.create({
     borderLeftColor: Colors.glassBorder,
     minWidth: 76,
   },
-  scoreBlockSheet: {
-    minWidth: 82,
-    paddingLeft: Spacing.md,
+  scoreBlockCompact: {
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    minWidth: 72,
+    paddingLeft: Spacing.sm,
+    paddingTop: 2,
+    gap: 1,
   },
   scoreEyebrow: {
     fontSize: 8,
@@ -238,15 +258,33 @@ const styles = StyleSheet.create({
     lineHeight: 32,
     color: Colors.gold,
   },
+  scoreValueCompact: {
+    fontSize: 26,
+    lineHeight: 28,
+    marginTop: 0,
+  },
   detailLink: {
     alignSelf: 'flex-end',
     paddingVertical: 4,
     paddingHorizontal: 2,
   },
+  detailLinkCompact: {
+    alignSelf: 'center',
+    marginTop: 2,
+    paddingVertical: 6,
+    paddingHorizontal: 4,
+    minHeight: 32,
+    justifyContent: 'center',
+  },
   detailLinkLabel: {
     fontSize: 14,
     fontWeight: '600',
     color: Colors.textSecondary,
+  },
+  detailLinkLabelCompact: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: detailLinkBlue,
   },
   buttonPressed: {
     opacity: 0.88,
