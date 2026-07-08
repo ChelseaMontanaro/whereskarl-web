@@ -50,11 +50,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 2rem;
-  width: 2rem;
   padding: 0;
   border: none;
-  border-radius: 9999px;
   background: transparent;
   cursor: pointer;
   transition: transform 0.15s ease, filter 0.15s ease;
@@ -74,10 +71,43 @@ body {
   filter: drop-shadow(0 1px 3px rgb(0 0 0 / 0.45));
 }
 
+.karl-map-marker--lightFog,
+.karl-map-marker--foggy,
+.karl-map-marker--karlTerritory {
+  height: 2rem;
+  width: 2rem;
+  border-radius: 9999px;
+}
+
 .karl-map-marker--neutral,
 .karl-map-marker--clear {
-  color: rgb(242 163 38);
+  height: auto;
+  width: auto;
+  min-height: 0;
+  min-width: 0;
+  border-radius: 0;
+  box-shadow: none;
   filter: drop-shadow(0 1px 4px rgb(0 0 0 / 0.35));
+}
+
+.karl-map-marker--neutral .karl-map-marker__svg,
+.karl-map-marker--clear .karl-map-marker__svg {
+  height: 2.5rem;
+  width: 2.5rem;
+}
+
+.karl-map-marker--portable.karl-map-marker--clear .karl-map-marker__svg,
+.karl-map-marker--portable.karl-map-marker--neutral .karl-map-marker__svg {
+  height: 2.75rem;
+  width: 2.75rem;
+}
+
+.karl-map-marker--clear.is-selected,
+.karl-map-marker--neutral.is-selected {
+  box-shadow: none;
+  transform: scale(1.1);
+  filter: drop-shadow(0 1px 4px rgb(0 0 0 / 0.35))
+    drop-shadow(0 0 8px rgb(0 0 0 / 0.3));
 }
 
 .karl-map-marker--lightFog,

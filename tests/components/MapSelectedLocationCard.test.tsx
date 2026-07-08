@@ -74,15 +74,16 @@ describe("MapSelectedLocationCard", () => {
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Close selected location" })).toBeInTheDocument();
 
-    const mobileSun = container.querySelector(
+    const sunIcon = container.querySelector(
       '[data-testid="insight-plain-icon"] svg.text-karl-gold',
     );
-    expect(mobileSun).toBeTruthy();
+    expect(sunIcon).toBeTruthy();
     expect(
       container.querySelector(
         '[data-testid="insight-plain-icon"].rounded-full',
       ),
     ).toBeNull();
+    expect(container.querySelector("span.rounded-full.border")).toBeNull();
   });
 
   it("renders metrics with explicit Fog, Wind, and Fahrenheit labels", () => {

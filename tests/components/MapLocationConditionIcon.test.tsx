@@ -49,7 +49,7 @@ describe("MapLocationConditionIcon", () => {
     vi.useRealTimers();
   });
 
-  it("uses a plain gold sun icon on mobile clear locations", () => {
+  it("uses a plain text-karl-gold sun icon for clear locations", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-03T12:00:00"));
 
@@ -57,33 +57,19 @@ describe("MapLocationConditionIcon", () => {
       <MapLocationConditionIcon location={clearLocation} />,
     );
 
-    const mobileIcon = container.querySelector(
+    const plainIcon = container.querySelector(
       '[data-testid="insight-plain-icon"]',
     );
-    const mobileSun = mobileIcon?.querySelector("svg.text-karl-gold");
+    const sunIcon = plainIcon?.querySelector("svg.text-karl-gold");
 
-    expect(mobileIcon).toBeTruthy();
-    expect(mobileSun).toBeTruthy();
-    expect(mobileIcon?.className).not.toContain("rounded-full");
-    expect(mobileIcon?.className).not.toContain("border");
+    expect(plainIcon).toBeTruthy();
+    expect(sunIcon).toBeTruthy();
+    expect(plainIcon?.className).not.toContain("rounded-full");
+    expect(plainIcon?.className).not.toContain("border");
+    expect(container.querySelector("span.rounded-full.border")).toBeNull();
   });
 
-  it("keeps a framed clear icon on desktop", () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date("2026-07-03T12:00:00"));
-
-    const { container } = render(
-      <MapLocationConditionIcon location={clearLocation} />,
-    );
-
-    const desktopIcon = container.querySelector("span.hidden.lg\\:flex");
-
-    expect(desktopIcon).toBeTruthy();
-    expect(desktopIcon?.className).toContain("rounded-full");
-    expect(desktopIcon?.className).toContain("border");
-  });
-
-  it("keeps fog icons inside their circular frames on mobile", () => {
+  it("keeps fog icons inside their circular frames", () => {
     const { container } = render(
       <MapLocationConditionIcon
         location={{

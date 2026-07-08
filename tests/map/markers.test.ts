@@ -1,5 +1,7 @@
 // @vitest-environment happy-dom
 
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { fireEvent } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -431,10 +433,11 @@ describe("createMapMarkerElement", () => {
 
     expect(marker.className).toContain("karl-map-marker--portable");
     expect(marker.className).toContain("karl-map-marker--clear");
+    expect(marker.className).toContain("text-karl-gold");
     expect(marker.innerHTML).toContain('circle cx="12" cy="12"');
   });
 
-  it("does not add portable styling for clear markers on desktop layout", () => {
+  it("uses text-karl-gold and plain styling for clear markers on desktop layout", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-03T12:00:00"));
 
@@ -456,6 +459,76 @@ describe("createMapMarkerElement", () => {
 
     expect(marker.className).not.toContain("karl-map-marker--portable");
     expect(marker.className).toContain("karl-map-marker--clear");
+    expect(marker.className).toContain("text-karl-gold");
+  });
+
+  it("does not apply a selected ring to clear sunny markers", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-03T12:00:00"));
+
+    const marker = createMapMarkerElement({
+      location: {
+        id: "mountain-view",
+        name: "Mountain View",
+        latitude: 37.3861,
+        longitude: -122.0839,
+        fogScore: 10,
+        sunshineScore: 90,
+        status: "Clear",
+      },
+      isSelected: true,
+      fogLayerEnabled: true,
+      layout: "immersive",
+      onSelect: vi.fn(),
+    });
+
+    const markerCss = readFileSync(
+      resolve(process.cwd(), "app/globals.css"),
+      "utf8",
+    );
+
+    expect(marker.className).toContain("is-selected");
+    expect(marker.className).toContain("karl-map-marker--clear");
+    expect(marker.className).toContain("text-karl-gold");
+    expect(marker.className).toContain("karl-map-marker--portable");
+    expect(markerCss).toContain(".karl-map-marker--clear.is-selected");
+    expect(markerCss).toMatch(
+      /\.karl-map-marker--clear\.is-selected[\s\S]*box-shadow: none;/,
+    );
+  });
+
+  it("uses larger portable sizing for clear sunny marker icons", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-03T12:00:00"));
+
+    const marker = createMapMarkerElement({
+      location: {
+        id: "mountain-view",
+        name: "Mountain View",
+        latitude: 37.3861,
+        longitude: -122.0839,
+        fogScore: 10,
+        sunshineScore: 90,
+        status: "Clear",
+      },
+      isSelected: false,
+      fogLayerEnabled: true,
+      layout: "immersive",
+      onSelect: vi.fn(),
+    });
+
+    const markerCss = readFileSync(
+      resolve(process.cwd(), "app/globals.css"),
+      "utf8",
+    );
+
+    expect(marker.className).toContain("karl-map-marker--portable");
+    expect(marker.className).toContain("karl-map-marker--clear");
+    expect(marker.className).toContain("text-karl-gold");
+    expect(marker.querySelector(".karl-map-marker__svg")).toBeTruthy();
+    expect(markerCss).toMatch(
+      /\.karl-map-marker--portable\.karl-map-marker--clear[\s\S]*height: 2\.75rem;/,
+    );
   });
 
   it("keeps fog marker chrome on portable layout", () => {
@@ -477,6 +550,7 @@ describe("createMapMarkerElement", () => {
 
     expect(marker.className).toContain("karl-map-marker--portable");
     expect(marker.className).toContain("karl-map-marker--foggy");
+    expect(marker.className).not.toContain("text-karl-gold");
     expect(marker.innerHTML).toContain('stroke="#93B8D8"');
   });
 
