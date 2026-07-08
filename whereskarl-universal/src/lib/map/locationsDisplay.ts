@@ -3,6 +3,10 @@
  */
 
 import type { LocationWeather } from '@/types/weather';
+import {
+  filterLocationsByProductRegion,
+  type BayAreaVisibleProductRegionId,
+} from '@/lib/map/regions';
 
 export const CLEAR_SKIES_SCORE_THRESHOLD = 50;
 
@@ -21,7 +25,7 @@ function clampScore(value: number): number {
   return Math.max(0, Math.min(100, Math.round(value)));
 }
 
-function resolveFogScore(location: LocationConditionInput): number | null {
+export function resolveFogScore(location: LocationConditionInput): number | null {
   if (
     typeof location.fogScore === 'number' &&
     Number.isFinite(location.fogScore)
@@ -87,6 +91,42 @@ export function resolveLocationFogIntensity(
   }
 
   return getFogIntensity(resolveFogScore(location));
+}
+
+/** Raw fogScore bands only — use for filter matching. */
+export function resolveRawLocationFogIntensity(
+  location: LocationConditionInput,
+): FogIntensity {
+  return getFogIntensity(resolveFogScore(location));
+}
+
+/**
+ * Canonical condition filter matching for map markers and overlays.
+ * Clear uses clear-sky qualification; Light Fog excludes strong clear-sky locations.
+ */
+export function locationMatchesFogIntensityFilter(
+  location: LocationConditionInput,
+  intensity: FogIntensity,
+): boolean {
+  if (intensity === 'clear') {
+    return locationQualifiesAsClearIntensity(location);
+  }
+
+  if (intensity === 'lightFog') {
+    return (
+      resolveRawLocationFogIntensity(location) === 'lightFog' &&
+      !locationQualifiesAsClearIntensity(location)
+    );
+  }
+
+  return resolveRawLocationFogIntensity(location) === intensity;
+}
+
+export function toggleConditionFilter(
+  current: FogIntensity | null,
+  next: FogIntensity,
+): FogIntensity | null {
+  return current === next ? null : next;
 }
 
 export function getFogIntensityLabel(intensity: FogIntensity): string {
@@ -245,4 +285,26 @@ export function prepareLocationResults(
   const searched = filterLocationsBySearch(locations, options.query);
   const filtered = filterLocationsByMode(searched, options.filterMode);
   return sortLocations(filtered, options.sortMode);
+}
+
+export function prepareMapLocationResults(
+  locations: LocationWeather[],
+  options: {
+    query: string;
+    regionId: BayAreaVisibleProductRegionId | null;
+    conditionFilter: FogIntensity | null;
+  },
+): LocationWeather[] {
+  const searched = filterLocationsBySearch(locations, options.query);
+  const regionFiltered = filterLocationsByProductRegion(
+    searched,
+    options.regionId,
+  );
+  const conditionFiltered = options.conditionFilter
+    ? regionFiltered.filter((location) =>
+        locationMatchesFogIntensityFilter(location, options.conditionFilter!),
+      )
+    : regionFiltered;
+
+  return sortLocations(conditionFiltered, 'brightest');
 }

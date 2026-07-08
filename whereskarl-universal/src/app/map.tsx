@@ -2,7 +2,6 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   useWindowDimensions,
@@ -19,6 +18,8 @@ import {
   LocationSearchBar,
   LocationSearchIconButton,
 } from '@/components/LocationSearchBar';
+import { MapBestRightNowTray } from '@/components/MapBestRightNowTray';
+import { MapFilterPanel } from '@/components/MapFilterPanel';
 import {
   MapViewModeToggle,
   type MapScreenViewMode,
@@ -30,9 +31,19 @@ import { useLocations } from '@/hooks/useLocations';
 import {
   findStrongSearchMatch,
   prepareLocationResults,
+  prepareMapLocationResults,
+  toggleConditionFilter,
+  type FogIntensity,
   type LocationFilterMode,
   type LocationSortMode,
 } from '@/lib/map/locationsDisplay';
+import {
+  getBestRightNowMapItems,
+} from '@/lib/map/mapPanelDisplay';
+import {
+  toggleRegionFilter,
+  type BayAreaVisibleProductRegionId,
+} from '@/lib/map/regions';
 
 function parseViewMode(value: string | string[] | undefined): MapScreenViewMode {
   const raw = Array.isArray(value) ? value[0] : value;
@@ -55,17 +66,6 @@ function buildMapRouteParams(options: {
     selected: options.selectedLocationId ?? '',
   };
 }
-
-const SORT_CHIP_OPTIONS: { id: LocationSortMode; label: string }[] = [
-  { id: 'brightest', label: 'Brightest' },
-  { id: 'temperature', label: 'Warmest' },
-  { id: 'name', label: 'A–Z' },
-];
-
-const FILTER_CHIP_OPTIONS: { id: LocationFilterMode; label: string }[] = [
-  { id: 'brightest', label: 'Bright' },
-  { id: 'all', label: 'All' },
-];
 
 export default function MapScreen() {
   const params = useLocalSearchParams<{
@@ -91,12 +91,15 @@ export default function MapScreen() {
   const [sortMode, setSortMode] = useState<LocationSortMode>('brightest');
   const [filterMode, setFilterMode] =
     useState<LocationFilterMode>('brightest');
+  const [selectedRegionId, setSelectedRegionId] =
+    useState<BayAreaVisibleProductRegionId | null>(null);
+  const [conditionFilter, setConditionFilter] = useState<FogIntensity | null>(
+    null,
+  );
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
     () => parseSelectedLocationId(params.selected),
   );
   const [isMobileSearchExpanded, setIsMobileSearchExpanded] = useState(false);
-  const [areMobileMapFiltersExpanded, setAreMobileMapFiltersExpanded] =
-    useState(false);
 
   const routeSyncSource = useRef<'local' | 'external'>('external');
 
@@ -126,7 +129,7 @@ export default function MapScreen() {
     }
   }, [params.view, params.selected]);
 
-  const visibleLocations = useMemo(
+  const listLocations = useMemo(
     () =>
       prepareLocationResults(locations, {
         query: searchQuery,
@@ -135,6 +138,38 @@ export default function MapScreen() {
       }),
     [locations, searchQuery, sortMode, filterMode],
   );
+
+  const mapLocations = useMemo(
+    () =>
+      prepareMapLocationResults(locations, {
+        query: searchQuery,
+        regionId: selectedRegionId,
+        conditionFilter,
+      }),
+    [locations, searchQuery, selectedRegionId, conditionFilter],
+  );
+
+  const bestRightNowSourceLocations = useMemo(
+    () =>
+      prepareMapLocationResults(locations, {
+        query: searchQuery,
+        regionId: selectedRegionId,
+        conditionFilter: null,
+      }),
+    [locations, searchQuery, selectedRegionId],
+  );
+
+  const bestRightNowItems = useMemo(
+    () =>
+      getBestRightNowMapItems(
+        bestRightNowSourceLocations,
+        4,
+        selectedLocationId,
+      ),
+    [bestRightNowSourceLocations, selectedLocationId],
+  );
+
+  const visibleLocations = viewMode === 'list' ? listLocations : mapLocations;
 
   const selectedLocation = useMemo(
     () =>
@@ -145,7 +180,8 @@ export default function MapScreen() {
   );
 
   const mapLayout = width >= 900 ? 'desktop' : 'mobile';
-  const isMobileMap = viewMode === 'map' && mapLayout === 'mobile';
+  const isMapMode = viewMode === 'map';
+  const isMobileMap = isMapMode && mapLayout === 'mobile';
 
   useEffect(() => {
     const trimmedQuery = searchQuery.trim();
@@ -163,7 +199,6 @@ export default function MapScreen() {
   useEffect(() => {
     if (!isMobileMap) {
       setIsMobileSearchExpanded(false);
-      setAreMobileMapFiltersExpanded(false);
     }
   }, [isMobileMap]);
 
@@ -196,6 +231,14 @@ export default function MapScreen() {
     handleSelectLocation(locationId);
   }
 
+  function handleSelectRegion(regionId: BayAreaVisibleProductRegionId) {
+    setSelectedRegionId((current) => toggleRegionFilter(current, regionId));
+  }
+
+  function handleSelectCondition(condition: FogIntensity) {
+    setConditionFilter((current) => toggleConditionFilter(current, condition));
+  }
+
   function toggleMobileSearch() {
     setIsMobileSearchExpanded((current) => {
       const next = !current;
@@ -206,17 +249,7 @@ export default function MapScreen() {
     });
   }
 
-  const mapSummaryText =
-    isLoading && visibleLocations.length === 0
-      ? 'Checking…'
-      : `${visibleLocations.length}`;
-
-  const activeSortLabel =
-    SORT_CHIP_OPTIONS.find((option) => option.id === sortMode)?.label ??
-    'Sort';
-  const activeFilterLabel =
-    FILTER_CHIP_OPTIONS.find((option) => option.id === filterMode)?.label ??
-    'Filter';
+  const showCachedHint = Boolean(error && visibleLocations.length > 0);
 
   const isHomeSelected =
     Boolean(selectedLocationId) &&
@@ -235,6 +268,20 @@ export default function MapScreen() {
     />
   );
 
+  const filterPanel = (
+    <MapFilterPanel
+      locations={locations}
+      isLoading={isLoading}
+      locationCount={mapLocations.length}
+      selectedRegionId={selectedRegionId}
+      onSelectRegion={handleSelectRegion}
+      conditionFilter={conditionFilter}
+      onSelectCondition={handleSelectCondition}
+      variant={isMobileMap ? 'mobile' : 'desktop'}
+      showCachedHint={showCachedHint}
+    />
+  );
+
   return (
     <View style={styles.root}>
       <View style={styles.glowTop} />
@@ -242,42 +289,9 @@ export default function MapScreen() {
 
       <SafeAreaView
         style={styles.safeArea}
-        edges={isMobileMap ? [] : ['top', 'bottom']}>
+        edges={isMapMode ? [] : ['top', 'bottom']}>
         <View style={styles.content}>
-          {viewMode === 'map' && mapLayout === 'desktop' ? (
-            <View style={styles.mapHeader}>
-              <View style={styles.mapHeaderRow}>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Go back"
-                  onPress={() => router.back()}
-                  style={({ pressed }) => [
-                    styles.backButton,
-                    styles.backButtonCompact,
-                    pressed && styles.backButtonPressed,
-                  ]}>
-                  <Text style={styles.backLabel}>Back</Text>
-                </Pressable>
-
-                <Text style={styles.mapHeaderTitle} numberOfLines={1}>
-                  Find Brightest Spot
-                </Text>
-
-                <MapViewModeToggle
-                  mode={viewMode}
-                  onModeChange={handleViewModeChange}
-                />
-              </View>
-
-              <LocationSearchBar
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                isDisabled={isLoading && locations.length === 0}
-                compact
-                placeholder="Search locations"
-              />
-            </View>
-          ) : viewMode === 'list' ? (
+          {viewMode === 'list' ? (
             <>
               <View style={styles.header}>
                 <View style={styles.headerTopRow}>
@@ -315,29 +329,27 @@ export default function MapScreen() {
                   isDisabled={isLoading && locations.length === 0}
                 />
               </View>
-            </>
-          ) : null}
 
-          {viewMode === 'list' ? (
-            <LocationResultsList
-              locations={visibleLocations}
-              isLoading={isLoading}
-              isRefreshing={isRefreshing}
-              error={error}
-              searchQuery={searchQuery}
-              sortMode={sortMode}
-              filterMode={filterMode}
-              selectedLocationId={selectedLocationId}
-              homeLocationId={homeLocationId}
-              onSelectLocation={handleListSelectLocation}
-              onSortModeChange={setSortMode}
-              onFilterModeChange={setFilterMode}
-              onRefresh={refresh}
-            />
+              <LocationResultsList
+                locations={listLocations}
+                isLoading={isLoading}
+                isRefreshing={isRefreshing}
+                error={error}
+                searchQuery={searchQuery}
+                sortMode={sortMode}
+                filterMode={filterMode}
+                selectedLocationId={selectedLocationId}
+                homeLocationId={homeLocationId}
+                onSelectLocation={handleListSelectLocation}
+                onSortModeChange={setSortMode}
+                onFilterModeChange={setFilterMode}
+                onRefresh={refresh}
+              />
+            </>
           ) : isMobileMap ? (
             <View style={styles.mapPaneFull}>
               <KarlMap
-                locations={visibleLocations}
+                locations={mapLocations}
                 selectedLocationId={selectedLocationId}
                 onSelectLocation={handleSelectLocation}
                 isLoading={isLoading}
@@ -406,76 +418,7 @@ export default function MapScreen() {
                   )}
                 </View>
 
-                <View style={styles.mobileMapFiltersWrap} pointerEvents="box-none">
-                  {areMobileMapFiltersExpanded ? (
-                    <ScrollView
-                      horizontal
-                      showsHorizontalScrollIndicator={false}
-                      contentContainerStyle={styles.mobileMapFiltersScroll}
-                      keyboardShouldPersistTaps="handled">
-                      {SORT_CHIP_OPTIONS.map((option) => (
-                        <MapControlChip
-                          key={option.id}
-                          label={option.label}
-                          isActive={sortMode === option.id}
-                          onPress={() => setSortMode(option.id)}
-                          compact
-                        />
-                      ))}
-                      <View style={styles.mapControlsDivider} />
-                      {FILTER_CHIP_OPTIONS.map((option) => (
-                        <MapControlChip
-                          key={option.id}
-                          label={option.label}
-                          isActive={filterMode === option.id}
-                          onPress={() => setFilterMode(option.id)}
-                          compact
-                        />
-                      ))}
-                    </ScrollView>
-                  ) : (
-                    <Pressable
-                      accessibilityRole="button"
-                      accessibilityLabel="Expand sort and filter controls"
-                      accessibilityState={{
-                        expanded: areMobileMapFiltersExpanded,
-                      }}
-                      onPress={() => setAreMobileMapFiltersExpanded(true)}
-                      style={({ pressed }) => [
-                        styles.mobileMapFiltersSummary,
-                        pressed && styles.chipPressed,
-                      ]}>
-                      <Text style={styles.mobileMapFiltersSummaryLabel}>
-                        {activeSortLabel} · {activeFilterLabel}
-                      </Text>
-                      <Text style={styles.mobileMapFiltersSummaryMeta}>
-                        {mapSummaryText} on map
-                        {error && visibleLocations.length > 0 ? ' · cached' : ''}
-                      </Text>
-                    </Pressable>
-                  )}
-
-                  {areMobileMapFiltersExpanded ? (
-                    <View style={styles.mobileMapFiltersFooter}>
-                      <Text style={styles.mapSummary}>
-                        {mapSummaryText} on map
-                        {error && visibleLocations.length > 0 ? ' · cached' : ''}
-                      </Text>
-                      <Pressable
-                        accessibilityRole="button"
-                        accessibilityLabel="Collapse sort and filter controls"
-                        onPress={() => setAreMobileMapFiltersExpanded(false)}
-                        style={({ pressed }) => [
-                          styles.mobileMapFiltersCollapse,
-                          pressed && styles.chipPressed,
-                        ]}>
-                        <Text style={styles.mobileMapFiltersCollapseLabel}>
-                          Done
-                        </Text>
-                      </Pressable>
-                    </View>
-                  ) : null}
-                </View>
+                {filterPanel}
               </View>
 
               {selectedLocation ? (
@@ -490,9 +433,9 @@ export default function MapScreen() {
               ) : null}
             </View>
           ) : (
-            <View style={styles.mapPane}>
+            <View style={styles.mapPaneFull}>
               <KarlMap
-                locations={visibleLocations}
+                locations={mapLocations}
                 selectedLocationId={selectedLocationId}
                 onSelectLocation={handleSelectLocation}
                 isLoading={isLoading}
@@ -503,78 +446,67 @@ export default function MapScreen() {
 
               <View
                 style={[
-                  styles.mapControlsTop,
-                  styles.mapControlsTopDesktop,
-                ]}>
-                <View style={styles.mapControlsRow}>
-                  {SORT_CHIP_OPTIONS.map((option) => (
-                    <MapControlChip
-                      key={option.id}
-                      label={option.label}
-                      isActive={sortMode === option.id}
-                      onPress={() => setSortMode(option.id)}
-                    />
-                  ))}
-                  <View style={styles.mapControlsDivider} />
-                  {FILTER_CHIP_OPTIONS.map((option) => (
-                    <MapControlChip
-                      key={option.id}
-                      label={option.label}
-                      isActive={filterMode === option.id}
-                      onPress={() => setFilterMode(option.id)}
-                    />
-                  ))}
+                  styles.desktopMapOverlayLeft,
+                  { paddingTop: insets.top + Spacing.md },
+                ]}
+                pointerEvents="box-none">
+                <View style={styles.desktopMapNavRow}>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Go back"
+                    onPress={() => router.back()}
+                    style={({ pressed }) => [
+                      styles.backButton,
+                      styles.backButtonCompact,
+                      pressed && styles.backButtonPressed,
+                    ]}>
+                    <Text style={styles.backLabel}>Back</Text>
+                  </Pressable>
+
+                  <MapViewModeToggle
+                    mode={viewMode}
+                    onModeChange={handleViewModeChange}
+                    compact
+                  />
                 </View>
-                <Text style={styles.mapSummary}>
-                  {mapSummaryText} on map
-                  {error && visibleLocations.length > 0 ? ' · cached' : ''}
-                </Text>
+
+                <View style={styles.desktopSearchWrap}>
+                  <LocationSearchBar
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    isDisabled={isLoading && locations.length === 0}
+                    compact
+                    placeholder="Search locations"
+                  />
+                </View>
+
+                {filterPanel}
+
+                <MapBestRightNowTray
+                  items={bestRightNowItems}
+                  selectedLocationId={selectedLocationId}
+                  onSelectLocation={handleSelectLocation}
+                  isLoading={isLoading && locations.length === 0}
+                />
               </View>
 
-              <View style={[styles.mapPreviewBottom, styles.mapPreviewBottomDesktop]}>
-                {selectedPreview}
-              </View>
+              {selectedLocation ? (
+                <View
+                  style={[
+                    styles.desktopMapPreviewBottom,
+                    { paddingBottom: Math.max(insets.bottom, Spacing.lg) },
+                  ]}
+                  pointerEvents="box-none">
+                  <View style={styles.desktopMapPreviewInner}>
+                    {selectedPreview}
+                  </View>
+                </View>
+              ) : null}
             </View>
           )}
         </View>
       </SafeAreaView>
     </View>
-  );
-}
-
-type MapControlChipProps = {
-  label: string;
-  isActive: boolean;
-  onPress: () => void;
-  compact?: boolean;
-};
-
-function MapControlChip({
-  label,
-  isActive,
-  onPress,
-  compact = false,
-}: MapControlChipProps) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ selected: isActive }}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.chip,
-        compact && styles.chipCompact,
-        isActive && styles.chipActive,
-        pressed && styles.chipPressed,
-      ]}>
-      <Text
-        style={[
-          styles.chipLabel,
-          compact && styles.chipLabelCompact,
-          isActive && styles.chipLabelActive,
-        ]}>
-        {label}
-      </Text>
-    </Pressable>
   );
 }
 
@@ -612,29 +544,6 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.sm,
     paddingBottom: Spacing.md,
     gap: Spacing.md,
-  },
-  mapHeader: {
-    width: '100%',
-    maxWidth: MaxContentWidth,
-    alignSelf: 'center',
-    paddingHorizontal: Spacing.md,
-    paddingTop: Spacing.xs,
-    paddingBottom: Spacing.xs,
-    gap: Spacing.xs,
-    zIndex: 2,
-  },
-  mapHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-  },
-  mapHeaderTitle: {
-    flex: 1,
-    fontFamily: Fonts?.serif,
-    fontSize: 17,
-    fontWeight: '600',
-    color: Colors.textPrimary,
-    textAlign: 'center',
   },
   headerTopRow: {
     flexDirection: 'row',
@@ -693,11 +602,6 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.md,
     zIndex: 2,
   },
-  mapPane: {
-    flex: 1,
-    minHeight: 0,
-    position: 'relative',
-  },
   mapPaneFull: {
     flex: 1,
     minHeight: 0,
@@ -729,64 +633,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     minWidth: 0,
   },
-  mobileMapFiltersWrap: {
-    gap: 4,
-    pointerEvents: 'box-none',
-  },
-  mobileMapFiltersScroll: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    borderRadius: Radius.pill,
-    borderWidth: 1,
-    borderColor: Colors.glassBorder,
-    backgroundColor: 'rgba(3, 11, 20, 0.78)',
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-  },
-  mobileMapFiltersSummary: {
-    alignSelf: 'flex-start',
-    borderRadius: Radius.pill,
-    borderWidth: 1,
-    borderColor: Colors.glassBorder,
-    backgroundColor: 'rgba(3, 11, 20, 0.78)',
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    gap: 2,
-    pointerEvents: 'auto',
-  },
-  mobileMapFiltersSummaryLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: Colors.textPrimary,
-  },
-  mobileMapFiltersSummaryMeta: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: Colors.textMuted,
-  },
-  mobileMapFiltersFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: Spacing.sm,
-    paddingHorizontal: 4,
-    pointerEvents: 'box-none',
-  },
-  mobileMapFiltersCollapse: {
-    borderRadius: Radius.pill,
-    borderWidth: 1,
-    borderColor: Colors.glassBorder,
-    backgroundColor: Colors.glassBackground,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    pointerEvents: 'auto',
-  },
-  mobileMapFiltersCollapseLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: Colors.textSecondary,
-  },
   mobileMapBottomSheet: {
     position: 'absolute',
     left: 0,
@@ -795,94 +641,38 @@ const styles = StyleSheet.create({
     zIndex: 4,
     pointerEvents: 'box-none',
   },
-  mapControlsTop: {
+  desktopMapOverlayLeft: {
     position: 'absolute',
-    top: Spacing.sm,
+    top: 0,
     left: Spacing.lg,
-    right: Spacing.lg,
-    zIndex: 3,
-    gap: 4,
+    zIndex: 4,
+    width: 300,
+    maxWidth: '34%',
+    gap: Spacing.sm,
     pointerEvents: 'box-none',
   },
-  mapControlsTopDesktop: {
-    left: 'auto',
-    right: Spacing.lg,
-    maxWidth: 420,
-    alignItems: 'flex-end',
-  },
-  mapControlsRow: {
+  desktopMapNavRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: 6,
-    borderRadius: Radius.pill,
-    borderWidth: 1,
-    borderColor: Colors.glassBorder,
-    backgroundColor: 'rgba(3, 11, 20, 0.78)',
-    paddingHorizontal: 8,
-    paddingVertical: 6,
+    justifyContent: 'space-between',
+    gap: Spacing.sm,
     pointerEvents: 'auto',
   },
-  mapControlsDivider: {
-    width: 1,
-    height: 16,
-    backgroundColor: Colors.glassBorder,
-    marginHorizontal: 2,
+  desktopSearchWrap: {
+    pointerEvents: 'auto',
   },
-  mapSummary: {
-    fontSize: 10,
-    fontWeight: '600',
-    letterSpacing: 0.3,
-    color: Colors.textMuted,
-    textAlign: 'right',
-    pointerEvents: 'none',
-  },
-  mapPreviewBottom: {
+  desktopMapPreviewBottom: {
     position: 'absolute',
-    left: Spacing.lg,
-    right: Spacing.lg,
+    left: 0,
+    right: 0,
     bottom: Spacing.lg,
-    zIndex: 3,
-    maxWidth: MaxContentWidth,
-    alignSelf: 'center',
-    width: '100%',
+    zIndex: 4,
+    alignItems: 'center',
+    paddingHorizontal: Spacing.lg,
     pointerEvents: 'box-none',
   },
-  mapPreviewBottomDesktop: {
-    left: 'auto',
-    right: Spacing.lg,
-    width: 340,
-    maxWidth: '34%',
-  },
-  chip: {
-    borderRadius: Radius.pill,
-    borderWidth: 1,
-    borderColor: 'transparent',
-    backgroundColor: 'transparent',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  chipCompact: {
-    paddingHorizontal: 7,
-    paddingVertical: 3,
-  },
-  chipActive: {
-    borderColor: 'rgba(242, 163, 38, 0.4)',
-    backgroundColor: 'rgba(242, 163, 38, 0.12)',
-  },
-  chipPressed: {
-    opacity: 0.86,
-  },
-  chipLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: Colors.textSecondary,
-  },
-  chipLabelCompact: {
-    fontSize: 10,
-  },
-  chipLabelActive: {
-    color: Colors.gold,
+  desktopMapPreviewInner: {
+    width: '100%',
+    maxWidth: 448,
   },
 });
