@@ -7,6 +7,7 @@ export type MapScreenViewMode = 'list' | 'map';
 type MapViewModeToggleProps = {
   mode: MapScreenViewMode;
   onModeChange: (mode: MapScreenViewMode) => void;
+  compact?: boolean;
 };
 
 const OPTIONS: { id: MapScreenViewMode; label: string }[] = [
@@ -17,9 +18,12 @@ const OPTIONS: { id: MapScreenViewMode; label: string }[] = [
 export function MapViewModeToggle({
   mode,
   onModeChange,
+  compact = false,
 }: MapViewModeToggleProps) {
   return (
-    <View style={styles.container} accessibilityRole="tablist">
+    <View
+      style={[styles.container, compact && styles.containerCompact]}
+      accessibilityRole="tablist">
       {OPTIONS.map((option) => {
         const isActive = mode === option.id;
 
@@ -31,10 +35,16 @@ export function MapViewModeToggle({
             onPress={() => onModeChange(option.id)}
             style={({ pressed }) => [
               styles.segment,
+              compact && styles.segmentCompact,
               isActive && styles.segmentActive,
               pressed && styles.segmentPressed,
             ]}>
-            <Text style={[styles.label, isActive && styles.labelActive]}>
+            <Text
+              style={[
+                styles.label,
+                compact && styles.labelCompact,
+                isActive && styles.labelActive,
+              ]}>
               {option.label}
             </Text>
           </Pressable>
@@ -55,10 +65,17 @@ const styles = StyleSheet.create({
     padding: 3,
     gap: 2,
   },
+  containerCompact: {
+    padding: 2,
+  },
   segment: {
     borderRadius: Radius.pill,
     paddingHorizontal: 14,
     paddingVertical: 7,
+  },
+  segmentCompact: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
   },
   segmentActive: {
     backgroundColor: 'rgba(242, 163, 38, 0.18)',
@@ -70,6 +87,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     color: Colors.textSecondary,
+  },
+  labelCompact: {
+    fontSize: 12,
   },
   labelActive: {
     color: Colors.gold,

@@ -2,6 +2,34 @@
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
+## Phone testing on LAN (web)
+
+To test the web app on a phone over your local network:
+
+1. Start the dev server bound to LAN:
+
+   ```bash
+   npm run web:lan
+   ```
+
+2. Find your Mac's local IP address (Wi‑Fi is usually `en0`):
+
+   ```bash
+   ipconfig getifaddr en0
+   ```
+
+3. On your phone (same Wi‑Fi as the Mac), open the map in the browser using the **Mac IP**, not `localhost`:
+
+   ```text
+   http://<mac-ip>:8081/map
+   ```
+
+   Example: `http://192.168.1.42:8081/map`
+
+   For map mode directly: `http://<mac-ip>:8081/map?view=map`
+
+`localhost` only works on the machine running Expo. Phones must use the LAN IP.
+
 ## Get started
 
 1. Install dependencies

@@ -12,6 +12,7 @@ type SelectedLocationPreviewProps = {
   isHomeLocation?: boolean;
   onOpenDetail?: (locationId: string) => void;
   onDismiss?: () => void;
+  variant?: 'card' | 'sheet';
 };
 
 export function SelectedLocationPreview({
@@ -20,17 +21,23 @@ export function SelectedLocationPreview({
   isHomeLocation = false,
   onOpenDetail,
   onDismiss,
+  variant = 'card',
 }: SelectedLocationPreviewProps) {
   if (!location) {
     return null;
   }
+
+  const isSheet = variant === 'sheet';
 
   return (
     <View
       style={[
         styles.container,
         isSelected && styles.containerSelected,
+        isSheet && styles.containerSheet,
+        isSheet && isSelected && styles.containerSheetSelected,
       ]}>
+      {isSheet ? <View style={styles.sheetHandle} accessibilityElementsHidden /> : null}
       <View style={styles.header}>
         <View style={styles.titleBlock}>
           {isHomeLocation ? <HomeLocationBadge /> : null}
@@ -94,6 +101,30 @@ const styles = StyleSheet.create({
   containerSelected: {
     borderColor: 'rgba(242, 163, 38, 0.45)',
     backgroundColor: 'rgba(242, 163, 38, 0.08)',
+  },
+  containerSheet: {
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    borderTopLeftRadius: Radius.lg + 4,
+    borderTopRightRadius: Radius.lg + 4,
+    backgroundColor: 'rgba(3, 11, 20, 0.94)',
+    paddingTop: Spacing.sm,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  containerSheetSelected: {
+    backgroundColor: 'rgba(9, 22, 34, 0.98)',
+  },
+  sheetHandle: {
+    alignSelf: 'center',
+    width: 36,
+    height: 4,
+    borderRadius: Radius.pill,
+    backgroundColor: 'rgba(255, 255, 255, 0.22)',
+    marginBottom: Spacing.sm,
   },
   header: {
     flexDirection: 'row',
