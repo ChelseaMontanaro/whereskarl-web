@@ -139,12 +139,12 @@ export function MapSelectedLocationCard({
           ) : null}
         </div>
 
-        <div className="flex shrink-0 flex-col items-center border-l border-white/10 pl-3">
+        <div className="flex shrink-0 flex-col items-center justify-center self-center border-l border-white/10 pl-3">
           <div className="text-center">
-            <p className="text-[0.5rem] font-bold uppercase tracking-[0.14em] text-white/40">
+            <p className="text-[0.5rem] font-bold uppercase tracking-[0.14em] text-white/40 max-lg:text-[0.625rem] max-lg:tracking-[0.12em]">
               Clear Skies Score
             </p>
-            <p className="mt-0.5 text-[1.35rem] font-light leading-none text-karl-gold">
+            <p className="mt-0.5 text-[1.35rem] font-light leading-none text-karl-gold max-lg:mt-1 max-lg:text-[2rem]">
               {location.sunshineScore}
             </p>
           </div>
