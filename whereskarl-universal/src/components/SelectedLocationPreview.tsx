@@ -86,7 +86,7 @@ export function SelectedLocationPreview({
           size={isCompact ? 40 : 44}
         />
 
-        <View style={styles.contentBlock}>
+        <View style={[styles.contentBlock, isCompact && styles.contentBlockCompact]}>
           {isHomeLocation ? <HomeLocationBadge /> : null}
           <Text style={[styles.name, isCompact && styles.nameCompact]}>
             {location.name}
@@ -106,7 +106,10 @@ export function SelectedLocationPreview({
         </View>
 
         <View style={[styles.scoreBlock, isCompact && styles.scoreBlockCompact]}>
-          <Text style={styles.scoreEyebrow}>Clear Skies Score</Text>
+          <Text
+            style={[styles.scoreEyebrow, isCompact && styles.scoreEyebrowCompact]}>
+            Clear Skies Score
+          </Text>
           <Text
             style={[
               styles.scoreValue,
@@ -145,8 +148,8 @@ const styles = StyleSheet.create({
   },
   containerCompact: {
     borderRadius: Radius.lg,
-    paddingTop: 10,
-    paddingBottom: 10,
+    paddingTop: 11,
+    paddingBottom: 11,
     paddingHorizontal: Spacing.sm,
     gap: 0,
     shadowOffset: { width: 0, height: 6 },
@@ -197,6 +200,10 @@ const styles = StyleSheet.create({
     minWidth: 0,
     gap: 3,
   },
+  contentBlockCompact: {
+    gap: 5,
+    paddingTop: 1,
+  },
   name: {
     fontFamily: Fonts?.serif,
     fontSize: 18,
@@ -204,8 +211,8 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
   nameCompact: {
-    fontSize: 17,
-    lineHeight: 20,
+    fontSize: 16,
+    lineHeight: 19,
   },
   subtitle: {
     fontSize: 12,
@@ -215,7 +222,7 @@ const styles = StyleSheet.create({
   },
   subtitleCompact: {
     fontSize: 12,
-    lineHeight: 15,
+    lineHeight: 16,
   },
   metadata: {
     marginTop: 2,
@@ -224,8 +231,9 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
   },
   metadataCompact: {
-    fontSize: 10,
-    lineHeight: 13,
+    marginTop: 0,
+    fontSize: 11,
+    lineHeight: 14,
   },
   scoreBlock: {
     alignItems: 'center',
@@ -236,12 +244,12 @@ const styles = StyleSheet.create({
     minWidth: 76,
   },
   scoreBlockCompact: {
-    alignItems: 'center',
+    alignItems: 'flex-end',
     justifyContent: 'flex-start',
     minWidth: 72,
     paddingLeft: Spacing.sm,
-    paddingTop: 2,
-    gap: 1,
+    paddingTop: 1,
+    gap: 2,
   },
   scoreEyebrow: {
     fontSize: 8,
@@ -251,6 +259,11 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
     textAlign: 'center',
   },
+  scoreEyebrowCompact: {
+    fontSize: 9,
+    letterSpacing: 0.7,
+    textAlign: 'right',
+  },
   scoreValue: {
     marginTop: 2,
     fontSize: 30,
@@ -259,9 +272,10 @@ const styles = StyleSheet.create({
     color: Colors.gold,
   },
   scoreValueCompact: {
-    fontSize: 26,
-    lineHeight: 28,
+    fontSize: 28,
+    lineHeight: 30,
     marginTop: 0,
+    textAlign: 'right',
   },
   detailLink: {
     alignSelf: 'flex-end',
@@ -269,11 +283,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
   },
   detailLinkCompact: {
-    alignSelf: 'center',
-    marginTop: 2,
-    paddingVertical: 6,
-    paddingHorizontal: 4,
-    minHeight: 32,
+    alignSelf: 'flex-end',
+    marginTop: 1,
+    paddingVertical: 4,
+    paddingHorizontal: 2,
+    minHeight: 28,
     justifyContent: 'center',
   },
   detailLinkLabel: {
@@ -283,6 +297,7 @@ const styles = StyleSheet.create({
   },
   detailLinkLabelCompact: {
     fontSize: 12,
+    lineHeight: 15,
     fontWeight: '600',
     color: detailLinkBlue,
   },
