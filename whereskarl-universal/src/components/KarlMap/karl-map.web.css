@@ -1,0 +1,65 @@
+.karl-universal-map-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  transform: scale(var(--marker-scale, 1));
+  transition: transform 160ms ease;
+}
+
+.karl-universal-map-marker__dot {
+  display: block;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 999px;
+  border: 2px solid var(--marker-border, rgb(242 163 38));
+  background: var(--marker-fill, rgb(242 163 38));
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.38);
+}
+
+.karl-universal-map-marker.is-selected .karl-universal-map-marker__dot {
+  box-shadow:
+    0 0 0 2px rgb(242 163 38 / 0.35),
+    0 1px 6px rgb(0 0 0 / 0.45);
+}
+
+.karl-universal-map-marker__label {
+  max-width: 7.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.88);
+  text-shadow: 0 1px 3px rgb(0 0 0 / 0.65);
+}
+
+.karl-universal-map-marker--clear .karl-universal-map-marker__dot {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.karl-universal-map-marker--karlTerritory .karl-universal-map-marker__dot {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.maplibregl-ctrl-attrib,
+.maplibregl-ctrl-attrib-button {
+  background-color: rgba(3, 11, 20, 0.72) !important;
+  color: rgba(255, 255, 255, 0.72) !important;
+}
+
+.maplibregl-ctrl-group {
+  background: rgba(3, 11, 20, 0.82) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.maplibregl-ctrl-group button {
+  filter: invert(1);
+}
