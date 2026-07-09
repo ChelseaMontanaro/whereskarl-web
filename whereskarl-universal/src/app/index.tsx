@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -17,6 +17,7 @@ import {
   heroSubheadline,
 } from '@/lib/home/weatherDisplay';
 import { getCloudSummary } from '@/lib/map/locationsDisplay';
+import { useClearSkiesNav } from '@/providers/ClearSkiesNavProvider';
 
 const PLACEHOLDER = {
   headline: 'Karl is draped across the Golden Gate',
@@ -38,6 +39,8 @@ export default function HomeScreen() {
     useHomeWeather();
   const { homeLocation } = useHomeLocation(locations);
 
+  const { setClearSkiesNav } = useClearSkiesNav();
+
   const karlLocation = useMemo(
     () => foggiestKarlLocation(locations),
     [locations],
@@ -45,6 +48,13 @@ export default function HomeScreen() {
 
   const hasLoadedWeather = hasLiveData && Boolean(current);
   const showLoading = isLoading && !hasLiveData;
+
+  useEffect(() => {
+    setClearSkiesNav({
+      locationId: bestSunshine?.id ?? null,
+      isLoading: showLoading,
+    });
+  }, [bestSunshine?.id, setClearSkiesNav, showLoading]);
 
   const headline = hasLoadedWeather
     ? heroHeadline({ current, karlLocation, hasLoadedWeather: true })

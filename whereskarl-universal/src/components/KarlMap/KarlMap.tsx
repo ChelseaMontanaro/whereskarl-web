@@ -1,3 +1,1 @@
-import KarlMap from './KarlMap.native';
-
-export default KarlMap;
+export { default } from './KarlMap.native';

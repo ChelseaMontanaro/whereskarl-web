@@ -2,6 +2,22 @@
  * Bay Area product regions — aligned with whereskarl-web/lib/map/regions.ts.
  */
 
+import {
+  BAY_AREA_DESKTOP_VIEWPORT_PADDING,
+  BAY_AREA_PHONE_PORTRAIT_REGION_VIEWPORT_PADDING,
+  PHONE_PORTRAIT_MAP_VIEWPORT_PADDING,
+  type KarlMapLayoutMode,
+  type MapViewportPadding,
+} from '@/lib/map/mapConfig';
+
+export type MapBounds = [[number, number], [number, number]];
+
+export type BayAreaProductRegionViewport = {
+  padding?: MapViewportPadding;
+  phonePortraitPadding?: MapViewportPadding;
+  maxZoom?: number;
+};
+
 export const BAY_AREA_VISIBLE_PRODUCT_REGION_IDS = [
   'san-francisco',
   'north-bay',
@@ -24,13 +40,69 @@ export type BayAreaProductRegion = {
   id: BayAreaVisibleProductRegionId;
   name: string;
   chipLabel: string;
+  bounds: MapBounds;
+  viewport?: BayAreaProductRegionViewport;
 };
 
 export const BAY_AREA_PRODUCT_REGIONS: BayAreaProductRegion[] = [
-  { id: 'san-francisco', name: 'San Francisco', chipLabel: 'SF' },
-  { id: 'north-bay', name: 'North Bay', chipLabel: 'North Bay' },
-  { id: 'east-bay', name: 'East Bay', chipLabel: 'East Bay' },
-  { id: 'south-bay', name: 'South Bay', chipLabel: 'South Bay' },
+  {
+    id: 'san-francisco',
+    name: 'San Francisco',
+    chipLabel: 'SF',
+    // Desktop framing. Phone-portrait web overrides this in KarlMap.web via
+    // the approved PHONE_PORTRAIT_SF_CENTRAL_BAY_BOUNDS composition.
+    bounds: [
+      [-122.68, 37.8],
+      [-122.2, 38.12],
+    ],
+    viewport: {
+      padding: 36,
+      phonePortraitPadding: PHONE_PORTRAIT_MAP_VIEWPORT_PADDING,
+      maxZoom: 11.9,
+    },
+  },
+  {
+    id: 'north-bay',
+    name: 'North Bay',
+    chipLabel: 'North Bay',
+    bounds: [
+      [-122.65, 37.795],
+      [-122.43, 38.02],
+    ],
+    viewport: {
+      padding: 36,
+      phonePortraitPadding: BAY_AREA_PHONE_PORTRAIT_REGION_VIEWPORT_PADDING,
+      maxZoom: 11.3,
+    },
+  },
+  {
+    id: 'east-bay',
+    name: 'East Bay',
+    chipLabel: 'East Bay',
+    bounds: [
+      [-122.33, 37.7],
+      [-121.72, 38.02],
+    ],
+    viewport: {
+      padding: 36,
+      phonePortraitPadding: BAY_AREA_PHONE_PORTRAIT_REGION_VIEWPORT_PADDING,
+      maxZoom: 10.5,
+    },
+  },
+  {
+    id: 'south-bay',
+    name: 'South Bay',
+    chipLabel: 'South Bay',
+    bounds: [
+      [-122.5, 37.08],
+      [-121.7, 37.58],
+    ],
+    viewport: {
+      padding: 36,
+      phonePortraitPadding: BAY_AREA_PHONE_PORTRAIT_REGION_VIEWPORT_PADDING,
+      maxZoom: 11,
+    },
+  },
 ];
 
 const BACKEND_TO_VISIBLE_REGION: Record<
@@ -76,6 +148,96 @@ export type LocationWithRegion = {
   id: string;
   region?: string | null;
 };
+
+export type LocationWithCoordinates = LocationWithRegion & {
+  latitude?: number;
+  longitude?: number;
+};
+
+export function findBayAreaProductRegion(
+  regionId: string | null | undefined,
+): BayAreaProductRegion | null {
+  if (!regionId) {
+    return null;
+  }
+
+  const visibleRegionId = normalizeVisibleMapRegionId(regionId);
+  if (!visibleRegionId) {
+    return null;
+  }
+
+  return (
+    BAY_AREA_PRODUCT_REGIONS.find((region) => region.id === visibleRegionId) ??
+    null
+  );
+}
+
+export function resolveRegionViewportFitOptions(
+  region: BayAreaProductRegion,
+  layout: KarlMapLayoutMode,
+  options?: { phonePortraitWeb?: boolean },
+): { padding: MapViewportPadding; maxZoom: number } {
+  const viewport = region.viewport;
+
+  if (layout === 'mobile') {
+    return {
+      padding: options?.phonePortraitWeb
+        ? PHONE_PORTRAIT_MAP_VIEWPORT_PADDING
+        : viewport?.phonePortraitPadding ??
+          BAY_AREA_PHONE_PORTRAIT_REGION_VIEWPORT_PADDING,
+      maxZoom: viewport?.maxZoom ?? 11,
+    };
+  }
+
+  return {
+    padding: viewport?.padding ?? BAY_AREA_DESKTOP_VIEWPORT_PADDING,
+    maxZoom: viewport?.maxZoom ?? 11,
+  };
+}
+
+export function isLocationWithinProductRegionBounds(
+  latitude: number,
+  longitude: number,
+  bounds: MapBounds,
+): boolean {
+  const [[west, south], [east, north]] = bounds;
+
+  return (
+    longitude >= west &&
+    longitude <= east &&
+    latitude >= south &&
+    latitude <= north
+  );
+}
+
+export function locationMatchesProductRegion<T extends LocationWithCoordinates>(
+  location: T,
+  regionId: BayAreaVisibleProductRegionId,
+): boolean {
+  const resolvedRegionId = resolveProductRegionId(location);
+  if (resolvedRegionId === regionId) {
+    return true;
+  }
+
+  if (resolvedRegionId !== null) {
+    return false;
+  }
+
+  const region = findBayAreaProductRegion(regionId);
+  if (
+    !region ||
+    typeof location.latitude !== 'number' ||
+    typeof location.longitude !== 'number'
+  ) {
+    return false;
+  }
+
+  return isLocationWithinProductRegionBounds(
+    location.latitude,
+    location.longitude,
+    region.bounds,
+  );
+}
 
 export function isBayAreaBackendRegionId(
   regionId: string,
@@ -130,7 +292,9 @@ export function resolveProductRegionId(
   return normalizeVisibleMapRegionId(backendRegionId);
 }
 
-export function filterLocationsByProductRegion<T extends LocationWithRegion>(
+export function filterLocationsByProductRegion<
+  T extends LocationWithCoordinates,
+>(
   locations: T[],
   regionId: BayAreaVisibleProductRegionId | null,
 ): T[] {
@@ -138,8 +302,8 @@ export function filterLocationsByProductRegion<T extends LocationWithRegion>(
     return locations;
   }
 
-  return locations.filter(
-    (location) => resolveProductRegionId(location) === regionId,
+  return locations.filter((location) =>
+    locationMatchesProductRegion(location, regionId),
   );
 }
 

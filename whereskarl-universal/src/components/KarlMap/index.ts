@@ -1,2 +1,2 @@
 export { default as KarlMap } from './KarlMap';
-export type { KarlMapLayout, KarlMapProps } from './KarlMap.types';
+export type { KarlMapHandle, KarlMapLayout, KarlMapProps } from './KarlMap.types';

@@ -1,11 +1,15 @@
+import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { MapConditionIcon } from '@/components/KarlMap/KarlMapMarkerView';
+import { ConditionIcon } from '@/components/conditions/ConditionIcon';
 import { HomeLocationBadge } from '@/components/HomeLocationBadge';
+import { LiquidGlassSurface } from '@/components/ui/LiquidGlassSurface';
 import { Colors, Fonts, Radius, Spacing } from '@/constants/theme';
+import { LiquidGlassTokens } from '@/constants/liquidGlass';
+import { useIsNighttime } from '@/hooks/useIsNighttime';
 import { locationWeatherMetadataItems } from '@/lib/map/locationMetadata';
-import { getMarkerVisualState, getScoreBadgeColor } from '@/lib/map/markerAppearance';
-import { getMarkerConditionSymbol } from '@/lib/map/markerIcons';
+import { resolveLocationFogIntensity } from '@/lib/map/locationsDisplay';
 import { getSelectedLocationSubtitle } from '@/lib/map/mapPanelDisplay';
 import type { LocationWeather } from '@/types/weather';
 
@@ -16,9 +20,12 @@ type SelectedLocationPreviewProps = {
   onOpenDetail?: (locationId: string) => void;
   onDismiss?: () => void;
   variant?: 'card' | 'compact';
+  /** Approved phone-portrait treatment: darker navy glass + score divider. */
+  phonePortrait?: boolean;
 };
 
 const compactScoreGreen = '#22E36B';
+const cardScoreGreen = '#22E36B';
 
 export function SelectedLocationPreview({
   location,
@@ -27,7 +34,10 @@ export function SelectedLocationPreview({
   onOpenDetail,
   onDismiss,
   variant = 'card',
+  phonePortrait = false,
 }: SelectedLocationPreviewProps) {
+  const isNighttime = useIsNighttime();
+
   if (!location) {
     return null;
   }
@@ -36,12 +46,11 @@ export function SelectedLocationPreview({
   const subtitle = getSelectedLocationSubtitle(location);
   const metadata = locationWeatherMetadataItems(location).join(' • ');
   const score = Math.round(location.sunshineScore);
-  const markerVisual = isCompact
-    ? getMarkerVisualState(location, isSelected)
-    : null;
-  const scoreColor = isCompact ? compactScoreGreen : getScoreBadgeColor(score);
-  const conditionSymbol = markerVisual
-    ? getMarkerConditionSymbol(markerVisual.intensity)
+  const scoreColor = isCompact
+    ? compactScoreGreen
+    : cardScoreGreen;
+  const conditionIntensity = isCompact
+    ? resolveLocationFogIntensity(location)
     : null;
 
   const detailLink =
@@ -59,13 +68,10 @@ export function SelectedLocationPreview({
     ) : null;
 
   return (
-    <View
-      style={[
-        styles.container,
-        isSelected && styles.containerSelected,
-        isCompact && styles.containerCompact,
-        isCompact && isSelected && styles.containerCompactSelected,
-      ]}>
+    <PreviewContainer
+      isCompact={isCompact}
+      isSelected={isSelected}
+      phonePortrait={phonePortrait}>
       {onDismiss ? (
         <Pressable
           accessibilityRole="button"
@@ -83,13 +89,11 @@ export function SelectedLocationPreview({
       <View style={[styles.mainRow, isCompact && styles.mainRowCompact]}>
         {isCompact ? (
           <View style={styles.plainIconWrap}>
-            <Text
-              style={[
-                styles.plainIconSymbol,
-                markerVisual?.intensity === 'clear' && styles.plainIconClear,
-              ]}>
-              {conditionSymbol}
-            </Text>
+            <ConditionIcon
+              intensity={conditionIntensity ?? 'clear'}
+              isNighttime={isNighttime}
+              size={28}
+            />
           </View>
         ) : (
           <MapConditionIcon
@@ -118,9 +122,18 @@ export function SelectedLocationPreview({
           ) : null}
         </View>
 
-        <View style={[styles.scoreBlock, isCompact && styles.scoreBlockCompact]}>
+        <View
+          style={[
+            styles.scoreBlock,
+            isCompact && styles.scoreBlockCompact,
+            phonePortrait && styles.scoreBlockPhonePortrait,
+          ]}>
           <Text
-            style={[styles.scoreEyebrow, isCompact && styles.scoreEyebrowCompact]}>
+            style={[
+              styles.scoreEyebrow,
+              !isCompact && styles.scoreEyebrowDesktop,
+              isCompact && styles.scoreEyebrowCompact,
+            ]}>
             Clear Skies Score
           </Text>
           <Text
@@ -135,8 +148,39 @@ export function SelectedLocationPreview({
       </View>
 
       {detailLink}
-    </View>
+    </PreviewContainer>
   );
+}
+
+function PreviewContainer({
+  children,
+  isCompact,
+  isSelected,
+  phonePortrait,
+}: {
+  children: ReactNode;
+  isCompact: boolean;
+  isSelected: boolean;
+  phonePortrait: boolean;
+}) {
+  const containerStyle = [
+    styles.container,
+    isSelected && styles.containerSelected,
+    isCompact && styles.containerCompact,
+    isCompact && isSelected && styles.containerCompactSelected,
+    phonePortrait && styles.containerPhonePortrait,
+    phonePortrait && isSelected && styles.containerPhonePortraitSelected,
+  ];
+
+  if (isCompact) {
+    return (
+      <LiquidGlassSurface variant="panel" style={containerStyle}>
+        {children}
+      </LiquidGlassSurface>
+    );
+  }
+
+  return <View style={containerStyle}>{children}</View>;
 }
 
 const styles = StyleSheet.create({
@@ -154,23 +198,41 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.32,
     shadowRadius: 20,
     elevation: 10,
+    width: '100%',
   },
   containerSelected: {
     borderColor: 'rgba(242, 163, 38, 0.42)',
   },
   containerCompact: {
     borderRadius: Radius.lg,
-    paddingTop: 11,
-    paddingBottom: 11,
+    paddingTop: 10,
+    paddingBottom: 10,
     paddingHorizontal: Spacing.sm,
     gap: 0,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.24,
-    shadowRadius: 12,
-    elevation: 6,
+    backgroundColor: LiquidGlassTokens.fill,
+    borderColor: LiquidGlassTokens.border,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.16,
+    shadowRadius: 8,
+    elevation: 4,
   },
   containerCompactSelected: {
-    backgroundColor: 'rgba(6, 18, 30, 0.98)',
+    borderColor: LiquidGlassTokens.borderHighlight,
+  },
+  containerPhonePortrait: {
+    borderRadius: 16,
+    paddingTop: 14,
+    paddingBottom: 14,
+    paddingHorizontal: 14,
+    borderColor: 'rgba(160, 185, 210, 0.24)',
+    backgroundColor: 'rgba(6, 15, 27, 0.92)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.45,
+    shadowRadius: 18,
+    elevation: 10,
+  },
+  containerPhonePortraitSelected: {
     borderColor: 'rgba(242, 163, 38, 0.42)',
   },
   closeButton: {
@@ -264,13 +326,20 @@ const styles = StyleSheet.create({
     paddingLeft: Spacing.sm,
     gap: 2,
   },
+  scoreBlockPhonePortrait: {
+    borderLeftWidth: 1,
+    borderLeftColor: 'rgba(150, 175, 200, 0.16)',
+  },
   scoreEyebrow: {
     fontSize: 8,
     fontWeight: '700',
     letterSpacing: 0.9,
     textTransform: 'uppercase',
-    color: Colors.textMuted,
+    color: Colors.textSecondary,
     textAlign: 'center',
+  },
+  scoreEyebrowDesktop: {
+    color: 'rgba(242, 163, 38, 0.9)',
   },
   scoreEyebrowCompact: {
     fontSize: 9,
@@ -279,10 +348,10 @@ const styles = StyleSheet.create({
   },
   scoreValue: {
     marginTop: 2,
-    fontSize: 30,
+    fontSize: 34,
     fontWeight: '300',
-    lineHeight: 32,
-    color: Colors.gold,
+    lineHeight: 36,
+    color: cardScoreGreen,
   },
   scoreValueCompact: {
     fontSize: 28,
@@ -292,18 +361,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   plainIconWrap: {
-    width: 28,
+    width: 30,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  plainIconSymbol: {
-    fontSize: 26,
-    lineHeight: 28,
-    fontWeight: '600',
-    color: Colors.textPrimary,
-  },
-  plainIconClear: {
-    color: Colors.gold,
   },
   detailLink: {
     alignSelf: 'flex-end',

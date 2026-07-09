@@ -9,8 +9,11 @@ import {
 } from '@/lib/map/locationsDisplay';
 import type { LocationWeather } from '@/types/weather';
 
-/** Clear/sun glyph — matches SelectedLocationPreview plainIconClear. */
+/** Clear/sun glyph — matches SelectedLocationPreview and daytime markers. */
 export const CLEAR_SUN_COLOR = Colors.gold;
+
+/** Icy-blue moon used for clear nighttime conditions. */
+export const CLEAR_MOON_COLOR = '#8CB8D8';
 
 export type KarlMapMarkerLocation = Pick<
   LocationWeather,

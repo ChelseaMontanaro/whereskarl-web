@@ -2,6 +2,20 @@
  * Bay Area map framing — aligned with whereskarl-web/lib/map/config.ts.
  */
 
+import {
+  PHONE_PORTRAIT_MAP_MAX_ZOOM,
+  PHONE_PORTRAIT_MAP_VIEWPORT_PADDING,
+  PHONE_PORTRAIT_SF_CENTRAL_BAY_BOUNDS,
+} from '@/lib/map/phonePortraitMapPresentation';
+
+export {
+  PHONE_PORTRAIT_SF_CENTRAL_BAY_BOUNDS,
+  PHONE_PORTRAIT_MAP_CENTER,
+  PHONE_PORTRAIT_MAP_INITIAL_ZOOM,
+  PHONE_PORTRAIT_MAP_MAX_ZOOM,
+  PHONE_PORTRAIT_MAP_VIEWPORT_PADDING,
+} from '@/lib/map/phonePortraitMapPresentation';
+
 export const BAY_AREA_MAP_STYLE_URL =
   'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
 
@@ -50,25 +64,49 @@ export type MapViewportPadding =
     };
 
 export const BAY_AREA_MOBILE_VIEWPORT_PADDING: MapViewportPadding = {
-  top: 168,
+  top: 120,
   right: 24,
-  bottom: 132,
+  bottom: 200,
   left: 24,
 };
 
-export const BAY_AREA_DESKTOP_VIEWPORT_PADDING: MapViewportPadding = 36;
+/** Room for phone portrait region chips, fog rail, tray, and bottom nav. */
+export const BAY_AREA_PHONE_PORTRAIT_REGION_VIEWPORT_PADDING: MapViewportPadding =
+  {
+    top: 72,
+    right: 44,
+    bottom: 208,
+    left: 78,
+  };
+
+export const BAY_AREA_DESKTOP_VIEWPORT_PADDING: MapViewportPadding = {
+  top: 96,
+  right: 220,
+  bottom: 200,
+  left: 24,
+};
 
 export type KarlMapLayoutMode = 'mobile' | 'desktop';
 
 export function getMapBoundsForLayout(
   layout: KarlMapLayoutMode,
+  options?: { phonePortraitWeb?: boolean },
 ): [[number, number], [number, number]] {
+  if (options?.phonePortraitWeb) {
+    return PHONE_PORTRAIT_SF_CENTRAL_BAY_BOUNDS;
+  }
+
   return layout === 'mobile' ? BAY_AREA_MOBILE_BOUNDS : BAY_AREA_DEFAULT_BOUNDS;
 }
 
 export function getMapViewportPaddingForLayout(
   layout: KarlMapLayoutMode,
+  options?: { phonePortraitWeb?: boolean },
 ): MapViewportPadding {
+  if (options?.phonePortraitWeb) {
+    return PHONE_PORTRAIT_MAP_VIEWPORT_PADDING;
+  }
+
   return layout === 'mobile'
     ? BAY_AREA_MOBILE_VIEWPORT_PADDING
     : BAY_AREA_DESKTOP_VIEWPORT_PADDING;
@@ -76,7 +114,12 @@ export function getMapViewportPaddingForLayout(
 
 export function getMapDefaultMaxZoomForLayout(
   layout: KarlMapLayoutMode,
+  options?: { phonePortraitWeb?: boolean },
 ): number {
+  if (options?.phonePortraitWeb) {
+    return PHONE_PORTRAIT_MAP_MAX_ZOOM;
+  }
+
   return layout === 'mobile'
     ? BAY_AREA_MOBILE_DEFAULT_MAX_ZOOM
     : BAY_AREA_DESKTOP_DEFAULT_MAX_ZOOM;

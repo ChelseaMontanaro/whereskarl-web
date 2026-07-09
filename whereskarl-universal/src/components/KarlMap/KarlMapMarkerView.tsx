@@ -1,76 +1,98 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-import { Colors, Radius } from '@/constants/theme';
-import { getMarkerConditionSymbol } from '@/lib/map/markerIcons';
+import { ConditionIcon } from '@/components/conditions/ConditionIcon';
+import { Colors } from '@/constants/theme';
 import {
-  CLEAR_SUN_COLOR,
   getMarkerVisualState,
   getScoreBadgeColor,
   type KarlMapMarkerLocation,
 } from '@/lib/map/markerAppearance';
+import { getMarkerConditionSymbol } from '@/lib/map/markerIcons';
+
+const PHONE_PORTRAIT_MARKER_ICON_SIZE = 40;
 
 type KarlMapMarkerViewProps = {
   location: KarlMapMarkerLocation;
   isSelected: boolean;
   showScore?: boolean;
+  showLocationLabel?: boolean;
   size?: 'compact' | 'regular';
+  isNighttime?: boolean;
+  useSvgIcons?: boolean;
 };
 
 export function KarlMapMarkerView({
   location,
   isSelected,
   showScore = true,
+  showLocationLabel = false,
   size = 'regular',
+  isNighttime = false,
+  useSvgIcons = false,
 }: KarlMapMarkerViewProps) {
   const visual = getMarkerVisualState(location, isSelected);
   const score = Math.round(location.sunshineScore);
-  const scoreColor = getScoreBadgeColor(score);
-  const symbol = getMarkerConditionSymbol(visual.intensity);
   const isCompact = size === 'compact';
+  const scoreColor = isCompact ? Colors.gold : getScoreBadgeColor(score);
+  const symbol = getMarkerConditionSymbol(visual.intensity, isNighttime);
+  const iconSize = isCompact ? PHONE_PORTRAIT_MARKER_ICON_SIZE : 24;
 
   return (
     <View
       style={[
         styles.root,
-        { transform: [{ scale: visual.scale }] },
+        !isCompact && { transform: [{ scale: visual.scale }] },
         isCompact && styles.rootCompact,
       ]}>
       <View
         style={[
-          styles.ring,
-          isCompact ? styles.ringCompact : styles.ringRegular,
-          {
-            borderColor: visual.borderColor,
-            backgroundColor: 'rgba(3, 11, 20, 0.72)',
-          },
-          isSelected && styles.ringSelected,
+          styles.iconWrap,
+          isCompact && isSelected && styles.iconWrapSelected,
+          isCompact &&
+            isSelected && { transform: [{ scale: 1.08 }] },
         ]}>
-        <View
-          style={[
-            styles.iconSurface,
-            isCompact ? styles.iconSurfaceCompact : styles.iconSurfaceRegular,
-            { backgroundColor: `${visual.fillColor}33` },
-          ]}>
+        {useSvgIcons ? (
+          <ConditionIcon
+            intensity={visual.intensity}
+            isNighttime={isNighttime}
+            size={iconSize}
+          />
+        ) : (
           <Text
             style={[
               styles.symbol,
               isCompact ? styles.symbolCompact : styles.symbolRegular,
-              visual.intensity === 'clear' && styles.symbolClear,
+              visual.intensity === 'clear' &&
+                (isNighttime ? styles.symbolClearNight : styles.symbolClearDay),
+              isSelected && !isCompact && styles.symbolSelected,
             ]}>
             {symbol}
           </Text>
-        </View>
+        )}
       </View>
 
-      {showScore ? (
-        <View
+      {showLocationLabel ? (
+        <Text
+          numberOfLines={1}
+          ellipsizeMode="tail"
           style={[
-            styles.scoreBadge,
-            isCompact && styles.scoreBadgeCompact,
-            isSelected && styles.scoreBadgeSelected,
+            styles.locationLabel,
+            isCompact && styles.locationLabelCompact,
           ]}>
-          <Text style={[styles.scoreText, { color: scoreColor }]}>{score}</Text>
-        </View>
+          {location.name}
+        </Text>
+      ) : null}
+
+      {showScore ? (
+        <Text
+          style={[
+            styles.scoreText,
+            isCompact && styles.scoreTextCompact,
+            { color: scoreColor },
+            isSelected && !isCompact && styles.scoreTextSelected,
+          ]}>
+          {score}
+        </Text>
       ) : null}
     </View>
   );
@@ -80,34 +102,22 @@ export function MapConditionIcon({
   location,
   isSelected = false,
   size = 44,
+  isNighttime = false,
 }: {
   location: KarlMapMarkerLocation;
   isSelected?: boolean;
   size?: number;
+  isNighttime?: boolean;
 }) {
   const visual = getMarkerVisualState(location, isSelected);
-  const symbol = getMarkerConditionSymbol(visual.intensity);
 
   return (
-    <View
-      style={[
-        styles.previewIcon,
-        {
-          width: size,
-          height: size,
-          borderRadius: size / 2,
-          borderColor: visual.borderColor,
-          backgroundColor: `${visual.fillColor}22`,
-        },
-      ]}>
-      <Text
-        style={[
-          styles.previewSymbol,
-          { fontSize: size * 0.42 },
-          visual.intensity === 'clear' && styles.symbolClear,
-        ]}>
-        {symbol}
-      </Text>
+    <View style={[styles.previewIcon, { width: size, height: size }]}>
+      <ConditionIcon
+        intensity={visual.intensity}
+        isNighttime={isNighttime}
+        size={Math.round(size * 0.72)}
+      />
     </View>
   );
 }
@@ -115,93 +125,83 @@ export function MapConditionIcon({
 const styles = StyleSheet.create({
   root: {
     alignItems: 'center',
-    gap: 2,
-  },
-  rootCompact: {
     gap: 1,
   },
-  ring: {
+  rootCompact: {
+    gap: 3,
+  },
+  iconWrap: {
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.35,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 4,
   },
-  ringRegular: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-  },
-  ringCompact: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-  },
-  ringSelected: {
+  iconWrapSelected: {
     shadowColor: Colors.gold,
     shadowOpacity: 0.45,
     shadowRadius: 8,
-    borderWidth: 2.5,
-  },
-  iconSurface: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: Radius.pill,
-  },
-  iconSurfaceRegular: {
-    width: 28,
-    height: 28,
-  },
-  iconSurfaceCompact: {
-    width: 24,
-    height: 24,
+    shadowOffset: { width: 0, height: 0 },
   },
   symbol: {
     color: Colors.textPrimary,
     fontWeight: '600',
+    textAlign: 'center',
   },
   symbolRegular: {
-    fontSize: 16,
+    fontSize: 22,
+    lineHeight: 24,
   },
   symbolCompact: {
-    fontSize: 14,
+    fontSize: 20,
+    lineHeight: 22,
   },
-  symbolClear: {
-    color: CLEAR_SUN_COLOR,
+  symbolClearDay: {
+    color: Colors.gold,
   },
-  scoreBadge: {
-    minWidth: 24,
-    paddingHorizontal: 5,
-    paddingVertical: 1,
-    borderRadius: Radius.pill,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
-    backgroundColor: 'rgba(3, 11, 20, 0.88)',
-    alignItems: 'center',
+  symbolClearNight: {
+    color: '#8CB8D8',
   },
-  scoreBadgeCompact: {
-    minWidth: 22,
-    paddingHorizontal: 4,
-  },
-  scoreBadgeSelected: {
-    borderColor: 'rgba(242, 163, 38, 0.35)',
-    backgroundColor: 'rgba(242, 163, 38, 0.1)',
+  symbolSelected: {
+    textShadowColor: 'rgba(242, 163, 38, 0.4)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 6,
   },
   scoreText: {
     fontSize: 11,
     fontWeight: '700',
     letterSpacing: 0.2,
+    lineHeight: 13,
+    textAlign: 'center',
+    textShadowColor: 'rgba(0, 0, 0, 0.65)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+  },
+  scoreTextCompact: {
+    fontSize: 12,
+    fontWeight: '700',
+    lineHeight: 14,
+    textShadowRadius: 0,
+    textShadowColor: 'transparent',
+  },
+  locationLabel: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '600',
+    lineHeight: 13,
+    maxWidth: 112,
+    textAlign: 'center',
+    textShadowColor: 'rgba(0, 0, 0, 0.9)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+  },
+  locationLabelCompact: {
+    fontSize: 11,
+    lineHeight: 13,
+    maxWidth: 112,
+  },
+  scoreTextSelected: {
+    color: Colors.gold,
   },
   previewIcon: {
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
-  },
-  previewSymbol: {
-    color: Colors.textPrimary,
-    fontWeight: '600',
   },
 });
