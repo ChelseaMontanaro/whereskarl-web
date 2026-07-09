@@ -180,15 +180,8 @@ function useMapViewState(): MapViewModel {
   );
 
   const bestRightNowItems = useMemo(
-    () =>
-      mapBestRightNowTrayItems(
-        locations,
-        intensityFilter,
-        mapQuery.activeRegionId,
-        null,
-        4,
-      ),
-    [intensityFilter, locations, mapQuery.activeRegionId],
+    () => mapBestRightNowTrayItems(locations, intensityFilter, null, 4),
+    [intensityFilter, locations],
   );
 
   const handleSelectLocation = useCallback(
@@ -325,14 +318,9 @@ function MobileMapView({ state }: { state: MapViewModel }) {
     () =>
       phonePortraitBestRightNowTrayItems(
         locations,
-        effectiveRegionId,
         selectedLocation?.id ?? null,
       ),
-    [
-      effectiveRegionId,
-      locations,
-      selectedLocation?.id,
-    ],
+    [locations, selectedLocation?.id],
   );
 
   const featuredPhoneLocation = useMemo(() => {

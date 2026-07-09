@@ -69,6 +69,8 @@ const multiRegionLocations = {
   ],
 };
 
+const bayWideTrayIds = ["san-jose", "palo-alto", "ocean-beach", "tiburon"];
+
 function getTrayLocationIds() {
   return screen
     .getAllByRole("button", { name: /Select .+ on map$/ })
@@ -122,48 +124,27 @@ describe("MapView region tray behavior", () => {
   });
 
   it.each([
-    {
-      region: "san-francisco",
-      chipLabel: "SF",
-      expectedIds: ["ocean-beach", "presidio"],
-      unexpectedId: "san-jose",
-    },
-    {
-      region: "north-bay",
-      chipLabel: "North Bay",
-      expectedIds: ["tiburon", "sausalito"],
-      unexpectedId: "oakland",
-    },
-    {
-      region: "east-bay",
-      chipLabel: "East Bay",
-      expectedIds: ["oakland", "berkeley"],
-      unexpectedId: "tiburon",
-    },
-    {
-      region: "south-bay",
-      chipLabel: "South Bay",
-      expectedIds: ["san-jose", "palo-alto"],
-      unexpectedId: "tiburon",
-    },
-  ] as const)(
-    "shows $chipLabel location cards in the tray when $region is active",
-    async ({ region, expectedIds, unexpectedId }) => {
+  { region: "san-francisco", chipLabel: "SF" },
+  { region: "north-bay", chipLabel: "North Bay" },
+  { region: "east-bay", chipLabel: "East Bay" },
+  { region: "south-bay", chipLabel: "South Bay" },
+] as const)(
+    "keeps Best Right Now bay-wide when $chipLabel is active",
+    async ({ region }) => {
       useSearchParamsMock.mockReturnValue(new URLSearchParams(`region=${region}`));
 
       renderMap();
 
       await screen.findByLabelText("Best Right Now");
-      expect(getTrayLocationIds()).toEqual(expectedIds);
-      expect(getTrayLocationIds()).not.toContain(unexpectedId);
+      expect(getTrayLocationIds()).toEqual(bayWideTrayIds);
     },
   );
 
-  it("does not empty the tray when a region with valid locations is selected", async () => {
+  it("keeps the bay-wide tray when switching regions", async () => {
     const { rerenderMap } = renderMap();
 
     await screen.findByLabelText("Best Right Now");
-    expect(getTrayLocationIds().length).toBeGreaterThan(0);
+    expect(getTrayLocationIds()).toEqual(bayWideTrayIds);
 
     fireEvent.click(screen.getByRole("button", { name: "North Bay" }));
     expect(replaceMock).toHaveBeenCalledWith("/map?region=north-bay", {
@@ -173,8 +154,8 @@ describe("MapView region tray behavior", () => {
     useSearchParamsMock.mockReturnValue(new URLSearchParams("region=north-bay"));
     rerenderMap();
 
-    await screen.findByRole("button", { name: "Select Tiburon on map" });
-    expect(getTrayLocationIds()).toEqual(["tiburon", "sausalito"]);
+    await screen.findByRole("button", { name: "Select San Jose on map" });
+    expect(getTrayLocationIds()).toEqual(bayWideTrayIds);
   });
 
   it("does not remove a location from the tray after it is selected", async () => {
@@ -194,7 +175,7 @@ describe("MapView region tray behavior", () => {
       useMinWidthMock.mockReturnValue(true);
     });
 
-    it("scopes the tray to the active region on desktop", async () => {
+    it("keeps Best Right Now bay-wide on desktop when a region is active", async () => {
       useSearchParamsMock.mockReturnValue(
         new URLSearchParams("region=south-bay"),
       );
@@ -202,8 +183,8 @@ describe("MapView region tray behavior", () => {
       renderMap();
 
       await screen.findByLabelText("Best Right Now");
-      expect(getTrayLocationIds()).toEqual(["san-jose", "palo-alto"]);
-      expect(getTrayLocationIds()).not.toContain("tiburon");
+      expect(getTrayLocationIds()).toEqual(bayWideTrayIds);
+      expect(getTrayLocationIds()).toContain("tiburon");
     });
   });
 
@@ -212,7 +193,7 @@ describe("MapView region tray behavior", () => {
       usePhonePortraitMock.mockReturnValue(true);
     });
 
-    it("preserves the approved compact controls while scoping the tray to the region", async () => {
+    it("keeps Best Right Now bay-wide when SF is selected", async () => {
       useSearchParamsMock.mockReturnValue(
         new URLSearchParams("region=san-francisco"),
       );
@@ -220,18 +201,38 @@ describe("MapView region tray behavior", () => {
       const { container } = renderMap();
 
       expect(
-        await screen.findByRole("heading", { name: "Bay Area conditions" }),
+        await screen.findByRole("heading", { name: "Karl Around the Bay" }),
       ).toBeInTheDocument();
-      expect(screen.getByText("Karl around the Bay")).toBeInTheDocument();
-      expect(
-        screen.queryByText("Explore live fog & clear skies around the Bay."),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText("Explore live fog & clear skies around the Bay.")).not.toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Karl Territory" })).toBeInTheDocument();
       expect(container.querySelector(".grid.grid-cols-2")).toBeNull();
       expect(container.querySelector(".flex.flex-col.gap-1")).toBeTruthy();
 
       await screen.findByLabelText("Best Right Now");
-      expect(getTrayLocationIds()).toEqual(["ocean-beach", "presidio"]);
+      expect(getTrayLocationIds()).toEqual(bayWideTrayIds);
+    });
+
+    it("shows the empty state only when no bay-wide location scores at least 70", async () => {
+      vi.spyOn(weatherApi, "getLocations").mockResolvedValue({
+        locations: [
+          createRegionLocation("ocean-beach", "Ocean Beach", "san-francisco", 45),
+          createRegionLocation("presidio", "Presidio", "san-francisco", 52),
+          createRegionLocation("tiburon", "Tiburon", "north-bay", 68),
+        ],
+      });
+
+      useSearchParamsMock.mockReturnValue(
+        new URLSearchParams("region=san-francisco"),
+      );
+
+      renderMap();
+
+      expect(
+        await screen.findByText("No clear spots above 70 right now"),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /Select .+ on map$/ }),
+      ).not.toBeInTheDocument();
     });
   });
 });

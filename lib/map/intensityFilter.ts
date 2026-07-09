@@ -55,11 +55,10 @@ export function intensityFilterTrayItems(
     }));
 }
 
-/** Score-ranked tray items for the map, scoped to the active region and intensity filter. */
+/** Score-ranked tray items for the map across the full Bay Area. */
 export function mapBestRightNowTrayItems(
   locations: LocationWeather[],
   intensityFilter: FogIntensity | null,
-  regionId: BayAreaProductRegionId | null,
   excludeLocationId: string | null = null,
   limit = 4,
 ): BestRightNowItem[] {
@@ -69,12 +68,11 @@ export function mapBestRightNowTrayItems(
       "clear",
       excludeLocationId,
       limit,
-      regionId,
+      null,
     );
   }
 
-  const scopedLocations = filterLocationsByProductRegion(locations, regionId);
-  return bestRightNowLocationItems(scopedLocations, excludeLocationId, limit);
+  return bestRightNowLocationItems(locations, excludeLocationId, limit);
 }
 
 export const PHONE_PORTRAIT_BEST_RIGHT_NOW_MAX_ITEMS = 4;
@@ -85,14 +83,12 @@ export const PHONE_PORTRAIT_BEST_RIGHT_NOW_EMPTY_MESSAGE =
 /** Phone-portrait tray: only strong clear-sky scores, ranked highest first. */
 export function phonePortraitBestRightNowTrayItems(
   locations: LocationWeather[],
-  regionId: BayAreaProductRegionId | null,
   excludeLocationId: string | null = null,
   limit = PHONE_PORTRAIT_BEST_RIGHT_NOW_MAX_ITEMS,
 ): BestRightNowItem[] {
   const excludedId = excludeLocationId?.trim().toLowerCase() ?? null;
-  const scopedLocations = filterLocationsByProductRegion(locations, regionId);
 
-  return scopedLocations
+  return locations
     .filter((location) => {
       if (excludedId && location.id.trim().toLowerCase() === excludedId) {
         return false;

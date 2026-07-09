@@ -221,7 +221,7 @@ describe("MapView desktop", () => {
       },
     );
 
-    it("keeps the Best Right Now tray visible when Clear and a region filter are active", async () => {
+    it("keeps the Best Right Now tray visible when Clear is active with a region selected", async () => {
       useSearchParamsMock.mockReturnValue(new URLSearchParams("region=north-bay"));
 
       renderDesktopMap();
@@ -233,14 +233,11 @@ describe("MapView desktop", () => {
       ).toBeInTheDocument();
       expect(screen.queryByLabelText("Clear Locations")).not.toBeInTheDocument();
       expect(
+        screen.getByRole("button", { name: "Select San Jose on map" }),
+      ).toBeInTheDocument();
+      expect(
         screen.getByRole("button", { name: "Select Tiburon on map" }),
       ).toBeInTheDocument();
-      expect(
-        screen.getByRole("button", { name: "Select Sausalito on map" }),
-      ).toBeInTheDocument();
-      expect(
-        screen.queryByRole("button", { name: "Select San Jose on map" }),
-      ).not.toBeInTheDocument();
     });
 
     it("hides the tray for fog filters even when a region filter is active", async () => {

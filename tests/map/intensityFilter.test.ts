@@ -192,20 +192,20 @@ describe("mapBestRightNowTrayItems", () => {
     },
   ];
 
-  it("scopes Best Right Now items to the active region", () => {
+  it("returns bay-wide Best Right Now items regardless of region", () => {
     expect(
-      mapBestRightNowTrayItems(locations, null, "north-bay").map(
+      mapBestRightNowTrayItems(locations, null, null, 4).map(
         (item) => item.locationId,
       ),
-    ).toEqual(["tiburon"]);
+    ).toEqual(["san-jose", "ocean-beach", "tiburon", "oakland"]);
   });
 
-  it("scopes clear-filter tray items to the active region", () => {
+  it("returns bay-wide clear-filter tray items regardless of region", () => {
     expect(
-      mapBestRightNowTrayItems(locations, "clear", "san-francisco").map(
+      mapBestRightNowTrayItems(locations, "clear", null, 4).map(
         (item) => item.locationId,
       ),
-    ).toEqual(["ocean-beach"]);
+    ).toEqual(["san-jose", "ocean-beach", "tiburon", "oakland"]);
   });
 });
 
@@ -263,7 +263,7 @@ describe("phonePortraitBestRightNowTrayItems", () => {
 
   it("returns only score-ranked locations with sunshine score at least 70", () => {
     expect(
-      phonePortraitBestRightNowTrayItems(locations, null).map((item) => ({
+      phonePortraitBestRightNowTrayItems(locations).map((item) => ({
         id: item.locationId,
         score: item.score,
       })),
@@ -276,11 +276,15 @@ describe("phonePortraitBestRightNowTrayItems", () => {
   });
 
   it("does not backfill with low-score locations when fewer than three qualify", () => {
+    const northBayOnlyQualifying = locations.filter(
+      (location) => location.id !== "oakland" && location.id !== "presidio",
+    );
+
     expect(
-      phonePortraitBestRightNowTrayItems(locations, "north-bay").map(
+      phonePortraitBestRightNowTrayItems(northBayOnlyQualifying).map(
         (item) => item.locationId,
       ),
-    ).toEqual(["tiburon"]);
+    ).toEqual(["ocean-beach", "tiburon"]);
   });
 });
 
