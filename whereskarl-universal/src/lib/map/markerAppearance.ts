@@ -9,6 +9,9 @@ import {
 } from '@/lib/map/locationsDisplay';
 import type { LocationWeather } from '@/types/weather';
 
+/** Clear/sun glyph — matches SelectedLocationPreview plainIconClear. */
+export const CLEAR_SUN_COLOR = Colors.gold;
+
 export type KarlMapMarkerLocation = Pick<
   LocationWeather,
   'id' | 'name' | 'latitude' | 'longitude' | 'fogScore' | 'sunshineScore' | 'status'

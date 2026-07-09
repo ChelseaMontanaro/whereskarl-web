@@ -42,7 +42,7 @@
 }
 
 .karl-universal-map-marker--clear {
-  color: rgb(242 163 38);
+  color: var(--clear-sun-color, rgb(242 163 38));
 }
 
 .karl-universal-map-marker--portable.karl-universal-map-marker--clear {

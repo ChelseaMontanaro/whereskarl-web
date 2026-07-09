@@ -2,11 +2,12 @@
  * Map marker icon markup — aligned with whereskarl-web/lib/map/markerIcons.ts.
  */
 
+import { CLEAR_SUN_COLOR } from '@/lib/map/markerAppearance';
 import type { FogIntensity } from '@/lib/map/locationsDisplay';
 
 const SUN_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" class="karl-universal-map-marker__svg">
-  <circle cx="12" cy="12" r="4.1" fill="currentColor" opacity="0.95" />
-  <path d="M12 4.25v2.1M12 17.65v2.1M4.25 12h2.1M17.65 12h2.1M6.55 6.55l1.48 1.48M16.97 16.97l1.48 1.48M6.55 17.45l1.48-1.48M16.97 7.03l1.48-1.48" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" opacity="0.92" />
+  <circle cx="12" cy="12" r="4.1" fill="${CLEAR_SUN_COLOR}" />
+  <path d="M12 4.25v2.1M12 17.65v2.1M4.25 12h2.1M17.65 12h2.1M6.55 6.55l1.48 1.48M16.97 16.97l1.48 1.48M6.55 17.45l1.48-1.48M16.97 7.03l1.48-1.48" stroke="${CLEAR_SUN_COLOR}" stroke-width="1.35" stroke-linecap="round" />
 </svg>`;
 
 const LIGHT_FOG_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" class="karl-universal-map-marker__svg">

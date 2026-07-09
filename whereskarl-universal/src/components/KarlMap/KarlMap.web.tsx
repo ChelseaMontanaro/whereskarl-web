@@ -7,6 +7,7 @@ import { KarlMapOverlayState } from '@/components/KarlMap/KarlMapOverlayState';
 import type { KarlMapProps } from '@/components/KarlMap/KarlMap.types';
 import { Colors } from '@/constants/theme';
 import {
+  CLEAR_SUN_COLOR,
   getMarkerAccessibilityLabel,
   getMarkerVisualState,
   getScoreBadgeColor,
@@ -64,6 +65,9 @@ function createMarkerElement(
   button.style.setProperty('--marker-border', visual.borderColor);
   button.style.setProperty('--marker-scale', String(visual.scale));
   button.style.setProperty('--score-color', scoreColor);
+  if (visual.intensity === 'clear') {
+    button.style.setProperty('--clear-sun-color', CLEAR_SUN_COLOR);
+  }
   button.dataset.locationId = location.id;
   button.setAttribute(
     'aria-label',

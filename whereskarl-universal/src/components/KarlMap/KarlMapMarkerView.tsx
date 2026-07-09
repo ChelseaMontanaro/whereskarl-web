@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Colors, Radius } from '@/constants/theme';
 import { getMarkerConditionSymbol } from '@/lib/map/markerIcons';
 import {
+  CLEAR_SUN_COLOR,
   getMarkerVisualState,
   getScoreBadgeColor,
   type KarlMapMarkerLocation,
@@ -169,7 +170,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   symbolClear: {
-    color: Colors.gold,
+    color: CLEAR_SUN_COLOR,
   },
   scoreBadge: {
     minWidth: 24,
