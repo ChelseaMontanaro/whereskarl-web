@@ -12,6 +12,7 @@ import {
 
 import { MapFogLegend } from "@/components/map/MapFogLegend";
 import { MapLayerControls } from "@/components/map/MapLayerControls";
+import { useIsNighttime } from "@/lib/hooks/useIsNighttime";
 import {
   BAY_AREA_CENTER,
   BAY_AREA_DEFAULT_MAX_ZOOM,
@@ -114,6 +115,7 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
     const isImmersive = layout === "immersive";
     const isFullBleed = isDesktop || isImmersive;
     const isPhonePortraitWeb = immersiveOverlayProfile === "phone-portrait";
+    const isNighttime = useIsNighttime();
 
     onSelectRef.current = onSelectLocation;
     phonePortraitWebRef.current = isPhonePortraitWeb;
@@ -378,6 +380,7 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
                 isSelected: location.id === selectedLocationId,
                 intensityFilter,
                 showLocationLabel,
+                isNighttime,
                 onSelect: (locationId) => onSelectRef.current(locationId),
               })
             : createMapMarkerElement({
@@ -461,6 +464,7 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
       immersiveOverlayProfile,
       intensityFilter,
       isPhonePortraitWeb,
+      isNighttime,
       layout,
       locations,
       mapReady,

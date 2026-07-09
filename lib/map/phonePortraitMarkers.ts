@@ -37,6 +37,7 @@ export function createPhonePortraitMapMarkerElement(input: {
   isSelected: boolean;
   intensityFilter?: FogIntensity | null;
   showLocationLabel: boolean;
+  isNighttime?: boolean;
   onSelect: (locationId: string) => void;
 }): HTMLDivElement {
   const intensity = resolveMarkerDisplayIntensity(input.location);
@@ -79,7 +80,9 @@ export function createPhonePortraitMapMarkerElement(input: {
     mapMarkerAriaLabel(input.location, input.isSelected),
   );
   button.setAttribute("aria-pressed", input.isSelected ? "true" : "false");
-  button.innerHTML = getPhonePortraitMarkerIconMarkup(intensity);
+  button.innerHTML = getPhonePortraitMarkerIconMarkup(intensity, {
+    isNighttime: input.isNighttime,
+  });
   button.addEventListener("click", (event) => {
     event.stopPropagation();
     input.onSelect(input.location.id);

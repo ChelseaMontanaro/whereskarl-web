@@ -3,6 +3,7 @@
 import type { FogIntensity } from "@/lib/map/conditions";
 import { getFogIntensityLabel } from "@/lib/map/conditions";
 import { getPhonePortraitConditionIconDataUri } from "@/lib/map/phonePortraitConditionIcons";
+import { useIsNighttime } from "@/lib/hooks/useIsNighttime";
 
 const RAIL_INTENSITIES: FogIntensity[] = [
   "clear",
@@ -20,6 +21,8 @@ export function MapPhonePortraitFogRail({
   activeIntensity,
   onSelectIntensity,
 }: MapPhonePortraitFogRailProps) {
+  const isNighttime = useIsNighttime();
+
   return (
     <aside
       aria-label="Fog intensity filter"
@@ -50,7 +53,9 @@ export function MapPhonePortraitFogRail({
               }`}
             >
               <img
-                src={getPhonePortraitConditionIconDataUri(intensity)}
+                src={getPhonePortraitConditionIconDataUri(intensity, {
+                  isNighttime,
+                })}
                 alt=""
                 width={28}
                 height={28}

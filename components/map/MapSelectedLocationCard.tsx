@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { MapLocationConditionIcon } from "@/components/map/MapLocationConditionIcon";
+import { MapPhonePortraitConditionIcon } from "@/components/map/MapPhonePortraitConditionIcon";
 import { desktopGlassCardClass } from "@/components/home/desktopGlass";
 import {
   resolveLocationFogIntensity,
@@ -115,7 +116,14 @@ export function MapSelectedLocationCard({
       ) : null}
 
       <div className="flex items-center gap-3 pr-5">
-        <MapLocationConditionIcon location={location} />
+        {phonePortrait ? (
+          <MapPhonePortraitConditionIcon
+            intensity={resolveLocationFogIntensity(location)}
+            className="h-7 w-7 shrink-0"
+          />
+        ) : (
+          <MapLocationConditionIcon location={location} />
+        )}
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">

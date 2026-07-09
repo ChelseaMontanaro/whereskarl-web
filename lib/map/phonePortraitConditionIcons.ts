@@ -4,7 +4,26 @@
  */
 
 import type { FogIntensity } from "@/lib/map/conditions";
+import {
+  resolvePhonePortraitIsNighttime,
+  type PhonePortraitPresentationOptions,
+} from "@/lib/map/phonePortraitPresentation";
 
+/** Daytime clear: warm sun with a small cloud. */
+const SUN_CLOUD_DETAILED_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" aria-hidden="true" fill="none">
+  <circle cx="34.5" cy="13.5" r="8.2" fill="#F2A326" opacity="0.95" />
+  <circle cx="34.5" cy="13.5" r="6.2" fill="#F6C15A" opacity="0.88" />
+  <path d="M34.5 3.8v3.2M34.5 20v3.2M24.2 13.5h3.2M42.8 13.5h3.2M27.4 6.4l2.3 2.3M39.3 18.3l2.3 2.3M27.4 20.6l2.3-2.3M39.3 8.7l2.3-2.3" stroke="#F2A326" stroke-width="1.8" stroke-linecap="round" opacity="0.9" />
+  <g>
+    <rect x="6.8" y="29.8" width="21.5" height="7.4" rx="3.7" fill="#E4EEF7" />
+    <circle cx="11.2" cy="31.6" r="5" fill="#EDF4FA" />
+    <circle cx="18.2" cy="28.4" r="6.1" fill="#FAFDFF" />
+    <circle cx="24.8" cy="31.8" r="4.6" fill="#D5E5F2" />
+    <circle cx="16.2" cy="27.2" r="3.8" fill="#FFFFFF" opacity="0.85" />
+  </g>
+</svg>`;
+
+/** Nighttime clear: icy-blue crescent moon with a soft cloud. */
 const MOON_CLOUD_DETAILED_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" aria-hidden="true" fill="none">
   <path d="M36.5 8.2A15.6 15.6 0 1 1 15.9 29a12.6 12.6 0 0 0 20.6-20.8Z" fill="#9FC4E6" opacity="0.92" transform="rotate(-14 26 20)" />
   <path d="M34.2 10.4A13.2 13.2 0 0 1 18 27.2a12.6 12.6 0 0 0 16.2-16.8Z" fill="#C4DDF2" opacity="0.5" transform="rotate(-14 26 20)" />
@@ -56,10 +75,15 @@ const KARL_TERRITORY_DETAILED_ICON = `<svg xmlns="http://www.w3.org/2000/svg" vi
   <path d="M13.5 41c2.5 0 3.8-1.3 5-2.4 1.2 1.1 2.5 2.4 5 2.4s3.8-1.3 5-2.4c1.2 1.1 2.5 2.4 5 2.4" stroke="#8797A6" stroke-width="1.8" stroke-linecap="round" opacity="0.5" />
 </svg>`;
 
-export function getPhonePortraitConditionIconSvg(intensity: FogIntensity): string {
+export function getPhonePortraitConditionIconSvg(
+  intensity: FogIntensity,
+  options: PhonePortraitPresentationOptions = {},
+): string {
   switch (intensity) {
     case "clear":
-      return MOON_CLOUD_DETAILED_ICON;
+      return resolvePhonePortraitIsNighttime(options)
+        ? MOON_CLOUD_DETAILED_ICON
+        : SUN_CLOUD_DETAILED_ICON;
     case "lightFog":
       return LIGHT_FOG_DETAILED_ICON;
     case "foggy":
@@ -71,14 +95,18 @@ export function getPhonePortraitConditionIconSvg(intensity: FogIntensity): strin
 
 export function getPhonePortraitConditionIconDataUri(
   intensity: FogIntensity,
+  options: PhonePortraitPresentationOptions = {},
 ): string {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
-    getPhonePortraitConditionIconSvg(intensity),
+    getPhonePortraitConditionIconSvg(intensity, options),
   )}`;
 }
 
-export function getPhonePortraitMarkerIconMarkup(intensity: FogIntensity): string {
-  return getPhonePortraitConditionIconSvg(intensity).replace(
+export function getPhonePortraitMarkerIconMarkup(
+  intensity: FogIntensity,
+  options: PhonePortraitPresentationOptions = {},
+): string {
+  return getPhonePortraitConditionIconSvg(intensity, options).replace(
     '<svg xmlns="http://www.w3.org/2000/svg"',
     '<svg class="karl-universal-map-marker__svg" xmlns="http://www.w3.org/2000/svg"',
   );

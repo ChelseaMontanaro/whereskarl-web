@@ -40,12 +40,12 @@ const cinematicSatellitePaint = {
   "raster-hue-rotate": 14,
 } as const;
 
-/** Approved phone-portrait treatment: deep navy, high contrast, desaturated. */
+/** Phone-portrait treatment: deep navy cinematic look with readable coastline/terrain. */
 const phonePortraitCinematicSatellitePaint = {
-  "raster-brightness-min": 0.02,
-  "raster-brightness-max": 0.42,
-  "raster-contrast": 0.46,
-  "raster-saturation": -0.5,
+  "raster-brightness-min": 0.04,
+  "raster-brightness-max": 0.52,
+  "raster-contrast": 0.42,
+  "raster-saturation": -0.44,
   "raster-hue-rotate": 195,
 } as const;
 
