@@ -11,6 +11,7 @@ type MapBestRightNowTrayProps = {
   isLoading?: boolean;
   title?: string;
   isPhonePortrait?: boolean;
+  emptyMessage?: string;
 };
 
 export function MapBestRightNowTray({
@@ -20,6 +21,7 @@ export function MapBestRightNowTray({
   isLoading = false,
   title = "Best Right Now",
   isPhonePortrait = false,
+  emptyMessage,
 }: MapBestRightNowTrayProps) {
   const panelClass = isPhonePortrait
     ? "rounded-2xl border border-[rgb(160_185_210/0.24)] bg-[rgb(6_15_27/0.92)] px-2.5 py-1.5 shadow-[0_10px_18px_rgb(0_0_0/0.45)]"
@@ -34,6 +36,25 @@ export function MapBestRightNowTray({
   }
 
   if (items.length === 0) {
+    if (isPhonePortrait && emptyMessage) {
+      return (
+        <section aria-label={title} className={`${panelClass} max-w-full`}>
+          <p
+            className={`font-bold uppercase text-karl-gold/90 ${
+              isPhonePortrait
+                ? "px-0.5 text-[0.625rem] tracking-[0.08em]"
+                : "px-1 text-[0.625rem] tracking-[0.16em] text-white/45"
+            }`}
+          >
+            {title}
+          </p>
+          <p className="mt-1 px-0.5 text-[0.6875rem] leading-snug text-white/55">
+            {emptyMessage}
+          </p>
+        </section>
+      );
+    }
+
     return null;
   }
 

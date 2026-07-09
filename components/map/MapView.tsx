@@ -25,6 +25,8 @@ import type { FogIntensity } from "@/lib/map/conditions";
 import { findBayAreaProductRegion, isBayAreaProductRegionId } from "@/lib/map/config";
 import {
   mapBestRightNowTrayItems,
+  PHONE_PORTRAIT_BEST_RIGHT_NOW_EMPTY_MESSAGE,
+  phonePortraitBestRightNowTrayItems,
   shouldShowDesktopBestRightNowTray,
   toggleIntensityFilter,
 } from "@/lib/map/intensityFilter";
@@ -321,16 +323,13 @@ function MobileMapView({ state }: { state: MapViewModel }) {
 
   const phonePortraitBestRightNowItems = useMemo(
     () =>
-      mapBestRightNowTrayItems(
+      phonePortraitBestRightNowTrayItems(
         locations,
-        intensityFilter,
         effectiveRegionId,
         selectedLocation?.id ?? null,
-        4,
       ),
     [
       effectiveRegionId,
-      intensityFilter,
       locations,
       selectedLocation?.id,
     ],
@@ -470,6 +469,11 @@ function MobileMapView({ state }: { state: MapViewModel }) {
               onSelectLocation={handleSelectLocation}
               isLoading={locationsQuery.isLoading}
               isPhonePortrait={isPhonePortrait}
+              emptyMessage={
+                isPhonePortrait
+                  ? PHONE_PORTRAIT_BEST_RIGHT_NOW_EMPTY_MESSAGE
+                  : undefined
+              }
             />
           ) : null}
 

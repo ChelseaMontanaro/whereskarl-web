@@ -5,6 +5,7 @@ import {
   boundsForIntensityLocations,
   intensityFilterTrayItems,
   mapBestRightNowTrayItems,
+  phonePortraitBestRightNowTrayItems,
   shouldShowDesktopBestRightNowTray,
   toggleIntensityFilter,
 } from "@/lib/map/intensityFilter";
@@ -205,6 +206,81 @@ describe("mapBestRightNowTrayItems", () => {
         (item) => item.locationId,
       ),
     ).toEqual(["ocean-beach"]);
+  });
+});
+
+describe("phonePortraitBestRightNowTrayItems", () => {
+  const locations: LocationWeather[] = [
+    {
+      ...baseLocation,
+      id: "ocean-beach",
+      name: "Ocean Beach",
+      region: "san-francisco",
+      fogScore: 20,
+      sunshineScore: 88,
+    },
+    {
+      ...baseLocation,
+      id: "presidio",
+      name: "Presidio",
+      region: "san-francisco",
+      fogScore: 20,
+      sunshineScore: 85,
+    },
+    {
+      ...baseLocation,
+      id: "tiburon",
+      name: "Tiburon",
+      region: "north-bay",
+      fogScore: 26,
+      sunshineScore: 82,
+    },
+    {
+      ...baseLocation,
+      id: "sausalito",
+      name: "Sausalito",
+      region: "north-bay",
+      fogScore: 30,
+      sunshineScore: 48,
+    },
+    {
+      ...baseLocation,
+      id: "oakland",
+      name: "Oakland",
+      region: "east-bay",
+      fogScore: 30,
+      sunshineScore: 72,
+    },
+    {
+      ...baseLocation,
+      id: "foggy-spot",
+      name: "Foggy Spot",
+      region: "san-francisco",
+      fogScore: 10,
+      sunshineScore: 45,
+    },
+  ];
+
+  it("returns only score-ranked locations with sunshine score at least 70", () => {
+    expect(
+      phonePortraitBestRightNowTrayItems(locations, null).map((item) => ({
+        id: item.locationId,
+        score: item.score,
+      })),
+    ).toEqual([
+      { id: "ocean-beach", score: 88 },
+      { id: "presidio", score: 85 },
+      { id: "tiburon", score: 82 },
+      { id: "oakland", score: 72 },
+    ]);
+  });
+
+  it("does not backfill with low-score locations when fewer than three qualify", () => {
+    expect(
+      phonePortraitBestRightNowTrayItems(locations, "north-bay").map(
+        (item) => item.locationId,
+      ),
+    ).toEqual(["tiburon"]);
   });
 });
 

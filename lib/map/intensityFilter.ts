@@ -1,5 +1,6 @@
 import type { MapBounds } from "@/lib/map/config";
 import {
+  CLEAR_INTENSITY_SUNSHINE_THRESHOLD,
   getBestRightNowScoreLabel,
   getFogIntensityLabel,
   locationMatchesFogIntensityFilter,
@@ -74,6 +75,49 @@ export function mapBestRightNowTrayItems(
 
   const scopedLocations = filterLocationsByProductRegion(locations, regionId);
   return bestRightNowLocationItems(scopedLocations, excludeLocationId, limit);
+}
+
+export const PHONE_PORTRAIT_BEST_RIGHT_NOW_MAX_ITEMS = 4;
+
+export const PHONE_PORTRAIT_BEST_RIGHT_NOW_EMPTY_MESSAGE =
+  "No clear spots above 70 right now";
+
+/** Phone-portrait tray: only strong clear-sky scores, ranked highest first. */
+export function phonePortraitBestRightNowTrayItems(
+  locations: LocationWeather[],
+  regionId: BayAreaProductRegionId | null,
+  excludeLocationId: string | null = null,
+  limit = PHONE_PORTRAIT_BEST_RIGHT_NOW_MAX_ITEMS,
+): BestRightNowItem[] {
+  const excludedId = excludeLocationId?.trim().toLowerCase() ?? null;
+  const scopedLocations = filterLocationsByProductRegion(locations, regionId);
+
+  return scopedLocations
+    .filter((location) => {
+      if (excludedId && location.id.trim().toLowerCase() === excludedId) {
+        return false;
+      }
+
+      return (
+        typeof location.sunshineScore === "number" &&
+        Number.isFinite(location.sunshineScore) &&
+        location.sunshineScore >= CLEAR_INTENSITY_SUNSHINE_THRESHOLD
+      );
+    })
+    .sort((left, right) => right.sunshineScore - left.sunshineScore)
+    .slice(0, limit)
+    .map((location, index) => ({
+      locationId: location.id,
+      locationName: location.name,
+      detail:
+        location.status?.trim() ||
+        location.karlReason?.trim() ||
+        "Clear skies",
+      score: location.sunshineScore,
+      scoreLabel: getBestRightNowScoreLabel(location),
+      rank: index + 1,
+      isDegraded: isLocationDataDegraded(location.dataStatus),
+    }));
 }
 
 export function intensityFilterTrayTitle(intensity: FogIntensity): string {
