@@ -4,8 +4,9 @@ import { MapConditionIcon } from '@/components/KarlMap/KarlMapMarkerView';
 import { HomeLocationBadge } from '@/components/HomeLocationBadge';
 import { Colors, Fonts, Radius, Spacing } from '@/constants/theme';
 import { locationWeatherMetadataItems } from '@/lib/map/locationMetadata';
+import { getMarkerVisualState, getScoreBadgeColor } from '@/lib/map/markerAppearance';
+import { getMarkerConditionSymbol } from '@/lib/map/markerIcons';
 import { getSelectedLocationSubtitle } from '@/lib/map/mapPanelDisplay';
-import { getScoreBadgeColor } from '@/lib/map/markerAppearance';
 import type { LocationWeather } from '@/types/weather';
 
 type SelectedLocationPreviewProps = {
@@ -17,7 +18,7 @@ type SelectedLocationPreviewProps = {
   variant?: 'card' | 'compact';
 };
 
-const detailLinkBlue = 'rgba(96, 165, 250, 0.95)';
+const compactScoreGreen = '#4ADE80';
 
 export function SelectedLocationPreview({
   location,
@@ -35,27 +36,27 @@ export function SelectedLocationPreview({
   const subtitle = getSelectedLocationSubtitle(location);
   const metadata = locationWeatherMetadataItems(location).join(' • ');
   const score = Math.round(location.sunshineScore);
-  const scoreColor = getScoreBadgeColor(score);
+  const markerVisual = isCompact
+    ? getMarkerVisualState(location, isSelected)
+    : null;
+  const scoreColor = isCompact ? compactScoreGreen : getScoreBadgeColor(score);
+  const conditionSymbol = markerVisual
+    ? getMarkerConditionSymbol(markerVisual.intensity)
+    : null;
 
-  const detailLink = onOpenDetail ? (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`Open details for ${location.name}`}
-      onPress={() => onOpenDetail(location.id)}
-      style={({ pressed }) => [
-        styles.detailLink,
-        isCompact && styles.detailLinkCompact,
-        pressed && styles.buttonPressed,
-      ]}>
-      <Text
-        style={[
-          styles.detailLinkLabel,
-          isCompact && styles.detailLinkLabelCompact,
+  const detailLink =
+    !isCompact && onOpenDetail ? (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Open details for ${location.name}`}
+        onPress={() => onOpenDetail(location.id)}
+        style={({ pressed }) => [
+          styles.detailLink,
+          pressed && styles.buttonPressed,
         ]}>
-        View details ›
-      </Text>
-    </Pressable>
-  ) : null;
+        <Text style={styles.detailLinkLabel}>View details ›</Text>
+      </Pressable>
+    ) : null;
 
   return (
     <View
@@ -80,11 +81,23 @@ export function SelectedLocationPreview({
       ) : null}
 
       <View style={[styles.mainRow, isCompact && styles.mainRowCompact]}>
-        <MapConditionIcon
-          location={location}
-          isSelected={isSelected}
-          size={isCompact ? 40 : 44}
-        />
+        {isCompact ? (
+          <View style={styles.plainIconWrap}>
+            <Text
+              style={[
+                styles.plainIconSymbol,
+                markerVisual?.intensity === 'clear' && styles.plainIconClear,
+              ]}>
+              {conditionSymbol}
+            </Text>
+          </View>
+        ) : (
+          <MapConditionIcon
+            location={location}
+            isSelected={isSelected}
+            size={44}
+          />
+        )}
 
         <View style={[styles.contentBlock, isCompact && styles.contentBlockCompact]}>
           {isHomeLocation ? <HomeLocationBadge /> : null}
@@ -118,11 +131,10 @@ export function SelectedLocationPreview({
             ]}>
             {score}
           </Text>
-          {isCompact ? detailLink : null}
         </View>
       </View>
 
-      {!isCompact ? detailLink : null}
+      {detailLink}
     </View>
   );
 }
@@ -191,7 +203,7 @@ const styles = StyleSheet.create({
     paddingRight: Spacing.lg,
   },
   mainRowCompact: {
-    alignItems: 'flex-start',
+    alignItems: 'center',
     gap: Spacing.sm,
     paddingRight: Spacing.xl,
   },
@@ -211,8 +223,10 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
   nameCompact: {
+    fontFamily: Fonts?.sans,
     fontSize: 16,
     lineHeight: 19,
+    fontWeight: '700',
   },
   subtitle: {
     fontSize: 12,
@@ -244,11 +258,10 @@ const styles = StyleSheet.create({
     minWidth: 76,
   },
   scoreBlockCompact: {
-    alignItems: 'flex-end',
-    justifyContent: 'flex-start',
+    alignItems: 'center',
+    justifyContent: 'center',
     minWidth: 72,
     paddingLeft: Spacing.sm,
-    paddingTop: 1,
     gap: 2,
   },
   scoreEyebrow: {
@@ -262,7 +275,7 @@ const styles = StyleSheet.create({
   scoreEyebrowCompact: {
     fontSize: 9,
     letterSpacing: 0.7,
-    textAlign: 'right',
+    textAlign: 'center',
   },
   scoreValue: {
     marginTop: 2,
@@ -275,31 +288,32 @@ const styles = StyleSheet.create({
     fontSize: 28,
     lineHeight: 30,
     marginTop: 0,
-    textAlign: 'right',
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  plainIconWrap: {
+    width: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  plainIconSymbol: {
+    fontSize: 26,
+    lineHeight: 28,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+  },
+  plainIconClear: {
+    color: Colors.gold,
   },
   detailLink: {
     alignSelf: 'flex-end',
     paddingVertical: 4,
     paddingHorizontal: 2,
   },
-  detailLinkCompact: {
-    alignSelf: 'flex-end',
-    marginTop: 1,
-    paddingVertical: 4,
-    paddingHorizontal: 2,
-    minHeight: 28,
-    justifyContent: 'center',
-  },
   detailLinkLabel: {
     fontSize: 14,
     fontWeight: '600',
     color: Colors.textSecondary,
-  },
-  detailLinkLabelCompact: {
-    fontSize: 12,
-    lineHeight: 15,
-    fontWeight: '600',
-    color: detailLinkBlue,
   },
   buttonPressed: {
     opacity: 0.88,
