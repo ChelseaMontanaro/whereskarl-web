@@ -96,7 +96,7 @@ export function MapSelectedLocationCard({
   }, [onClose]);
 
   const panelClass = phonePortrait
-    ? "relative w-full rounded-2xl border border-[rgb(160_185_210/0.24)] bg-[rgb(6_15_27/0.92)] px-2.5 py-1.5 shadow-[0_10px_18px_rgb(0_0_0/0.45)]"
+    ? "relative flex min-h-[5.0625rem] w-full items-center rounded-2xl border border-[rgb(160_185_210/0.24)] bg-[rgb(6_15_27/0.92)] px-2.5 py-3 shadow-[0_10px_18px_rgb(0_0_0/0.45)]"
     : `${desktopGlassCardClass} relative max-w-[28rem] px-4 py-3 shadow-[0_8px_28px_rgba(0,0,0,0.28)]`;
 
   return (
@@ -116,8 +116,8 @@ export function MapSelectedLocationCard({
       ) : null}
 
       <div
-        className={`flex items-center ${
-          phonePortrait ? "gap-2 pr-4" : "gap-3 pr-5"
+        className={`flex w-full items-center ${
+          phonePortrait ? "gap-2.5 pr-4" : "gap-3 pr-5"
         }`}
       >
         {phonePortrait ? (
@@ -129,7 +129,11 @@ export function MapSelectedLocationCard({
           <MapLocationConditionIcon location={location} />
         )}
 
-        <div className="min-w-0 flex-1">
+        <div
+          className={`min-w-0 flex-1 ${
+            phonePortrait ? "flex flex-col justify-center gap-0.5" : ""
+          }`}
+        >
           <div className="flex items-center gap-1">
             <h2
               className={`font-semibold tracking-tight text-white ${
@@ -194,10 +198,10 @@ export function MapSelectedLocationCard({
         </div>
 
         <div
-          className={`flex shrink-0 flex-col items-center justify-center self-center border-l ${
+          className={`flex shrink-0 flex-col items-center justify-center border-l ${
             phonePortrait
-              ? "min-w-[3.25rem] border-[rgb(150_175_200/0.16)] pl-2"
-              : "min-w-[4.5rem] border-white/10 pl-3"
+              ? "min-w-[3.25rem] self-stretch border-[rgb(150_175_200/0.16)] py-0.5 pl-2.5"
+              : "min-w-[4.5rem] self-center border-white/10 pl-3"
           }`}
         >
           <div className="text-center">
