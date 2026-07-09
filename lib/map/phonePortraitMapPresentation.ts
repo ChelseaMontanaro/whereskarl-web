@@ -18,13 +18,17 @@ export const PHONE_PORTRAIT_SF_CENTRAL_BAY_BOUNDS: MapBounds = [
   [-122.267, 38.115],
 ];
 
-/** Fixed approved Marin-centered camera for the 390×844 composition. */
+/**
+ * Fixed approved camera: Marin-centered with the full SF-tab composition visible
+ * (Stinson Beach, Marin towns, Richmond/Berkeley, and San Francisco).
+ */
 export const PHONE_PORTRAIT_MAP_CENTER = {
-  latitude: 37.89,
-  longitude: -122.475,
+  latitude: 37.888,
+  longitude: -122.462,
 } as const;
 
-export const PHONE_PORTRAIT_MAP_INITIAL_ZOOM = 9.2;
+/** Wider SF-tab framing so Marin through Berkeley/Stinson stay in view at 390px. */
+export const PHONE_PORTRAIT_MAP_INITIAL_ZOOM = 8.65;
 
 export const PHONE_PORTRAIT_MAP_MAX_ZOOM = 10.6;
 

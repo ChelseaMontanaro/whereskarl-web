@@ -40,13 +40,16 @@ const cinematicSatellitePaint = {
   "raster-hue-rotate": 14,
 } as const;
 
-/** Phone-portrait treatment: deep navy cinematic look with readable coastline/terrain. */
+/**
+ * Phone-portrait satellite: same natural hybrid color as desktop, with only a
+ * light polish so water stays blue and land stays green/brown.
+ */
 const phonePortraitCinematicSatellitePaint = {
-  "raster-brightness-min": 0.04,
-  "raster-brightness-max": 0.52,
-  "raster-contrast": 0.42,
-  "raster-saturation": -0.44,
-  "raster-hue-rotate": 195,
+  "raster-brightness-min": 0,
+  "raster-brightness-max": 0.64,
+  "raster-contrast": 0.38,
+  "raster-saturation": -0.06,
+  "raster-hue-rotate": 14,
 } as const;
 
 /** Previous hybrid readability baseline for regression checks. */
