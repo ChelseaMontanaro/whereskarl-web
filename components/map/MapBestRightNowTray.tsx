@@ -10,6 +10,7 @@ type MapBestRightNowTrayProps = {
   selectedLocationId?: string | null;
   isLoading?: boolean;
   title?: string;
+  isPhonePortrait?: boolean;
 };
 
 export function MapBestRightNowTray({
@@ -18,10 +19,15 @@ export function MapBestRightNowTray({
   selectedLocationId = null,
   isLoading = false,
   title = "Best Right Now",
+  isPhonePortrait = false,
 }: MapBestRightNowTrayProps) {
+  const panelClass = isPhonePortrait
+    ? "rounded-2xl border border-[rgb(160_185_210/0.24)] bg-[rgb(6_15_27/0.92)] px-3 py-[0.6875rem] shadow-[0_10px_18px_rgb(0_0_0/0.45)]"
+    : desktopGlassCardClass;
+
   if (isLoading) {
     return (
-      <div className={`${desktopGlassCardClass} px-4 py-3`}>
+      <div className={`${panelClass} px-4 py-3`}>
         <p className="text-xs text-white/50">Finding best spots…</p>
       </div>
     );
@@ -34,13 +40,20 @@ export function MapBestRightNowTray({
   return (
     <section
       aria-label={title}
-      className={`${desktopGlassCardClass} max-w-full overflow-x-auto px-3 py-3`}
+      className={`${panelClass} max-w-full overflow-x-auto`}
     >
-      <p className="px-1 text-[0.625rem] font-bold uppercase tracking-[0.16em] text-white/45">
+      <p
+        className={`px-1 font-bold uppercase text-karl-gold/90 ${
+          isPhonePortrait
+            ? "text-[0.6875rem] tracking-[0.1em]"
+            : "text-[0.625rem] tracking-[0.16em] text-white/45"
+        }`}
+      >
         {title}
       </p>
-      <ul className="mt-2 flex items-stretch gap-2">
-        {items.map((item) => {
+      <div className="mt-2 flex items-stretch gap-2">
+        <ul className="flex items-stretch gap-2">
+        {items.map((item, index) => {
           const isSelected =
             selectedLocationId != null &&
             item.locationId.trim().toLowerCase() ===
@@ -58,24 +71,59 @@ export function MapBestRightNowTray({
                 event.stopPropagation();
                 onSelectLocation(item.locationId);
               }}
-              className="flex min-w-[7.5rem] flex-col rounded-xl border border-white/8 bg-white/[0.03] px-3 py-2 text-left transition-colors hover:border-karl-gold/25 hover:bg-karl-gold/[0.06] motion-reduce:transition-none"
+              className={`flex flex-col rounded-xl border px-2 py-1.5 text-left transition-colors hover:border-karl-gold/25 hover:bg-karl-gold/[0.06] motion-reduce:transition-none ${
+                isPhonePortrait ? "w-24 gap-0.5" : "min-w-[7.5rem] px-3 py-2"
+              } ${
+                isSelected
+                  ? "border-karl-gold/28 bg-karl-gold/[0.08]"
+                  : "border-white/8 bg-white/[0.03]"
+              }`}
             >
-              <span className="truncate text-sm font-semibold text-white">
+              <span
+                className={`truncate font-semibold text-white ${
+                  isPhonePortrait ? "text-xs leading-[0.875rem]" : "text-sm"
+                }`}
+              >
                 {item.locationName}
               </span>
               {item.score != null ? (
-                <span className="mt-1 text-xs font-light text-karl-gold">
-                  {item.scoreLabel ?? `${item.score} clear`}
+                <span
+                  className={`font-semibold text-karl-gold ${
+                    isPhonePortrait
+                      ? "text-[0.9375rem] leading-[1.0625rem]"
+                      : "mt-1 text-xs font-light"
+                  }`}
+                >
+                  {isPhonePortrait
+                    ? item.score
+                    : (item.scoreLabel ?? `${item.score} clear`)}
                 </span>
               ) : null}
-              {item.isDegraded ? (
+              {isPhonePortrait && (index === 0 || item.scoreLabel) ? (
+                <span className="truncate text-[0.625rem] font-medium leading-3 text-white/55">
+                  {item.scoreLabel ?? (index === 0 ? "Clearest" : "")}
+                </span>
+              ) : null}
+              {!isPhonePortrait && item.isDegraded ? (
                 <DegradedDataLabel variant="bestRightNow" className="mt-1" />
+              ) : null}
+              {isPhonePortrait && item.isDegraded ? (
+                <DegradedDataLabel variant="bestRightNow" className="mt-0.5" />
               ) : null}
             </button>
           </li>
           );
         })}
-      </ul>
+        </ul>
+        {isPhonePortrait ? (
+          <div
+            aria-hidden
+            className="flex h-7 w-7 shrink-0 items-center justify-center self-center rounded-full border border-white/10 bg-white/[0.04] text-lg text-white/55"
+          >
+            ›
+          </div>
+        ) : null}
+      </div>
     </section>
   );
 }

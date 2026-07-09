@@ -1,0 +1,124 @@
+.karl-universal-map-marker-root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  pointer-events: none;
+}
+
+.karl-universal-map-marker-root.is-portable {
+  gap: 0.12rem;
+}
+
+.karl-universal-map-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: auto;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+  transform: scale(var(--marker-scale, 1));
+  transition: transform 160ms ease, filter 160ms ease;
+  box-shadow: none;
+}
+
+.karl-universal-map-marker--portable {
+  width: auto;
+  height: auto;
+}
+
+.karl-universal-map-marker__svg {
+  display: block;
+  width: 1.55rem;
+  height: 1.55rem;
+}
+
+.karl-universal-map-marker--portable .karl-universal-map-marker__svg {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.karl-universal-map-marker--clear {
+  color: var(--clear-sun-color, rgb(242 163 38));
+}
+
+.karl-universal-map-marker--portable.karl-universal-map-marker--clear {
+  width: auto;
+  height: auto;
+  border: none;
+  background: transparent;
+}
+
+.karl-universal-map-marker--portable.karl-universal-map-marker--clear
+  .karl-universal-map-marker__svg {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.karl-universal-map-marker--portable.is-selected {
+  filter: drop-shadow(0 0 8px rgb(242 163 38 / 0.5));
+  transform: scale(calc(var(--marker-scale, 1) * 1.03));
+}
+
+.karl-universal-map-marker.is-selected {
+  filter: drop-shadow(0 0 6px rgb(242 163 38 / 0.45));
+  transform: scale(calc(var(--marker-scale, 1) * 1.04));
+}
+
+.karl-universal-map-marker.is-filtered-out {
+  opacity: 0.35;
+  filter: grayscale(0.2);
+}
+
+.karl-universal-map-marker__score {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 0;
+  border-radius: 0;
+  border: none;
+  background: transparent;
+  color: var(--score-color, rgb(242 163 38));
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  pointer-events: none;
+  box-shadow: none;
+  text-shadow: 0 1px 3px rgb(0 0 0 / 0.65);
+}
+
+.karl-universal-map-marker-root.is-selected .karl-universal-map-marker__score,
+.karl-universal-map-marker.is-selected + .karl-universal-map-marker__score {
+  color: rgb(242 163 38);
+}
+
+.karl-universal-map-marker__label {
+  max-width: 8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0.12rem 0.42rem;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  background: rgb(3 11 20 / 0.78);
+  color: rgb(255 255 255 / 0.88);
+  font-size: 0.62rem;
+  font-weight: 600;
+  line-height: 1.2;
+  pointer-events: none;
+  text-shadow: 0 1px 3px rgb(0 0 0 / 0.65);
+}
+
+.karl-universal-map-marker:focus-visible {
+  outline: 2px solid rgb(242 163 38);
+  outline-offset: 3px;
+}

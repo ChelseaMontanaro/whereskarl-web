@@ -1,14 +1,19 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { MutableRefObject } from "react";
 import { useQuery } from "@tanstack/react-query";
 
-import { BayAreaMap } from "@/components/map/BayAreaMap";
+import {
+  BayAreaMap,
+  type BayAreaMapHandle,
+} from "@/components/map/BayAreaMap";
 import { MapBestRightNowTray } from "@/components/map/MapBestRightNowTray";
 import { MapConditionsPanel } from "@/components/map/MapConditionsPanel";
 import { MapPhonePortraitControls } from "@/components/map/MapPhonePortraitControls";
+import { MapPhonePortraitFogRail } from "@/components/map/MapPhonePortraitFogRail";
+import { MapPhonePortraitFloatingControls } from "@/components/map/MapPhonePortraitFloatingControls";
 import { MapFogLegend } from "@/components/map/MapFogLegend";
 import { MapSelectedLocationCard } from "@/components/map/MapSelectedLocationCard";
 import { GlassCard } from "@/components/ui/GlassCard";
@@ -31,6 +36,8 @@ import {
   resolveMapQueryState,
 } from "@/lib/map/routing";
 import type { KarlMapStyleId } from "@/lib/map/styles";
+import { filterLocationsForPhonePortraitSfComposition } from "@/lib/map/phonePortraitMapPresentation";
+import { filterLocationsByProductRegion } from "@/lib/map/regions";
 import type { LocationWeather } from "@/lib/schemas/weather";
 
 function initialMapStyle(): KarlMapStyleId {
@@ -241,7 +248,9 @@ function useMapViewState(): MapViewModel {
 
 function MobileMapView({ state }: { state: MapViewModel }) {
   const isPhonePortrait = usePhonePortrait();
+  const mapRef = useRef<BayAreaMapHandle>(null);
   const [isLayersPanelOpen, setIsLayersPanelOpen] = useState(false);
+  const router = useRouter();
   const {
     mapQuery,
     mapStyle,
@@ -250,6 +259,7 @@ function MobileMapView({ state }: { state: MapViewModel }) {
     setFogLayerEnabled,
     locationsQuery,
     currentQuery,
+    locations,
     selectedLocation,
     unknownLocationId,
     markerLocations,
@@ -262,12 +272,106 @@ function MobileMapView({ state }: { state: MapViewModel }) {
     suppressViewportUpdateRef,
   } = state;
 
+  const effectiveRegionId =
+    selectedLocation || mapQuery.activeRegionId
+      ? mapQuery.activeRegionId
+      : isPhonePortrait
+        ? "san-francisco"
+        : null;
+
+  useEffect(() => {
+    if (
+      !isPhonePortrait ||
+      mapQuery.activeRegionId ||
+      selectedLocation ||
+      mapQuery.requestedLocationId
+    ) {
+      return;
+    }
+
+    router.replace(buildMapRegionHref("san-francisco"), { scroll: false });
+  }, [
+    isPhonePortrait,
+    mapQuery.activeRegionId,
+    mapQuery.requestedLocationId,
+    router,
+    selectedLocation,
+  ]);
+
+  const phonePortraitMarkerLocations = useMemo(() => {
+    if (!isPhonePortrait) {
+      return markerLocations;
+    }
+
+    if (effectiveRegionId === "san-francisco") {
+      return filterLocationsForPhonePortraitSfComposition(markerLocations);
+    }
+
+    if (effectiveRegionId) {
+      return filterLocationsByProductRegion(
+        markerLocations,
+        isBayAreaProductRegionId(effectiveRegionId)
+          ? effectiveRegionId
+          : null,
+      );
+    }
+
+    return markerLocations;
+  }, [effectiveRegionId, isPhonePortrait, markerLocations]);
+
+  const phonePortraitBestRightNowItems = useMemo(
+    () =>
+      mapBestRightNowTrayItems(
+        locations,
+        intensityFilter,
+        effectiveRegionId,
+        selectedLocation?.id ?? null,
+        4,
+      ),
+    [
+      effectiveRegionId,
+      intensityFilter,
+      locations,
+      selectedLocation?.id,
+    ],
+  );
+
+  const featuredPhoneLocation = useMemo(() => {
+    if (!isPhonePortrait) {
+      return null;
+    }
+
+    if (selectedLocation) {
+      return selectedLocation;
+    }
+
+    const topLocationId = phonePortraitBestRightNowItems[0]?.locationId;
+    if (!topLocationId) {
+      return null;
+    }
+
+    return locations.find((location) => location.id === topLocationId) ?? null;
+  }, [
+    isPhonePortrait,
+    locations,
+    phonePortraitBestRightNowItems,
+    selectedLocation,
+  ]);
+
+  const trayItems = isPhonePortrait
+    ? phonePortraitBestRightNowItems
+    : bestRightNowItems;
+  const mapLocations = isPhonePortrait
+    ? phonePortraitMarkerLocations
+    : markerLocations;
+
   return (
     <div className="fixed inset-0 z-10">
       <BayAreaMap
-        locations={markerLocations}
+        ref={mapRef}
+        locations={mapLocations}
         selectedLocationId={selectedLocation?.id ?? null}
-        selectedRegionId={selectedLocation ? null : mapQuery.activeRegionId}
+        selectedRegionId={selectedLocation ? null : effectiveRegionId}
         onSelectLocation={handleSelectLocation}
         mapStyle={mapStyle}
         fogLayerEnabled={fogLayerEnabled}
@@ -289,65 +393,96 @@ function MobileMapView({ state }: { state: MapViewModel }) {
           }`}
         />
 
-        <div
-          className={`pointer-events-auto absolute left-3 top-3 flex flex-col gap-1.5 transition-opacity motion-reduce:transition-none sm:left-4 sm:top-4 sm:gap-2 md:top-[4.5rem] ${
-            isPhonePortrait
-              ? "max-w-[calc(100vw-5.75rem)]"
-              : "max-w-[min(100%,13.5rem)] sm:max-w-xs md:max-w-xs"
-          } ${
-            isPhonePortrait && isLayersPanelOpen
-              ? "pointer-events-none opacity-0"
-              : "opacity-100"
-          }`}
-        >
-          {isPhonePortrait ? (
-            <div className="flex w-full max-w-[calc(100vw-5.75rem)] flex-col gap-2">
-              <MapPhonePortraitControls
-                selectedRegionId={
-                  selectedLocation ? null : mapQuery.activeRegionId
-                }
-                onSelectRegion={handleSelectRegion}
-              />
-              <MapFogLegend
-                layout="phone-rail"
-                activeIntensity={intensityFilter}
-                onSelectIntensity={handleSelectIntensity}
+        {!isLayersPanelOpen ? (
+          <>
+            <div
+              className={`pointer-events-auto absolute left-3 flex flex-col transition-opacity motion-reduce:transition-none sm:left-4 ${
+                isPhonePortrait
+                  ? "top-[calc(1.375rem+env(safe-area-inset-top))] w-[calc(100vw-3.5rem)] max-w-[calc(100vw-3.5rem)] gap-0"
+                  : "top-3 max-w-[min(100%,13.5rem)] gap-1.5 sm:top-4 sm:max-w-xs md:top-[4.5rem] md:max-w-xs"
+              } opacity-100`}
+            >
+              {isPhonePortrait ? (
+                <MapPhonePortraitControls
+                  selectedRegionId={
+                    selectedLocation ? null : effectiveRegionId
+                  }
+                  onSelectRegion={handleSelectRegion}
+                  isPhonePortrait
+                />
+              ) : (
+                <>
+                  <MapConditionsPanel
+                    isLoading={currentQuery.isLoading && !currentQuery.data}
+                    selectedRegionId={
+                      selectedLocation ? null : mapQuery.activeRegionId
+                    }
+                    onSelectRegion={handleSelectRegion}
+                  />
+                  <MapFogLegend
+                    layout="desktop-stack"
+                    activeIntensity={intensityFilter}
+                    onSelectIntensity={handleSelectIntensity}
+                  />
+                </>
+              )}
+              <MapQueryWarnings
+                unknownLocationId={unknownLocationId}
+                unknownRegionId={mapQuery.unknownRegionId}
+                variant="desktop"
               />
             </div>
-          ) : (
-            <>
-              <MapConditionsPanel
-                isLoading={currentQuery.isLoading && !currentQuery.data}
-                selectedRegionId={
-                  selectedLocation ? null : mapQuery.activeRegionId
-                }
-                onSelectRegion={handleSelectRegion}
-              />
-              <MapFogLegend
-                layout="desktop-stack"
-                activeIntensity={intensityFilter}
-                onSelectIntensity={handleSelectIntensity}
-              />
-            </>
-          )}
-          <MapQueryWarnings
-            unknownLocationId={unknownLocationId}
-            unknownRegionId={mapQuery.unknownRegionId}
-            variant="desktop"
-          />
-        </div>
 
-        <div className="pointer-events-auto absolute inset-x-3 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] flex flex-col items-stretch gap-2 sm:inset-x-4 md:bottom-[calc(5.25rem+env(safe-area-inset-bottom))]">
+            {isPhonePortrait ? (
+              <div
+                className="pointer-events-auto absolute left-3 top-[calc(7rem+env(safe-area-inset-top))]"
+              >
+                <MapPhonePortraitFogRail
+                  activeIntensity={intensityFilter}
+                  onSelectIntensity={handleSelectIntensity}
+                />
+              </div>
+            ) : null}
+
+            {isPhonePortrait ? (
+              <div className="pointer-events-auto absolute right-3 top-[calc(7.5rem+env(safe-area-inset-top))]">
+                <MapPhonePortraitFloatingControls
+                  onOpenLayers={() => setIsLayersPanelOpen(true)}
+                  onLocateMe={() => mapRef.current?.locateMe()}
+                  onResetView={() => mapRef.current?.resetView()}
+                />
+              </div>
+            ) : null}
+          </>
+        ) : null}
+
+        <div
+          className={`pointer-events-auto absolute inset-x-3 flex flex-col items-stretch gap-2.5 sm:inset-x-4 ${
+            isPhonePortrait
+              ? "bottom-[calc(4.5rem+env(safe-area-inset-bottom))]"
+              : "bottom-[calc(5.5rem+env(safe-area-inset-bottom))] md:bottom-[calc(5.25rem+env(safe-area-inset-bottom))]"
+          }`}
+        >
           {shouldShowDesktopBestRightNowTray(intensityFilter) ? (
             <MapBestRightNowTray
-              items={bestRightNowItems}
+              items={trayItems}
               selectedLocationId={selectedLocation?.id ?? null}
               onSelectLocation={handleSelectLocation}
               isLoading={locationsQuery.isLoading}
+              isPhonePortrait={isPhonePortrait}
             />
           ) : null}
 
-          {selectedLocation ? (
+          {isPhonePortrait && featuredPhoneLocation ? (
+            <MapSelectedLocationCard
+              location={featuredPhoneLocation}
+              onClose={
+                selectedLocation ? handleClearSelectedLocation : undefined
+              }
+              showCloseButton={Boolean(selectedLocation)}
+              phonePortrait
+            />
+          ) : selectedLocation ? (
             <MapSelectedLocationCard
               location={selectedLocation}
               onClose={handleClearSelectedLocation}

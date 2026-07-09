@@ -1,6 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type MutableRefObject } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+  type MutableRefObject,
+} from "react";
 
 import { MapFogLegend } from "@/components/map/MapFogLegend";
 import { MapLayerControls } from "@/components/map/MapLayerControls";
@@ -8,6 +16,7 @@ import {
   BAY_AREA_CENTER,
   BAY_AREA_DEFAULT_MAX_ZOOM,
   BAY_AREA_IMMERSIVE_MIN_ZOOM,
+  BAY_AREA_LOCATION_ZOOM,
   BAY_AREA_MAX_BOUNDS,
   findBayAreaProductRegion,
   type ImmersiveOverlayProfile,
@@ -22,6 +31,23 @@ import {
   type MapMarkerLocation,
 } from "@/lib/map/markers";
 import type { FogIntensity } from "@/lib/map/conditions";
+import {
+  getPhonePortraitMarkerMapOffset,
+  getPhonePortraitMarkerOffset,
+  getPhonePortraitMarkerPriority,
+  PHONE_PORTRAIT_MAP_CENTER,
+  PHONE_PORTRAIT_MAP_INITIAL_ZOOM,
+} from "@/lib/map/phonePortraitMapPresentation";
+import {
+  createPhonePortraitMapMarkerElement,
+  declutterPhonePortraitMarkers,
+  type PhonePortraitDeclutterEntry,
+} from "@/lib/map/phonePortraitMarkers";
+import {
+  fitPhonePortraitMapViewport,
+  locatePhonePortraitMap,
+  shouldUsePhonePortraitFixedCamera,
+} from "@/lib/map/phonePortraitViewport";
 import { resolveKarlMapStyle, type KarlMapStyleId } from "@/lib/map/styles";
 import {
   fitDefaultBayAreaViewport,
@@ -31,6 +57,11 @@ import {
   resolveIntensityFilterFitOptions,
   resolveRegionViewportOptions,
 } from "@/lib/map/viewport";
+
+export type BayAreaMapHandle = {
+  resetView: () => void;
+  locateMe: () => void;
+};
 
 type BayAreaMapProps = {
   locations: MapMarkerLocation[];
@@ -49,69 +80,233 @@ type BayAreaMapProps = {
   immersiveOverlayProfile?: ImmersiveOverlayProfile;
 };
 
-export function BayAreaMap({
-  locations,
-  selectedLocationId,
-  selectedRegionId,
-  onSelectLocation,
-  mapStyle,
-  fogLayerEnabled,
-  onMapStyleChange,
-  onFogLayerChange,
-  isLoading = false,
-  layout = "mobile",
-  suppressViewportUpdateRef,
-  intensityFilter = null,
-  onImmersiveLayersPanelOpenChange,
-  immersiveOverlayProfile = "tablet",
-}: BayAreaMapProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<import("maplibre-gl").Map | null>(null);
-  const markersRef = useRef<Map<string, import("maplibre-gl").Marker>>(new Map());
-  const onSelectRef = useRef(onSelectLocation);
-  const [mapReady, setMapReady] = useState(false);
-  const isDesktop = layout === "desktop";
-  const isImmersive = layout === "immersive";
-  const isFullBleed = isDesktop || isImmersive;
+export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
+  function BayAreaMap(
+    {
+      locations,
+      selectedLocationId,
+      selectedRegionId,
+      onSelectLocation,
+      mapStyle,
+      fogLayerEnabled,
+      onMapStyleChange,
+      onFogLayerChange,
+      isLoading = false,
+      layout = "mobile",
+      suppressViewportUpdateRef,
+      intensityFilter = null,
+      onImmersiveLayersPanelOpenChange,
+      immersiveOverlayProfile = "tablet",
+    },
+    ref,
+  ) {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const mapRef = useRef<import("maplibre-gl").Map | null>(null);
+    const markersRef = useRef<Map<string, import("maplibre-gl").Marker>>(
+      new Map(),
+    );
+    const onSelectRef = useRef(onSelectLocation);
+    const phonePortraitWebRef = useRef(
+      immersiveOverlayProfile === "phone-portrait",
+    );
+    const [mapReady, setMapReady] = useState(false);
+    const isDesktop = layout === "desktop";
+    const isImmersive = layout === "immersive";
+    const isFullBleed = isDesktop || isImmersive;
+    const isPhonePortraitWeb = immersiveOverlayProfile === "phone-portrait";
 
-  onSelectRef.current = onSelectLocation;
+    onSelectRef.current = onSelectLocation;
+    phonePortraitWebRef.current = isPhonePortraitWeb;
 
-  const handleZoomIn = useCallback(() => {
-    mapRef.current?.zoomIn({ duration: 250 });
-  }, []);
+    const handleZoomIn = useCallback(() => {
+      mapRef.current?.zoomIn({ duration: 250 });
+    }, []);
 
-  const handleZoomOut = useCallback(() => {
-    mapRef.current?.zoomOut({ duration: 250 });
-  }, []);
+    const handleZoomOut = useCallback(() => {
+      mapRef.current?.zoomOut({ duration: 250 });
+    }, []);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function setupMap() {
-      const maplibregl = (await import("maplibre-gl")).default;
-      if (cancelled || !containerRef.current) {
+    const resetView = useCallback(() => {
+      const map = mapRef.current;
+      if (!map) {
         return;
       }
 
-      const map = new maplibregl.Map({
-        container: containerRef.current,
-        style: resolveKarlMapStyle(mapStyle),
-        center: BAY_AREA_CENTER,
-        zoom: 8,
-        minZoom: isImmersive ? BAY_AREA_IMMERSIVE_MIN_ZOOM : undefined,
-        maxBounds: BAY_AREA_MAX_BOUNDS,
-        attributionControl: { compact: true },
-      });
-
-      if (!isFullBleed) {
-        map.addControl(
-          new maplibregl.NavigationControl({ showCompass: false }),
-          "top-right",
-        );
+      if (phonePortraitWebRef.current) {
+        fitPhonePortraitMapViewport(map, { duration: 450 });
+        return;
       }
 
-      map.on("load", () => {
-        if (cancelled) {
+      const immersiveFit = isImmersive
+        ? getImmersiveDefaultBayAreaFitOptions(immersiveOverlayProfile)
+        : null;
+      fitDefaultBayAreaViewport(
+        map,
+        immersiveFit?.padding,
+        immersiveFit?.maxZoom ?? BAY_AREA_DEFAULT_MAX_ZOOM,
+      );
+    }, [immersiveOverlayProfile, isImmersive]);
+
+    const locateMe = useCallback(() => {
+      const map = mapRef.current;
+      if (!map) {
+        return;
+      }
+
+      if (phonePortraitWebRef.current) {
+        locatePhonePortraitMap(map);
+        return;
+      }
+
+      if (!navigator.geolocation) {
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          map.flyTo({
+            center: [position.coords.longitude, position.coords.latitude],
+            zoom: BAY_AREA_LOCATION_ZOOM,
+            duration: 450,
+            essential: true,
+          });
+        },
+        () => undefined,
+        { enableHighAccuracy: true, timeout: 10000 },
+      );
+    }, []);
+
+    useImperativeHandle(ref, () => ({ resetView, locateMe }), [
+      locateMe,
+      resetView,
+    ]);
+
+    useEffect(() => {
+      let cancelled = false;
+
+      async function setupMap() {
+        const maplibregl = (await import("maplibre-gl")).default;
+        if (cancelled || !containerRef.current) {
+          return;
+        }
+
+        const isPhonePortrait = phonePortraitWebRef.current;
+        const initialCenter = isPhonePortrait
+          ? [PHONE_PORTRAIT_MAP_CENTER.longitude, PHONE_PORTRAIT_MAP_CENTER.latitude]
+          : BAY_AREA_CENTER;
+
+        const map = new maplibregl.Map({
+          container: containerRef.current,
+          style: resolveKarlMapStyle(mapStyle, {
+            phonePortraitWeb: isPhonePortrait,
+          }),
+          center: initialCenter as [number, number],
+          zoom: isPhonePortrait ? PHONE_PORTRAIT_MAP_INITIAL_ZOOM : 8,
+          minZoom: isImmersive ? BAY_AREA_IMMERSIVE_MIN_ZOOM : undefined,
+          maxBounds: BAY_AREA_MAX_BOUNDS,
+          attributionControl: { compact: true },
+        });
+
+        if (!isFullBleed && !isPhonePortrait) {
+          map.addControl(
+            new maplibregl.NavigationControl({ showCompass: false }),
+            "top-right",
+          );
+        }
+
+        map.on("load", () => {
+          if (cancelled) {
+            return;
+          }
+
+          if (isPhonePortrait) {
+            fitPhonePortraitMapViewport(map);
+          } else {
+            const immersiveFit = isImmersive
+              ? getImmersiveDefaultBayAreaFitOptions(immersiveOverlayProfile)
+              : null;
+            fitDefaultBayAreaViewport(
+              map,
+              immersiveFit?.padding,
+              immersiveFit?.maxZoom ?? BAY_AREA_DEFAULT_MAX_ZOOM,
+            );
+          }
+
+          syncFogOverlayLayer(
+            map,
+            locations,
+            fogLayerEnabled && !isPhonePortrait,
+            intensityFilter,
+          );
+          setMapReady(true);
+        });
+
+        mapRef.current = map;
+      }
+
+      setupMap();
+
+      return () => {
+        cancelled = true;
+        mapRef.current?.remove();
+        mapRef.current = null;
+        setMapReady(false);
+      };
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- map initializes once
+    }, []);
+
+    const appliedStyleRef = useRef(mapStyle);
+
+    useEffect(() => {
+      const map = mapRef.current;
+      if (!map || !mapReady || appliedStyleRef.current === mapStyle) {
+        return;
+      }
+
+      appliedStyleRef.current = mapStyle;
+      const nextStyle = resolveKarlMapStyle(mapStyle, {
+        phonePortraitWeb: phonePortraitWebRef.current,
+      });
+
+      const applyStyle = () => {
+        syncFogOverlayLayer(
+          map,
+          locations,
+          fogLayerEnabled && !phonePortraitWebRef.current,
+          intensityFilter,
+        );
+
+        if (isPhonePortraitWeb) {
+          if (
+            shouldUsePhonePortraitFixedCamera(selectedRegionId) &&
+            !selectedLocationId
+          ) {
+            fitPhonePortraitMapViewport(map);
+          }
+          return;
+        }
+
+        if (selectedLocationId) {
+          const location = locations.find(
+            (item) => item.id === selectedLocationId,
+          );
+          if (location) {
+            focusMapOnLocation(map, location.longitude, location.latitude);
+          }
+          return;
+        }
+
+        const region = findBayAreaProductRegion(selectedRegionId);
+        if (region) {
+          fitMapToBounds(
+            map,
+            region.bounds,
+            resolveRegionViewportOptions(
+              region.viewport,
+              layout,
+              immersiveOverlayProfile,
+            ),
+          );
           return;
         }
 
@@ -123,37 +318,211 @@ export function BayAreaMap({
           immersiveFit?.padding,
           immersiveFit?.maxZoom ?? BAY_AREA_DEFAULT_MAX_ZOOM,
         );
-        syncFogOverlayLayer(map, locations, fogLayerEnabled, intensityFilter);
-        setMapReady(true);
-      });
+      };
 
-      mapRef.current = map;
-    }
+      map.once("style.load", applyStyle);
+      map.setStyle(nextStyle);
+    }, [
+      fogLayerEnabled,
+      immersiveOverlayProfile,
+      intensityFilter,
+      isImmersive,
+      isPhonePortraitWeb,
+      layout,
+      locations,
+      mapReady,
+      mapStyle,
+      selectedLocationId,
+      selectedRegionId,
+    ]);
 
-    setupMap();
+    useEffect(() => {
+      const map = mapRef.current;
+      if (!map || !mapReady) {
+        return;
+      }
 
-    return () => {
-      cancelled = true;
-      mapRef.current?.remove();
-      mapRef.current = null;
-      setMapReady(false);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- map initializes once
-  }, []);
+      let cancelled = false;
+      let declutterHandler: (() => void) | null = null;
 
-  const appliedStyleRef = useRef(mapStyle);
+      async function syncMarkers() {
+        const maplibregl = (await import("maplibre-gl")).default;
+        if (cancelled || !mapRef.current) {
+          return;
+        }
 
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !mapReady || appliedStyleRef.current === mapStyle) {
-      return;
-    }
+        markersRef.current.forEach((marker) => marker.remove());
+        markersRef.current.clear();
 
-    appliedStyleRef.current = mapStyle;
-    const nextStyle = resolveKarlMapStyle(mapStyle);
+        const showLocationLabel = isPhonePortraitWeb
+          ? true
+          : shouldShowFoggyFilterMarkerLabel(
+              layout,
+              intensityFilter,
+              false,
+            );
 
-    const applyStyle = () => {
-      syncFogOverlayLayer(map, locations, fogLayerEnabled, intensityFilter);
+        for (const location of locations) {
+          const isVisible = isMapMarkerVisible(location, {
+            intensityFilter,
+            selectedRegionId: isPhonePortraitWeb ? null : selectedRegionId,
+          });
+
+          if (!isVisible && !isPhonePortraitWeb) {
+            continue;
+          }
+
+          const element = isPhonePortraitWeb
+            ? createPhonePortraitMapMarkerElement({
+                location,
+                isSelected: location.id === selectedLocationId,
+                intensityFilter,
+                showLocationLabel,
+                onSelect: (locationId) => onSelectRef.current(locationId),
+              })
+            : createMapMarkerElement({
+                location,
+                isSelected: location.id === selectedLocationId,
+                fogLayerEnabled,
+                intensityFilter,
+                selectedRegionId,
+                layout,
+                showLocationLabel,
+                onSelect: (locationId) => onSelectRef.current(locationId),
+              });
+
+          const baseOffset = isPhonePortraitWeb
+            ? getPhonePortraitMarkerMapOffset(showLocationLabel)
+            : getMapMarkerPlacementOptions(showLocationLabel).offset ?? [0, 0];
+          const placementOffset = isPhonePortraitWeb
+            ? ([
+                baseOffset[0] + getPhonePortraitMarkerOffset(location.id)[0],
+                baseOffset[1] + getPhonePortraitMarkerOffset(location.id)[1],
+              ] as [number, number])
+            : (baseOffset as [number, number]);
+
+          const marker = new maplibregl.Marker({
+            element,
+            anchor: "center",
+            offset: placementOffset,
+          })
+            .setLngLat([location.longitude, location.latitude])
+            .addTo(mapRef.current);
+
+          markersRef.current.set(location.id, marker);
+        }
+
+        if (!isPhonePortraitWeb || !mapRef.current) {
+          return;
+        }
+
+        const mapInstance = mapRef.current;
+        const entries: PhonePortraitDeclutterEntry[] = locations.flatMap(
+          (location) => {
+            const marker = markersRef.current.get(location.id);
+            if (!marker) {
+              return [];
+            }
+
+            return [
+              {
+                locationId: location.id,
+                element: marker.getElement(),
+                longitude: location.longitude,
+                latitude: location.latitude,
+                offset: getPhonePortraitMarkerOffset(location.id),
+                priority: getPhonePortraitMarkerPriority(location.id),
+                score: location.sunshineScore,
+                isSelected: selectedLocationId === location.id,
+              },
+            ];
+          },
+        );
+
+        declutterHandler = () =>
+          declutterPhonePortraitMarkers(mapInstance, entries);
+        declutterHandler();
+        mapInstance.on("moveend", declutterHandler);
+      }
+
+      syncMarkers();
+
+      return () => {
+        cancelled = true;
+        if (declutterHandler && mapRef.current) {
+          mapRef.current.off("moveend", declutterHandler);
+        }
+        const markers = markersRef.current;
+        markers.forEach((marker) => marker.remove());
+        markers.clear();
+      };
+    }, [
+      fogLayerEnabled,
+      immersiveOverlayProfile,
+      intensityFilter,
+      isPhonePortraitWeb,
+      layout,
+      locations,
+      mapReady,
+      selectedLocationId,
+      selectedRegionId,
+    ]);
+
+    useEffect(() => {
+      const map = mapRef.current;
+      if (!map || !mapReady) {
+        return;
+      }
+
+      syncFogOverlayLayer(
+        map,
+        locations,
+        fogLayerEnabled && !isPhonePortraitWeb,
+        intensityFilter,
+      );
+    }, [
+      fogLayerEnabled,
+      intensityFilter,
+      isPhonePortraitWeb,
+      locations,
+      mapReady,
+    ]);
+
+    useEffect(() => {
+      const map = mapRef.current;
+      if (!map || !mapReady) {
+        return;
+      }
+
+      if (suppressViewportUpdateRef?.current) {
+        suppressViewportUpdateRef.current = false;
+        return;
+      }
+
+      if (isPhonePortraitWeb) {
+        if (selectedLocationId) {
+          return;
+        }
+
+        if (shouldUsePhonePortraitFixedCamera(selectedRegionId)) {
+          fitPhonePortraitMapViewport(map, { duration: 450 });
+          return;
+        }
+
+        const region = findBayAreaProductRegion(selectedRegionId);
+        if (region) {
+          fitMapToBounds(
+            map,
+            region.bounds,
+            resolveRegionViewportOptions(
+              region.viewport,
+              layout,
+              immersiveOverlayProfile,
+            ),
+          );
+        }
+        return;
+      }
 
       if (selectedLocationId) {
         const location = locations.find((item) => item.id === selectedLocationId);
@@ -177,6 +546,18 @@ export function BayAreaMap({
         return;
       }
 
+      if (intensityFilter) {
+        const bounds = boundsForIntensityLocations(locations, intensityFilter);
+        if (bounds) {
+          fitMapToBounds(
+            map,
+            bounds,
+            resolveIntensityFilterFitOptions(layout, immersiveOverlayProfile),
+          );
+          return;
+        }
+      }
+
       const immersiveFit = isImmersive
         ? getImmersiveDefaultBayAreaFitOptions(immersiveOverlayProfile)
         : null;
@@ -185,201 +566,113 @@ export function BayAreaMap({
         immersiveFit?.padding,
         immersiveFit?.maxZoom ?? BAY_AREA_DEFAULT_MAX_ZOOM,
       );
-    };
+    }, [
+      immersiveOverlayProfile,
+      intensityFilter,
+      isImmersive,
+      isPhonePortraitWeb,
+      layout,
+      locations,
+      mapReady,
+      selectedLocationId,
+      selectedRegionId,
+      suppressViewportUpdateRef,
+    ]);
 
-    map.once("style.load", applyStyle);
-    map.setStyle(nextStyle);
-  }, [
-    fogLayerEnabled,
-    immersiveOverlayProfile,
-    intensityFilter,
-    isImmersive,
-    layout,
-    locations,
-    mapReady,
-    mapStyle,
-    selectedLocationId,
-    selectedRegionId,
-  ]);
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !mapReady) {
-      return;
-    }
-
-    let cancelled = false;
-
-    async function syncMarkers() {
-      const maplibregl = (await import("maplibre-gl")).default;
-      if (cancelled || !mapRef.current) {
+    useEffect(() => {
+      const map = mapRef.current;
+      if (!map || !mapReady) {
         return;
       }
 
-      markersRef.current.forEach((marker) => marker.remove());
-      markersRef.current.clear();
+      const nextStyle = resolveKarlMapStyle(mapStyle, {
+        phonePortraitWeb: phonePortraitWebRef.current,
+      });
 
-      for (const location of locations) {
-        const isVisible = isMapMarkerVisible(location, {
-          intensityFilter,
-          selectedRegionId,
-        });
-        const showLocationLabel = shouldShowFoggyFilterMarkerLabel(
-          layout,
-          intensityFilter,
-          !isVisible,
-        );
-        const element = createMapMarkerElement({
-          location,
-          isSelected: location.id === selectedLocationId,
-          fogLayerEnabled,
-          intensityFilter,
-          selectedRegionId,
-          layout,
-          showLocationLabel,
-          onSelect: (locationId) => onSelectRef.current(locationId),
-        });
-        const placement = getMapMarkerPlacementOptions(showLocationLabel);
-
-        const marker = new maplibregl.Marker({
-          element,
-          anchor: placement.anchor,
-          offset: placement.offset,
-        })
-          .setLngLat([location.longitude, location.latitude])
-          .addTo(mapRef.current);
-
-        markersRef.current.set(location.id, marker);
-      }
-    }
-
-    syncMarkers();
-
-    return () => {
-      cancelled = true;
-      // Marker refs are managed imperatively by MapLibre, not React DOM.
-      // eslint-disable-next-line react-hooks/exhaustive-deps -- cleanup must read latest marker refs
-      const markers = markersRef.current;
-      markers.forEach((marker) => marker.remove());
-      markers.clear();
-    };
-  }, [fogLayerEnabled, intensityFilter, layout, locations, mapReady, selectedLocationId, selectedRegionId]);
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !mapReady) {
-      return;
-    }
-
-    syncFogOverlayLayer(map, locations, fogLayerEnabled, intensityFilter);
-  }, [fogLayerEnabled, intensityFilter, locations, mapReady]);
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !mapReady) {
-      return;
-    }
-
-    if (suppressViewportUpdateRef?.current) {
-      suppressViewportUpdateRef.current = false;
-      return;
-    }
-
-    if (selectedLocationId) {
-      const location = locations.find((item) => item.id === selectedLocationId);
-      if (location) {
-        focusMapOnLocation(map, location.longitude, location.latitude);
-      }
-      return;
-    }
-
-    const region = findBayAreaProductRegion(selectedRegionId);
-    if (region) {
-      fitMapToBounds(
-        map,
-        region.bounds,
-        resolveRegionViewportOptions(
-          region.viewport,
-          layout,
-          immersiveOverlayProfile,
-        ),
-      );
-      return;
-    }
-
-    if (intensityFilter) {
-      const bounds = boundsForIntensityLocations(locations, intensityFilter);
-      if (bounds) {
-        fitMapToBounds(
+      const applyStyle = () => {
+        syncFogOverlayLayer(
           map,
-          bounds,
-          resolveIntensityFilterFitOptions(layout, immersiveOverlayProfile),
+          locations,
+          fogLayerEnabled && !phonePortraitWebRef.current,
+          intensityFilter,
         );
-        return;
-      }
-    }
 
-    const immersiveFit = isImmersive
-      ? getImmersiveDefaultBayAreaFitOptions(immersiveOverlayProfile)
-      : null;
-    fitDefaultBayAreaViewport(
-      map,
-      immersiveFit?.padding,
-      immersiveFit?.maxZoom ?? BAY_AREA_DEFAULT_MAX_ZOOM,
-    );
-  }, [
-    immersiveOverlayProfile,
-    intensityFilter,
-    isImmersive,
-    layout,
-    locations,
-    mapReady,
-    selectedLocationId,
-    selectedRegionId,
-    suppressViewportUpdateRef,
-  ]);
+        if (isPhonePortraitWeb) {
+          if (
+            shouldUsePhonePortraitFixedCamera(selectedRegionId) &&
+            !selectedLocationId
+          ) {
+            fitPhonePortraitMapViewport(map);
+          }
+          return;
+        }
 
-  return (
-    <div
-      className={`relative w-full ${
-        isFullBleed ? "h-full min-h-screen" : "h-full min-h-[360px]"
-      }`}
-    >
+        if (selectedLocationId) {
+          const location = locations.find(
+            (item) => item.id === selectedLocationId,
+          );
+          if (location) {
+            focusMapOnLocation(map, location.longitude, location.latitude);
+          }
+        }
+      };
+
+      map.once("style.load", applyStyle);
+      map.setStyle(nextStyle);
+    }, [isPhonePortraitWeb, mapReady]);
+
+    return (
       <div
-        ref={containerRef}
-        data-testid="bay-area-map"
-        className={`karl-map-canvas w-full ${
+        className={`relative w-full ${
           isFullBleed ? "h-full min-h-screen" : "h-full min-h-[360px]"
-        }`}
-      />
-      <MapLayerControls
-        layout={layout}
-        mapStyle={mapStyle}
-        fogLayerEnabled={fogLayerEnabled}
-        onMapStyleChange={onMapStyleChange}
-        onFogLayerChange={onFogLayerChange}
-        onZoomIn={handleZoomIn}
-        onZoomOut={handleZoomOut}
-        onImmersivePanelOpenChange={onImmersiveLayersPanelOpenChange}
-      />
-      {!isFullBleed && fogLayerEnabled ? <MapFogLegend layout="mobile" /> : null}
-      {!isFullBleed ? (
-        <>
+        } ${isPhonePortraitWeb ? "karl-map-phone-portrait-host" : ""}`}
+      >
+        <div
+          ref={containerRef}
+          data-testid="bay-area-map"
+          className={`karl-map-canvas w-full ${
+            isFullBleed ? "h-full min-h-screen" : "h-full min-h-[360px]"
+          }`}
+        />
+        {isPhonePortraitWeb ? (
           <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-karl-navy/70 to-transparent"
+            aria-hidden
+            className="karl-map-phone-portrait-vignette pointer-events-none absolute inset-0 z-[1]"
           />
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-karl-navy/80 to-transparent"
-          />
-        </>
-      ) : null}
-      {isLoading || !mapReady ? (
-        <div className="absolute inset-0 flex items-center justify-center bg-karl-navy/55 px-6 text-center text-sm text-white/60 backdrop-blur-[1px]">
-          {isLoading ? "Loading Bay Area locations…" : "Preparing Bay Area map…"}
-        </div>
-      ) : null}
-    </div>
-  );
-}
+        ) : null}
+        <MapLayerControls
+          layout={layout}
+          mapStyle={mapStyle}
+          fogLayerEnabled={fogLayerEnabled}
+          onMapStyleChange={onMapStyleChange}
+          onFogLayerChange={onFogLayerChange}
+          onZoomIn={handleZoomIn}
+          onZoomOut={handleZoomOut}
+          onImmersivePanelOpenChange={onImmersiveLayersPanelOpenChange}
+        />
+        {!isFullBleed && fogLayerEnabled && !isPhonePortraitWeb ? (
+          <MapFogLegend layout="mobile" />
+        ) : null}
+        {!isFullBleed && !isPhonePortraitWeb ? (
+          <>
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-karl-navy/70 to-transparent"
+            />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-karl-navy/80 to-transparent"
+            />
+          </>
+        ) : null}
+        {isLoading || !mapReady ? (
+          <div className="absolute inset-0 flex items-center justify-center bg-karl-navy/55 px-6 text-center text-sm text-white/60 backdrop-blur-[1px]">
+            {isLoading
+              ? "Loading Bay Area locations…"
+              : "Preparing Bay Area map…"}
+          </div>
+        ) : null}
+      </div>
+    );
+  },
+);

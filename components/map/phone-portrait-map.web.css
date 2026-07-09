@@ -1,0 +1,99 @@
+/* Phone-portrait web map atmosphere and marker presentation. */
+
+.karl-map-phone-portrait-host {
+  position: relative;
+}
+
+.karl-map-phone-portrait-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background:
+    radial-gradient(
+      ellipse 130% 95% at 50% 42%,
+      rgb(2 8 16 / 0) 46%,
+      rgb(2 8 16 / 0.4) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgb(3 11 20 / 0.62) 0%,
+      rgb(3 11 20 / 0.1) 22%,
+      rgb(3 11 20 / 0.05) 55%,
+      rgb(3 11 20 / 0.5) 100%
+    );
+}
+
+.karl-universal-map-marker-root.is-phone-portrait {
+  gap: 0.18rem;
+  z-index: 2;
+}
+
+.karl-universal-map-marker-root.is-phone-portrait.is-selected {
+  z-index: 4;
+}
+
+.karl-universal-map-marker--phone-portrait.is-filtered-out {
+  opacity: 1;
+  filter: none;
+}
+
+.karl-universal-map-marker--phone-portrait .karl-universal-map-marker__svg {
+  width: 2.25rem;
+  height: 2.25rem;
+  filter: drop-shadow(0 2px 5px rgb(0 0 0 / 0.5));
+  opacity: 0.94;
+}
+
+.karl-universal-map-marker--phone-portrait.karl-universal-map-marker--clear
+  .karl-universal-map-marker__svg,
+.karl-universal-map-marker--phone-portrait.karl-universal-map-marker--lightFog
+  .karl-universal-map-marker__svg,
+.karl-universal-map-marker--phone-portrait.karl-universal-map-marker--foggy
+  .karl-universal-map-marker__svg,
+.karl-universal-map-marker--phone-portrait.karl-universal-map-marker--karlTerritory
+  .karl-universal-map-marker__svg {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+.karl-universal-map-marker--phone-portrait {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.karl-universal-map-marker--phone-portrait.is-selected {
+  filter: drop-shadow(0 0 10px rgb(242 163 38 / 0.55));
+  transform: scale(1.06);
+}
+
+.karl-universal-map-marker-root.is-phone-portrait .karl-universal-map-marker__label {
+  max-width: 8.5rem;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: rgb(255 255 255 / 0.88);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: 0.015em;
+  text-shadow:
+    0 1px 3px rgb(0 0 0 / 0.95),
+    0 0 8px rgb(0 0 0 / 0.55);
+}
+
+.karl-universal-map-marker-root.is-phone-portrait .karl-universal-map-marker__score {
+  color: rgb(242 163 38 / 0.95);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  text-shadow:
+    0 1px 3px rgb(0 0 0 / 0.9),
+    0 0 6px rgb(0 0 0 / 0.45);
+}
+
+.karl-map-canvas.karl-map-phone-portrait-host .maplibregl-ctrl-top-right {
+  top: 5.75rem;
+}

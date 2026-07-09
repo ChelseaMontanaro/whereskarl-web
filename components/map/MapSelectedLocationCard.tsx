@@ -18,7 +18,9 @@ import { isLocationDataDegraded } from "@/lib/weather/dataStatus";
 
 type MapSelectedLocationCardProps = {
   location: LocationWeather;
-  onClose: () => void;
+  onClose?: () => void;
+  phonePortrait?: boolean;
+  showCloseButton?: boolean;
 };
 
 function FavoriteHeartIcon({
@@ -60,6 +62,8 @@ function getConditionSentence(location: LocationWeather): string {
 export function MapSelectedLocationCard({
   location,
   onClose,
+  phonePortrait = false,
+  showCloseButton = true,
 }: MapSelectedLocationCardProps) {
   const conditionSentence = getConditionSentence(location);
   const isDegraded = isLocationDataDegraded(location.dataStatus);
@@ -74,6 +78,10 @@ export function MapSelectedLocationCard({
   }, [location.id]);
 
   useEffect(() => {
+    if (!onClose) {
+      return;
+    }
+
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Escape") {
         return;
@@ -86,11 +94,16 @@ export function MapSelectedLocationCard({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [onClose]);
 
+  const panelClass = phonePortrait
+    ? "relative w-full rounded-2xl border border-[rgb(160_185_210/0.24)] bg-[rgb(6_15_27/0.92)] px-3.5 py-3.5 shadow-[0_10px_18px_rgb(0_0_0/0.45)]"
+    : `${desktopGlassCardClass} relative max-w-[28rem] px-4 py-3 shadow-[0_8px_28px_rgba(0,0,0,0.28)]`;
+
   return (
     <article
-      className={`${desktopGlassCardClass} relative max-w-[28rem] px-4 py-3 shadow-[0_8px_28px_rgba(0,0,0,0.28)]`}
+      className={panelClass}
       aria-label={`Selected location: ${location.name}`}
     >
+      {showCloseButton && onClose ? (
       <button
         type="button"
         onClick={onClose}
@@ -99,6 +112,7 @@ export function MapSelectedLocationCard({
       >
         ×
       </button>
+      ) : null}
 
       <div className="flex items-center gap-3 pr-5">
         <MapLocationConditionIcon location={location} />
@@ -139,12 +153,22 @@ export function MapSelectedLocationCard({
           ) : null}
         </div>
 
-        <div className="flex shrink-0 flex-col items-center justify-center self-center border-l border-white/10 pl-3">
+        <div className={`flex shrink-0 flex-col items-center justify-center self-center border-l pl-3 ${
+          phonePortrait ? "min-w-[4.5rem] border-[rgb(150_175_200/0.16)]" : "border-white/10"
+        }`}>
           <div className="text-center">
-            <p className="text-[0.5rem] font-bold uppercase tracking-[0.14em] text-white/40 max-lg:text-[0.625rem] max-lg:tracking-[0.12em]">
+            <p className={`font-bold uppercase text-white/40 ${
+              phonePortrait
+                ? "text-[0.5625rem] tracking-[0.07em]"
+                : "text-[0.5rem] tracking-[0.14em] max-lg:text-[0.625rem] max-lg:tracking-[0.12em]"
+            }`}>
               Clear Skies Score
             </p>
-            <p className="mt-0.5 text-[1.35rem] font-light leading-none text-karl-gold max-lg:mt-1 max-lg:text-[2rem]">
+            <p className={`font-light leading-none text-[#22E36B] ${
+              phonePortrait
+                ? "mt-0 text-[1.75rem] leading-[1.875rem]"
+                : "mt-0.5 text-[1.35rem] max-lg:mt-1 max-lg:text-[2rem]"
+            }`}>
               {location.sunshineScore}
             </p>
           </div>

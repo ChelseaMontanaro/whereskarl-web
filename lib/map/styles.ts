@@ -40,6 +40,15 @@ const cinematicSatellitePaint = {
   "raster-hue-rotate": 14,
 } as const;
 
+/** Approved phone-portrait treatment: deep navy, high contrast, desaturated. */
+const phonePortraitCinematicSatellitePaint = {
+  "raster-brightness-min": 0.02,
+  "raster-brightness-max": 0.42,
+  "raster-contrast": 0.46,
+  "raster-saturation": -0.5,
+  "raster-hue-rotate": 195,
+} as const;
+
 /** Previous hybrid readability baseline for regression checks. */
 export const HYBRID_LABEL_OPACITY_BASELINE = 0.84;
 export const HYBRID_ROAD_OPACITY_BASELINE = 0.42;
@@ -142,16 +151,71 @@ const hybridStyle = {
   ],
 } satisfies StyleSpecification;
 
+const phonePortraitHybridStyle = {
+  ...hybridStyle,
+  layers: [
+    {
+      id: "karl-satellite",
+      type: "raster",
+      source: "karl-satellite",
+      paint: phonePortraitCinematicSatellitePaint,
+    },
+    {
+      id: "karl-roads-minor",
+      type: "raster",
+      source: "karl-roads",
+      paint: {
+        ...hybridMinorRoadPaint,
+        "raster-opacity": 0.1,
+      },
+    },
+    {
+      id: "karl-roads-major",
+      type: "raster",
+      source: "karl-roads",
+      paint: {
+        ...hybridMajorRoadPaint,
+        "raster-opacity": 0.3,
+      },
+    },
+    {
+      id: "karl-labels",
+      type: "raster",
+      source: "karl-labels",
+      paint: {
+        ...hybridLabelPaint,
+        "raster-opacity": 0.42,
+        "raster-contrast": 0.5,
+      },
+    },
+  ],
+} satisfies StyleSpecification;
+
+const phonePortraitSatelliteStyle = {
+  ...satelliteStyle,
+  layers: [
+    {
+      id: "karl-satellite",
+      type: "raster",
+      source: "karl-satellite",
+      paint: phonePortraitCinematicSatellitePaint,
+    },
+  ],
+} satisfies StyleSpecification;
+
 export function resolveKarlMapStyle(
   styleId: KarlMapStyleId,
+  options?: { phonePortraitWeb?: boolean },
 ): string | StyleSpecification {
+  const phonePortraitWeb = options?.phonePortraitWeb ?? false;
+
   switch (styleId) {
     case "standard":
       return BAY_AREA_MAP_STYLE;
     case "satellite":
-      return satelliteStyle;
+      return phonePortraitWeb ? phonePortraitSatelliteStyle : satelliteStyle;
     case "hybrid":
-      return hybridStyle;
+      return phonePortraitWeb ? phonePortraitHybridStyle : hybridStyle;
   }
 }
 

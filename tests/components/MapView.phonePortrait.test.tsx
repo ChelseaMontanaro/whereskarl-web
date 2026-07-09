@@ -67,18 +67,16 @@ describe("MapView phone portrait", () => {
     );
   });
 
-  it("uses the compact phone portrait header instead of the large conditions card", async () => {
+  it("uses the approved phone portrait header and region chips", async () => {
     const { container } = renderMap();
 
     expect(
-      await screen.findByRole("heading", { name: "Bay Area conditions" }),
+      await screen.findByRole("heading", { name: "Karl Around the Bay" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Karl around the Bay")).toBeInTheDocument();
     expect(
-      screen.queryByText("Explore live fog & clear skies around the Bay."),
+      screen.queryByRole("heading", { name: "Bay Area conditions" }),
     ).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Karl Territory" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "SF" })).toBeInTheDocument();
     expect(container.querySelector(".grid.grid-cols-2")).toBeNull();
-    expect(container.querySelector(".flex.flex-col.gap-1")).toBeTruthy();
   });
 });

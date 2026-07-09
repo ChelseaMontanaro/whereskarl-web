@@ -4,7 +4,29 @@ import {
   normalizeVisibleMapRegionId,
   type BayAreaBackendRegionId,
   type BayAreaVisibleProductRegionId,
+  type MapBounds,
 } from "@/lib/map/config";
+
+export type LocationWithCoordinates = {
+  id: string;
+  latitude: number;
+  longitude: number;
+};
+
+export function isLocationWithinProductRegionBounds(
+  latitude: number,
+  longitude: number,
+  bounds: MapBounds,
+): boolean {
+  const [[west, south], [east, north]] = bounds;
+
+  return (
+    longitude >= west &&
+    longitude <= east &&
+    latitude >= south &&
+    latitude <= north
+  );
+}
 
 export type LocationWithRegion = {
   id: string;
