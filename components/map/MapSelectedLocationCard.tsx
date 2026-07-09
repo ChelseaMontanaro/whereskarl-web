@@ -96,7 +96,7 @@ export function MapSelectedLocationCard({
   }, [onClose]);
 
   const panelClass = phonePortrait
-    ? "relative w-full rounded-2xl border border-[rgb(160_185_210/0.24)] bg-[rgb(6_15_27/0.92)] px-3.5 py-3.5 shadow-[0_10px_18px_rgb(0_0_0/0.45)]"
+    ? "relative w-full rounded-2xl border border-[rgb(160_185_210/0.24)] bg-[rgb(6_15_27/0.92)] px-2.5 py-1.5 shadow-[0_10px_18px_rgb(0_0_0/0.45)]"
     : `${desktopGlassCardClass} relative max-w-[28rem] px-4 py-3 shadow-[0_8px_28px_rgba(0,0,0,0.28)]`;
 
   return (
@@ -115,19 +115,29 @@ export function MapSelectedLocationCard({
       </button>
       ) : null}
 
-      <div className="flex items-center gap-3 pr-5">
+      <div
+        className={`flex items-center ${
+          phonePortrait ? "gap-2 pr-4" : "gap-3 pr-5"
+        }`}
+      >
         {phonePortrait ? (
           <MapPhonePortraitConditionIcon
             intensity={resolveLocationFogIntensity(location)}
-            className="h-7 w-7 shrink-0"
+            className="h-5 w-5 shrink-0"
           />
         ) : (
           <MapLocationConditionIcon location={location} />
         )}
 
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5">
-            <h2 className="text-[1.05rem] font-semibold leading-tight tracking-tight text-white">
+          <div className="flex items-center gap-1">
+            <h2
+              className={`font-semibold tracking-tight text-white ${
+                phonePortrait
+                  ? "text-[0.8125rem] leading-3"
+                  : "text-[1.05rem] leading-tight"
+              }`}
+            >
               {location.name}
             </h2>
             <button
@@ -139,44 +149,74 @@ export function MapSelectedLocationCard({
                   ? `Remove ${location.name} from favorites`
                   : `Add ${location.name} to favorites`
               }
-              className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full transition-colors motion-reduce:transition-none ${
+              className={`flex shrink-0 items-center justify-center rounded-full transition-colors motion-reduce:transition-none ${
+                phonePortrait ? "h-5 w-5" : "h-6 w-6"
+              } ${
                 isFavorite
                   ? "text-karl-gold"
                   : "text-white/42 hover:bg-white/[0.05] hover:text-karl-gold/85"
               }`}
             >
-              <FavoriteHeartIcon filled={isFavorite} />
+              <FavoriteHeartIcon
+                filled={isFavorite}
+                className={phonePortrait ? "h-3.5 w-3.5" : "h-4 w-4"}
+              />
             </button>
           </div>
-          <p className="mt-0.5 line-clamp-2 text-[0.75rem] leading-snug text-white/72">
+          <p
+            className={`text-white/72 ${
+              phonePortrait
+                ? "mt-px line-clamp-1 text-[0.625rem] leading-tight"
+                : "mt-0.5 line-clamp-2 text-[0.75rem] leading-snug"
+            }`}
+          >
             {conditionSentence}
           </p>
 
-          {isDegraded ? <DegradedDataLabel variant="location" className="mt-1" /> : null}
+          {isDegraded ? (
+            <DegradedDataLabel
+              variant="location"
+              className={phonePortrait ? "mt-px" : "mt-1"}
+            />
+          ) : null}
 
           {metadataItems.length > 0 ? (
-            <p className="mt-1.5 text-[0.65rem] font-medium text-white/48">
+            <p
+              className={`font-medium text-white/48 ${
+                phonePortrait
+                  ? "mt-0.5 text-[0.5625rem] leading-none"
+                  : "mt-1.5 text-[0.65rem]"
+              }`}
+            >
               {metadataItems.join(" • ")}
             </p>
           ) : null}
         </div>
 
-        <div className={`flex shrink-0 flex-col items-center justify-center self-center border-l pl-3 ${
-          phonePortrait ? "min-w-[4.5rem] border-[rgb(150_175_200/0.16)]" : "border-white/10"
-        }`}>
+        <div
+          className={`flex shrink-0 flex-col items-center justify-center self-center border-l ${
+            phonePortrait
+              ? "min-w-[3.25rem] border-[rgb(150_175_200/0.16)] pl-2"
+              : "min-w-[4.5rem] border-white/10 pl-3"
+          }`}
+        >
           <div className="text-center">
-            <p className={`font-bold uppercase text-white/40 ${
-              phonePortrait
-                ? "text-[0.5625rem] tracking-[0.07em]"
-                : "text-[0.5rem] tracking-[0.14em] max-lg:text-[0.625rem] max-lg:tracking-[0.12em]"
-            }`}>
+            <p
+              className={`font-bold uppercase text-white/40 ${
+                phonePortrait
+                  ? "text-[0.5rem] tracking-[0.06em]"
+                  : "text-[0.5rem] tracking-[0.14em] max-lg:text-[0.625rem] max-lg:tracking-[0.12em]"
+              }`}
+            >
               Clear Skies Score
             </p>
-            <p className={`font-light leading-none text-[#22E36B] ${
-              phonePortrait
-                ? "mt-0 text-[1.75rem] leading-[1.875rem]"
-                : "mt-0.5 text-[1.35rem] max-lg:mt-1 max-lg:text-[2rem]"
-            }`}>
+            <p
+              className={`font-light leading-none text-[#22E36B] ${
+                phonePortrait
+                  ? "mt-px text-xl leading-5"
+                  : "mt-0.5 text-[1.35rem] max-lg:mt-1 max-lg:text-[2rem]"
+              }`}
+            >
               {location.sunshineScore}
             </p>
           </div>

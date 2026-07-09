@@ -41,15 +41,15 @@ const cinematicSatellitePaint = {
 } as const;
 
 /**
- * Phone-portrait satellite: same natural hybrid color as desktop, with only a
- * light polish so water stays blue and land stays green/brown.
+ * Phone-portrait satellite: natural blue water and green land with only a
+ * subtle cool polish — no brown cast, no heavy navy crush.
  */
 const phonePortraitCinematicSatellitePaint = {
   "raster-brightness-min": 0,
-  "raster-brightness-max": 0.64,
-  "raster-contrast": 0.38,
-  "raster-saturation": -0.06,
-  "raster-hue-rotate": 14,
+  "raster-brightness-max": 0.78,
+  "raster-contrast": 0.2,
+  "raster-saturation": 0.06,
+  "raster-hue-rotate": -5,
 } as const;
 
 /** Previous hybrid readability baseline for regression checks. */

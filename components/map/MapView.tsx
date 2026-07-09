@@ -457,10 +457,10 @@ function MobileMapView({ state }: { state: MapViewModel }) {
         ) : null}
 
         <div
-          className={`pointer-events-auto absolute inset-x-3 flex flex-col items-stretch gap-2.5 sm:inset-x-4 ${
+          className={`pointer-events-auto absolute inset-x-3 flex flex-col items-stretch sm:inset-x-4 ${
             isPhonePortrait
-              ? "bottom-[calc(4.5rem+env(safe-area-inset-bottom))]"
-              : "bottom-[calc(5.5rem+env(safe-area-inset-bottom))] md:bottom-[calc(5.25rem+env(safe-area-inset-bottom))]"
+              ? "bottom-[calc(4.5rem+env(safe-area-inset-bottom))] gap-1.5"
+              : "bottom-[calc(5.5rem+env(safe-area-inset-bottom))] gap-2.5 md:bottom-[calc(5.25rem+env(safe-area-inset-bottom))]"
           }`}
         >
           {shouldShowDesktopBestRightNowTray(intensityFilter) ? (
