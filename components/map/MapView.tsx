@@ -474,14 +474,16 @@ function MobileMapView({ state }: { state: MapViewModel }) {
           ) : null}
 
           {isPhonePortrait && featuredPhoneLocation ? (
-            <MapSelectedLocationCard
-              location={featuredPhoneLocation}
-              onClose={
-                selectedLocation ? handleClearSelectedLocation : undefined
-              }
-              showCloseButton={Boolean(selectedLocation)}
-              phonePortrait
-            />
+            <div className="mb-8">
+              <MapSelectedLocationCard
+                location={featuredPhoneLocation}
+                onClose={
+                  selectedLocation ? handleClearSelectedLocation : undefined
+                }
+                showCloseButton={Boolean(selectedLocation)}
+                phonePortrait
+              />
+            </div>
           ) : selectedLocation ? (
             <MapSelectedLocationCard
               location={selectedLocation}
