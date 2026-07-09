@@ -18,7 +18,7 @@ type SelectedLocationPreviewProps = {
   variant?: 'card' | 'compact';
 };
 
-const compactScoreGreen = '#4ADE80';
+const compactScoreGreen = '#22E36B';
 
 export function SelectedLocationPreview({
   location,
@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     lineHeight: 30,
     marginTop: 0,
-    fontWeight: '600',
+    fontWeight: '300',
     textAlign: 'center',
   },
   plainIconWrap: {
