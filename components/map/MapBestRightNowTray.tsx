@@ -22,7 +22,7 @@ export function MapBestRightNowTray({
   isPhonePortrait = false,
 }: MapBestRightNowTrayProps) {
   const panelClass = isPhonePortrait
-    ? "rounded-2xl border border-[rgb(160_185_210/0.24)] bg-[rgb(6_15_27/0.92)] px-3 py-[0.6875rem] shadow-[0_10px_18px_rgb(0_0_0/0.45)]"
+    ? "rounded-2xl border border-[rgb(160_185_210/0.24)] bg-[rgb(6_15_27/0.92)] px-2.5 py-1.5 shadow-[0_10px_18px_rgb(0_0_0/0.45)]"
     : desktopGlassCardClass;
 
   if (isLoading) {
@@ -43,16 +43,24 @@ export function MapBestRightNowTray({
       className={`${panelClass} max-w-full overflow-x-auto`}
     >
       <p
-        className={`px-1 font-bold uppercase text-karl-gold/90 ${
+        className={`font-bold uppercase text-karl-gold/90 ${
           isPhonePortrait
-            ? "text-[0.6875rem] tracking-[0.1em]"
-            : "text-[0.625rem] tracking-[0.16em] text-white/45"
+            ? "px-0.5 text-[0.625rem] tracking-[0.08em]"
+            : "px-1 text-[0.625rem] tracking-[0.16em] text-white/45"
         }`}
       >
         {title}
       </p>
-      <div className="mt-2 flex items-stretch gap-2">
-        <ul className="flex items-stretch gap-2">
+      <div
+        className={`flex items-stretch ${
+          isPhonePortrait ? "mt-1 gap-1.5" : "mt-2 gap-2"
+        }`}
+      >
+        <ul
+          className={`flex items-stretch ${
+            isPhonePortrait ? "gap-1.5" : "gap-2"
+          }`}
+        >
         {items.map((item, index) => {
           const isSelected =
             selectedLocationId != null &&
@@ -71,8 +79,10 @@ export function MapBestRightNowTray({
                 event.stopPropagation();
                 onSelectLocation(item.locationId);
               }}
-              className={`flex flex-col rounded-xl border px-2 py-1.5 text-left transition-colors hover:border-karl-gold/25 hover:bg-karl-gold/[0.06] motion-reduce:transition-none ${
-                isPhonePortrait ? "w-24 gap-0.5" : "min-w-[7.5rem] px-3 py-2"
+              className={`flex flex-col rounded-xl border text-left transition-colors hover:border-karl-gold/25 hover:bg-karl-gold/[0.06] motion-reduce:transition-none ${
+                isPhonePortrait
+                  ? "w-[5.25rem] gap-0 px-1.5 py-1"
+                  : "min-w-[7.5rem] px-3 py-2"
               } ${
                 isSelected
                   ? "border-karl-gold/28 bg-karl-gold/[0.08]"
@@ -81,7 +91,9 @@ export function MapBestRightNowTray({
             >
               <span
                 className={`truncate font-semibold text-white ${
-                  isPhonePortrait ? "text-xs leading-[0.875rem]" : "text-sm"
+                  isPhonePortrait
+                    ? "text-[0.6875rem] leading-3"
+                    : "text-sm"
                 }`}
               >
                 {item.locationName}
@@ -90,7 +102,7 @@ export function MapBestRightNowTray({
                 <span
                   className={`font-semibold text-karl-gold ${
                     isPhonePortrait
-                      ? "text-[0.9375rem] leading-[1.0625rem]"
+                      ? "text-sm leading-4"
                       : "mt-1 text-xs font-light"
                   }`}
                 >
@@ -100,7 +112,7 @@ export function MapBestRightNowTray({
                 </span>
               ) : null}
               {isPhonePortrait && (index === 0 || item.scoreLabel) ? (
-                <span className="truncate text-[0.625rem] font-medium leading-3 text-white/55">
+                <span className="truncate text-[0.5625rem] font-medium leading-[0.625rem] text-white/55">
                   {item.scoreLabel ?? (index === 0 ? "Clearest" : "")}
                 </span>
               ) : null}
@@ -108,7 +120,7 @@ export function MapBestRightNowTray({
                 <DegradedDataLabel variant="bestRightNow" className="mt-1" />
               ) : null}
               {isPhonePortrait && item.isDegraded ? (
-                <DegradedDataLabel variant="bestRightNow" className="mt-0.5" />
+                <DegradedDataLabel variant="bestRightNow" className="mt-px" />
               ) : null}
             </button>
           </li>
@@ -118,7 +130,7 @@ export function MapBestRightNowTray({
         {isPhonePortrait ? (
           <div
             aria-hidden
-            className="flex h-7 w-7 shrink-0 items-center justify-center self-center rounded-full border border-white/10 bg-white/[0.04] text-lg text-white/55"
+            className="flex h-6 w-6 shrink-0 items-center justify-center self-center rounded-full border border-white/10 bg-white/[0.04] text-base text-white/55"
           >
             ›
           </div>
