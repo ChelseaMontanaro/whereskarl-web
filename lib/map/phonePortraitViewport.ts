@@ -4,13 +4,17 @@ import { BAY_AREA_LOCATION_ZOOM } from "@/lib/map/config";
 import {
   getPhonePortraitCameraPreset,
   PHONE_PORTRAIT_MAP_MAX_ZOOM,
+  PHONE_PORTRAIT_NORTH_BAY_REGION_BOUNDS,
+  PHONE_PORTRAIT_NORTH_BAY_VIEWPORT_PADDING,
   PHONE_PORTRAIT_SF_REGION_BOUNDS,
   PHONE_PORTRAIT_SF_VIEWPORT_PADDING,
 } from "@/lib/map/phonePortraitMapPresentation";
 import { fitMapToBounds } from "@/lib/map/viewport";
 
 function normalizePhonePortraitPadding(
-  padding: typeof PHONE_PORTRAIT_SF_VIEWPORT_PADDING,
+  padding:
+    | typeof PHONE_PORTRAIT_SF_VIEWPORT_PADDING
+    | typeof PHONE_PORTRAIT_NORTH_BAY_VIEWPORT_PADDING,
 ): { top: number; bottom: number; left: number; right: number } {
   if (typeof padding === "number") {
     return { top: padding, bottom: padding, left: padding, right: padding };
@@ -37,6 +41,20 @@ export function fitPhonePortraitRegionViewport(
     );
 
     map.fitBounds(PHONE_PORTRAIT_SF_REGION_BOUNDS, {
+      padding,
+      maxZoom: PHONE_PORTRAIT_MAP_MAX_ZOOM,
+      duration,
+      essential: true,
+    });
+    return;
+  }
+
+  if (regionId === "north-bay") {
+    const padding = normalizePhonePortraitPadding(
+      PHONE_PORTRAIT_NORTH_BAY_VIEWPORT_PADDING,
+    );
+
+    map.fitBounds(PHONE_PORTRAIT_NORTH_BAY_REGION_BOUNDS, {
       padding,
       maxZoom: PHONE_PORTRAIT_MAP_MAX_ZOOM,
       duration,

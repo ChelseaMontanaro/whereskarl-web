@@ -60,11 +60,25 @@ export const PHONE_PORTRAIT_SF_CAMERA: PhonePortraitCameraPreset = {
   zoom: PHONE_PORTRAIT_MAP_INITIAL_ZOOM,
 };
 
+/** North Bay tab: Marin hills with Mill Valley centered — approved screenshot. */
+export const PHONE_PORTRAIT_NORTH_BAY_REGION_BOUNDS: MapBounds = [
+  [-122.655, 37.812],
+  [-122.455, 38.005],
+];
+
+/** Padding tuned for North Bay fitBounds above the bottom tray and beside the fog rail. */
+export const PHONE_PORTRAIT_NORTH_BAY_VIEWPORT_PADDING: ViewportPadding = {
+  top: 135,
+  right: 22,
+  bottom: 228,
+  left: 100,
+};
+
 /** North Bay tab: Marin, Novato, San Rafael, Mill Valley, Tiburon, Sausalito. */
 export const PHONE_PORTRAIT_NORTH_BAY_CAMERA: PhonePortraitCameraPreset = {
-  latitude: 37.97,
-  longitude: -122.545,
-  zoom: 9.35,
+  latitude: 37.904,
+  longitude: -122.552,
+  zoom: 9.62,
 };
 
 /** East Bay tab: Richmond, Berkeley, Oakland, Alameda. */
