@@ -291,7 +291,9 @@ function ImmersiveMapLayerControls({
       <div
         className={`absolute z-20 flex flex-col gap-1.5 sm:top-4 sm:gap-2 md:top-[4.5rem] ${
           isPhonePortrait
-            ? "right-3 top-3 w-[min(100%,12.5rem)] items-end"
+            ? `right-3 top-[calc(7rem+env(safe-area-inset-top))] items-end${
+                !isLayersCollapsed ? " w-[min(calc(100vw-1.5rem),17rem)]" : ""
+              }`
             : "top-3 right-3 w-[min(17rem,calc(100%-0.75rem))] max-w-full items-stretch"
         } ${!isLayersCollapsed && isPhonePortrait ? "z-30" : "z-20"}`}
       >

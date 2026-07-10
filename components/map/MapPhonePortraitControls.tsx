@@ -27,6 +27,7 @@ export function MapPhonePortraitControls({
   isPhonePortrait = false,
 }: MapPhonePortraitControlsProps) {
   const chipRefs = useRef(new Map<string, HTMLButtonElement>());
+  const chipScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isPhonePortrait || !selectedRegionId) {
@@ -34,19 +35,31 @@ export function MapPhonePortraitControls({
     }
 
     const selectedChip = chipRefs.current.get(selectedRegionId);
-    if (!selectedChip) {
+    const scrollContainer = chipScrollRef.current;
+    if (!selectedChip || !scrollContainer) {
       return;
     }
 
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
+    const behavior = prefersReducedMotion ? "auto" : "smooth";
+    const edgePadding = 4;
+    const chipStart = selectedChip.offsetLeft;
+    const chipEnd = chipStart + selectedChip.offsetWidth;
+    const viewStart = scrollContainer.scrollLeft;
+    const viewEnd = viewStart + scrollContainer.clientWidth;
 
-    selectedChip.scrollIntoView({
-      behavior: prefersReducedMotion ? "auto" : "smooth",
-      block: "nearest",
-      inline: "center",
-    });
+    let nextScroll = viewStart;
+    if (chipStart - edgePadding < viewStart) {
+      nextScroll = Math.max(0, chipStart - edgePadding);
+    } else if (chipEnd + edgePadding > viewEnd) {
+      nextScroll = chipEnd + edgePadding - scrollContainer.clientWidth;
+    } else {
+      return;
+    }
+
+    scrollContainer.scrollTo({ left: nextScroll, behavior });
   }, [isPhonePortrait, selectedRegionId]);
 
   if (isPhonePortrait) {
@@ -56,7 +69,10 @@ export function MapPhonePortraitControls({
           Karl Around the Bay
         </h1>
 
-        <div className="flex w-full items-center gap-1.5 overflow-x-auto scroll-px-1 pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div
+          ref={chipScrollRef}
+          className="flex w-full items-center gap-1.5 overflow-x-auto scroll-px-1 pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
           {BAY_AREA_PRODUCT_REGIONS.map((region) => {
             const isSelected = selectedRegionId === region.id;
 

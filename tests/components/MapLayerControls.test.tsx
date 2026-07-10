@@ -141,6 +141,11 @@ describe("MapLayerControls immersive", () => {
     expect(screen.getByRole("button", { name: "Open map layers" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Zoom in" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Zoom out" })).not.toBeInTheDocument();
+
+    const layersButton = screen.getByRole("button", { name: "Open map layers" });
+    const controls = layersButton.parentElement;
+    expect(controls?.className).toContain("7rem");
+    expect(controls?.className).not.toContain("12.5rem");
   });
 
   it("notifies when the immersive layers panel opens on phone portrait", () => {

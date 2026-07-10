@@ -399,10 +399,10 @@ function MobileMapView({ state }: { state: MapViewModel }) {
         {!isLayersPanelOpen ? (
           <>
             <div
-              className={`pointer-events-auto absolute left-3 flex flex-col transition-opacity motion-reduce:transition-none sm:left-4 ${
+              className={`pointer-events-auto absolute flex flex-col transition-opacity motion-reduce:transition-none ${
                 isPhonePortrait
-                  ? "top-[calc(1.375rem+env(safe-area-inset-top))] w-[calc(100vw-4.75rem)] max-w-[calc(100vw-4.75rem)] gap-0"
-                  : "top-3 max-w-[min(100%,13.5rem)] gap-1.5 sm:top-4 sm:max-w-xs md:top-[4.5rem] md:max-w-xs"
+                  ? "inset-x-3 top-[calc(1.375rem+env(safe-area-inset-top))] gap-0"
+                  : "left-3 top-3 max-w-[min(100%,13.5rem)] gap-1.5 sm:left-4 sm:top-4 sm:max-w-xs md:top-[4.5rem] md:max-w-xs"
               } opacity-100`}
             >
               {isPhonePortrait ? (

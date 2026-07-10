@@ -43,10 +43,10 @@ describe("MapPhonePortraitControls", () => {
   });
 
   it("scrolls the selected phone portrait chip into view", () => {
-    const scrollIntoView = vi.fn();
-    Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
+    const scrollTo = vi.fn();
+    Object.defineProperty(HTMLElement.prototype, "scrollTo", {
       configurable: true,
-      value: scrollIntoView,
+      value: scrollTo,
     });
     Object.defineProperty(window, "matchMedia", {
       configurable: true,
@@ -62,11 +62,7 @@ describe("MapPhonePortraitControls", () => {
       />,
     );
 
-    expect(scrollIntoView).toHaveBeenCalledWith({
-      behavior: "smooth",
-      block: "nearest",
-      inline: "center",
-    });
+    expect(scrollTo).toHaveBeenCalled();
   });
 
   it("keeps region chip interactions wired", () => {

@@ -78,5 +78,10 @@ describe("MapView phone portrait", () => {
     ).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "SF" })).toBeInTheDocument();
     expect(container.querySelector(".grid.grid-cols-2")).toBeNull();
+
+    const header = screen.getByRole("heading", { name: "Karl Around the Bay" });
+    const headerContainer = header.parentElement?.parentElement;
+    expect(headerContainer?.className).toContain("inset-x-3");
+    expect(headerContainer?.className).not.toContain("4.75rem");
   });
 });
