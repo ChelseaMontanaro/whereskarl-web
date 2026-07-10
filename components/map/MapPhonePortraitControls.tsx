@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+
 import {
   BAY_AREA_PRODUCT_REGIONS,
   type BayAreaProductRegion,
@@ -22,6 +26,29 @@ export function MapPhonePortraitControls({
   onSelectRegion,
   isPhonePortrait = false,
 }: MapPhonePortraitControlsProps) {
+  const chipRefs = useRef(new Map<string, HTMLButtonElement>());
+
+  useEffect(() => {
+    if (!isPhonePortrait || !selectedRegionId) {
+      return;
+    }
+
+    const selectedChip = chipRefs.current.get(selectedRegionId);
+    if (!selectedChip) {
+      return;
+    }
+
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    selectedChip.scrollIntoView({
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+      block: "nearest",
+      inline: "center",
+    });
+  }, [isPhonePortrait, selectedRegionId]);
+
   if (isPhonePortrait) {
     return (
       <div className="flex w-full flex-col items-center gap-1.5" aria-label="Bay Area regions">
@@ -29,17 +56,24 @@ export function MapPhonePortraitControls({
           Karl Around the Bay
         </h1>
 
-        <div className="flex w-full items-center gap-1.5 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="flex w-full items-center gap-1.5 overflow-x-auto scroll-px-1 pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {BAY_AREA_PRODUCT_REGIONS.map((region) => {
             const isSelected = selectedRegionId === region.id;
 
             return (
               <button
                 key={region.id}
+                ref={(node) => {
+                  if (node) {
+                    chipRefs.current.set(region.id, node);
+                  } else {
+                    chipRefs.current.delete(region.id);
+                  }
+                }}
                 type="button"
                 aria-pressed={isSelected}
                 onClick={() => onSelectRegion(region.id)}
-                className={`shrink-0 rounded-full border px-2.5 py-2 text-center text-xs font-bold leading-[0.875rem] transition-opacity motion-reduce:transition-none ${
+                className={`shrink-0 whitespace-nowrap rounded-full border px-2.5 py-2 text-center text-xs font-bold leading-[0.875rem] transition-opacity motion-reduce:transition-none ${
                   isSelected
                     ? "border-karl-gold/45 bg-karl-gold text-karl-navy"
                     : "border-[rgb(150_175_200/0.2)] bg-[rgb(5_13_24/0.78)] text-white/78 hover:opacity-90"
