@@ -8,6 +8,8 @@ import {
   PHONE_PORTRAIT_MAP_MAX_ZOOM,
   PHONE_PORTRAIT_NORTH_BAY_REGION_BOUNDS,
   PHONE_PORTRAIT_NORTH_BAY_VIEWPORT_PADDING,
+  PHONE_PORTRAIT_PENINSULA_REGION_BOUNDS,
+  PHONE_PORTRAIT_PENINSULA_VIEWPORT_PADDING,
   PHONE_PORTRAIT_SF_REGION_BOUNDS,
   PHONE_PORTRAIT_SF_VIEWPORT_PADDING,
   PHONE_PORTRAIT_SOUTH_BAY_REGION_BOUNDS,
@@ -20,6 +22,7 @@ function normalizePhonePortraitPadding(
     | typeof PHONE_PORTRAIT_SF_VIEWPORT_PADDING
     | typeof PHONE_PORTRAIT_NORTH_BAY_VIEWPORT_PADDING
     | typeof PHONE_PORTRAIT_EAST_BAY_VIEWPORT_PADDING
+    | typeof PHONE_PORTRAIT_PENINSULA_VIEWPORT_PADDING
     | typeof PHONE_PORTRAIT_SOUTH_BAY_VIEWPORT_PADDING,
 ): { top: number; bottom: number; left: number; right: number } {
   if (typeof padding === "number") {
@@ -89,6 +92,20 @@ export function fitPhonePortraitRegionViewport(
     );
 
     map.fitBounds(PHONE_PORTRAIT_SOUTH_BAY_REGION_BOUNDS, {
+      padding,
+      maxZoom: PHONE_PORTRAIT_MAP_MAX_ZOOM,
+      duration,
+      essential: true,
+    });
+    return;
+  }
+
+  if (regionId === "peninsula") {
+    const padding = normalizePhonePortraitPadding(
+      PHONE_PORTRAIT_PENINSULA_VIEWPORT_PADDING,
+    );
+
+    map.fitBounds(PHONE_PORTRAIT_PENINSULA_REGION_BOUNDS, {
       padding,
       maxZoom: PHONE_PORTRAIT_MAP_MAX_ZOOM,
       duration,

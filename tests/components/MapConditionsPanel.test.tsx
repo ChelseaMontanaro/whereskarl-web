@@ -44,7 +44,7 @@ describe("MapConditionsPanel", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("renders only the four visible region chips", () => {
+  it("renders all visible region chips including Peninsula", () => {
     render(
       <MapConditionsPanel selectedRegionId={null} onSelectRegion={vi.fn()} />,
     );
@@ -53,7 +53,7 @@ describe("MapConditionsPanel", () => {
     expect(screen.getByRole("button", { name: "North Bay" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "East Bay" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "South Bay" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Peninsula" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Peninsula" })).toBeInTheDocument();
   });
 
   it("keeps region chip filtering behavior unchanged", () => {

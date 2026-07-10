@@ -190,17 +190,16 @@ describe("MapView", () => {
     expect(await screen.findByLabelText("Best Right Now")).toBeInTheDocument();
   });
 
-  it("normalizes peninsula region params to San Francisco", async () => {
+  it("activates the Peninsula region from the shareable region route", async () => {
     useSearchParamsMock.mockReturnValue(new URLSearchParams("region=peninsula"));
 
     renderMap();
 
-    expect(await screen.findByRole("button", { name: "SF" })).toHaveAttribute(
+    expect(await screen.findByRole("button", { name: "Peninsula" })).toHaveAttribute(
       "aria-pressed",
       "true",
     );
     expect(screen.queryByText(/Couldn't find region/i)).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Peninsula" })).not.toBeInTheDocument();
   });
 
   it("selects a location from the Best Right Now tray and updates routing", async () => {

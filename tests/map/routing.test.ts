@@ -72,11 +72,11 @@ describe("map routing", () => {
     );
   });
 
-  it("resolveMapQueryState normalizes peninsula to San Francisco", () => {
+  it("resolveMapQueryState recognizes peninsula as a visible region", () => {
     expect(resolveMapQueryState(new URLSearchParams("region=peninsula"))).toEqual(
       {
         requestedLocationId: null,
-        activeRegionId: "san-francisco",
+        activeRegionId: "peninsula",
         unknownLocationId: null,
         unknownRegionId: null,
       },

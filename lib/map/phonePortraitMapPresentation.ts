@@ -123,6 +123,27 @@ export const PHONE_PORTRAIT_SOUTH_BAY_CAMERA: PhonePortraitCameraPreset = {
   zoom: 9.88,
 };
 
+/** Peninsula tab: Pacific coast through Palo Alto — approved screenshot. */
+export const PHONE_PORTRAIT_PENINSULA_REGION_BOUNDS: MapBounds = [
+  [-122.5, 37.38],
+  [-122.12, 37.8],
+];
+
+/** Padding tuned for Peninsula fitBounds above the bottom tray and beside the fog rail. */
+export const PHONE_PORTRAIT_PENINSULA_VIEWPORT_PADDING: ViewportPadding = {
+  top: 130,
+  right: 30,
+  bottom: 224,
+  left: 96,
+};
+
+/** Peninsula tab: Daly City through Palo Alto with Half Moon Bay context. */
+export const PHONE_PORTRAIT_PENINSULA_CAMERA: PhonePortraitCameraPreset = {
+  latitude: 37.57,
+  longitude: -122.31,
+  zoom: 9.38,
+};
+
 /** Deselected / all-Bay default: wider full Bay Area view. */
 export const PHONE_PORTRAIT_ALL_BAY_CAMERA: PhonePortraitCameraPreset = {
   latitude: 37.58,
@@ -142,6 +163,8 @@ export function getPhonePortraitCameraPreset(
       return PHONE_PORTRAIT_EAST_BAY_CAMERA;
     case "south-bay":
       return PHONE_PORTRAIT_SOUTH_BAY_CAMERA;
+    case "peninsula":
+      return PHONE_PORTRAIT_PENINSULA_CAMERA;
     default:
       return PHONE_PORTRAIT_ALL_BAY_CAMERA;
   }

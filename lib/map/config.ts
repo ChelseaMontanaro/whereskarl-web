@@ -64,12 +64,13 @@ export type BayAreaProductRegionViewport = {
   maxZoom?: number;
 };
 
-/** Region chips and map framing — SF, North Bay, East Bay, South Bay only. */
+/** Region chips and map framing — SF, North Bay, East Bay, South Bay, Peninsula. */
 export const BAY_AREA_VISIBLE_PRODUCT_REGION_IDS = [
   "san-francisco",
   "north-bay",
   "east-bay",
   "south-bay",
+  "peninsula",
 ] as const;
 
 /** Backend `/locations` region values, including the coastal Peninsula belt. */
@@ -170,6 +171,25 @@ export const BAY_AREA_PRODUCT_REGIONS: BayAreaProductRegion[] = [
       maxZoom: 11,
     },
   },
+  {
+    id: "peninsula",
+    name: "Peninsula",
+    bounds: [
+      [-122.52, 37.38],
+      [-122.12, 37.82],
+    ],
+    viewport: {
+      padding: 36,
+      immersivePadding: immersiveViewportPadding,
+      desktopPadding: {
+        top: 80,
+        right: 80,
+        bottom: 128,
+        left: 360,
+      },
+      maxZoom: 10.4,
+    },
+  },
 ];
 
 /** Maps backend-only regions into the visible coastal fog belt grouping. */
@@ -181,7 +201,7 @@ const BACKEND_TO_VISIBLE_REGION: Record<
   "north-bay": "north-bay",
   "east-bay": "east-bay",
   "south-bay": "south-bay",
-  peninsula: "san-francisco",
+  peninsula: "peninsula",
 };
 
 export function findBayAreaProductRegion(

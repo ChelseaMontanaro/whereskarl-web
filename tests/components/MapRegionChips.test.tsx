@@ -11,7 +11,7 @@ describe("MapRegionChips", () => {
     cleanup();
   });
 
-  it("renders exactly the four visible product regions", () => {
+  it("renders all visible product regions", () => {
     render(
       <MapRegionChips selectedRegionId={null} onSelectRegion={vi.fn()} />,
     );
@@ -22,7 +22,7 @@ describe("MapRegionChips", () => {
       ).toBeInTheDocument();
     }
 
-    expect(screen.getAllByRole("button")).toHaveLength(4);
-    expect(screen.queryByRole("button", { name: "Peninsula" })).not.toBeInTheDocument();
+    expect(screen.getAllByRole("button")).toHaveLength(5);
+    expect(screen.getByRole("button", { name: "Peninsula" })).toBeInTheDocument();
   });
 });

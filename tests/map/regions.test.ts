@@ -10,8 +10,8 @@ describe("map regions", () => {
   it("maps monitored locations to visible product regions", () => {
     expect(getProductRegionIdForLocation("tiburon")).toBe("north-bay");
     expect(getProductRegionIdForLocation("marin-headlands")).toBe("north-bay");
-    expect(getProductRegionIdForLocation("daly-city")).toBe("san-francisco");
-    expect(getProductRegionIdForLocation("pacifica")).toBe("san-francisco");
+    expect(getProductRegionIdForLocation("daly-city")).toBe("peninsula");
+    expect(getProductRegionIdForLocation("pacifica")).toBe("peninsula");
     expect(getProductRegionIdForLocation("oakland")).toBe("east-bay");
     expect(getProductRegionNameForLocation("san-jose")).toBe("South Bay");
   });

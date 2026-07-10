@@ -26,31 +26,32 @@ function pointInBounds(
 }
 
 describe("Bay Area product regions", () => {
-  it("defines the four visible product regions without a Peninsula chip", () => {
+  it("defines the five visible product regions including Peninsula", () => {
     expect(BAY_AREA_PRODUCT_REGIONS.map((region) => region.id)).toEqual([
       "san-francisco",
       "north-bay",
       "east-bay",
       "south-bay",
+      "peninsula",
     ]);
-    expect(BAY_AREA_PRODUCT_REGIONS.map((region) => region.name)).not.toContain(
+    expect(BAY_AREA_PRODUCT_REGIONS.map((region) => region.name)).toContain(
       "Peninsula",
     );
   });
 
   it("recognizes valid visible and backend region ids", () => {
     expect(isBayAreaProductRegionId("east-bay")).toBe(true);
-    expect(isBayAreaProductRegionId("peninsula")).toBe(false);
+    expect(isBayAreaProductRegionId("peninsula")).toBe(true);
     expect(isBayAreaBackendRegionId("peninsula")).toBe(true);
     expect(findBayAreaProductRegion("north-bay")?.name).toBe("North Bay");
   });
 
-  it("maps backend peninsula to the San Francisco visible region", () => {
-    expect(normalizeVisibleMapRegionId("peninsula")).toBe("san-francisco");
-    expect(findBayAreaProductRegion("peninsula")?.name).toBe("San Francisco");
+  it("maps backend peninsula to the Peninsula visible region", () => {
+    expect(normalizeVisibleMapRegionId("peninsula")).toBe("peninsula");
+    expect(findBayAreaProductRegion("peninsula")?.name).toBe("Peninsula");
   });
 
-  it("uses a wide default viewport that spans all four visible regions", () => {
+  it("uses a wide default viewport that spans all five visible regions", () => {
     const [[west, south], [east, north]] = BAY_AREA_DEFAULT_BOUNDS;
 
     for (const region of BAY_AREA_PRODUCT_REGIONS) {

@@ -128,6 +128,7 @@ describe("MapView region tray behavior", () => {
   { region: "north-bay", chipLabel: "North Bay" },
   { region: "east-bay", chipLabel: "East Bay" },
   { region: "south-bay", chipLabel: "South Bay" },
+  { region: "peninsula", chipLabel: "Peninsula" },
 ] as const)(
     "keeps Best Right Now bay-wide when $chipLabel is active",
     async ({ region }) => {

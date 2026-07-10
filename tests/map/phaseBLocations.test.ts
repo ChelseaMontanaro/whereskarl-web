@@ -115,14 +115,14 @@ describe("Phase B location integration", () => {
     }
   });
 
-  it("preserves backend peninsula regions while mapping to San Francisco in the UI", () => {
+  it("preserves backend peninsula regions as the Peninsula visible region", () => {
     expect(resolveBackendRegionId(marinHeadlands)).toBe("north-bay");
     expect(resolveBackendRegionId(dalyCity)).toBe("peninsula");
     expect(resolveBackendRegionId(pacifica)).toBe("peninsula");
 
     expect(resolveProductRegionId(marinHeadlands)).toBe("north-bay");
-    expect(resolveProductRegionId(dalyCity)).toBe("san-francisco");
-    expect(resolveProductRegionId(pacifica)).toBe("san-francisco");
+    expect(resolveProductRegionId(dalyCity)).toBe("peninsula");
+    expect(resolveProductRegionId(pacifica)).toBe("peninsula");
   });
 
   it("falls back to catalog assignments when region is omitted", () => {
@@ -130,12 +130,8 @@ describe("Phase B location integration", () => {
     delete withoutRegion.region;
 
     expect(getProductRegionIdForLocation(withoutRegion)).toBe("north-bay");
-    expect(getProductRegionIdForLocation({ id: "daly-city" })).toBe(
-      "san-francisco",
-    );
-    expect(getProductRegionIdForLocation({ id: "pacifica" })).toBe(
-      "san-francisco",
-    );
+    expect(getProductRegionIdForLocation({ id: "daly-city" })).toBe("peninsula");
+    expect(getProductRegionIdForLocation({ id: "pacifica" })).toBe("peninsula");
   });
 
   it("includes Marin Headlands for North Bay + Karl Territory markers", () => {
@@ -199,7 +195,7 @@ describe("Phase B location integration", () => {
     ).toBe(true);
   });
 
-  it("includes Daly City and Pacifica in San Francisco filtered trays", () => {
+  it("includes only San Francisco locations in San Francisco filtered trays", () => {
     const foggyDalyCity = {
       ...dalyCity,
       fogScore: 80,
@@ -224,10 +220,37 @@ describe("Phase B location integration", () => {
       "san-francisco",
     );
 
+    expect(trayItems.map((item) => item.locationId)).toEqual(["ocean-beach"]);
+  });
+
+  it("includes Daly City and Pacifica in Peninsula filtered trays", () => {
+    const foggyDalyCity = {
+      ...dalyCity,
+      fogScore: 80,
+      sunshineScore: 18,
+      status: "Karl Territory",
+    };
+    const oceanBeach = buildPhaseBLocation({
+      id: "ocean-beach",
+      name: "Ocean Beach",
+      region: "san-francisco",
+      latitude: 37.7594,
+      longitude: -122.5107,
+      fogScore: 96,
+      sunshineScore: 12,
+    });
+
+    const trayItems = intensityFilterTrayItems(
+      [marinHeadlands, oceanBeach, foggyDalyCity, pacifica],
+      "karlTerritory",
+      null,
+      4,
+      "peninsula",
+    );
+
     expect(trayItems.map((item) => item.locationId)).toEqual([
       "daly-city",
       "pacifica",
-      "ocean-beach",
     ]);
   });
 
@@ -263,15 +286,16 @@ describe("Phase B location integration", () => {
     ]);
   });
 
-  it("groups peninsula backend locations under San Francisco in visible filters", () => {
+  it("groups peninsula backend locations under Peninsula in visible filters", () => {
     const locations = [marinHeadlands, dalyCity, pacifica];
 
-    expect(filterLocationsByProductRegion(locations, "san-francisco")).toEqual([
+    expect(filterLocationsByProductRegion(locations, "peninsula")).toEqual([
       dalyCity,
       pacifica,
     ]);
     expect(filterLocationsByProductRegion(locations, "north-bay")).toEqual([
       marinHeadlands,
     ]);
+    expect(filterLocationsByProductRegion(locations, "san-francisco")).toEqual([]);
   });
 });
