@@ -267,19 +267,30 @@ function MobileMapView({ state }: { state: MapViewModel }) {
     suppressViewportUpdateRef,
   } = state;
 
-  const effectiveRegionId =
-    selectedLocation || mapQuery.activeRegionId
-      ? mapQuery.activeRegionId
-      : isPhonePortrait
-        ? "san-francisco"
-        : null;
+  const skipPhonePortraitDefaultRegionRef = useRef(false);
+  const phonePortraitRegionId = selectedLocation ? null : mapQuery.activeRegionId;
+
+  const handlePhonePortraitSelectRegion = useCallback(
+    (regionId: string) => {
+      if (
+        isBayAreaProductRegionId(regionId) &&
+        mapQuery.activeRegionId === regionId
+      ) {
+        skipPhonePortraitDefaultRegionRef.current = true;
+      }
+
+      handleSelectRegion(regionId);
+    },
+    [handleSelectRegion, mapQuery.activeRegionId],
+  );
 
   useEffect(() => {
     if (
       !isPhonePortrait ||
       mapQuery.activeRegionId ||
       selectedLocation ||
-      mapQuery.requestedLocationId
+      mapQuery.requestedLocationId ||
+      skipPhonePortraitDefaultRegionRef.current
     ) {
       return;
     }
@@ -298,21 +309,21 @@ function MobileMapView({ state }: { state: MapViewModel }) {
       return markerLocations;
     }
 
-    if (effectiveRegionId === "san-francisco") {
+    if (phonePortraitRegionId === "san-francisco") {
       return filterLocationsForPhonePortraitSfComposition(markerLocations);
     }
 
-    if (effectiveRegionId) {
+    if (phonePortraitRegionId) {
       return filterLocationsByProductRegion(
         markerLocations,
-        isBayAreaProductRegionId(effectiveRegionId)
-          ? effectiveRegionId
+        isBayAreaProductRegionId(phonePortraitRegionId)
+          ? phonePortraitRegionId
           : null,
       );
     }
 
     return markerLocations;
-  }, [effectiveRegionId, isPhonePortrait, markerLocations]);
+  }, [isPhonePortrait, markerLocations, phonePortraitRegionId]);
 
   const phonePortraitBestRightNowItems = useMemo(
     () =>
@@ -358,7 +369,7 @@ function MobileMapView({ state }: { state: MapViewModel }) {
         ref={mapRef}
         locations={mapLocations}
         selectedLocationId={selectedLocation?.id ?? null}
-        selectedRegionId={selectedLocation ? null : effectiveRegionId}
+        selectedRegionId={phonePortraitRegionId}
         onSelectLocation={handleSelectLocation}
         mapStyle={mapStyle}
         fogLayerEnabled={fogLayerEnabled}
@@ -391,10 +402,8 @@ function MobileMapView({ state }: { state: MapViewModel }) {
             >
               {isPhonePortrait ? (
                 <MapPhonePortraitControls
-                  selectedRegionId={
-                    selectedLocation ? null : effectiveRegionId
-                  }
-                  onSelectRegion={handleSelectRegion}
+                  selectedRegionId={phonePortraitRegionId}
+                  onSelectRegion={handlePhonePortraitSelectRegion}
                   isPhonePortrait
                 />
               ) : (
