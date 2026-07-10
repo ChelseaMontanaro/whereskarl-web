@@ -295,14 +295,16 @@ function ImmersiveMapLayerControls({
             : "top-3 right-3 w-[min(17rem,calc(100%-0.75rem))] max-w-full items-stretch"
         } ${!isLayersCollapsed && isPhonePortrait ? "z-30" : "z-20"}`}
       >
-      <div
-        className={`${desktopGlassCardClass} flex flex-col items-center p-0.5 sm:p-1`}
-        aria-label="Map zoom controls"
-      >
-        <ZoomButton label="Zoom in" onClick={onZoomIn} compact={isPhonePortrait} />
-        <div className="my-0.5 h-px w-5 bg-white/10 sm:w-6" aria-hidden="true" />
-        <ZoomButton label="Zoom out" onClick={onZoomOut} compact={isPhonePortrait} />
-      </div>
+      {!isPhonePortrait ? (
+        <div
+          className={`${desktopGlassCardClass} flex flex-col items-center p-0.5 sm:p-1`}
+          aria-label="Map zoom controls"
+        >
+          <ZoomButton label="Zoom in" onClick={onZoomIn} compact={isPhonePortrait} />
+          <div className="my-0.5 h-px w-5 bg-white/10 sm:w-6" aria-hidden="true" />
+          <ZoomButton label="Zoom out" onClick={onZoomOut} compact={isPhonePortrait} />
+        </div>
+      ) : null}
 
       {isLayersCollapsed ? (
         <button

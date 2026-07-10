@@ -13,7 +13,6 @@ import { MapBestRightNowTray } from "@/components/map/MapBestRightNowTray";
 import { MapConditionsPanel } from "@/components/map/MapConditionsPanel";
 import { MapPhonePortraitControls } from "@/components/map/MapPhonePortraitControls";
 import { MapPhonePortraitFogRail } from "@/components/map/MapPhonePortraitFogRail";
-import { MapPhonePortraitFloatingControls } from "@/components/map/MapPhonePortraitFloatingControls";
 import { MapFogLegend } from "@/components/map/MapFogLegend";
 import { MapSelectedLocationCard } from "@/components/map/MapSelectedLocationCard";
 import { GlassCard } from "@/components/ui/GlassCard";
@@ -446,15 +445,6 @@ function MobileMapView({ state }: { state: MapViewModel }) {
               </div>
             ) : null}
 
-            {isPhonePortrait ? (
-              <div className="pointer-events-auto absolute right-3 top-[calc(8.25rem+env(safe-area-inset-top))]">
-                <MapPhonePortraitFloatingControls
-                  onOpenLayers={() => setIsLayersPanelOpen(true)}
-                  onLocateMe={() => mapRef.current?.locateMe()}
-                  onResetView={() => mapRef.current?.resetView()}
-                />
-              </div>
-            ) : null}
           </>
         ) : null}
 

@@ -139,7 +139,8 @@ describe("MapLayerControls immersive", () => {
 
     expect(screen.queryByRole("radio", { name: "Satellite" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Open map layers" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Zoom in" })).toHaveClass("h-8", "w-8");
+    expect(screen.queryByRole("button", { name: "Zoom in" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Zoom out" })).not.toBeInTheDocument();
   });
 
   it("notifies when the immersive layers panel opens on phone portrait", () => {
