@@ -19,18 +19,27 @@ export const PHONE_PORTRAIT_SF_CENTRAL_BAY_BOUNDS: MapBounds = [
 ];
 
 /**
- * Fixed approved camera: Marin/Mill Valley/Tiburon/Sausalito centered,
- * San Rafael and Novato upper-left, Richmond/Berkeley right, Stinson Beach
- * lower-left, San Francisco lower-right — matching the approved 390x844
- * screenshot composition.
+ * SF-tab camera bounds: southern Marin (Tiburon/Sausalito) through the SF
+ * peninsula and Daly City to San Bruno/Millbrae — matching the approved
+ * 390x844 SF region screenshot.
+ */
+export const PHONE_PORTRAIT_SF_REGION_BOUNDS: MapBounds = [
+  [-122.515, 37.595],
+  [-122.405, 37.875],
+];
+
+/**
+ * Peninsula-centered camera for the SF tab screenshot composition.
+ * Offset south/west so the peninsula sits in the visible area above the
+ * bottom tray and beside the left fog rail.
  */
 export const PHONE_PORTRAIT_MAP_CENTER = {
-  latitude: 37.89,
-  longitude: -122.475,
+  latitude: 37.705,
+  longitude: -122.468,
 } as const;
 
-/** Tight enough to crop Napa/Sonoma and most of the East Bay. */
-export const PHONE_PORTRAIT_MAP_INITIAL_ZOOM = 9.2;
+/** Tight peninsula span from Tiburon/Sausalito to San Bruno/Millbrae. */
+export const PHONE_PORTRAIT_MAP_INITIAL_ZOOM = 9.32;
 
 export type PhonePortraitCameraPreset = {
   latitude: number;
@@ -38,7 +47,7 @@ export type PhonePortraitCameraPreset = {
   zoom: number;
 };
 
-/** SF tab: San Francisco + Marin/central Bay. */
+/** SF tab: SF peninsula from southern Marin to San Bruno. */
 export const PHONE_PORTRAIT_SF_CAMERA: PhonePortraitCameraPreset = {
   latitude: PHONE_PORTRAIT_MAP_CENTER.latitude,
   longitude: PHONE_PORTRAIT_MAP_CENTER.longitude,

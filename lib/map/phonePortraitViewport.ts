@@ -1,19 +1,55 @@
 import type { Map } from "maplibre-gl";
 
 import { BAY_AREA_LOCATION_ZOOM } from "@/lib/map/config";
-import { getPhonePortraitCameraPreset } from "@/lib/map/phonePortraitMapPresentation";
+import {
+  getPhonePortraitCameraPreset,
+  PHONE_PORTRAIT_MAP_MAX_ZOOM,
+  PHONE_PORTRAIT_MAP_VIEWPORT_PADDING,
+  PHONE_PORTRAIT_SF_REGION_BOUNDS,
+} from "@/lib/map/phonePortraitMapPresentation";
+import { fitMapToBounds } from "@/lib/map/viewport";
+
+function normalizePhonePortraitPadding(
+  padding: typeof PHONE_PORTRAIT_MAP_VIEWPORT_PADDING,
+): { top: number; bottom: number; left: number; right: number } {
+  if (typeof padding === "number") {
+    return { top: padding, bottom: padding, left: padding, right: padding };
+  }
+
+  return {
+    top: padding.top ?? 48,
+    right: padding.right ?? 48,
+    bottom: padding.bottom ?? 48,
+    left: padding.left ?? 48,
+  };
+}
 
 export function fitPhonePortraitRegionViewport(
   map: Map,
   regionId: string | null | undefined,
   options?: { duration?: number },
 ): void {
+  const duration = options?.duration ?? 0;
+
+  if (regionId === "san-francisco") {
+    const padding = normalizePhonePortraitPadding(
+      PHONE_PORTRAIT_MAP_VIEWPORT_PADDING,
+    );
+
+    map.fitBounds(PHONE_PORTRAIT_SF_REGION_BOUNDS, {
+      padding,
+      maxZoom: PHONE_PORTRAIT_MAP_MAX_ZOOM,
+      duration,
+      essential: true,
+    });
+    return;
+  }
+
   const preset = getPhonePortraitCameraPreset(regionId);
   const camera = {
     center: [preset.longitude, preset.latitude] as [number, number],
     zoom: preset.zoom,
   };
-  const duration = options?.duration ?? 0;
 
   if (duration > 0) {
     map.easeTo({ ...camera, duration, essential: true });
