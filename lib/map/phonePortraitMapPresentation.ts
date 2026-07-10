@@ -83,23 +83,23 @@ export const PHONE_PORTRAIT_NORTH_BAY_CAMERA: PhonePortraitCameraPreset = {
 
 /** East Bay tab: shoreline through inland hills — approved screenshot. */
 export const PHONE_PORTRAIT_EAST_BAY_REGION_BOUNDS: MapBounds = [
-  [-122.37, 37.55],
-  [-121.96, 38.11],
+  [-122.28, 37.4],
+  [-121.68, 38.04],
 ];
 
 /** Padding tuned for East Bay fitBounds above the bottom tray and beside the fog rail. */
 export const PHONE_PORTRAIT_EAST_BAY_VIEWPORT_PADDING: ViewportPadding = {
-  top: 132,
-  right: 24,
-  bottom: 224,
-  left: 108,
+  top: 128,
+  right: 30,
+  bottom: 232,
+  left: 92,
 };
 
 /** East Bay tab: Richmond, Berkeley, Oakland, Alameda. */
 export const PHONE_PORTRAIT_EAST_BAY_CAMERA: PhonePortraitCameraPreset = {
-  latitude: 37.83,
-  longitude: -122.165,
-  zoom: 9.5,
+  latitude: 37.68,
+  longitude: -121.98,
+  zoom: 9.22,
 };
 
 /** South Bay tab: Silicon Valley corridor through lower Bay — approved screenshot. */
