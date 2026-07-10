@@ -1,21 +1,17 @@
 import type { Map } from "maplibre-gl";
 
 import { BAY_AREA_LOCATION_ZOOM } from "@/lib/map/config";
-import {
-  PHONE_PORTRAIT_MAP_CENTER,
-  PHONE_PORTRAIT_MAP_INITIAL_ZOOM,
-} from "@/lib/map/phonePortraitMapPresentation";
+import { getPhonePortraitCameraPreset } from "@/lib/map/phonePortraitMapPresentation";
 
-export function fitPhonePortraitMapViewport(
+export function fitPhonePortraitRegionViewport(
   map: Map,
+  regionId: string | null | undefined,
   options?: { duration?: number },
 ): void {
+  const preset = getPhonePortraitCameraPreset(regionId);
   const camera = {
-    center: [
-      PHONE_PORTRAIT_MAP_CENTER.longitude,
-      PHONE_PORTRAIT_MAP_CENTER.latitude,
-    ] as [number, number],
-    zoom: PHONE_PORTRAIT_MAP_INITIAL_ZOOM,
+    center: [preset.longitude, preset.latitude] as [number, number],
+    zoom: preset.zoom,
   };
   const duration = options?.duration ?? 0;
 
@@ -26,10 +22,12 @@ export function fitPhonePortraitMapViewport(
   }
 }
 
-export function shouldUsePhonePortraitFixedCamera(
-  selectedRegionId: string | null,
-): boolean {
-  return selectedRegionId === "san-francisco" || selectedRegionId === null;
+/** @deprecated Use fitPhonePortraitRegionViewport with "san-francisco". */
+export function fitPhonePortraitMapViewport(
+  map: Map,
+  options?: { duration?: number },
+): void {
+  fitPhonePortraitRegionViewport(map, "san-francisco", options);
 }
 
 export function locatePhonePortraitMap(map: Map): void {

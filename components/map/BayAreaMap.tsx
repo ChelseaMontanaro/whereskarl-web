@@ -45,9 +45,8 @@ import {
   type PhonePortraitDeclutterEntry,
 } from "@/lib/map/phonePortraitMarkers";
 import {
-  fitPhonePortraitMapViewport,
+  fitPhonePortraitRegionViewport,
   locatePhonePortraitMap,
-  shouldUsePhonePortraitFixedCamera,
 } from "@/lib/map/phonePortraitViewport";
 import { resolveKarlMapStyle, type KarlMapStyleId } from "@/lib/map/styles";
 import {
@@ -119,6 +118,8 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
 
     onSelectRef.current = onSelectLocation;
     phonePortraitWebRef.current = isPhonePortraitWeb;
+    const selectedRegionIdRef = useRef(selectedRegionId);
+    selectedRegionIdRef.current = selectedRegionId;
 
     const handleZoomIn = useCallback(() => {
       mapRef.current?.zoomIn({ duration: 250 });
@@ -135,7 +136,11 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
       }
 
       if (phonePortraitWebRef.current) {
-        fitPhonePortraitMapViewport(map, { duration: 450 });
+        fitPhonePortraitRegionViewport(
+          map,
+          selectedRegionIdRef.current,
+          { duration: 450 },
+        );
         return;
       }
 
@@ -222,7 +227,10 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
           }
 
           if (isPhonePortrait) {
-            fitPhonePortraitMapViewport(map);
+            fitPhonePortraitRegionViewport(
+              map,
+              selectedRegionIdRef.current,
+            );
           } else {
             const immersiveFit = isImmersive
               ? getImmersiveDefaultBayAreaFitOptions(immersiveOverlayProfile)
@@ -279,11 +287,11 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
         );
 
         if (isPhonePortraitWeb) {
-          if (
-            shouldUsePhonePortraitFixedCamera(selectedRegionId) &&
-            !selectedLocationId
-          ) {
-            fitPhonePortraitMapViewport(map);
+          if (!selectedLocationId) {
+            fitPhonePortraitRegionViewport(
+              map,
+              selectedRegionId,
+            );
           }
           return;
         }
@@ -508,23 +516,9 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
           return;
         }
 
-        if (shouldUsePhonePortraitFixedCamera(selectedRegionId)) {
-          fitPhonePortraitMapViewport(map, { duration: 450 });
-          return;
-        }
-
-        const region = findBayAreaProductRegion(selectedRegionId);
-        if (region) {
-          fitMapToBounds(
-            map,
-            region.bounds,
-            resolveRegionViewportOptions(
-              region.viewport,
-              layout,
-              immersiveOverlayProfile,
-            ),
-          );
-        }
+        fitPhonePortraitRegionViewport(map, selectedRegionId, {
+          duration: 450,
+        });
         return;
       }
 
@@ -602,11 +596,11 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
         );
 
         if (isPhonePortraitWeb) {
-          if (
-            shouldUsePhonePortraitFixedCamera(selectedRegionId) &&
-            !selectedLocationId
-          ) {
-            fitPhonePortraitMapViewport(map);
+          if (!selectedLocationId) {
+            fitPhonePortraitRegionViewport(
+              map,
+              selectedRegionId,
+            );
           }
           return;
         }

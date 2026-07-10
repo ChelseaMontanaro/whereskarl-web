@@ -39,6 +39,9 @@ import {
 } from "@/lib/map/routing";
 import type { KarlMapStyleId } from "@/lib/map/styles";
 import { filterLocationsForPhonePortraitSfComposition } from "@/lib/map/phonePortraitMapPresentation";
+
+const PHONE_PORTRAIT_SKIP_DEFAULT_REGION_KEY =
+  "whereskarl:phone-map:skip-default-region";
 import { filterLocationsByProductRegion } from "@/lib/map/regions";
 import type { LocationWeather } from "@/lib/schemas/weather";
 
@@ -267,21 +270,24 @@ function MobileMapView({ state }: { state: MapViewModel }) {
     suppressViewportUpdateRef,
   } = state;
 
-  const skipPhonePortraitDefaultRegionRef = useRef(false);
   const phonePortraitRegionId = selectedLocation ? null : mapQuery.activeRegionId;
 
   const handlePhonePortraitSelectRegion = useCallback(
     (regionId: string) => {
-      if (
-        isBayAreaProductRegionId(regionId) &&
-        mapQuery.activeRegionId === regionId
-      ) {
-        skipPhonePortraitDefaultRegionRef.current = true;
+      suppressViewportUpdateRef.current = false;
+      if (!isBayAreaProductRegionId(regionId)) {
+        return;
       }
 
-      handleSelectRegion(regionId);
+      if (mapQuery.activeRegionId === regionId) {
+        sessionStorage.setItem(PHONE_PORTRAIT_SKIP_DEFAULT_REGION_KEY, "1");
+        router.replace("/map", { scroll: false });
+        return;
+      }
+
+      router.replace(buildMapRegionHref(regionId), { scroll: false });
     },
-    [handleSelectRegion, mapQuery.activeRegionId],
+    [mapQuery.activeRegionId, router, suppressViewportUpdateRef],
   );
 
   useEffect(() => {
@@ -290,7 +296,7 @@ function MobileMapView({ state }: { state: MapViewModel }) {
       mapQuery.activeRegionId ||
       selectedLocation ||
       mapQuery.requestedLocationId ||
-      skipPhonePortraitDefaultRegionRef.current
+      sessionStorage.getItem(PHONE_PORTRAIT_SKIP_DEFAULT_REGION_KEY)
     ) {
       return;
     }

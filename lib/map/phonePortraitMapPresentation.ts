@@ -32,6 +32,64 @@ export const PHONE_PORTRAIT_MAP_CENTER = {
 /** Tight enough to crop Napa/Sonoma and most of the East Bay. */
 export const PHONE_PORTRAIT_MAP_INITIAL_ZOOM = 9.2;
 
+export type PhonePortraitCameraPreset = {
+  latitude: number;
+  longitude: number;
+  zoom: number;
+};
+
+/** SF tab: San Francisco + Marin/central Bay. */
+export const PHONE_PORTRAIT_SF_CAMERA: PhonePortraitCameraPreset = {
+  latitude: PHONE_PORTRAIT_MAP_CENTER.latitude,
+  longitude: PHONE_PORTRAIT_MAP_CENTER.longitude,
+  zoom: PHONE_PORTRAIT_MAP_INITIAL_ZOOM,
+};
+
+/** North Bay tab: Marin, Novato, San Rafael, Mill Valley, Tiburon, Sausalito. */
+export const PHONE_PORTRAIT_NORTH_BAY_CAMERA: PhonePortraitCameraPreset = {
+  latitude: 37.97,
+  longitude: -122.545,
+  zoom: 9.35,
+};
+
+/** East Bay tab: Richmond, Berkeley, Oakland, Alameda. */
+export const PHONE_PORTRAIT_EAST_BAY_CAMERA: PhonePortraitCameraPreset = {
+  latitude: 37.83,
+  longitude: -122.18,
+  zoom: 9.45,
+};
+
+/** South Bay tab: San Jose, Palo Alto, Mountain View and nearby. */
+export const PHONE_PORTRAIT_SOUTH_BAY_CAMERA: PhonePortraitCameraPreset = {
+  latitude: 37.36,
+  longitude: -122.02,
+  zoom: 9.05,
+};
+
+/** Deselected / all-Bay default: wider full Bay Area view. */
+export const PHONE_PORTRAIT_ALL_BAY_CAMERA: PhonePortraitCameraPreset = {
+  latitude: 37.58,
+  longitude: -122.27,
+  zoom: 8,
+};
+
+export function getPhonePortraitCameraPreset(
+  regionId: string | null | undefined,
+): PhonePortraitCameraPreset {
+  switch (regionId) {
+    case "san-francisco":
+      return PHONE_PORTRAIT_SF_CAMERA;
+    case "north-bay":
+      return PHONE_PORTRAIT_NORTH_BAY_CAMERA;
+    case "east-bay":
+      return PHONE_PORTRAIT_EAST_BAY_CAMERA;
+    case "south-bay":
+      return PHONE_PORTRAIT_SOUTH_BAY_CAMERA;
+    default:
+      return PHONE_PORTRAIT_ALL_BAY_CAMERA;
+  }
+}
+
 export const PHONE_PORTRAIT_MAP_MAX_ZOOM = 10.6;
 
 export const PHONE_PORTRAIT_MAP_VIEWPORT_PADDING: ViewportPadding = {
