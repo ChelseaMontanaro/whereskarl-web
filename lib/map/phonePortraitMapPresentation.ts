@@ -19,27 +19,33 @@ export const PHONE_PORTRAIT_SF_CENTRAL_BAY_BOUNDS: MapBounds = [
 ];
 
 /**
- * SF-tab camera bounds: southern Marin (Tiburon/Sausalito) through the SF
- * peninsula and Daly City to San Bruno/Millbrae — matching the approved
- * 390x844 SF region screenshot.
+ * SF-tab camera bounds: thin Marin Headlands / Sausalito context through the
+ * full SF peninsula to San Bruno / Millbrae — matching the approved 390x844
+ * SF region screenshot.
  */
 export const PHONE_PORTRAIT_SF_REGION_BOUNDS: MapBounds = [
-  [-122.515, 37.595],
-  [-122.405, 37.875],
+  [-122.498, 37.608],
+  [-122.392, 37.828],
 ];
 
+/** Padding tuned for SF fitBounds above the bottom tray and beside the fog rail. */
+export const PHONE_PORTRAIT_SF_VIEWPORT_PADDING: ViewportPadding = {
+  top: 128,
+  right: 28,
+  bottom: 210,
+  left: 100,
+};
+
 /**
- * Peninsula-centered camera for the SF tab screenshot composition.
- * Offset south/west so the peninsula sits in the visible area above the
- * bottom tray and beside the left fog rail.
+ * Peninsula-centered fallback used before fitBounds resolves on first paint.
  */
 export const PHONE_PORTRAIT_MAP_CENTER = {
-  latitude: 37.705,
-  longitude: -122.468,
+  latitude: 37.718,
+  longitude: -122.445,
 } as const;
 
-/** Tight peninsula span from Tiburon/Sausalito to San Bruno/Millbrae. */
-export const PHONE_PORTRAIT_MAP_INITIAL_ZOOM = 9.32;
+/** Tight peninsula span with Marin as a thin top edge only. */
+export const PHONE_PORTRAIT_MAP_INITIAL_ZOOM = 9.42;
 
 export type PhonePortraitCameraPreset = {
   latitude: number;
