@@ -102,10 +102,10 @@ export const PHONE_PORTRAIT_EAST_BAY_CAMERA: PhonePortraitCameraPreset = {
   zoom: 9.5,
 };
 
-/** South Bay tab: Peninsula through San Jose hills — approved screenshot. */
+/** South Bay tab: Silicon Valley corridor through lower Bay — approved screenshot. */
 export const PHONE_PORTRAIT_SOUTH_BAY_REGION_BOUNDS: MapBounds = [
-  [-122.36, 37.02],
-  [-121.90, 37.47],
+  [-122.28, 37.28],
+  [-121.84, 37.52],
 ];
 
 /** Padding tuned for South Bay fitBounds above the bottom tray and beside the fog rail. */
@@ -118,9 +118,9 @@ export const PHONE_PORTRAIT_SOUTH_BAY_VIEWPORT_PADDING: ViewportPadding = {
 
 /** South Bay tab: San Jose, Palo Alto, Mountain View and nearby. */
 export const PHONE_PORTRAIT_SOUTH_BAY_CAMERA: PhonePortraitCameraPreset = {
-  latitude: 37.245,
-  longitude: -122.13,
-  zoom: 9.72,
+  latitude: 37.40,
+  longitude: -122.06,
+  zoom: 9.88,
 };
 
 /** Deselected / all-Bay default: wider full Bay Area view. */
