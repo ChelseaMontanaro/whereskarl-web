@@ -22,6 +22,7 @@ type MapSelectedLocationCardProps = {
   onClose?: () => void;
   phonePortrait?: boolean;
   showCloseButton?: boolean;
+  embedded?: boolean;
 };
 
 function FavoriteHeartIcon({
@@ -65,6 +66,7 @@ export function MapSelectedLocationCard({
   onClose,
   phonePortrait = false,
   showCloseButton = true,
+  embedded = false,
 }: MapSelectedLocationCardProps) {
   const conditionSentence = getConditionSentence(location);
   const isDegraded = isLocationDataDegraded(location.dataStatus);
@@ -95,14 +97,18 @@ export function MapSelectedLocationCard({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [onClose]);
 
-  const panelClass = phonePortrait
-    ? "relative flex min-h-[5.0625rem] w-full items-center rounded-2xl border border-[rgb(160_185_210/0.24)] bg-[rgb(6_15_27/0.92)] px-2.5 py-3 shadow-[0_10px_18px_rgb(0_0_0/0.45)]"
-    : `${desktopGlassCardClass} relative max-w-[28rem] px-4 py-3 shadow-[0_8px_28px_rgba(0,0,0,0.28)]`;
+  const panelClass = embedded
+    ? "relative flex min-w-0 flex-1 items-center"
+    : phonePortrait
+      ? "relative flex min-h-[5.0625rem] w-full items-center rounded-2xl border border-[rgb(160_185_210/0.24)] bg-[rgb(6_15_27/0.92)] px-2.5 py-3 shadow-[0_10px_18px_rgb(0_0_0/0.45)]"
+      : `${desktopGlassCardClass} relative max-w-[28rem] px-4 py-3 shadow-[0_8px_28px_rgba(0,0,0,0.28)]`;
+
+  const Wrapper = embedded ? "div" : "article";
 
   return (
-    <article
+    <Wrapper
       className={panelClass}
-      aria-label={`Selected location: ${location.name}`}
+      aria-label={embedded ? undefined : `Selected location: ${location.name}`}
     >
       {showCloseButton && onClose ? (
       <button
@@ -117,10 +123,10 @@ export function MapSelectedLocationCard({
 
       <div
         className={`flex w-full items-center ${
-          phonePortrait ? "gap-2.5 pr-4" : "gap-3 pr-5"
+          embedded || phonePortrait ? "gap-2.5 pr-4" : "gap-3 pr-5"
         }`}
       >
-        {phonePortrait ? (
+        {embedded || phonePortrait ? (
           <MapPhonePortraitConditionIcon
             intensity={resolveLocationFogIntensity(location)}
             className="h-5 w-5 shrink-0"
@@ -131,13 +137,13 @@ export function MapSelectedLocationCard({
 
         <div
           className={`min-w-0 flex-1 ${
-            phonePortrait ? "flex flex-col justify-center gap-0.5" : ""
+            embedded || phonePortrait ? "flex flex-col justify-center gap-0.5" : ""
           }`}
         >
           <div className="flex items-center gap-1">
             <h2
               className={`font-semibold tracking-tight text-white ${
-                phonePortrait
+                embedded || phonePortrait
                   ? "text-[0.8125rem] leading-3"
                   : "text-[1.05rem] leading-tight"
               }`}
@@ -154,7 +160,7 @@ export function MapSelectedLocationCard({
                   : `Add ${location.name} to favorites`
               }
               className={`flex shrink-0 items-center justify-center rounded-full transition-colors motion-reduce:transition-none ${
-                phonePortrait ? "h-5 w-5" : "h-6 w-6"
+                embedded || phonePortrait ? "h-5 w-5" : "h-6 w-6"
               } ${
                 isFavorite
                   ? "text-karl-gold"
@@ -163,13 +169,13 @@ export function MapSelectedLocationCard({
             >
               <FavoriteHeartIcon
                 filled={isFavorite}
-                className={phonePortrait ? "h-3.5 w-3.5" : "h-4 w-4"}
+                className={embedded || phonePortrait ? "h-3.5 w-3.5" : "h-4 w-4"}
               />
             </button>
           </div>
           <p
             className={`text-white/72 ${
-              phonePortrait
+              embedded || phonePortrait
                 ? "mt-px line-clamp-1 text-[0.625rem] leading-tight"
                 : "mt-0.5 line-clamp-2 text-[0.75rem] leading-snug"
             }`}
@@ -180,14 +186,14 @@ export function MapSelectedLocationCard({
           {isDegraded ? (
             <DegradedDataLabel
               variant="location"
-              className={phonePortrait ? "mt-px" : "mt-1"}
+              className={embedded || phonePortrait ? "mt-px" : "mt-1"}
             />
           ) : null}
 
           {metadataItems.length > 0 ? (
             <p
               className={`font-medium text-white/48 ${
-                phonePortrait
+                embedded || phonePortrait
                   ? "mt-0.5 text-[0.5625rem] leading-none"
                   : "mt-1.5 text-[0.65rem]"
               }`}
@@ -199,7 +205,7 @@ export function MapSelectedLocationCard({
 
         <div
           className={`flex shrink-0 flex-col items-center justify-center border-l ${
-            phonePortrait
+            embedded || phonePortrait
               ? "min-w-[3.25rem] self-stretch border-[rgb(150_175_200/0.16)] py-0.5 pl-2.5"
               : "min-w-[4.5rem] self-center border-white/10 pl-3"
           }`}
@@ -207,7 +213,7 @@ export function MapSelectedLocationCard({
           <div className="text-center">
             <p
               className={`font-bold uppercase text-white/40 ${
-                phonePortrait
+                embedded || phonePortrait
                   ? "text-[0.5rem] tracking-[0.06em]"
                   : "text-[0.5rem] tracking-[0.14em] max-lg:text-[0.625rem] max-lg:tracking-[0.12em]"
               }`}
@@ -216,7 +222,7 @@ export function MapSelectedLocationCard({
             </p>
             <p
               className={`font-light leading-none text-[#22E36B] ${
-                phonePortrait
+                embedded || phonePortrait
                   ? "mt-px text-xl leading-5"
                   : "mt-0.5 text-[1.35rem] max-lg:mt-1 max-lg:text-[2rem]"
               }`}
@@ -226,6 +232,6 @@ export function MapSelectedLocationCard({
           </div>
         </div>
       </div>
-    </article>
+    </Wrapper>
   );
 }

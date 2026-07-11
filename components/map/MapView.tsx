@@ -13,6 +13,7 @@ import { MapBestRightNowTray } from "@/components/map/MapBestRightNowTray";
 import { MapConditionsPanel } from "@/components/map/MapConditionsPanel";
 import { MapPhonePortraitControls } from "@/components/map/MapPhonePortraitControls";
 import { MapPhonePortraitFogRail } from "@/components/map/MapPhonePortraitFogRail";
+import { MapPhonePortraitUnifiedCard } from "@/components/map/MapPhonePortraitUnifiedCard";
 import { MapFogLegend } from "@/components/map/MapFogLegend";
 import { MapSelectedLocationCard } from "@/components/map/MapSelectedLocationCard";
 import { GlassCard } from "@/components/ui/GlassCard";
@@ -331,35 +332,9 @@ function MobileMapView({ state }: { state: MapViewModel }) {
   }, [isPhonePortrait, markerLocations, phonePortraitRegionId]);
 
   const phonePortraitBestRightNowItems = useMemo(
-    () =>
-      phonePortraitBestRightNowTrayItems(
-        locations,
-        selectedLocation?.id ?? null,
-      ),
-    [locations, selectedLocation?.id],
+    () => phonePortraitBestRightNowTrayItems(locations, null),
+    [locations],
   );
-
-  const featuredPhoneLocation = useMemo(() => {
-    if (!isPhonePortrait) {
-      return null;
-    }
-
-    if (selectedLocation) {
-      return selectedLocation;
-    }
-
-    const topLocationId = phonePortraitBestRightNowItems[0]?.locationId;
-    if (!topLocationId) {
-      return null;
-    }
-
-    return locations.find((location) => location.id === topLocationId) ?? null;
-  }, [
-    isPhonePortrait,
-    locations,
-    phonePortraitBestRightNowItems,
-    selectedLocation,
-  ]);
 
   const trayItems = isPhonePortrait
     ? phonePortraitBestRightNowItems
@@ -451,42 +426,39 @@ function MobileMapView({ state }: { state: MapViewModel }) {
         <div
           className={`pointer-events-auto absolute inset-x-3 flex flex-col items-stretch sm:inset-x-4 ${
             isPhonePortrait
-              ? "bottom-[calc(4.5rem+env(safe-area-inset-bottom))] gap-1.5"
+              ? "bottom-[calc(4.5rem+env(safe-area-inset-bottom))] gap-0"
               : "bottom-[calc(5.5rem+env(safe-area-inset-bottom))] gap-2.5 md:bottom-[calc(5.25rem+env(safe-area-inset-bottom))]"
           }`}
         >
-          {shouldShowDesktopBestRightNowTray(intensityFilter) ? (
-            <MapBestRightNowTray
+          {isPhonePortrait ? (
+            <MapPhonePortraitUnifiedCard
               items={trayItems}
-              selectedLocationId={selectedLocation?.id ?? null}
+              selectedLocation={selectedLocation}
               onSelectLocation={handleSelectLocation}
+              onClearSelection={handleClearSelectedLocation}
               isLoading={locationsQuery.isLoading}
-              isPhonePortrait={isPhonePortrait}
-              emptyMessage={
-                isPhonePortrait
-                  ? PHONE_PORTRAIT_BEST_RIGHT_NOW_EMPTY_MESSAGE
-                  : undefined
-              }
+              showBestRightNow={shouldShowDesktopBestRightNowTray(intensityFilter)}
+              emptyMessage={PHONE_PORTRAIT_BEST_RIGHT_NOW_EMPTY_MESSAGE}
             />
-          ) : null}
+          ) : (
+            <>
+              {shouldShowDesktopBestRightNowTray(intensityFilter) ? (
+                <MapBestRightNowTray
+                  items={trayItems}
+                  selectedLocationId={selectedLocation?.id ?? null}
+                  onSelectLocation={handleSelectLocation}
+                  isLoading={locationsQuery.isLoading}
+                />
+              ) : null}
 
-          {isPhonePortrait && featuredPhoneLocation ? (
-            <div className="mb-8">
-              <MapSelectedLocationCard
-                location={featuredPhoneLocation}
-                onClose={
-                  selectedLocation ? handleClearSelectedLocation : undefined
-                }
-                showCloseButton={Boolean(selectedLocation)}
-                phonePortrait
-              />
-            </div>
-          ) : selectedLocation ? (
-            <MapSelectedLocationCard
-              location={selectedLocation}
-              onClose={handleClearSelectedLocation}
-            />
-          ) : null}
+              {selectedLocation ? (
+                <MapSelectedLocationCard
+                  location={selectedLocation}
+                  onClose={handleClearSelectedLocation}
+                />
+              ) : null}
+            </>
+          )}
         </div>
       </div>
 

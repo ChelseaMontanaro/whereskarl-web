@@ -77,6 +77,12 @@ function getTrayLocationIds() {
     .map((button) => button.getAttribute("data-location-id"));
 }
 
+function cyclePhonePortraitBestRightNow() {
+  fireEvent.click(
+    screen.getByRole("button", { name: "Show next Best Right Now location" }),
+  );
+}
+
 function renderMap() {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -210,7 +216,19 @@ describe("MapView region tray behavior", () => {
       expect(container.querySelector(".flex.flex-col.gap-1")).toBeTruthy();
 
       await screen.findByLabelText("Best Right Now");
-      expect(getTrayLocationIds()).toEqual(bayWideTrayIds);
+      expect(getTrayLocationIds()).toEqual(["san-jose"]);
+      expect(screen.getAllByRole("button", { name: /Select .+ on map$/ })).toHaveLength(
+        1,
+      );
+
+      cyclePhonePortraitBestRightNow();
+      expect(getTrayLocationIds()).toEqual(["palo-alto"]);
+
+      cyclePhonePortraitBestRightNow();
+      expect(getTrayLocationIds()).toEqual(["ocean-beach"]);
+
+      cyclePhonePortraitBestRightNow();
+      expect(getTrayLocationIds()).toEqual(["tiburon"]);
     });
 
     it("shows the empty state only when no bay-wide location scores at least 70", async () => {
