@@ -78,6 +78,7 @@ type BayAreaMapProps = {
   intensityFilter?: FogIntensity | null;
   onImmersiveLayersPanelOpenChange?: (isOpen: boolean) => void;
   immersiveOverlayProfile?: ImmersiveOverlayProfile;
+  onMapReady?: (map: import("maplibre-gl").Map) => void;
 };
 
 export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
@@ -97,6 +98,7 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
       intensityFilter = null,
       onImmersiveLayersPanelOpenChange,
       immersiveOverlayProfile = "tablet",
+      onMapReady,
     },
     ref,
   ) {
@@ -120,6 +122,8 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
     phonePortraitWebRef.current = isPhonePortraitWeb;
     const selectedRegionIdRef = useRef(selectedRegionId);
     selectedRegionIdRef.current = selectedRegionId;
+    const selectedLocationIdRef = useRef(selectedLocationId);
+    selectedLocationIdRef.current = selectedLocationId;
 
     const handleZoomIn = useCallback(() => {
       mapRef.current?.zoomIn({ duration: 250 });
@@ -249,6 +253,7 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
             intensityFilter,
           );
           setMapReady(true);
+          onMapReady?.(map);
         });
 
         mapRef.current = map;
@@ -595,19 +600,19 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
           intensityFilter,
         );
 
-        if (isPhonePortraitWeb) {
-          if (!selectedLocationId) {
+        if (phonePortraitWebRef.current) {
+          if (!selectedLocationIdRef.current) {
             fitPhonePortraitRegionViewport(
               map,
-              selectedRegionId,
+              selectedRegionIdRef.current,
             );
           }
           return;
         }
 
-        if (selectedLocationId) {
+        if (selectedLocationIdRef.current) {
           const location = locations.find(
-            (item) => item.id === selectedLocationId,
+            (item) => item.id === selectedLocationIdRef.current,
           );
           if (location) {
             focusMapOnLocation(map, location.longitude, location.latitude);

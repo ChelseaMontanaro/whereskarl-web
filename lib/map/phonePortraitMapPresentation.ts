@@ -123,25 +123,25 @@ export const PHONE_PORTRAIT_SOUTH_BAY_CAMERA: PhonePortraitCameraPreset = {
   zoom: 9.88,
 };
 
-/** Peninsula tab: Pacific coast through Palo Alto — approved screenshot. */
+/** Peninsula tab: coast-hugging strip — SSF through Palo Alto, bay/Oakland cropped east. */
 export const PHONE_PORTRAIT_PENINSULA_REGION_BOUNDS: MapBounds = [
-  [-122.44, 37.34],
-  [-122.08, 37.74],
+  [-122.478, 37.408],
+  [-122.112, 37.648],
 ];
 
-/** Padding tuned for Peninsula fitBounds above the bottom tray and beside the fog rail. */
+/** Padding tuned for Peninsula camera above the bottom tray and beside the fog rail. */
 export const PHONE_PORTRAIT_PENINSULA_VIEWPORT_PADDING: ViewportPadding = {
-  top: 152,
-  right: 22,
-  bottom: 212,
-  left: 118,
+  top: 112,
+  right: 96,
+  bottom: 215,
+  left: 76,
 };
 
-/** Peninsula tab: Daly City through Palo Alto with Half Moon Bay context. */
+/** Peninsula tab: Burlingame/San Mateo centered with Palo Alto lower-right. */
 export const PHONE_PORTRAIT_PENINSULA_CAMERA: PhonePortraitCameraPreset = {
-  latitude: 37.54,
-  longitude: -122.275,
-  zoom: 9.38,
+  latitude: 37.548,
+  longitude: -122.314,
+  zoom: 9.92,
 };
 
 /** Deselected / all-Bay default: wider full Bay Area view. */
