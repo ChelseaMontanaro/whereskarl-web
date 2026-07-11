@@ -31,7 +31,7 @@ import {
   toggleIntensityFilter,
 } from "@/lib/map/intensityFilter";
 import { resolveMapLocationFocus } from "@/lib/map/locationSelection";
-import type { MapMarkerLocation } from "@/lib/map/markers";
+import { isMapMarkerVisible, type MapMarkerLocation } from "@/lib/map/markers";
 import {
   buildMapHref,
   buildMapRegionHref,
@@ -315,21 +315,38 @@ function MobileMapView({ state }: { state: MapViewModel }) {
       return markerLocations;
     }
 
-    if (phonePortraitRegionId === "san-francisco") {
-      return filterLocationsForPhonePortraitSfComposition(markerLocations);
+    const regionFiltered =
+      phonePortraitRegionId === "san-francisco"
+        ? filterLocationsForPhonePortraitSfComposition(markerLocations)
+        : phonePortraitRegionId
+          ? filterLocationsByProductRegion(
+              markerLocations,
+              isBayAreaProductRegionId(phonePortraitRegionId)
+                ? phonePortraitRegionId
+                : null,
+            )
+          : markerLocations;
+
+    if (!intensityFilter) {
+      return regionFiltered;
     }
 
-    if (phonePortraitRegionId) {
-      return filterLocationsByProductRegion(
-        markerLocations,
-        isBayAreaProductRegionId(phonePortraitRegionId)
-          ? phonePortraitRegionId
-          : null,
-      );
-    }
-
-    return markerLocations;
-  }, [isPhonePortrait, markerLocations, phonePortraitRegionId]);
+    // Phone-portrait markers are never hidden by CSS or BayAreaMap, so the
+    // active intensity filter has to be applied to the rendered list here,
+    // reusing the same visibility logic as the desktop map. The selected
+    // location stays visible so tapping a marker still works with a filter on.
+    return regionFiltered.filter(
+      (location) =>
+        location.id === selectedLocation?.id ||
+        isMapMarkerVisible(location, { intensityFilter }),
+    );
+  }, [
+    intensityFilter,
+    isPhonePortrait,
+    markerLocations,
+    phonePortraitRegionId,
+    selectedLocation?.id,
+  ]);
 
   const phonePortraitBestRightNowItems = useMemo(
     () => phonePortraitBestRightNowTrayItems(locations, null),
