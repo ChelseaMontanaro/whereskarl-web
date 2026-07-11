@@ -1,6 +1,10 @@
 "use client";
 
 import { KarlLogo } from "@/components/brand/KarlLogo";
+import {
+  insightGlassCardClass,
+  mobileInsightGlassHighlightClass,
+} from "@/components/home/desktopGlass";
 import type { FogIntensity } from "@/lib/map/conditions";
 import { getFogIntensityLabel } from "@/lib/map/conditions";
 import { getPhonePortraitFogRailConditionIconDataUri } from "@/lib/map/phonePortraitConditionIcons";
@@ -27,8 +31,9 @@ export function MapPhonePortraitFogRail({
   return (
     <aside
       aria-label="Fog intensity filter"
-      className="flex w-[3.125rem] flex-col gap-1 rounded-2xl border border-[rgb(150_175_200/0.18)] bg-[rgb(5_13_24/0.82)] px-[3px] py-1 shadow-[0_6px_12px_rgb(0_0_0/0.32)]"
+      className={`flex w-[3.125rem] flex-col gap-1 px-[3px] py-1 ${insightGlassCardClass}`}
     >
+      <div aria-hidden="true" className={mobileInsightGlassHighlightClass} />
       <p className="text-center text-[0.4375rem] font-extrabold uppercase leading-[0.5625rem] tracking-[0.02em] text-white/90">
         Fog
         <br />
