@@ -75,15 +75,6 @@ const KARL_TERRITORY_DETAILED_ICON = `<svg xmlns="http://www.w3.org/2000/svg" vi
   <path d="M13.5 41c2.5 0 3.8-1.3 5-2.4 1.2 1.1 2.5 2.4 5 2.4s3.8-1.3 5-2.4c1.2 1.1 2.5 2.4 5 2.4" stroke="#8797A6" stroke-width="1.8" stroke-linecap="round" opacity="0.5" />
 </svg>`;
 
-/** Fog-rail Clear only: soft light-blue sky disc — reads as clear sky, not weather. */
-const FOG_RAIL_CLEAR_SKY_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" aria-hidden="true" fill="none">
-  <circle cx="24" cy="24" r="15" fill="#8CB8D8" opacity="0.22" />
-  <circle cx="24" cy="24" r="12" fill="#A8CCE8" opacity="0.55" />
-  <circle cx="24" cy="24" r="9.8" fill="#B8D8F0" opacity="0.92" />
-  <circle cx="24" cy="24" r="7.8" fill="#D2E6F5" />
-  <circle cx="20.8" cy="21.2" r="2.8" fill="#EAF4FB" opacity="0.8" />
-</svg>`;
-
 export function getPhonePortraitConditionIconSvg(
   intensity: FogIntensity,
   options: PhonePortraitPresentationOptions = {},
@@ -102,15 +93,18 @@ export function getPhonePortraitConditionIconSvg(
   }
 }
 
+/**
+ * Fog-rail icons reuse the approved condition artwork. Clear resolves to the
+ * day/night sun or moon treatment (not the fog palette) so it reads distinctly
+ * from the Light Fog and Foggy states.
+ */
 export function getPhonePortraitFogRailConditionIconDataUri(
   intensity: FogIntensity,
+  options: PhonePortraitPresentationOptions = {},
 ): string {
-  const svg =
-    intensity === "clear"
-      ? FOG_RAIL_CLEAR_SKY_ICON
-      : getPhonePortraitConditionIconSvg(intensity);
-
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
+    getPhonePortraitConditionIconSvg(intensity, options),
+  )}`;
 }
 
 export function getPhonePortraitConditionIconDataUri(
