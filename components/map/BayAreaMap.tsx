@@ -109,6 +109,9 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
     const phonePortraitWebRef = useRef(
       immersiveOverlayProfile === "phone-portrait",
     );
+    const phonePortraitStyleAppliedRef = useRef(
+      immersiveOverlayProfile === "phone-portrait",
+    );
     const [mapReady, setMapReady] = useState(false);
     const isDesktop = layout === "desktop";
     const isImmersive = layout === "immersive";
@@ -228,7 +231,9 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
             return;
           }
 
-          if (isPhonePortrait) {
+          const phonePortrait = phonePortraitWebRef.current;
+
+          if (phonePortrait) {
             fitPhonePortraitRegionViewport(
               map,
               selectedRegionIdRef.current,
@@ -247,7 +252,7 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
           syncFogOverlayLayer(
             map,
             locations,
-            fogLayerEnabled && !isPhonePortrait,
+            fogLayerEnabled && !phonePortrait,
             intensityFilter,
           );
           setMapReady(true);
@@ -585,9 +590,24 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
         return;
       }
 
+      const phonePortrait = phonePortraitWebRef.current;
+      if (phonePortraitStyleAppliedRef.current === phonePortrait) {
+        return;
+      }
+
+      phonePortraitStyleAppliedRef.current = phonePortrait;
+
       const nextStyle = resolveKarlMapStyle(mapStyle, {
-        phonePortraitWeb: phonePortraitWebRef.current,
+        phonePortraitWeb: phonePortrait,
       });
+
+      const applyPhonePortraitViewport = () => {
+        if (!phonePortraitWebRef.current || selectedLocationIdRef.current) {
+          return;
+        }
+
+        fitPhonePortraitRegionViewport(map, selectedRegionIdRef.current);
+      };
 
       const applyStyle = () => {
         syncFogOverlayLayer(
@@ -598,12 +618,8 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
         );
 
         if (phonePortraitWebRef.current) {
-          if (!selectedLocationIdRef.current) {
-            fitPhonePortraitRegionViewport(
-              map,
-              selectedRegionIdRef.current,
-            );
-          }
+          applyPhonePortraitViewport();
+          map.once("idle", applyPhonePortraitViewport);
           return;
         }
 
@@ -619,7 +635,7 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
 
       map.once("style.load", applyStyle);
       map.setStyle(nextStyle);
-    }, [isPhonePortraitWeb, mapReady]);
+    }, [fogLayerEnabled, intensityFilter, isPhonePortraitWeb, locations, mapReady, mapStyle]);
 
     return (
       <div

@@ -11,7 +11,12 @@ describe("fitPhonePortraitRegionViewport", () => {
     const jumpTo = vi.fn();
     const easeTo = vi.fn();
     const fitBounds = vi.fn();
-    const map = { jumpTo, easeTo, fitBounds } as unknown as import("maplibre-gl").Map;
+    const map = {
+      jumpTo,
+      easeTo,
+      fitBounds,
+      once: vi.fn(),
+    } as unknown as import("maplibre-gl").Map;
 
     fitPhonePortraitRegionViewport(map, "peninsula");
 

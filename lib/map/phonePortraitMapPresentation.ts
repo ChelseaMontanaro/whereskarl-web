@@ -123,25 +123,33 @@ export const PHONE_PORTRAIT_SOUTH_BAY_CAMERA: PhonePortraitCameraPreset = {
   zoom: 9.88,
 };
 
-/** Peninsula tab: coast-hugging strip — SSF through Palo Alto, bay/Oakland cropped east. */
+/**
+ * Peninsula tab: land corridor only — SSF through Mountain View on the 101
+ * strip. East edge stops at the hills/101 corridor so fitBounds does not
+ * mathematically center open Bay water or Foster City.
+ */
 export const PHONE_PORTRAIT_PENINSULA_REGION_BOUNDS: MapBounds = [
-  [-122.478, 37.408],
-  [-122.112, 37.648],
+  [-122.502, 37.375],
+  [-122.198, 37.668],
 ];
 
-/** Padding tuned for Peninsula camera above the bottom tray and beside the fog rail. */
+/**
+ * Padding tuned for Peninsula fitBounds above the bottom tray and beside the
+ * fog rail. Heavy right padding intentionally biases the visible center west
+ * onto peninsula land instead of the Bay / East Bay.
+ */
 export const PHONE_PORTRAIT_PENINSULA_VIEWPORT_PADDING: ViewportPadding = {
   top: 112,
-  right: 96,
+  right: 176,
   bottom: 215,
   left: 76,
 };
 
-/** Peninsula tab: Burlingame/San Mateo centered with Palo Alto lower-right. */
+/** Peninsula tab: Burlingame / San Mateo land centered; bay cropped east. */
 export const PHONE_PORTRAIT_PENINSULA_CAMERA: PhonePortraitCameraPreset = {
-  latitude: 37.548,
-  longitude: -122.314,
-  zoom: 9.92,
+  latitude: 37.528,
+  longitude: -122.402,
+  zoom: 10.18,
 };
 
 /** Deselected / all-Bay default: wider full Bay Area view. */
