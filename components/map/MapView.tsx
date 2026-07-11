@@ -411,12 +411,14 @@ function MobileMapView({ state }: { state: MapViewModel }) {
 
             {isPhonePortrait ? (
               <div
-                className="pointer-events-auto absolute left-3 top-[calc(7rem+env(safe-area-inset-top))]"
+                className="pointer-events-none absolute left-3 top-[calc(6rem+env(safe-area-inset-top))] bottom-[calc(9.5rem+env(safe-area-inset-bottom))] flex flex-col justify-center"
               >
-                <MapPhonePortraitFogRail
-                  activeIntensity={intensityFilter}
-                  onSelectIntensity={handleSelectIntensity}
-                />
+                <div className="pointer-events-auto">
+                  <MapPhonePortraitFogRail
+                    activeIntensity={intensityFilter}
+                    onSelectIntensity={handleSelectIntensity}
+                  />
+                </div>
               </div>
             ) : null}
 

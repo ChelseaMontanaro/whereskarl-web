@@ -75,6 +75,24 @@ const KARL_TERRITORY_DETAILED_ICON = `<svg xmlns="http://www.w3.org/2000/svg" vi
   <path d="M13.5 41c2.5 0 3.8-1.3 5-2.4 1.2 1.1 2.5 2.4 5 2.4s3.8-1.3 5-2.4c1.2 1.1 2.5 2.4 5 2.4" stroke="#8797A6" stroke-width="1.8" stroke-linecap="round" opacity="0.5" />
 </svg>`;
 
+/**
+ * Fog-rail Clear (daytime): sun only — no cloud — reusing the approved warm
+ * sun palette so it stays distinct from the grey fog states.
+ */
+const FOG_RAIL_CLEAR_SUN_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" aria-hidden="true" fill="none">
+  <circle cx="24" cy="24" r="9" fill="#F2A326" opacity="0.95" />
+  <circle cx="24" cy="24" r="6.8" fill="#F6C15A" opacity="0.9" />
+  <path d="M24 5.5v4.2M24 38.3v4.2M5.5 24h4.2M38.3 24h4.2M11 11l3 3M34 34l3 3M11 37l3-3M34 14l3-3" stroke="#F2A326" stroke-width="2" stroke-linecap="round" opacity="0.9" />
+</svg>`;
+
+/**
+ * Fog-rail Clear (nighttime): crescent moon only — no cloud — reusing the
+ * approved icy-blue moon palette.
+ */
+const FOG_RAIL_CLEAR_MOON_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" aria-hidden="true" fill="none">
+  <path d="M24 10A14 14 0 0 0 24 38 A26 26 0 0 1 24 10Z" fill="#9FC4E6" opacity="0.92" />
+</svg>`;
+
 export function getPhonePortraitConditionIconSvg(
   intensity: FogIntensity,
   options: PhonePortraitPresentationOptions = {},
@@ -94,17 +112,22 @@ export function getPhonePortraitConditionIconSvg(
 }
 
 /**
- * Fog-rail icons reuse the approved condition artwork. Clear resolves to the
- * day/night sun or moon treatment (not the fog palette) so it reads distinctly
- * from the Light Fog and Foggy states.
+ * Fog-rail icons reuse the approved condition artwork. Clear resolves to a
+ * cloud-free sun (day) or crescent moon (night) so it reads distinctly from the
+ * Light Fog, Foggy, and Karl Territory states while preserving day/night logic.
  */
 export function getPhonePortraitFogRailConditionIconDataUri(
   intensity: FogIntensity,
   options: PhonePortraitPresentationOptions = {},
 ): string {
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
-    getPhonePortraitConditionIconSvg(intensity, options),
-  )}`;
+  const svg =
+    intensity === "clear"
+      ? resolvePhonePortraitIsNighttime(options)
+        ? FOG_RAIL_CLEAR_MOON_ICON
+        : FOG_RAIL_CLEAR_SUN_ICON
+      : getPhonePortraitConditionIconSvg(intensity, options);
+
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }
 
 export function getPhonePortraitConditionIconDataUri(
