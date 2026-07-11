@@ -7,8 +7,12 @@ import { DegradedDataLabel } from "@/components/weather/DegradedDataLabel";
 import type { BestRightNowItem } from "@/lib/home/weatherDisplay";
 import type { LocationWeather } from "@/lib/schemas/weather";
 
+/**
+ * Translucent map glass: navy tint at low opacity plus backdrop blur so the map
+ * texture stays visible beneath. Sizes to content — no min-height.
+ */
 const PHONE_PORTRAIT_PANEL_CLASS =
-  "rounded-2xl border border-[rgb(160_185_210/0.24)] bg-[rgb(6_15_27/0.92)] px-2.5 py-1.5 shadow-[0_10px_18px_rgb(0_0_0/0.45)]";
+  "rounded-2xl border border-white/12 bg-[rgb(6_15_27/0.55)] px-2.5 py-1.5 shadow-[0_6px_18px_rgb(0_0_0/0.3)] backdrop-blur-md";
 
 function getPhonePortraitConditionLine(
   item: BestRightNowItem,
@@ -117,10 +121,10 @@ export function MapPhonePortraitUnifiedCard({
 
     return (
       <section aria-label={title} className={`${PHONE_PORTRAIT_PANEL_CLASS} w-full max-w-full`}>
-        <p className="px-0.5 text-[0.625rem] font-bold uppercase tracking-[0.08em] text-karl-gold/90">
+        <p className="text-[0.5625rem] font-bold uppercase leading-none tracking-[0.08em] text-karl-gold/90">
           {title}
         </p>
-        <p className="mt-1 px-0.5 text-[0.6875rem] leading-snug text-white/55">
+        <p className="mt-1 text-[0.6875rem] leading-snug text-white/55">
           {emptyMessage}
         </p>
       </section>
@@ -133,10 +137,10 @@ export function MapPhonePortraitUnifiedCard({
 
   return (
     <section aria-label={title} className={`${PHONE_PORTRAIT_PANEL_CLASS} w-full max-w-full`}>
-      <p className="px-0.5 text-[0.625rem] font-bold uppercase tracking-[0.08em] text-karl-gold/90">
+      <p className="text-[0.5625rem] font-bold uppercase leading-none tracking-[0.08em] text-karl-gold/90">
         {title}
       </p>
-      <div className="mt-1 flex items-stretch gap-1.5">
+      <div className="mt-1 flex items-center gap-2">
         <button
           type="button"
           data-location-id={item.locationId}
@@ -145,23 +149,30 @@ export function MapPhonePortraitUnifiedCard({
             event.stopPropagation();
             onSelectLocation(item.locationId);
           }}
-          className="flex min-w-0 flex-1 flex-col gap-0 py-0.5 text-left transition-opacity hover:opacity-90 motion-reduce:transition-none"
+          className="flex min-w-0 flex-1 items-center gap-2 text-left transition-opacity hover:opacity-90 motion-reduce:transition-none"
         >
-          <span className="truncate text-[0.6875rem] font-semibold leading-3 text-white">
-            {item.locationName}
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-[0.8125rem] font-semibold leading-tight text-white">
+              {item.locationName}
+            </span>
+            {conditionLine ? (
+              <span className="block truncate text-[0.5625rem] font-medium leading-tight text-white/55">
+                {conditionLine}
+              </span>
+            ) : null}
+            {item.isDegraded ? (
+              <DegradedDataLabel variant="bestRightNow" className="mt-px" />
+            ) : null}
           </span>
           {item.score != null ? (
-            <span className="text-sm font-semibold leading-4 text-karl-gold">
-              {item.score}
+            <span className="flex shrink-0 flex-col items-center self-stretch justify-center border-l border-white/12 pl-2 leading-none">
+              <span className="text-[0.5rem] font-bold uppercase tracking-[0.06em] text-white/40">
+                Clear Skies
+              </span>
+              <span className="mt-px text-lg font-light leading-5 text-karl-gold">
+                {item.score}
+              </span>
             </span>
-          ) : null}
-          {conditionLine ? (
-            <span className="truncate text-[0.5625rem] font-medium leading-[0.625rem] text-white/55">
-              {conditionLine}
-            </span>
-          ) : null}
-          {item.isDegraded ? (
-            <DegradedDataLabel variant="bestRightNow" className="mt-px" />
           ) : null}
         </button>
         {items.length > 1 ? (
