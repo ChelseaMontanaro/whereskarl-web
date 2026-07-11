@@ -12,7 +12,6 @@ import {
 import { MapBestRightNowTray } from "@/components/map/MapBestRightNowTray";
 import { MapConditionsPanel } from "@/components/map/MapConditionsPanel";
 import { MapPhonePortraitControls } from "@/components/map/MapPhonePortraitControls";
-import { MapPhonePortraitCameraDebug } from "@/components/map/MapPhonePortraitCameraDebug";
 import { MapPhonePortraitFogRail } from "@/components/map/MapPhonePortraitFogRail";
 import { MapFogLegend } from "@/components/map/MapFogLegend";
 import { MapSelectedLocationCard } from "@/components/map/MapSelectedLocationCard";
@@ -39,7 +38,6 @@ import {
 } from "@/lib/map/routing";
 import type { KarlMapStyleId } from "@/lib/map/styles";
 import { filterLocationsForPhonePortraitSfComposition } from "@/lib/map/phonePortraitMapPresentation";
-import { PHONE_PORTRAIT_CAMERA_DEBUG_ENABLED } from "@/lib/map/phonePortraitCameraDebug";
 
 const PHONE_PORTRAIT_SKIP_DEFAULT_REGION_KEY =
   "whereskarl:phone-map:skip-default-region";
@@ -249,11 +247,6 @@ function MobileMapView({ state }: { state: MapViewModel }) {
   const isPhonePortrait = usePhonePortrait();
   const mapRef = useRef<BayAreaMapHandle>(null);
   const [isLayersPanelOpen, setIsLayersPanelOpen] = useState(false);
-  const [phonePortraitDebugMap, setPhonePortraitDebugMap] = useState<
-    import("maplibre-gl").Map | null
-  >(null);
-  const showPhonePortraitCameraDebug =
-    PHONE_PORTRAIT_CAMERA_DEBUG_ENABLED && isPhonePortrait;
   const router = useRouter();
   const {
     mapQuery,
@@ -393,7 +386,6 @@ function MobileMapView({ state }: { state: MapViewModel }) {
         intensityFilter={intensityFilter}
         onImmersiveLayersPanelOpenChange={setIsLayersPanelOpen}
         immersiveOverlayProfile={isPhonePortrait ? "phone-portrait" : "tablet"}
-        onMapReady={showPhonePortraitCameraDebug ? setPhonePortraitDebugMap : undefined}
       />
 
       <div className="pointer-events-none absolute inset-0 z-20">
@@ -497,10 +489,6 @@ function MobileMapView({ state }: { state: MapViewModel }) {
           ) : null}
         </div>
       </div>
-
-      {showPhonePortraitCameraDebug ? (
-        <MapPhonePortraitCameraDebug map={phonePortraitDebugMap} />
-      ) : null}
 
       <p className="pointer-events-none absolute bottom-[calc(5rem+env(safe-area-inset-bottom))] right-3 z-20 text-[0.6rem] text-white/25 sm:right-4">
         Map data © OpenStreetMap contributors · CARTO

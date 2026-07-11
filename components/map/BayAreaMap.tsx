@@ -78,7 +78,6 @@ type BayAreaMapProps = {
   intensityFilter?: FogIntensity | null;
   onImmersiveLayersPanelOpenChange?: (isOpen: boolean) => void;
   immersiveOverlayProfile?: ImmersiveOverlayProfile;
-  onMapReady?: (map: import("maplibre-gl").Map) => void;
 };
 
 export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
@@ -98,7 +97,6 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
       intensityFilter = null,
       onImmersiveLayersPanelOpenChange,
       immersiveOverlayProfile = "tablet",
-      onMapReady,
     },
     ref,
   ) {
@@ -253,7 +251,6 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
             intensityFilter,
           );
           setMapReady(true);
-          onMapReady?.(map);
         });
 
         mapRef.current = map;

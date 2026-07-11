@@ -15,7 +15,6 @@ import {
   PHONE_PORTRAIT_SOUTH_BAY_REGION_BOUNDS,
   PHONE_PORTRAIT_SOUTH_BAY_VIEWPORT_PADDING,
 } from "@/lib/map/phonePortraitMapPresentation";
-import { fitMapToBounds } from "@/lib/map/viewport";
 
 function normalizePhonePortraitPadding(
   padding:
