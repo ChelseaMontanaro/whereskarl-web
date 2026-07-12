@@ -132,6 +132,16 @@ type MapViewModel = {
   /** Canonical Best Right Now location id (matches Home's recommendation). */
   bestRightNowLocationId: string | null;
   suppressViewportUpdateRef: MutableRefObject<boolean>;
+  /**
+   * UI-only phone-portrait sheet state. These never define *which* location is
+   * selected — `?location=` remains the canonical selection source. They only
+   * distinguish the three entry situations for the one-time auto-selection:
+   *   - `autoSelectAppliedRef`: the single clean-entry auto-selection has run.
+   *   - `sheetDismissedRef`: the user explicitly closed the sheet, so auto-
+   *     selection must not resurrect it for the rest of this session.
+   */
+  autoSelectAppliedRef: MutableRefObject<boolean>;
+  sheetDismissedRef: MutableRefObject<boolean>;
   handleSelectLocation: (locationId: string) => void;
   handleSelectRegion: (regionId: string) => void;
   handleClearSelectedLocation: () => void;
@@ -144,6 +154,9 @@ function useMapViewState(): MapViewModel {
   const searchParams = useSearchParams();
   const mapQuery = resolveMapQueryState(searchParams);
   const suppressViewportUpdateRef = useRef(false);
+  // Phone-portrait sheet lifecycle (UI-only; selection stays canonical in URL).
+  const autoSelectAppliedRef = useRef(false);
+  const sheetDismissedRef = useRef(false);
   const [mapStyle, setMapStyle] = useState<KarlMapStyleId>(initialMapStyle);
   const [fogLayerEnabled, setFogLayerEnabled] = useState(true);
   const [intensityFilter, setIntensityFilter] = useState<FogIntensity | null>(
@@ -231,6 +244,10 @@ function useMapViewState(): MapViewModel {
   );
 
   const handleClearSelectedLocation = useCallback(() => {
+    // Explicit dismissal: latch the sheet closed so the clean-entry auto-select
+    // effect does not immediately re-open Best Right Now when `?location=`
+    // clears. Selection itself stays canonical — we only drop the URL param.
+    sheetDismissedRef.current = true;
     suppressViewportUpdateRef.current = true;
     router.replace("/map", { scroll: false });
   }, [router]);
@@ -272,6 +289,8 @@ function useMapViewState(): MapViewModel {
     bestRightNowItems,
     bestRightNowLocationId,
     suppressViewportUpdateRef,
+    autoSelectAppliedRef,
+    sheetDismissedRef,
     handleSelectLocation,
     handleSelectRegion,
     handleClearSelectedLocation,
@@ -304,6 +323,8 @@ function MobileMapView({ state }: { state: MapViewModel }) {
     handleSelectIntensity,
     intensityFilter,
     suppressViewportUpdateRef,
+    autoSelectAppliedRef,
+    sheetDismissedRef,
   } = state;
 
   // Region that frames the phone-portrait camera. It stays independent of the
@@ -320,11 +341,16 @@ function MobileMapView({ state }: { state: MapViewModel }) {
     : mapQuery.activeRegionId;
 
   // Selection-driven entry: on a clean map open (no explicit location/region),
-  // auto-select the canonical Best Right Now location so the card immediately
-  // becomes the selected-location experience. The camera is unaffected.
+  // auto-select the canonical Best Right Now location ONCE so the sheet
+  // immediately becomes the selected-location experience. The camera is
+  // unaffected. This must not fire again after the user explicitly dismisses
+  // the sheet (which clears `?location=`) — `sheetDismissedRef` latches that
+  // intent, and `autoSelectAppliedRef` ensures the auto-selection is one-time.
   useEffect(() => {
     if (
       !isPhonePortrait ||
+      autoSelectAppliedRef.current ||
+      sheetDismissedRef.current ||
       mapQuery.requestedLocationId ||
       mapQuery.activeRegionId ||
       mapQuery.unknownRegionId ||
@@ -333,15 +359,18 @@ function MobileMapView({ state }: { state: MapViewModel }) {
       return;
     }
 
+    autoSelectAppliedRef.current = true;
     suppressViewportUpdateRef.current = false;
     router.replace(buildMapHref(bestRightNowLocationId), { scroll: false });
   }, [
+    autoSelectAppliedRef,
     bestRightNowLocationId,
     isPhonePortrait,
     mapQuery.activeRegionId,
     mapQuery.requestedLocationId,
     mapQuery.unknownRegionId,
     router,
+    sheetDismissedRef,
     suppressViewportUpdateRef,
   ]);
 
@@ -461,10 +490,14 @@ function MobileMapView({ state }: { state: MapViewModel }) {
 
         {isPhonePortrait ? (
           <>
-            {/* Fog Intensity rail — global filter, left side, vertically
-                centered. Stays mounted (and unchanged) while the Map Layers
-                sheet is open; the sheet's backdrop dims it along with the map. */}
-            <div className="pointer-events-none absolute left-3 top-[calc(6rem+env(safe-area-inset-top))] bottom-[calc(9.5rem+env(safe-area-inset-bottom))] flex flex-col justify-center">
+            {/* Fog Intensity rail — global filter, anchored to the upper-left
+                control area (below the region chips) so the layout reads
+                intentionally: chips + Layers on top, rail on the left, the
+                Selected Location sheet on the bottom. Rail dimensions, styling,
+                icons, and filtering are unchanged — only its position moved
+                higher now that the Selected Location is a bottom sheet. Stays
+                mounted while the Map Layers sheet is open. */}
+            <div className="pointer-events-none absolute left-3 top-[calc(6rem+env(safe-area-inset-top))] flex flex-col">
               <div className="pointer-events-auto flex flex-col items-start gap-2">
                 <MapPhonePortraitFogRail
                   activeIntensity={intensityFilter}
@@ -487,47 +520,40 @@ function MobileMapView({ state }: { state: MapViewModel }) {
           </>
         ) : null}
 
-        <div
-          className={`pointer-events-auto absolute inset-x-3 flex flex-col items-stretch sm:inset-x-4 ${
-            isPhonePortrait
-              ? "bottom-[calc(4.5rem+env(safe-area-inset-bottom))] gap-0"
-              : "bottom-[calc(5.5rem+env(safe-area-inset-bottom))] gap-2.5 md:bottom-[calc(5.25rem+env(safe-area-inset-bottom))]"
-          }`}
-        >
-          {isPhonePortrait ? (
-            selectedLocation ? (
+        {isPhonePortrait ? (
+          // Phone portrait: the Selected Location is a canonical bottom sheet
+          // that owns its own fixed positioning (anchored above the bottom
+          // navigation), so it renders outside the absolute bottom container.
+          selectedLocation ? (
+            <MapSelectedLocationCard
+              location={selectedLocation}
+              phonePortrait
+              onClose={handleClearSelectedLocation}
+            />
+          ) : locationsQuery.isLoading ? (
+            <div className="pointer-events-auto fixed inset-x-3 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-40 mx-auto max-w-[26rem] rounded-t-[1.75rem] rounded-b-3xl border border-white/12 bg-black/70 px-4 py-3 shadow-[0_-8px_40px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+              <p className="text-xs text-white/55">Finding the clearest spot…</p>
+            </div>
+          ) : null
+        ) : (
+          <div className="pointer-events-auto absolute inset-x-3 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] flex flex-col items-stretch gap-2.5 sm:inset-x-4 md:bottom-[calc(5.25rem+env(safe-area-inset-bottom))]">
+            {shouldShowDesktopBestRightNowTray(intensityFilter) ? (
+              <MapBestRightNowTray
+                items={bestRightNowItems}
+                selectedLocationId={selectedLocation?.id ?? null}
+                onSelectLocation={handleSelectLocation}
+                isLoading={locationsQuery.isLoading}
+              />
+            ) : null}
+
+            {selectedLocation ? (
               <MapSelectedLocationCard
                 location={selectedLocation}
-                phonePortrait
-                showCloseButton={false}
+                onClose={handleClearSelectedLocation}
               />
-            ) : locationsQuery.isLoading ? (
-              <div className="w-full rounded-2xl border border-white/12 bg-[rgb(6_15_27/0.55)] px-4 py-3 backdrop-blur-md">
-                <p className="text-xs text-white/50">
-                  Finding the clearest spot…
-                </p>
-              </div>
-            ) : null
-          ) : (
-            <>
-              {shouldShowDesktopBestRightNowTray(intensityFilter) ? (
-                <MapBestRightNowTray
-                  items={bestRightNowItems}
-                  selectedLocationId={selectedLocation?.id ?? null}
-                  onSelectLocation={handleSelectLocation}
-                  isLoading={locationsQuery.isLoading}
-                />
-              ) : null}
-
-              {selectedLocation ? (
-                <MapSelectedLocationCard
-                  location={selectedLocation}
-                  onClose={handleClearSelectedLocation}
-                />
-              ) : null}
-            </>
-          )}
-        </div>
+            ) : null}
+          </div>
+        )}
       </div>
 
       <p className="pointer-events-none absolute bottom-[calc(5rem+env(safe-area-inset-bottom))] right-3 z-20 text-[0.6rem] text-white/25 sm:right-4">

@@ -230,7 +230,7 @@ describe("MapSelectedLocationCard", () => {
   });
 });
 
-describe("MapSelectedLocationCard phone portrait", () => {
+describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
   beforeEach(() => {
     window.localStorage.clear();
   });
@@ -240,68 +240,96 @@ describe("MapSelectedLocationCard phone portrait", () => {
     window.localStorage.clear();
   });
 
-  it("renders Karl's Read with the location name and score band", () => {
-    render(<MapSelectedLocationCard location={location} phonePortrait />);
+  it("renders the selection inside a labelled bottom sheet with a grab handle", () => {
+    render(
+      <MapSelectedLocationCard
+        location={location}
+        phonePortrait
+        onClose={vi.fn()}
+      />,
+    );
 
-    expect(screen.getByRole("heading", { name: "Tiburon" })).toBeInTheDocument();
-    expect(screen.getByText("Karl's Read")).toBeInTheDocument();
     expect(
-      screen.getByText("Mostly clear across Tiburon."),
+      screen.getByRole("region", { name: "Selected location: Tiburon" }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Expand details" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Tiburon" })).toBeInTheDocument();
+    // Subtitle reads as "<area>, CA".
+    expect(screen.getByText(/,\s*CA$/)).toBeInTheDocument();
+  });
+
+  it("renders the canonical metrics row from the presentation helpers", () => {
+    render(<MapSelectedLocationCard location={location} phonePortrait />);
 
     const score = screen.getByTestId("clear-skies-score");
     expect(score.textContent).toBe("82");
     expect(score).toHaveAttribute("data-score-band", "clear");
+
+    const metrics = screen.getByTestId("selected-location-metrics");
+    expect(metrics).toHaveTextContent("Clear Skies");
+    expect(metrics).toHaveTextContent("Fog");
+    expect(metrics).toHaveTextContent("18%");
+    expect(metrics).toHaveTextContent("AQI");
+    expect(metrics).toHaveTextContent("Temp");
+    expect(metrics).toHaveTextContent("68°");
+    expect(metrics).toHaveTextContent("Wind");
+    expect(metrics).toHaveTextContent("W 8");
+    expect(metrics).toHaveTextContent("mph");
   });
 
-  it("shows a canonical Air Quality slot that awaits data when AQI is absent", () => {
+  it("shows the canonical Air Quality slot as 'Coming Soon' when AQI is absent", () => {
     render(<MapSelectedLocationCard location={location} phonePortrait />);
 
     const slot = screen.getByTestId("air-quality-slot");
-    expect(slot).toHaveTextContent("Air Quality");
+    expect(slot).toHaveTextContent("AQI");
     expect(slot).toHaveTextContent("Coming Soon");
   });
 
-  it("renders the AQI category and band when a value exists", () => {
+  it("renders the AQI category when a value exists", () => {
     render(
-      <MapSelectedLocationCard
-        location={{ ...location, aqi: 42 }}
-        phonePortrait
-      />,
+      <MapSelectedLocationCard location={{ ...location, aqi: 42 }} phonePortrait />,
     );
 
     const slot = screen.getByTestId("air-quality-slot");
     expect(slot).toHaveTextContent("42");
     expect(slot).toHaveTextContent("Good");
-    expect(slot.querySelector("[data-aqi-band='good']")).toBeTruthy();
+    expect(slot).not.toHaveTextContent("Coming Soon");
   });
 
-  it("renders the weather summary metrics", () => {
+  it("renders a neutral premium location-image placeholder with no per-location image pipeline", () => {
     render(<MapSelectedLocationCard location={location} phonePortrait />);
 
-    const summary = screen.getByText(/Humidity 60%/);
-    expect(summary).toHaveTextContent("Fog 18%");
-    expect(summary).toHaveTextContent("Wind W 8 mph");
-    expect(summary).toHaveTextContent("68°F");
+    const placeholder = screen.getByTestId("location-image-placeholder");
+    expect(placeholder).toHaveTextContent("Location Image");
+    expect(placeholder).toHaveTextContent("Coming Soon");
+    // Presentation-only: the placeholder is not a real <img> and pulls in no
+    // per-location image source, mapping, or second image system.
+    expect(placeholder.querySelector("img")).toBeNull();
+    expect(placeholder.className).toContain("rounded-full");
   });
 
-  it("shows a forecast preview when a prediction is available and no View Full Forecast button", () => {
-    render(
-      <MapSelectedLocationCard
-        location={{
-          ...location,
-          prediction: {
-            predictionConfidenceScore: 80,
-            predictionConfidenceLabel: "High",
-            predictionReason: "Sun breaks through by 11 AM.",
-            trend: "clearing",
-          },
-        }}
-        phonePortrait
-      />,
+  it("renders Karl's Read as the primary insight with the smiling fog logo", () => {
+    const { container } = render(
+      <MapSelectedLocationCard location={location} phonePortrait />,
     );
 
-    expect(screen.getByText("Next hour")).toBeInTheDocument();
+    const karlSection = screen.getByRole("region", { name: "Karl's Read" });
+    expect(karlSection).toHaveTextContent("Karl's Read");
+    expect(karlSection).toHaveTextContent("Mostly clear across Tiburon.");
+    // The Karl logo image (brand asset) is rendered, not a generic icon.
+    expect(container.querySelector('img[src*="wheres-karl-logo"]')).toBeTruthy();
+  });
+
+  it("renders an hourly outlook chip strip without a View Full Forecast action", () => {
+    render(<MapSelectedLocationCard location={location} phonePortrait />);
+
+    const forecast = screen.getByRole("region", { name: "Hourly outlook" });
+    expect(forecast).toHaveTextContent("Hourly Outlook");
+    // "Now" chip is always present, populated with the real current temperature.
+    expect(forecast).toHaveTextContent("Now");
+    expect(forecast).toHaveTextContent("68°");
     expect(
       screen.queryByRole("button", { name: /View Full Forecast/i }),
     ).not.toBeInTheDocument();
@@ -310,19 +338,62 @@ describe("MapSelectedLocationCard phone portrait", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("omits the forecast section when prediction data is unavailable", () => {
-    render(<MapSelectedLocationCard location={location} phonePortrait />);
+  it("adds a next-hour chip when a projected fog score exists (no fabricated temps)", () => {
+    render(
+      <MapSelectedLocationCard
+        location={{
+          ...location,
+          prediction: {
+            ...location.prediction,
+            trend: "clearing",
+            projectedFogScore1h: 40,
+          },
+        }}
+        phonePortrait
+      />,
+    );
 
-    expect(screen.queryByText("Next hour")).not.toBeInTheDocument();
+    const forecast = screen.getByRole("region", { name: "Hourly outlook" });
+    expect(forecast).toHaveTextContent("Next hr");
+    expect(forecast).toHaveTextContent("Light Fog");
   });
 
-  it("toggles favorite from the phone portrait card", () => {
+  it("closes via the header close button", () => {
+    const onClose = vi.fn();
+    render(
+      <MapSelectedLocationCard
+        location={location}
+        phonePortrait
+        onClose={onClose}
+      />,
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Close selected location" }),
+    );
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("closes when Escape is pressed", () => {
+    const onClose = vi.fn();
+    render(
+      <MapSelectedLocationCard
+        location={location}
+        phonePortrait
+        onClose={onClose}
+      />,
+    );
+
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("toggles favorite from the sheet header", () => {
     render(<MapSelectedLocationCard location={location} phonePortrait />);
 
-    const favoriteButton = screen.getByRole("button", {
-      name: "Add Tiburon to favorites",
-    });
-    fireEvent.click(favoriteButton);
+    fireEvent.click(
+      screen.getByRole("button", { name: "Add Tiburon to favorites" }),
+    );
 
     expect(
       screen.getByRole("button", { name: "Remove Tiburon from favorites" }),

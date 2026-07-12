@@ -1,17 +1,21 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 
 import { KarlLogo } from "@/components/brand/KarlLogo";
 import { MapLocationConditionIcon } from "@/components/map/MapLocationConditionIcon";
 import { MapPhonePortraitConditionIcon } from "@/components/map/MapPhonePortraitConditionIcon";
+import { BottomSheet } from "@/components/ui/BottomSheet";
 import { desktopGlassCardClass } from "@/components/home/desktopGlass";
 import {
-  getLocationConditionLabel,
+  getFogIntensity,
+  getFogIntensityLabel,
+  resolveFogScore,
   resolveLocationFogIntensity,
+  type FogIntensity,
 } from "@/lib/map/conditions";
+import { getProductRegionNameForLocation } from "@/lib/map/regions";
 import { locationWeatherMetadataItems } from "@/lib/map/locationMetadata";
-import { nextHourOutlookSummary } from "@/lib/home/weatherDisplay";
 import { useIsNighttime } from "@/lib/hooks/useIsNighttime";
 import { presentClearSkiesScore } from "@/lib/score/clearSkiesScore";
 import { presentAirQuality } from "@/lib/weather/airQuality";
@@ -71,11 +75,114 @@ function useFavoriteToggle(locationId: string) {
     isFavoriteLocation(locationId),
   );
 
+  // Keep favorite state correct when the selected location changes without the
+  // card unmounting (the persistent bottom sheet stays mounted across taps).
+  useEffect(() => {
+    setIsFavorite(isFavoriteLocation(locationId));
+  }, [locationId]);
+
   const handleToggleFavorite = useCallback(() => {
     setIsFavorite(toggleFavoriteLocation(locationId));
   }, [locationId]);
 
   return { isFavorite, handleToggleFavorite };
+}
+
+/** Location pin glyph for the sheet subtitle. */
+function LocationPinIcon({ className = "h-3 w-3" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={className}
+      fill="currentColor"
+    >
+      <path d="M12 2c-3.87 0-7 3.13-7 7 0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z" />
+    </svg>
+  );
+}
+
+/** Relative freshness label for the selected-location header ("Updated …"). */
+function relativeUpdatedLabel(updatedAt: string): string {
+  const timestamp = Date.parse(updatedAt);
+  if (Number.isNaN(timestamp)) {
+    return "Updated recently";
+  }
+
+  const diffMinutes = Math.round((Date.now() - timestamp) / 60000);
+  if (diffMinutes <= 1) {
+    return "Updated just now";
+  }
+  if (diffMinutes < 60) {
+    return `Updated ${diffMinutes}m ago`;
+  }
+
+  const diffHours = Math.round(diffMinutes / 60);
+  if (diffHours < 24) {
+    return `Updated ${diffHours}h ago`;
+  }
+
+  const diffDays = Math.round(diffHours / 24);
+  return `Updated ${diffDays}d ago`;
+}
+
+/** hex → rgba string for subtle inline tints (e.g. the score metric cell). */
+function hexToRgba(hex: string, alpha: number): string {
+  const normalized = hex.replace("#", "");
+  const r = parseInt(normalized.slice(0, 2), 16);
+  const g = parseInt(normalized.slice(2, 4), 16);
+  const b = parseInt(normalized.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+type MapForecastPeriod = {
+  key: string;
+  label: string;
+  intensity: FogIntensity;
+  tempF: number | null;
+  caption: string | null;
+};
+
+/**
+ * Real forecast periods for the sheet's hourly strip.
+ *
+ * The web backend does not yet expose an hourly forecast array — only the
+ * current observation and a single next-hour projection. We render the honest
+ * data we have (current conditions + the projected next-hour intensity) rather
+ * than fabricating hourly temperatures. When a backend hourly array lands, this
+ * builder is the single place to expand into the full strip.
+ */
+function buildForecastPeriods(
+  location: LocationWeather,
+  isNighttime: boolean,
+): MapForecastPeriod[] {
+  const periods: MapForecastPeriod[] = [
+    {
+      key: "now",
+      label: "Now",
+      intensity: resolveLocationFogIntensity(location),
+      tempF:
+        typeof location.temperature === "number" &&
+        Number.isFinite(location.temperature)
+          ? Math.round(location.temperature)
+          : null,
+      caption: null,
+    },
+  ];
+
+  const projected = location.prediction?.projectedFogScore1h;
+  if (typeof projected === "number" && Number.isFinite(projected)) {
+    const nextIntensity = getFogIntensity(Math.max(0, Math.min(100, projected)));
+    periods.push({
+      key: "next-hour",
+      label: "Next hr",
+      intensity: nextIntensity,
+      tempF: null,
+      caption: getFogIntensityLabel(nextIntensity, isNighttime),
+    });
+  }
+
+  return periods;
 }
 
 function FavoriteButton({
@@ -115,6 +222,94 @@ function FavoriteButton({
   );
 }
 
+function SectionLabel({ children }: { children: ReactNode }) {
+  return (
+    <p className="text-[0.625rem] font-bold uppercase tracking-[0.14em] text-karl-gold/90">
+      {children}
+    </p>
+  );
+}
+
+/**
+ * A single metric column in the sheet's at-a-glance metrics row. Values and
+ * colors come from the canonical presentation helpers — this component never
+ * derives thresholds or colors itself.
+ */
+function MetricCell({
+  title,
+  value,
+  valueColor,
+  valueClassName = "text-lg font-light",
+  supporting,
+  goldTitle = false,
+  highlightColor,
+  band,
+  testId,
+  containerTestId,
+}: {
+  title: string;
+  value: ReactNode;
+  valueColor?: string;
+  valueClassName?: string;
+  supporting?: string;
+  goldTitle?: boolean;
+  highlightColor?: string;
+  band?: string;
+  testId?: string;
+  containerTestId?: string;
+}) {
+  const highlightStyle = highlightColor
+    ? {
+        backgroundColor: hexToRgba(highlightColor, 0.12),
+        boxShadow: `inset 0 0 0 1px ${hexToRgba(highlightColor, 0.32)}`,
+      }
+    : undefined;
+
+  return (
+    <div
+      className="flex flex-1 flex-col items-center justify-start gap-0.5 rounded-2xl px-1 py-1.5 text-center"
+      style={highlightStyle}
+      data-testid={containerTestId}
+    >
+      <span
+        className={`text-[0.5rem] font-bold uppercase leading-none tracking-[0.08em] ${
+          goldTitle ? "text-karl-gold/90" : "text-white/45"
+        }`}
+      >
+        {title}
+      </span>
+      <span
+        className={`mt-0.5 leading-none ${valueClassName}`}
+        style={valueColor ? { color: valueColor } : undefined}
+        data-score-band={band}
+        data-testid={testId}
+      >
+        {value}
+      </span>
+      <span className="min-h-[0.6875rem] text-[0.5rem] font-medium leading-tight text-white/50">
+        {supporting ?? ""}
+      </span>
+    </div>
+  );
+}
+
+function ForecastChip({ period }: { period: MapForecastPeriod }) {
+  return (
+    <div className="flex min-w-[3.25rem] shrink-0 flex-col items-center gap-1 rounded-2xl border border-white/10 bg-white/[0.04] px-2.5 py-2 text-center">
+      <span className="text-[0.5625rem] font-semibold uppercase leading-none tracking-[0.04em] text-white/55">
+        {period.label}
+      </span>
+      <MapPhonePortraitConditionIcon
+        intensity={period.intensity}
+        className="h-6 w-6"
+      />
+      <span className="text-[0.75rem] font-semibold leading-none text-white">
+        {period.tempF !== null ? `${period.tempF}°` : (period.caption ?? "—")}
+      </span>
+    </div>
+  );
+}
+
 function PhonePortraitSelectedCard({
   location,
   onClose,
@@ -126,12 +321,28 @@ function PhonePortraitSelectedCard({
 }) {
   const isNighttime = useIsNighttime();
   const isDegraded = isLocationDataDegraded(location.dataStatus);
-  const intensity = resolveLocationFogIntensity(location);
-  const conditionLabel = getLocationConditionLabel(location, isNighttime);
+  const headerIntensity = resolveLocationFogIntensity(location);
   const karlRead = getConditionSentence(location);
   const score = presentClearSkiesScore(location.sunshineScore);
   const airQuality = presentAirQuality(location.aqi);
-  const forecastSummary = nextHourOutlookSummary(location.prediction);
+  const fogScore = resolveFogScore(location);
+  const fogLabel = getFogIntensityLabel(headerIntensity, isNighttime);
+  const forecastPeriods = buildForecastPeriods(location, isNighttime);
+
+  const subtitle = `${getProductRegionNameForLocation(location) ?? "Bay Area"}, CA`;
+  const updatedLabel = relativeUpdatedLabel(location.updatedAt);
+
+  const windValue =
+    typeof location.windSpeed === "number" && Number.isFinite(location.windSpeed)
+      ? location.windDirection?.trim()
+        ? `${location.windDirection.trim()} ${Math.round(location.windSpeed)}`
+        : `${Math.round(location.windSpeed)}`
+      : "—";
+  const tempValue =
+    typeof location.temperature === "number" &&
+    Number.isFinite(location.temperature)
+      ? `${Math.round(location.temperature)}°`
+      : "—";
 
   const { isFavorite, handleToggleFavorite } = useFavoriteToggle(location.id);
 
@@ -150,130 +361,138 @@ function PhonePortraitSelectedCard({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [onClose]);
 
-  const humidity =
-    typeof location.humidity === "number" && Number.isFinite(location.humidity)
-      ? `Humidity ${Math.round(location.humidity)}%`
-      : null;
-  const weatherSummary = [
-    ...locationWeatherMetadataItems(location).map((item) =>
-      item.replace(/^Fog: /, "Fog ").replace(/^Wind: /, "Wind "),
-    ),
-    humidity,
-  ].filter((item): item is string => Boolean(item));
-
-  return (
-    <article
-      aria-label={`Selected location: ${location.name}`}
-      className="relative w-full rounded-2xl border border-[rgb(160_185_210/0.24)] bg-[rgb(6_15_27/0.92)] px-3 py-2.5 shadow-[0_10px_18px_rgb(0_0_0/0.45)]"
-    >
-      {showCloseButton && onClose ? (
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close selected location"
-          className="absolute right-2.5 top-2.5 flex h-5 w-5 items-center justify-center rounded-full text-sm leading-none text-white/45 transition-colors hover:bg-white/[0.06] hover:text-white/75 motion-reduce:transition-none"
+  const header = (
+    <>
+      <div className="flex items-start gap-3">
+        {/*
+          Location image placeholder. The backend does not yet expose a
+          canonical per-location image URL, so this renders a neutral, premium
+          placeholder occupying the exact circular frame the real image will
+          fill. When the backend provides an image URL, replace the inner
+          caption with `<img src={…} className="h-full w-full object-cover" />`
+          inside this same frame — no structural change and no new image
+          pipeline, mapping, or per-location asset required.
+        */}
+        <span
+          data-testid="location-image-placeholder"
+          className="flex h-14 w-14 shrink-0 flex-col items-center justify-center gap-0.5 overflow-hidden rounded-full border border-white/15 bg-gradient-to-br from-white/[0.18] via-white/[0.06] to-transparent text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
         >
-          ×
-        </button>
-      ) : null}
-
-      {/* Top row: location name + favorite */}
-      <div className="flex items-center gap-1.5 pr-6">
-        <h2 className="min-w-0 flex-1 truncate text-[0.9375rem] font-semibold leading-tight tracking-tight text-white">
-          {location.name}
-        </h2>
-        <FavoriteButton
-          location={location}
-          isFavorite={isFavorite}
-          onToggle={handleToggleFavorite}
-          size="sm"
-        />
-      </div>
-
-      {isDegraded ? <DegradedDataLabel variant="location" className="mt-1" /> : null}
-
-      {/* Primary metrics: condition · Karl's Read · Clear Skies Score */}
-      <div className="mt-2 grid grid-cols-[auto_1fr_auto] items-stretch gap-2.5">
-        <div className="flex flex-col items-center justify-center gap-0.5 text-center">
-          <MapPhonePortraitConditionIcon
-            intensity={intensity}
-            className="h-6 w-6"
-          />
-          <span className="text-[0.5625rem] font-medium leading-none text-white/60">
-            {conditionLabel}
+          <span className="px-1 text-[0.5rem] font-semibold leading-[1.05] tracking-tight text-white/70">
+            Location Image
           </span>
+          <span className="text-[0.4375rem] font-medium uppercase leading-[1.05] tracking-[0.08em] text-white/45">
+            Coming Soon
+          </span>
+        </span>
+
+        <div className="min-w-0 flex-1">
+          <h2 className="truncate text-[1.0625rem] font-semibold leading-tight tracking-tight text-white">
+            {location.name}
+          </h2>
+          <p className="mt-0.5 flex items-center gap-1 text-[0.75rem] leading-tight text-white/60">
+            <LocationPinIcon className="h-3 w-3 shrink-0 text-white/45" />
+            <span className="truncate">{subtitle}</span>
+          </p>
+          <p className="mt-0.5 text-[0.625rem] leading-tight text-white/40">
+            {updatedLabel}
+          </p>
         </div>
 
-        <div className="flex min-w-0 flex-col justify-center border-x border-[rgb(150_175_200/0.16)] px-2.5">
-          <div className="flex items-center gap-1">
-            <KarlLogo className="h-4 w-4" />
-            <span className="text-[0.5rem] font-bold uppercase leading-none tracking-[0.08em] text-karl-gold/90">
-              Karl&apos;s Read
-            </span>
-          </div>
-          <p className="mt-1 line-clamp-2 text-[0.6875rem] leading-snug text-white/78">
+        <div className="flex shrink-0 items-center gap-1">
+          <FavoriteButton
+            location={location}
+            isFavorite={isFavorite}
+            onToggle={handleToggleFavorite}
+          />
+          {showCloseButton && onClose ? (
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close selected location"
+              className="flex h-6 w-6 items-center justify-center rounded-full border border-white/12 bg-white/[0.05] text-sm leading-none text-white/60 transition-colors hover:border-white/25 hover:text-white motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karl-gold/50"
+            >
+              ×
+            </button>
+          ) : null}
+        </div>
+      </div>
+
+      {isDegraded ? (
+        <DegradedDataLabel variant="location" className="mt-1.5" />
+      ) : null}
+
+      {/* At-a-glance metrics row — canonical helpers only. */}
+      <div
+        className="mt-3 flex items-stretch gap-1"
+        data-testid="selected-location-metrics"
+      >
+        <MetricCell
+          title="Clear Skies"
+          value={score.score}
+          valueColor={score.color}
+          valueClassName="text-xl font-semibold"
+          supporting={score.qualityLabel}
+          goldTitle
+          highlightColor={score.color}
+          band={score.band}
+          testId="clear-skies-score"
+        />
+        <MetricCell
+          title="Fog"
+          value={fogScore !== null ? `${fogScore}%` : "—"}
+          supporting={fogLabel}
+        />
+        <MetricCell
+          title="AQI"
+          value={
+            airQuality.available ? (
+              airQuality.aqi
+            ) : (
+              <span className="text-[0.5625rem] font-medium leading-tight text-white/45">
+                Coming Soon
+              </span>
+            )
+          }
+          valueColor={airQuality.available ? (airQuality.color ?? undefined) : undefined}
+          supporting={airQuality.available ? airQuality.label : undefined}
+          band={airQuality.available ? (airQuality.band ?? undefined) : undefined}
+          containerTestId="air-quality-slot"
+        />
+        <MetricCell title="Temp" value={tempValue} />
+        <MetricCell title="Wind" value={windValue} supporting="mph" />
+      </div>
+    </>
+  );
+
+  return (
+    <BottomSheet
+      ariaLabel={`Selected location: ${location.name}`}
+      header={header}
+    >
+      {/* Karl's Read — the primary insight section. */}
+      <section aria-label="Karl's Read" className="border-t border-white/10 pt-3">
+        <SectionLabel>Karl&apos;s Read</SectionLabel>
+        <div className="mt-2 flex items-start gap-3">
+          <KarlLogo className="h-12 w-12 shrink-0" />
+          <p className="text-[0.8125rem] leading-relaxed text-white/80">
             {karlRead}
           </p>
         </div>
+      </section>
 
-        <div className="flex flex-col items-center justify-center text-center">
-          <span className="text-[0.5rem] font-bold uppercase leading-none tracking-[0.06em] text-white/40">
-            Clear Skies
-          </span>
-          <span
-            className="mt-0.5 text-2xl font-light leading-none"
-            style={{ color: score.color }}
-            data-score-band={score.band}
-            data-testid="clear-skies-score"
-          >
-            {score.score}
-          </span>
+      {/* Hourly outlook — the sheet is the forecast experience. */}
+      <section
+        aria-label="Hourly outlook"
+        className="mt-3 border-t border-white/10 pt-3"
+      >
+        <SectionLabel>Hourly Outlook</SectionLabel>
+        <div className="mt-2 flex gap-2 overflow-x-auto overscroll-x-contain pb-1">
+          {forecastPeriods.map((period) => (
+            <ForecastChip key={period.key} period={period} />
+          ))}
         </div>
-      </div>
-
-      {/* Secondary metrics: Air Quality + weather summary */}
-      <div className="mt-2 space-y-1.5 border-t border-[rgb(150_175_200/0.16)] pt-2">
-        <div
-          className="flex items-center justify-between gap-2"
-          data-testid="air-quality-slot"
-        >
-          <span className="text-[0.5625rem] font-bold uppercase tracking-[0.08em] text-white/40">
-            Air Quality
-          </span>
-          {airQuality.available ? (
-            <span
-              className="text-[0.6875rem] font-semibold leading-none"
-              style={{ color: airQuality.color ?? undefined }}
-              data-aqi-band={airQuality.band ?? undefined}
-            >
-              {airQuality.aqi} · {airQuality.label}
-            </span>
-          ) : (
-            <span className="text-[0.6875rem] font-medium leading-none text-white/38">
-              Coming Soon
-            </span>
-          )}
-        </div>
-
-        {weatherSummary.length > 0 ? (
-          <p className="text-[0.625rem] font-medium leading-snug text-white/55">
-            {weatherSummary.join("  ·  ")}
-          </p>
-        ) : null}
-      </div>
-
-      {/* Forecast preview — the card is the primary forecast experience. */}
-      {forecastSummary ? (
-        <div className="mt-2 border-t border-[rgb(150_175_200/0.16)] pt-2">
-          <p className="text-[0.5rem] font-bold uppercase leading-none tracking-[0.08em] text-white/40">
-            Next hour
-          </p>
-          <p className="mt-1 text-[0.6875rem] leading-snug text-white/72">
-            {forecastSummary}
-          </p>
-        </div>
-      ) : null}
-    </article>
+      </section>
+    </BottomSheet>
   );
 }
 
