@@ -36,12 +36,23 @@ function normalizePhonePortraitPadding(
   };
 }
 
+const ZERO_TRANSFORM_PADDING = { top: 0, right: 0, bottom: 0, left: 0 };
+
 export function fitPhonePortraitRegionViewport(
   map: Map,
   regionId: string | null | undefined,
   options?: { duration?: number },
 ): void {
   const duration = options?.duration ?? 0;
+
+  // MapLibre's `fitBounds` reads the map's persistent transform padding
+  // (`tr.padding`) and adds it on top of the padding passed here, but never
+  // resets it. The Peninsula preset applies persistent padding via
+  // `jumpTo`/`easeTo`, so once it runs every later `fitBounds` region would
+  // double-count that leftover padding and reframe incorrectly. Reset to a
+  // clean zero baseline first so each region is framed deterministically on
+  // every selection, no matter which region was shown before.
+  map.setPadding(ZERO_TRANSFORM_PADDING);
 
   if (regionId === "san-francisco") {
     const padding = normalizePhonePortraitPadding(

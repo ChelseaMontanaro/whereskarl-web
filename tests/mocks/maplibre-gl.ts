@@ -34,6 +34,9 @@ const {
     loaded = vi.fn(() => true);
     flyTo = flyTo;
     fitBounds = fitBounds;
+    jumpTo = vi.fn();
+    easeTo = vi.fn();
+    setPadding = vi.fn();
     setStyle = setStyle;
     addSource = addSource;
     addLayer = addLayer;

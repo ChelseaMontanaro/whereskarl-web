@@ -19,13 +19,15 @@ function createMapSpies() {
   const jumpTo = vi.fn();
   const easeTo = vi.fn();
   const fitBounds = vi.fn();
+  const setPadding = vi.fn();
   const map = {
     jumpTo,
     easeTo,
     fitBounds,
+    setPadding,
     once: vi.fn(),
   } as unknown as import("maplibre-gl").Map;
-  return { map, jumpTo, easeTo, fitBounds };
+  return { map, jumpTo, easeTo, fitBounds, setPadding };
 }
 
 function normalizePadding(padding: unknown) {
@@ -157,5 +159,66 @@ describe("fitPhonePortraitRegionViewport", () => {
       ],
       zoom: PHONE_PORTRAIT_ALL_BAY_CAMERA.zoom,
     });
+  });
+
+  it("resets persistent transform padding before every region application", () => {
+    const { map, setPadding } = createMapSpies();
+
+    for (const { id } of FIT_BOUNDS_REGIONS) {
+      fitPhonePortraitRegionViewport(map, id);
+    }
+    fitPhonePortraitRegionViewport(map, "peninsula");
+    fitPhonePortraitRegionViewport(map, null);
+
+    // One reset per application (4 fitBounds regions + Peninsula + all-Bay).
+    expect(setPadding).toHaveBeenCalledTimes(6);
+    for (const call of setPadding.mock.calls) {
+      expect(call[0]).toEqual({ top: 0, right: 0, bottom: 0, left: 0 });
+    }
+  });
+
+  it("re-applies each region's canonical camera identically across repeated cycles", () => {
+    const { map, fitBounds, jumpTo, setPadding } = createMapSpies();
+    const order = [
+      "san-francisco",
+      "north-bay",
+      "east-bay",
+      "south-bay",
+      "peninsula",
+    ] as const;
+
+    // Three full cycles including the Peninsula preset (which sets persistent
+    // padding) so any leftover-padding regression would surface on cycle 2+.
+    const CYCLES = 3;
+    for (let cycle = 0; cycle < CYCLES; cycle += 1) {
+      for (const id of order) {
+        fitPhonePortraitRegionViewport(map, id, { duration: 450 });
+      }
+    }
+
+    // Padding is reset once per application (5 regions × 3 cycles).
+    expect(setPadding).toHaveBeenCalledTimes(order.length * CYCLES);
+
+    // Each fitBounds region is invoked once per cycle with identical arguments,
+    // proving switching away and back reproduces the first selection's camera.
+    for (const { id, bounds, padding } of FIT_BOUNDS_REGIONS) {
+      const callsForRegion = fitBounds.mock.calls.filter(
+        (call) => call[0] === bounds,
+      );
+      expect(callsForRegion).toHaveLength(CYCLES);
+      for (const call of callsForRegion) {
+        expect(call[1]).toEqual(
+          expect.objectContaining({
+            padding: normalizePadding(padding),
+            duration: 450,
+          }),
+        );
+      }
+      void id;
+    }
+
+    // Peninsula keeps its dedicated animated preset every cycle.
+    const peninsulaCalls = jumpTo.mock.calls.length; // none (all animated)
+    expect(peninsulaCalls).toBe(0);
   });
 });
