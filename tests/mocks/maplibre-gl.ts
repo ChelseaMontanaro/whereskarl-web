@@ -32,6 +32,8 @@ const {
       callback();
     });
     loaded = vi.fn(() => true);
+    getZoom = vi.fn(() => 10);
+    project = vi.fn((_lngLat: [number, number]) => ({ x: 0, y: 0 }));
     flyTo = flyTo;
     fitBounds = fitBounds;
     jumpTo = vi.fn();
@@ -50,6 +52,9 @@ const {
   class Marker {
     element: HTMLElement;
     setLngLat = vi.fn().mockReturnThis();
+    getElement = vi.fn(function getElement(this: Marker) {
+      return this.element;
+    });
     addTo = vi.fn(function addTo(this: Marker) {
       document.body.appendChild(this.element);
       return this;

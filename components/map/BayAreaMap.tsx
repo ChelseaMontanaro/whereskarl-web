@@ -252,7 +252,7 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
           syncFogOverlayLayer(
             map,
             locations,
-            fogLayerEnabled && !phonePortrait,
+            fogLayerEnabled,
             intensityFilter,
           );
           setMapReady(true);
@@ -289,7 +289,7 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
         syncFogOverlayLayer(
           map,
           locations,
-          fogLayerEnabled && !phonePortraitWebRef.current,
+          fogLayerEnabled,
           intensityFilter,
         );
 
@@ -496,7 +496,7 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
       syncFogOverlayLayer(
         map,
         locations,
-        fogLayerEnabled && !isPhonePortraitWeb,
+        fogLayerEnabled,
         intensityFilter,
       );
     }, [
@@ -613,7 +613,7 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
         syncFogOverlayLayer(
           map,
           locations,
-          fogLayerEnabled && !phonePortraitWebRef.current,
+          fogLayerEnabled,
           intensityFilter,
         );
 

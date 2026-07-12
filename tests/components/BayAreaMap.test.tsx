@@ -7,6 +7,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { BayAreaMap } from "@/components/map/BayAreaMap";
 import { findBayAreaProductRegion } from "@/lib/map/config";
+import {
+  FOG_OVERLAY_LAYER_ID,
+  FOG_OVERLAY_SOURCE_ID,
+} from "@/lib/map/fogOverlays";
 import type { MapMarkerLocation } from "@/lib/map/markers";
 import {
   mockAddLayer,
@@ -831,5 +835,148 @@ describe("BayAreaMap", () => {
     expect(
       screen.getByTestId("map-marker-ocean-beach").className,
     ).toContain("is-filtered-hidden");
+  });
+});
+
+describe("BayAreaMap phone-portrait fog overlay", () => {
+  afterEach(() => {
+    cleanup();
+    mockAddSource.mockClear();
+    mockAddLayer.mockClear();
+    mockSetStyle.mockClear();
+  });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  function foggyAddLayerCalls() {
+    return mockAddLayer.mock.calls.filter(
+      ([layer]) => (layer as { id?: string } | undefined)?.id === FOG_OVERLAY_LAYER_ID,
+    );
+  }
+
+  function foggyAddSourceCalls() {
+    return mockAddSource.mock.calls.filter(
+      ([sourceId]) => sourceId === FOG_OVERLAY_SOURCE_ID,
+    );
+  }
+
+  it("renders the canonical fog overlay on phone portrait when the Fog Layer is enabled", async () => {
+    render(
+      <BayAreaMap
+        locations={locations}
+        selectedLocationId={null}
+        selectedRegionId={null}
+        onSelectLocation={vi.fn()}
+        {...defaultProps}
+        fogLayerEnabled
+        layout="immersive"
+        immersiveOverlayProfile="phone-portrait"
+      />,
+    );
+
+    await waitFor(() => {
+      expect(foggyAddSourceCalls().length).toBeGreaterThan(0);
+    });
+
+    const [, sourceDefinition] = foggyAddSourceCalls()[0]!;
+    expect((sourceDefinition as { type?: string }).type).toBe("geojson");
+
+    const [fogLayer] = foggyAddLayerCalls()[0]!;
+    expect(fogLayer).toMatchObject({
+      id: FOG_OVERLAY_LAYER_ID,
+      type: "fill",
+      source: FOG_OVERLAY_SOURCE_ID,
+    });
+    expect((fogLayer as { paint?: Record<string, unknown> }).paint).toMatchObject(
+      {
+        "fill-color": ["get", "color"],
+        "fill-opacity": ["get", "opacity"],
+      },
+    );
+  });
+
+  it("does not render the fog overlay on phone portrait when the Fog Layer is disabled", async () => {
+    render(
+      <BayAreaMap
+        locations={locations}
+        selectedLocationId={null}
+        selectedRegionId={null}
+        onSelectLocation={vi.fn()}
+        {...defaultProps}
+        fogLayerEnabled={false}
+        layout="immersive"
+        immersiveOverlayProfile="phone-portrait"
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("bay-area-map")).toBeInTheDocument();
+    });
+
+    expect(foggyAddLayerCalls()).toHaveLength(0);
+  });
+
+  it("re-adds the phone-portrait fog overlay after a base-map style switch", async () => {
+    const { rerender } = render(
+      <BayAreaMap
+        locations={locations}
+        selectedLocationId={null}
+        selectedRegionId={null}
+        onSelectLocation={vi.fn()}
+        {...defaultProps}
+        mapStyle="standard"
+        fogLayerEnabled
+        layout="immersive"
+        immersiveOverlayProfile="phone-portrait"
+      />,
+    );
+
+    await waitFor(() => {
+      expect(foggyAddLayerCalls().length).toBeGreaterThan(0);
+    });
+
+    mockSetStyle.mockClear();
+    mockAddLayer.mockClear();
+
+    rerender(
+      <BayAreaMap
+        locations={locations}
+        selectedLocationId={null}
+        selectedRegionId={null}
+        onSelectLocation={vi.fn()}
+        {...defaultProps}
+        mapStyle="satellite"
+        fogLayerEnabled
+        layout="immersive"
+        immersiveOverlayProfile="phone-portrait"
+      />,
+    );
+
+    await waitFor(() => {
+      expect(mockSetStyle).toHaveBeenCalled();
+    });
+    expect(foggyAddLayerCalls().length).toBeGreaterThan(0);
+  });
+
+  it("keeps location markers mounted above the fog overlay on phone portrait", async () => {
+    render(
+      <BayAreaMap
+        locations={locations}
+        selectedLocationId={null}
+        selectedRegionId={null}
+        onSelectLocation={vi.fn()}
+        {...defaultProps}
+        fogLayerEnabled
+        layout="immersive"
+        immersiveOverlayProfile="phone-portrait"
+      />,
+    );
+
+    // MapLibre HTML markers render in an overlay pane above the fog fill layer
+    // (which lives in the WebGL canvas), so both must coexist when fog is on.
+    expect(await screen.findByTestId("map-marker-tiburon")).toBeInTheDocument();
+    expect(foggyAddLayerCalls().length).toBeGreaterThan(0);
   });
 });
