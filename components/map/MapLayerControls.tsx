@@ -402,7 +402,7 @@ function PhoneLayersSheetBody({
               >
                 <span
                   aria-hidden="true"
-                  className={`relative h-14 w-full overflow-hidden rounded-xl border ${
+                  className={`relative h-16 w-full overflow-hidden rounded-xl border ${
                     isSelected ? "border-karl-gold/40" : "border-white/10"
                   }`}
                 >
