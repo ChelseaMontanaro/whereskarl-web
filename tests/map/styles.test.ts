@@ -9,8 +9,10 @@ import {
   HYBRID_ROAD_OPACITY_BASELINE,
   hybridLabelPaint,
   hybridMajorRoadPaint,
+  KARL_MAP_STYLE_OPTIONS,
   karlMapStyleHasLabelLayer,
   karlMapStyleHasRoadLayer,
+  MAP_STYLE_PREVIEW_CAMERA,
   resolveKarlMapStyle,
 } from "@/lib/map/styles";
 
@@ -105,6 +107,30 @@ describe("resolveKarlMapStyle", () => {
     expect(hybridLabelPaint["raster-contrast"]).toBeGreaterThanOrEqual(0.45);
     expect(hybridLabelPaint["raster-saturation"]).toBeLessThan(-0.5);
     expect(hybridLabelPaint["raster-hue-rotate"]).toBe(0);
+  });
+
+  it("carries one canonical preview image per map-style option and no duplicates", () => {
+    expect(KARL_MAP_STYLE_OPTIONS.map((option) => option.id)).toEqual([
+      "standard",
+      "satellite",
+      "hybrid",
+    ]);
+
+    for (const option of KARL_MAP_STYLE_OPTIONS) {
+      expect(option.previewImage).toBe(`/map-previews/${option.id}.webp`);
+    }
+
+    const previews = KARL_MAP_STYLE_OPTIONS.map((option) => option.previewImage);
+    expect(new Set(previews).size).toBe(previews.length);
+  });
+
+  it("exposes a single canonical preview camera preset shared by every thumbnail", () => {
+    expect(MAP_STYLE_PREVIEW_CAMERA).toMatchObject({
+      bearing: 0,
+      pitch: 0,
+    });
+    expect(MAP_STYLE_PREVIEW_CAMERA.center).toHaveLength(2);
+    expect(typeof MAP_STYLE_PREVIEW_CAMERA.zoom).toBe("number");
   });
 
   it("grades satellite imagery toward muted tan/olive without canvas filters", () => {

@@ -358,14 +358,6 @@ type MapPhonePortraitLayersControlProps = Pick<
 const PHONE_MAP_CONTROL_BUTTON_CLASS =
   "flex h-11 w-11 items-center justify-center rounded-full border border-white/12 bg-black/40 shadow-[0_4px_20px_rgba(0,0,0,0.24)] backdrop-blur-md transition-colors hover:border-karl-gold/30 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karl-gold/50";
 
-/** Per-style preview swatch tint — no imagery assets, just a readable hint. */
-const PHONE_STYLE_SWATCH_CLASS: Record<KarlMapStyleId, string> = {
-  standard: "bg-gradient-to-br from-slate-400/45 via-slate-500/35 to-slate-700/45",
-  satellite: "bg-gradient-to-br from-emerald-700/55 via-slate-700/45 to-slate-900/60",
-  hybrid:
-    "bg-gradient-to-br from-emerald-700/50 via-sky-800/45 to-slate-900/60",
-};
-
 /**
  * Touch-tuned phone-portrait Map Layers sheet body. Consumes the canonical
  * `KARL_MAP_STYLE_OPTIONS` array and shared `FogLayerToggle` so no map-style
@@ -412,8 +404,15 @@ function PhoneLayersSheetBody({
                   aria-hidden="true"
                   className={`relative h-14 w-full overflow-hidden rounded-xl border ${
                     isSelected ? "border-karl-gold/40" : "border-white/10"
-                  } ${PHONE_STYLE_SWATCH_CLASS[option.id]}`}
+                  }`}
                 >
+                  <img
+                    src={option.previewImage}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover"
+                  />
                   {isSelected ? (
                     <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-karl-gold text-[0.625rem] font-bold text-karl-navy">
                       ✓

@@ -13,6 +13,7 @@ import {
   MapLayerControls,
   MapPhonePortraitLayersControl,
 } from "@/components/map/MapLayerControls";
+import { KARL_MAP_STYLE_OPTIONS } from "@/lib/map/styles";
 
 describe("MapLayerControls", () => {
   afterEach(() => {
@@ -233,6 +234,16 @@ describe("MapPhonePortraitLayersControl", () => {
       "aria-checked",
       "true",
     );
+
+    // Each tile shows the canonical preview image for that style (real
+    // thumbnails, no placeholders) sourced from KARL_MAP_STYLE_OPTIONS.
+    for (const { id } of KARL_MAP_STYLE_OPTIONS) {
+      const preview = sheet.querySelector(
+        `img[src="/map-previews/${id}.webp"]`,
+      );
+      expect(preview).not.toBeNull();
+      expect(preview).toHaveClass("object-cover");
+    }
 
     fireEvent.click(screen.getByRole("radio", { name: "Satellite" }));
     expect(onMapStyleChange).toHaveBeenCalledWith("satellite");

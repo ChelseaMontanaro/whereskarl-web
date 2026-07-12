@@ -7,13 +7,45 @@ export type KarlMapStyleId = "standard" | "satellite" | "hybrid";
 export type KarlMapStyleOption = {
   id: KarlMapStyleId;
   label: string;
+  /**
+   * Static thumbnail of the actual Where's Karl map rendered in this style.
+   * Every option is captured from `MAP_STYLE_PREVIEW_CAMERA`, so all previews
+   * share identical framing and differ only by the underlying style. Regenerate
+   * all three whenever the camera or a style changes (see the report below).
+   */
+  previewImage: string;
 };
+
+/**
+ * Single canonical camera used to render every map-style preview thumbnail. A
+ * representative central Bay Area framing (bay, peninsula, and East Bay all
+ * visible). Change this in one place and regenerate all three previews so their
+ * framing stays identical.
+ */
+export const MAP_STYLE_PREVIEW_CAMERA = {
+  center: [-122.33, 37.66] as [number, number],
+  zoom: 8.3,
+  bearing: 0,
+  pitch: 0,
+} as const;
 
 /** Matches iOS `KarlMapStyle` labels. */
 export const KARL_MAP_STYLE_OPTIONS: KarlMapStyleOption[] = [
-  { id: "standard", label: "Standard" },
-  { id: "satellite", label: "Satellite" },
-  { id: "hybrid", label: "Hybrid" },
+  {
+    id: "standard",
+    label: "Standard",
+    previewImage: "/map-previews/standard.webp",
+  },
+  {
+    id: "satellite",
+    label: "Satellite",
+    previewImage: "/map-previews/satellite.webp",
+  },
+  {
+    id: "hybrid",
+    label: "Hybrid",
+    previewImage: "/map-previews/hybrid.webp",
+  },
 ];
 
 const ESRI_SATELLITE_TILES = [
