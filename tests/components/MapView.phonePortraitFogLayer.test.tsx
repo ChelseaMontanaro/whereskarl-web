@@ -96,7 +96,7 @@ function renderMap() {
   );
 }
 
-describe("MapView phone-portrait Fog Layer placement", () => {
+describe("MapView phone-portrait Map Layers placement", () => {
   beforeEach(() => {
     useSearchParamsMock.mockReturnValue(new URLSearchParams());
     usePhonePortraitMock.mockReturnValue(true);
@@ -118,7 +118,7 @@ describe("MapView phone-portrait Fog Layer placement", () => {
     useMinWidthMock.mockReturnValue(false);
   });
 
-  it("renders exactly one Fog Layer trigger stacked above the Fog Intensity rail", () => {
+  it("renders exactly one Map Layers trigger in the top-right overlay, separate from the rail", () => {
     renderMap();
 
     const triggers = screen.getAllByRole("button", { name: "Open map layers" });
@@ -127,50 +127,67 @@ describe("MapView phone-portrait Fog Layer placement", () => {
     const trigger = triggers[0];
     const rail = screen.getByLabelText("Fog intensity filter");
 
-    // The trigger and the rail share one control-group wrapper, with the
-    // trigger rendered directly above the rail (earlier in document order).
-    const group = rail.parentElement;
-    expect(group).not.toBeNull();
-    expect(group?.contains(trigger)).toBe(true);
-    expect(
-      trigger.compareDocumentPosition(rail) &
-        Node.DOCUMENT_POSITION_FOLLOWING,
-    ).toBeTruthy();
+    // The Map Layers control is a global control, deliberately separate from
+    // the Fog Intensity rail — they must not share a control-group wrapper.
+    const group = trigger.closest("div.absolute");
+    expect(group?.className).toContain("right-3");
+    expect(group?.className).not.toContain("left-3");
+    expect(group?.contains(rail)).toBe(false);
   });
 
-  it("opens and closes the Fog Layer menu from the relocated trigger", () => {
+  it("uses a stacked-layers icon and no hamburger for the trigger", () => {
+    renderMap();
+
+    const trigger = screen.getByRole("button", { name: "Open map layers" });
+    const iconPath = trigger.querySelector("svg path");
+    expect(iconPath?.getAttribute("d")).toContain("18.54");
+    expect(iconPath?.getAttribute("d")).not.toContain("M4 6h16");
+    expect(trigger.textContent).toBe("");
+  });
+
+  it("opens a phone Map Layers sheet while keeping the Fog Intensity rail mounted", () => {
     renderMap();
 
     const trigger = screen.getByRole("button", { name: "Open map layers" });
     expect(trigger).toHaveAttribute("aria-expanded", "false");
+    expect(trigger).toHaveAttribute("aria-controls", "map-layer-sheet-phone");
 
     fireEvent.click(trigger);
     expect(
       screen.getByRole("button", { name: "Open map layers" }),
     ).toHaveAttribute("aria-expanded", "true");
+
+    const sheet = screen.getByRole("dialog", { name: "Map Layers" });
+    expect(sheet).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: "Satellite" })).toBeInTheDocument();
 
-    // While the panel is open the rail hides so the menu stays clear of it.
-    expect(screen.queryByLabelText("Fog intensity filter")).not.toBeInTheDocument();
+    // The rail stays mounted (and unchanged) while the sheet is open; the
+    // backdrop simply dims it along with the map.
+    expect(screen.getByLabelText("Fog intensity filter")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Close map layers" }));
     expect(
       screen.getByRole("button", { name: "Open map layers" }),
     ).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(screen.getByLabelText("Fog intensity filter")).toBeInTheDocument();
   });
 
-  it("keeps the Fog Layer trigger out of the top-right map region", () => {
+  it("anchors the phone Map Layers sheet above the bottom navigation", () => {
     renderMap();
 
-    const trigger = screen.getByRole("button", { name: "Open map layers" });
-    // The relocated group is anchored to the left edge, not the top-right.
-    const group = trigger.closest("div.absolute");
-    expect(group?.className).toContain("left-3");
-    expect(group?.className).not.toContain("right-3");
+    fireEvent.click(screen.getByRole("button", { name: "Open map layers" }));
+
+    const sheet = screen.getByRole("dialog", { name: "Map Layers" });
+    // Fixed, near-full-width, and lifted above the bottom nav via a bottom
+    // offset that respects the safe area — never rendered under the nav.
+    expect(sheet.className).toContain("fixed");
+    expect(sheet.className).toContain("inset-x-3");
+    expect(sheet.className).toContain("bottom-[calc(5.5rem+env(safe-area-inset-bottom))]");
+    expect(sheet.className).toContain("overflow-y-auto");
   });
 
-  it("does not render the phone Fog Layer trigger for desktop", async () => {
+  it("does not render the phone Map Layers trigger for desktop", async () => {
     useMinWidthMock.mockReturnValue(true);
     renderMap();
 

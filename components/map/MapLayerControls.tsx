@@ -57,6 +57,24 @@ function LayersIcon({ className = "h-4 w-4" }: { className?: string }) {
   );
 }
 
+/**
+ * Recognizable stacked-layers glyph (offset diamond layers, Material "layers"
+ * shape). Used by the phone-portrait Map Layers trigger in place of the
+ * hamburger `LayersIcon`; desktop/tablet keep `LayersIcon` unchanged.
+ */
+function StackedLayersIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={className}
+      fill="currentColor"
+    >
+      <path d="M11.99 18.54l-7.37-5.73L3 14.07l9 7 9-7-1.63-1.27-7.38 5.74zM12 16l7.36-5.73L21 9l-9-7-9 7 1.63 1.27L12 16z" />
+    </svg>
+  );
+}
+
 function RadioIndicator({ checked }: { checked: boolean }) {
   return (
     <span
@@ -336,12 +354,103 @@ type MapPhonePortraitLayersControlProps = Pick<
   onOpenChange?: (isOpen: boolean) => void;
 };
 
+/** Compact circular glass treatment shared by phone-portrait map controls. */
+const PHONE_MAP_CONTROL_BUTTON_CLASS =
+  "flex h-11 w-11 items-center justify-center rounded-full border border-white/12 bg-black/40 shadow-[0_4px_20px_rgba(0,0,0,0.24)] backdrop-blur-md transition-colors hover:border-karl-gold/30 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karl-gold/50";
+
+/** Per-style preview swatch tint — no imagery assets, just a readable hint. */
+const PHONE_STYLE_SWATCH_CLASS: Record<KarlMapStyleId, string> = {
+  standard: "bg-gradient-to-br from-slate-400/45 via-slate-500/35 to-slate-700/45",
+  satellite: "bg-gradient-to-br from-emerald-700/55 via-slate-700/45 to-slate-900/60",
+  hybrid:
+    "bg-gradient-to-br from-emerald-700/50 via-sky-800/45 to-slate-900/60",
+};
+
 /**
- * Canonical phone-portrait Fog Layer menu trigger. Renders the same glass
- * hamburger button + layers panel used everywhere else, but inline so the
- * shared phone-portrait control group in MapView can position it directly above
- * the Fog Intensity rail. The trigger stays mounted while the panel is open so
- * the menu (a fixed backdrop + anchored panel) can toggle and stay reachable.
+ * Touch-tuned phone-portrait Map Layers sheet body. Consumes the canonical
+ * `KARL_MAP_STYLE_OPTIONS` array and shared `FogLayerToggle` so no map-style
+ * options or Fog Layer control logic are duplicated — only the presentation is
+ * phone-specific (larger tiles with radio semantics for touch).
+ */
+function PhoneLayersSheetBody({
+  mapStyle,
+  fogLayerEnabled,
+  onMapStyleChange,
+  onFogLayerChange,
+}: Pick<
+  MapLayerControlsProps,
+  "mapStyle" | "fogLayerEnabled" | "onMapStyleChange" | "onFogLayerChange"
+>) {
+  return (
+    <div className="mt-4 space-y-5">
+      <section aria-label="Map style">
+        <p className="text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-white/45">
+          Map type
+        </p>
+        <div
+          role="radiogroup"
+          aria-label="Map style"
+          className="mt-3 grid grid-cols-3 gap-2.5"
+        >
+          {KARL_MAP_STYLE_OPTIONS.map((option) => {
+            const isSelected = mapStyle === option.id;
+
+            return (
+              <button
+                key={option.id}
+                type="button"
+                role="radio"
+                aria-checked={isSelected}
+                onClick={() => onMapStyleChange(option.id)}
+                className={`group flex flex-col items-stretch gap-2 rounded-2xl border p-2 text-center transition-colors motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karl-gold/50 ${
+                  isSelected
+                    ? "border-karl-gold/60 bg-karl-gold/10"
+                    : "border-white/10 bg-white/[0.04] hover:border-white/25"
+                }`}
+              >
+                <span
+                  aria-hidden="true"
+                  className={`relative h-14 w-full overflow-hidden rounded-xl border ${
+                    isSelected ? "border-karl-gold/40" : "border-white/10"
+                  } ${PHONE_STYLE_SWATCH_CLASS[option.id]}`}
+                >
+                  {isSelected ? (
+                    <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-karl-gold text-[0.625rem] font-bold text-karl-navy">
+                      ✓
+                    </span>
+                  ) : null}
+                </span>
+                <span
+                  className={`text-xs font-semibold ${
+                    isSelected ? "text-karl-gold" : "text-white/80"
+                  }`}
+                >
+                  {option.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      <section aria-label="Overlays">
+        <p className="text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-white/45">
+          Details
+        </p>
+        <FogLayerToggle enabled={fogLayerEnabled} onChange={onFogLayerChange} />
+      </section>
+    </div>
+  );
+}
+
+/**
+ * Canonical phone-portrait Map Layers control. Renders a compact circular glass
+ * trigger (stacked-layers icon) that MapView positions at the top-right below
+ * the region chips — a global map control, deliberately separate from the Fog
+ * Intensity rail. Tapping it opens a Google-Maps-style bottom sheet (fixed
+ * scrim + sheet anchored above the bottom navigation) that reuses the canonical
+ * map-style options and Fog Layer state. The trigger stays mounted while the
+ * sheet is open so open/close state stays reachable.
  */
 export function MapPhonePortraitLayersControl({
   mapStyle,
@@ -356,59 +465,77 @@ export function MapPhonePortraitLayersControl({
     onOpenChange?.(isOpen);
   }, [isOpen, onOpenChange]);
 
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen]);
+
   return (
     <>
+      <button
+        type="button"
+        aria-haspopup="dialog"
+        aria-expanded={isOpen}
+        aria-controls="map-layer-sheet-phone"
+        aria-label="Open map layers"
+        onClick={() => setIsOpen((open) => !open)}
+        className={`${PHONE_MAP_CONTROL_BUTTON_CLASS} ${
+          isOpen ? "border-karl-gold/50 text-karl-gold" : "text-white/85"
+        }`}
+      >
+        <StackedLayersIcon className="h-5 w-5" />
+      </button>
+
       {isOpen ? (
-        <button
-          type="button"
-          aria-label="Close map layers"
-          className="fixed inset-0 z-[15] bg-black/42 backdrop-blur-[1px] motion-reduce:transition-none"
-          onClick={() => setIsOpen(false)}
-        />
-      ) : null}
+        <>
+          <button
+            type="button"
+            aria-label="Dismiss map layers"
+            className="fixed inset-0 z-30 bg-black/55 backdrop-blur-[1px] motion-reduce:transition-none"
+            onClick={() => setIsOpen(false)}
+          />
 
-      <div className="relative z-30 flex flex-col">
-        <button
-          type="button"
-          aria-expanded={isOpen}
-          aria-controls="map-layer-panel-phone"
-          aria-label="Open map layers"
-          onClick={() => setIsOpen((open) => !open)}
-          className={`${desktopGlassCardClass} flex items-center gap-2 px-2.5 py-2 text-xs font-semibold text-white/80 transition-colors hover:text-karl-gold motion-reduce:transition-none sm:px-3`}
-        >
-          <LayersIcon className="h-3.5 w-3.5" />
-          <span className="sr-only">Layers</span>
-        </button>
-
-        {isOpen ? (
           <div
-            id="map-layer-panel-phone"
-            className={`${desktopGlassCardClass} absolute left-0 top-[calc(100%+0.5rem)] z-30 w-[min(calc(100vw-1.5rem),17rem)] p-3 shadow-xl`}
+            id="map-layer-sheet-phone"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Map Layers"
+            className="fixed inset-x-3 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-40 mx-auto max-h-[calc(100dvh-12rem-env(safe-area-inset-top)-env(safe-area-inset-bottom))] max-w-[26rem] overflow-y-auto overscroll-contain rounded-3xl border border-white/12 bg-black/70 p-4 shadow-[0_-8px_40px_rgba(0,0,0,0.45)] backdrop-blur-xl"
           >
             <div className="flex items-start justify-between gap-3">
-              <div className="space-y-1">
-                <p className="text-sm font-semibold text-white">Map Layers</p>
+              <div className="space-y-0.5">
+                <p className="text-base font-semibold text-white">Map Layers</p>
                 <p className="text-xs text-white/55">Customize the Karl map</p>
               </div>
               <button
                 type="button"
-                aria-label="Collapse layers panel"
+                aria-label="Close map layers"
                 onClick={() => setIsOpen(false)}
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/12 bg-white/[0.04] text-sm text-white/65 transition-colors hover:border-white/20 hover:text-white motion-reduce:transition-none"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/12 bg-white/[0.06] text-base text-white/70 transition-colors hover:border-white/25 hover:text-white motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karl-gold/50"
               >
                 ×
               </button>
             </div>
-            <LayerPanelContent
+
+            <PhoneLayersSheetBody
               mapStyle={mapStyle}
               fogLayerEnabled={fogLayerEnabled}
               onMapStyleChange={onMapStyleChange}
               onFogLayerChange={onFogLayerChange}
-              vertical
             />
           </div>
-        ) : null}
-      </div>
+        </>
+      ) : null}
     </>
   );
 }

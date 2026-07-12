@@ -389,7 +389,7 @@ function MobileMapView({ state }: { state: MapViewModel }) {
           }`}
         />
 
-        {!isLayersPanelOpen ? (
+        {!isLayersPanelOpen || isPhonePortrait ? (
           <div
             className={`pointer-events-auto absolute flex flex-col transition-opacity motion-reduce:transition-none ${
               isPhonePortrait
@@ -428,12 +428,22 @@ function MobileMapView({ state }: { state: MapViewModel }) {
         ) : null}
 
         {isPhonePortrait ? (
-          <div className="pointer-events-none absolute left-3 top-[calc(6rem+env(safe-area-inset-top))] bottom-[calc(9.5rem+env(safe-area-inset-bottom))] flex flex-col justify-center">
-            {/* Shared phone-portrait control group: canonical Fog Layer menu
-                trigger stacked directly above the Fog Intensity rail with a
-                small, intentional gap. The trigger stays mounted while the
-                layers panel is open; the rail hides so the panel stays clear. */}
-            <div className="pointer-events-auto flex flex-col items-start gap-2">
+          <>
+            {/* Fog Intensity rail — global filter, left side, vertically
+                centered. Stays mounted (and unchanged) while the Map Layers
+                sheet is open; the sheet's backdrop dims it along with the map. */}
+            <div className="pointer-events-none absolute left-3 top-[calc(6rem+env(safe-area-inset-top))] bottom-[calc(9.5rem+env(safe-area-inset-bottom))] flex flex-col justify-center">
+              <div className="pointer-events-auto flex flex-col items-start gap-2">
+                <MapPhonePortraitFogRail
+                  activeIntensity={intensityFilter}
+                  onSelectIntensity={handleSelectIntensity}
+                />
+              </div>
+            </div>
+
+            {/* Map Layers — global map control, top-right below the region
+                chips, deliberately separate from the Fog Intensity rail. */}
+            <div className="pointer-events-auto absolute right-3 top-[calc(6rem+env(safe-area-inset-top))] flex flex-col items-end">
               <MapPhonePortraitLayersControl
                 mapStyle={mapStyle}
                 fogLayerEnabled={fogLayerEnabled}
@@ -441,14 +451,8 @@ function MobileMapView({ state }: { state: MapViewModel }) {
                 onFogLayerChange={setFogLayerEnabled}
                 onOpenChange={setIsLayersPanelOpen}
               />
-              {!isLayersPanelOpen ? (
-                <MapPhonePortraitFogRail
-                  activeIntensity={intensityFilter}
-                  onSelectIntensity={handleSelectIntensity}
-                />
-              ) : null}
             </div>
-          </div>
+          </>
         ) : null}
 
         <div

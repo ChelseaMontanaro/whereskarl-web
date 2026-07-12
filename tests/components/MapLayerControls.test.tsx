@@ -168,7 +168,7 @@ describe("MapPhonePortraitLayersControl", () => {
     cleanup();
   });
 
-  it("renders a single collapsed Fog Layer trigger and wires open state", () => {
+  it("renders a single collapsed Map Layers trigger with a stacked-layers icon", () => {
     const onOpenChange = vi.fn();
 
     render(
@@ -183,23 +183,26 @@ describe("MapPhonePortraitLayersControl", () => {
 
     const trigger = screen.getByRole("button", { name: "Open map layers" });
     expect(trigger).toHaveAttribute("aria-expanded", "false");
-    expect(trigger).toHaveAttribute("aria-controls", "map-layer-panel-phone");
-    // Exactly one Fog Layer trigger exists.
+    expect(trigger).toHaveAttribute("aria-controls", "map-layer-sheet-phone");
+    // Exactly one Map Layers trigger exists.
     expect(screen.getAllByRole("button", { name: "Open map layers" })).toHaveLength(1);
+
+    // The trigger uses the stacked-layers glyph, not the hamburger lines.
+    const iconPath = trigger.querySelector("svg path");
+    expect(iconPath?.getAttribute("d")).toContain("18.54");
+    expect(iconPath?.getAttribute("d")).not.toContain("M4 6h16");
+    expect(trigger.querySelector("svg")).not.toBeNull();
+
+    // The trigger carries no visible text.
+    expect(trigger.textContent).toBe("");
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(screen.queryByRole("radio", { name: "Satellite" })).not.toBeInTheDocument();
     expect(onOpenChange).toHaveBeenLastCalledWith(false);
-
-    fireEvent.click(trigger);
-
-    expect(onOpenChange).toHaveBeenLastCalledWith(true);
-    expect(trigger).toHaveAttribute("aria-expanded", "true");
-    expect(screen.getByRole("radio", { name: "Satellite" })).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Close map layers" }),
-    ).toBeInTheDocument();
   });
 
-  it("keeps the trigger wired to map style and fog layer state", () => {
+  it("opens a phone Map Layers sheet with map-style and Fog Layer controls", () => {
+    const onOpenChange = vi.fn();
     const onMapStyleChange = vi.fn();
     const onFogLayerChange = vi.fn();
 
@@ -209,22 +212,42 @@ describe("MapPhonePortraitLayersControl", () => {
         fogLayerEnabled
         onMapStyleChange={onMapStyleChange}
         onFogLayerChange={onFogLayerChange}
+        onOpenChange={onOpenChange}
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Open map layers" }));
+    const trigger = screen.getByRole("button", { name: "Open map layers" });
+    fireEvent.click(trigger);
+
+    expect(onOpenChange).toHaveBeenLastCalledWith(true);
+    expect(trigger).toHaveAttribute("aria-expanded", "true");
+
+    const sheet = screen.getByRole("dialog", { name: "Map Layers" });
+    expect(sheet).toHaveAttribute("id", "map-layer-sheet-phone");
+
+    // Reuses the canonical map-style options with radio semantics.
+    expect(screen.getByRole("radio", { name: "Standard" })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "Satellite" })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "Hybrid" })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "Standard" })).toHaveAttribute(
+      "aria-checked",
+      "true",
+    );
 
     fireEvent.click(screen.getByRole("radio", { name: "Satellite" }));
     expect(onMapStyleChange).toHaveBeenCalledWith("satellite");
 
-    fireEvent.click(screen.getByRole("switch", { name: "Fog Layer" }));
+    // Reuses the canonical Fog Layer switch.
+    const fogSwitch = screen.getByRole("switch", { name: "Fog Layer" });
+    expect(fogSwitch).toHaveAttribute("aria-checked", "true");
+    fireEvent.click(fogSwitch);
     expect(onFogLayerChange).toHaveBeenCalledWith(false);
   });
 
-  it("closes the panel from the backdrop and collapse control", () => {
+  it("closes the sheet from the header close control and the backdrop", () => {
     const onOpenChange = vi.fn();
 
-    render(
+    const { rerender } = render(
       <MapPhonePortraitLayersControl
         mapStyle="standard"
         fogLayerEnabled
@@ -234,11 +257,28 @@ describe("MapPhonePortraitLayersControl", () => {
       />,
     );
 
+    // Close via the header close control.
     fireEvent.click(screen.getByRole("button", { name: "Open map layers" }));
     expect(onOpenChange).toHaveBeenLastCalledWith(true);
-
     fireEvent.click(screen.getByRole("button", { name: "Close map layers" }));
     expect(onOpenChange).toHaveBeenLastCalledWith(false);
-    expect(screen.queryByRole("radio", { name: "Satellite" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+
+    rerender(
+      <MapPhonePortraitLayersControl
+        mapStyle="standard"
+        fogLayerEnabled
+        onMapStyleChange={vi.fn()}
+        onFogLayerChange={vi.fn()}
+        onOpenChange={onOpenChange}
+      />,
+    );
+
+    // Close via the backdrop scrim.
+    fireEvent.click(screen.getByRole("button", { name: "Open map layers" }));
+    expect(onOpenChange).toHaveBeenLastCalledWith(true);
+    fireEvent.click(screen.getByRole("button", { name: "Dismiss map layers" }));
+    expect(onOpenChange).toHaveBeenLastCalledWith(false);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 });
