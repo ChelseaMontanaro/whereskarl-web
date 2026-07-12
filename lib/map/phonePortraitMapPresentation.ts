@@ -19,13 +19,15 @@ export const PHONE_PORTRAIT_SF_CENTRAL_BAY_BOUNDS: MapBounds = [
 ];
 
 /**
- * SF-tab camera bounds: thin Marin Headlands / Sausalito context through the
- * full SF peninsula to San Bruno / Millbrae — matching the approved 390x844
- * SF region screenshot.
+ * SF-tab camera bounds: the San Francisco landmass (Ocean Beach through the
+ * downtown waterfront) with only a thin band of southern Marin (Sausalito /
+ * Tiburon) as top context. The southern edge stops at the SF / Daly City
+ * border so the frame stays on the city instead of drifting south into the
+ * Peninsula or centering on open water.
  */
 export const PHONE_PORTRAIT_SF_REGION_BOUNDS: MapBounds = [
-  [-122.498, 37.608],
-  [-122.392, 37.828],
+  [-122.525, 37.715],
+  [-122.375, 37.875],
 ];
 
 /** Padding tuned for SF fitBounds above the bottom tray and beside the fog rail. */
@@ -53,13 +55,6 @@ export type PhonePortraitCameraPreset = {
   zoom: number;
 };
 
-/** SF tab: SF peninsula from southern Marin to San Bruno. */
-export const PHONE_PORTRAIT_SF_CAMERA: PhonePortraitCameraPreset = {
-  latitude: PHONE_PORTRAIT_MAP_CENTER.latitude,
-  longitude: PHONE_PORTRAIT_MAP_CENTER.longitude,
-  zoom: PHONE_PORTRAIT_MAP_INITIAL_ZOOM,
-};
-
 /** North Bay tab: Marin peninsula from Novato to the Gate — approved screenshot. */
 export const PHONE_PORTRAIT_NORTH_BAY_REGION_BOUNDS: MapBounds = [
   [-122.658, 37.808],
@@ -74,17 +69,15 @@ export const PHONE_PORTRAIT_NORTH_BAY_VIEWPORT_PADDING: ViewportPadding = {
   left: 100,
 };
 
-/** North Bay tab: Marin, Novato, San Rafael, Mill Valley, Tiburon, Sausalito. */
-export const PHONE_PORTRAIT_NORTH_BAY_CAMERA: PhonePortraitCameraPreset = {
-  latitude: 37.924,
-  longitude: -122.556,
-  zoom: 9.6,
-};
-
-/** East Bay tab: shoreline through inland hills — approved screenshot. */
+/**
+ * East Bay tab: the Berkeley → Oakland shoreline corridor. Kept tight around
+ * the monitored East Bay locations so fitBounds centers on the shoreline
+ * instead of pulling the camera far inland (Livermore/Tri-Valley) and jamming
+ * Berkeley/Oakland against the west edge.
+ */
 export const PHONE_PORTRAIT_EAST_BAY_REGION_BOUNDS: MapBounds = [
-  [-122.28, 37.4],
-  [-121.68, 38.04],
+  [-122.34, 37.75],
+  [-122.17, 37.91],
 ];
 
 /** Padding tuned for East Bay fitBounds above the bottom tray and beside the fog rail. */
@@ -95,17 +88,15 @@ export const PHONE_PORTRAIT_EAST_BAY_VIEWPORT_PADDING: ViewportPadding = {
   left: 92,
 };
 
-/** East Bay tab: Richmond, Berkeley, Oakland, Alameda. */
-export const PHONE_PORTRAIT_EAST_BAY_CAMERA: PhonePortraitCameraPreset = {
-  latitude: 37.68,
-  longitude: -121.98,
-  zoom: 9.22,
-};
-
-/** South Bay tab: Silicon Valley corridor through lower Bay — approved screenshot. */
+/**
+ * South Bay tab: the Silicon Valley corridor from Palo Alto through Mountain
+ * View to San Jose. Bounds are tightened around the monitored South Bay
+ * locations so the camera zooms into the valley instead of leaving the upper
+ * viewport filled with central Bay water.
+ */
 export const PHONE_PORTRAIT_SOUTH_BAY_REGION_BOUNDS: MapBounds = [
-  [-122.28, 37.28],
-  [-121.84, 37.52],
+  [-122.18, 37.3],
+  [-121.85, 37.47],
 ];
 
 /** Padding tuned for South Bay fitBounds above the bottom tray and beside the fog rail. */
@@ -114,13 +105,6 @@ export const PHONE_PORTRAIT_SOUTH_BAY_VIEWPORT_PADDING: ViewportPadding = {
   right: 24,
   bottom: 200,
   left: 92,
-};
-
-/** South Bay tab: San Jose, Palo Alto, Mountain View and nearby. */
-export const PHONE_PORTRAIT_SOUTH_BAY_CAMERA: PhonePortraitCameraPreset = {
-  latitude: 37.40,
-  longitude: -122.06,
-  zoom: 9.88,
 };
 
 /**
@@ -159,18 +143,16 @@ export const PHONE_PORTRAIT_ALL_BAY_CAMERA: PhonePortraitCameraPreset = {
   zoom: 8,
 };
 
+/**
+ * Deselected / no-region fallback camera. Every visible product region is
+ * framed by {@link fitPhonePortraitRegionViewport} (bounds for SF / North Bay /
+ * East Bay / South Bay, the dedicated Peninsula preset for Peninsula), so this
+ * helper only supplies the all-Bay camera when no region is active.
+ */
 export function getPhonePortraitCameraPreset(
   regionId: string | null | undefined,
 ): PhonePortraitCameraPreset {
   switch (regionId) {
-    case "san-francisco":
-      return PHONE_PORTRAIT_SF_CAMERA;
-    case "north-bay":
-      return PHONE_PORTRAIT_NORTH_BAY_CAMERA;
-    case "east-bay":
-      return PHONE_PORTRAIT_EAST_BAY_CAMERA;
-    case "south-bay":
-      return PHONE_PORTRAIT_SOUTH_BAY_CAMERA;
     case "peninsula":
       return PHONE_PORTRAIT_PENINSULA_CAMERA;
     default:
