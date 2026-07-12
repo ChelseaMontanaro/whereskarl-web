@@ -3,6 +3,7 @@
  * approved mobile mockup. Solid fills only (no duplicate gradient ids).
  */
 
+import { KARL_LOGO_SRC } from "@/lib/brand/karlLogo";
 import type { FogIntensity } from "@/lib/map/conditions";
 import {
   resolvePhonePortraitIsNighttime,
@@ -155,6 +156,13 @@ export function getPhonePortraitMarkerIconMarkup(
   intensity: FogIntensity,
   options: PhonePortraitPresentationOptions = {},
 ): string {
+  // Karl Territory markers render the approved Where's Karl logo (same
+  // canonical asset as the Fog Intensity rail and desktop markers) instead of a
+  // fog cloud. Sizing reuses the shared marker class so dimensions are unchanged.
+  if (intensity === "karlTerritory") {
+    return `<img src="${KARL_LOGO_SRC}" alt="" aria-hidden="true" class="karl-universal-map-marker__svg" width="36" height="36" style="object-fit:contain" />`;
+  }
+
   // Clear markers reuse the approved cloud-free sun (day) / moon (night)
   // artwork so they match the Fog Intensity rail; the other intensities keep
   // their detailed fog artwork.

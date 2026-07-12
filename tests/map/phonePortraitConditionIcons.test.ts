@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { KARL_LOGO_SRC } from "@/lib/brand/karlLogo";
 import {
   getPhonePortraitFogRailConditionIconDataUri,
   getPhonePortraitMarkerIconMarkup,
@@ -10,6 +11,8 @@ import {
 const CLOUD_FILL = "#E4EEF7";
 const SUN_FILL = "#F2A326";
 const MOON_FILL = "#9FC4E6";
+// Fill from the retired Karl Territory fog-cloud artwork.
+const KARL_FOG_CLOUD_FILL = "#8F9BA9";
 
 describe("getPhonePortraitMarkerIconMarkup — Clear markers", () => {
   it("renders a sun-only icon (no cloud) for clear daytime", () => {
@@ -34,18 +37,44 @@ describe("getPhonePortraitMarkerIconMarkup — Clear markers", () => {
     expect(markup).toContain("karl-universal-map-marker__svg");
   });
 
-  it("leaves light fog, foggy, and Karl Territory markers unchanged", () => {
+  it("leaves light fog and foggy markers on their detailed fog artwork", () => {
     const lightFog = getPhonePortraitMarkerIconMarkup("lightFog");
     const foggy = getPhonePortraitMarkerIconMarkup("foggy");
-    const karlTerritory = getPhonePortraitMarkerIconMarkup("karlTerritory");
 
     // Detailed fog artwork keeps its layered cloud fills.
     expect(lightFog).toContain("#C6CFD8");
     expect(foggy).toContain("#AAB5C1");
-    expect(karlTerritory).toContain("#8F9BA9");
-    for (const markup of [lightFog, foggy, karlTerritory]) {
+    for (const markup of [lightFog, foggy]) {
       expect(markup).toContain("karl-universal-map-marker__svg");
+      // The retired Karl fog-cloud artwork must not leak into other states.
+      expect(markup).not.toContain(KARL_LOGO_SRC);
     }
+  });
+});
+
+describe("getPhonePortraitMarkerIconMarkup — Karl Territory markers", () => {
+  it("renders the approved Where's Karl logo, not a fog cloud", () => {
+    const markup = getPhonePortraitMarkerIconMarkup("karlTerritory");
+
+    expect(markup).toContain(KARL_LOGO_SRC);
+    expect(markup).toContain("<img");
+    // No trace of the retired fog-cloud artwork.
+    expect(markup).not.toContain(KARL_FOG_CLOUD_FILL);
+    expect(markup).not.toContain("<svg");
+    // Sized via the shared marker class so dimensions stay unchanged.
+    expect(markup).toContain("karl-universal-map-marker__svg");
+  });
+
+  it("uses the same canonical logo source day and night", () => {
+    const day = getPhonePortraitMarkerIconMarkup("karlTerritory", {
+      isNighttime: false,
+    });
+    const night = getPhonePortraitMarkerIconMarkup("karlTerritory", {
+      isNighttime: true,
+    });
+
+    expect(day).toBe(night);
+    expect(day).toContain(KARL_LOGO_SRC);
   });
 });
 

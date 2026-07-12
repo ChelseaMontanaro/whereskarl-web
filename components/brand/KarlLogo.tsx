@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-const KARL_LOGO_SRC = "/brand/wheres-karl-logo@2x.png";
+import { KARL_LOGO_SRC } from "@/lib/brand/karlLogo";
 
 type KarlLogoProps = {
   className?: string;

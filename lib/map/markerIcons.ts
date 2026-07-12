@@ -1,6 +1,5 @@
+import { KARL_LOGO_SRC } from "@/lib/brand/karlLogo";
 import type { FogIntensity } from "@/lib/map/conditions";
-
-const KARL_LOGO_SRC = "/brand/wheres-karl-logo@2x.png";
 
 const SUN_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" class="karl-map-marker__svg">
   <circle cx="12" cy="12" r="4.1" fill="currentColor" opacity="0.95" />

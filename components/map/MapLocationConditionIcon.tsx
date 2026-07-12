@@ -12,10 +12,9 @@ import {
   desktopMistIconClass,
 } from "@/components/home/desktopGlass";
 import { isNighttime } from "@/lib/home/weatherDisplay";
+import { KARL_LOGO_SRC } from "@/lib/brand/karlLogo";
 import { getMarkerFogIntensity } from "@/lib/map/markers";
 import type { LocationConditionInput } from "@/lib/map/conditions";
-
-const KARL_LOGO_SRC = "/brand/wheres-karl-logo@2x.png";
 
 type MapLocationConditionIconProps = {
   location: LocationConditionInput;
