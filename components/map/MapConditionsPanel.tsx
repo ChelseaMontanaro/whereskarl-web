@@ -1,16 +1,5 @@
 import { desktopGlassCardClass } from "@/components/home/desktopGlass";
-import {
-  BAY_AREA_PRODUCT_REGIONS,
-  type BayAreaProductRegion,
-} from "@/lib/map/config";
-
-const REGION_CHIP_LABELS: Record<BayAreaProductRegion["id"], string> = {
-  "san-francisco": "SF",
-  "north-bay": "North Bay",
-  "east-bay": "East Bay",
-  "south-bay": "South Bay",
-  peninsula: "Peninsula",
-};
+import { BAY_AREA_PRODUCT_REGIONS } from "@/lib/map/config";
 
 const MAP_CONDITIONS_SUBTITLE =
   "Explore live fog & clear skies around the Bay.";
@@ -73,7 +62,7 @@ export function MapConditionsPanel({
                     : "border-white/10 bg-white/[0.04] text-white/65 hover:border-white/18 hover:text-white/85"
                 }`}
               >
-                {REGION_CHIP_LABELS[region.id]}
+                {region.chipLabel}
               </button>
             );
           })}

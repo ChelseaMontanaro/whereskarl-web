@@ -2,18 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-import {
-  BAY_AREA_PRODUCT_REGIONS,
-  type BayAreaProductRegion,
-} from "@/lib/map/config";
-
-const REGION_CHIP_LABELS: Record<BayAreaProductRegion["id"], string> = {
-  "san-francisco": "SF",
-  "north-bay": "North Bay",
-  "east-bay": "East Bay",
-  "south-bay": "South Bay",
-  peninsula: "Peninsula",
-};
+import { BAY_AREA_PRODUCT_REGIONS } from "@/lib/map/config";
 
 type MapPhonePortraitControlsProps = {
   selectedRegionId: string | null;
@@ -71,34 +60,36 @@ export function MapPhonePortraitControls({
 
         <div
           ref={chipScrollRef}
-          className="flex w-full items-center gap-1.5 overflow-x-auto scroll-px-1 pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="relative w-full overflow-x-auto scroll-px-1 pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
-          {BAY_AREA_PRODUCT_REGIONS.map((region) => {
-            const isSelected = selectedRegionId === region.id;
+          <div className="flex w-max min-w-full items-center justify-center gap-1">
+            {BAY_AREA_PRODUCT_REGIONS.map((region) => {
+              const isSelected = selectedRegionId === region.id;
 
-            return (
-              <button
-                key={region.id}
-                ref={(node) => {
-                  if (node) {
-                    chipRefs.current.set(region.id, node);
-                  } else {
-                    chipRefs.current.delete(region.id);
-                  }
-                }}
-                type="button"
-                aria-pressed={isSelected}
-                onClick={() => onSelectRegion(region.id)}
-                className={`shrink-0 whitespace-nowrap rounded-full border px-2.5 py-2 text-center text-xs font-bold leading-[0.875rem] transition-opacity motion-reduce:transition-none ${
-                  isSelected
-                    ? "border-karl-gold/45 bg-karl-gold text-karl-navy"
-                    : "border-[rgb(150_175_200/0.2)] bg-[rgb(5_13_24/0.78)] text-white/78 hover:opacity-90"
-                }`}
-              >
-                {REGION_CHIP_LABELS[region.id]}
-              </button>
-            );
-          })}
+              return (
+                <button
+                  key={region.id}
+                  ref={(node) => {
+                    if (node) {
+                      chipRefs.current.set(region.id, node);
+                    } else {
+                      chipRefs.current.delete(region.id);
+                    }
+                  }}
+                  type="button"
+                  aria-pressed={isSelected}
+                  onClick={() => onSelectRegion(region.id)}
+                  className={`inline-flex min-w-[2.75rem] shrink-0 items-center justify-center whitespace-nowrap rounded-full border px-2 py-2 text-center text-xs font-bold leading-[0.875rem] transition-opacity motion-reduce:transition-none ${
+                    isSelected
+                      ? "border-karl-gold/45 bg-karl-gold text-karl-navy"
+                      : "border-[rgb(150_175_200/0.2)] bg-[rgb(5_13_24/0.78)] text-white/78 hover:opacity-90"
+                  }`}
+                >
+                  {region.chipLabel}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
     );
@@ -131,7 +122,7 @@ export function MapPhonePortraitControls({
                   : "border-white/10 bg-black/28 text-white/65 backdrop-blur-sm hover:border-white/18 hover:text-white/85"
               }`}
             >
-              {REGION_CHIP_LABELS[region.id]}
+              {region.chipLabel}
             </button>
           );
         })}

@@ -90,6 +90,8 @@ export type BayAreaProductRegionId = BayAreaVisibleProductRegionId;
 export type BayAreaProductRegion = {
   id: BayAreaVisibleProductRegionId;
   name: string;
+  /** Short label shown on region chips (e.g. "SF" for San Francisco). */
+  chipLabel: string;
   bounds: MapBounds;
   viewport?: BayAreaProductRegionViewport;
 };
@@ -98,6 +100,7 @@ export const BAY_AREA_PRODUCT_REGIONS: BayAreaProductRegion[] = [
   {
     id: "san-francisco",
     name: "San Francisco",
+    chipLabel: "SF",
     bounds: [
       [-122.54, 37.615],
       [-122.26, 37.84],
@@ -117,6 +120,7 @@ export const BAY_AREA_PRODUCT_REGIONS: BayAreaProductRegion[] = [
   {
     id: "north-bay",
     name: "North Bay",
+    chipLabel: "North Bay",
     bounds: [
       [-122.65, 37.795],
       [-122.43, 38.02],
@@ -136,6 +140,7 @@ export const BAY_AREA_PRODUCT_REGIONS: BayAreaProductRegion[] = [
   {
     id: "east-bay",
     name: "East Bay",
+    chipLabel: "East Bay",
     bounds: [
       [-122.33, 37.7],
       [-121.72, 38.02],
@@ -155,6 +160,7 @@ export const BAY_AREA_PRODUCT_REGIONS: BayAreaProductRegion[] = [
   {
     id: "south-bay",
     name: "South Bay",
+    chipLabel: "South Bay",
     bounds: [
       [-122.5, 37.08],
       [-121.7, 37.58],
@@ -174,6 +180,7 @@ export const BAY_AREA_PRODUCT_REGIONS: BayAreaProductRegion[] = [
   {
     id: "peninsula",
     name: "Peninsula",
+    chipLabel: "Peninsula",
     bounds: [
       [-122.52, 37.38],
       [-122.12, 37.82],
