@@ -76,22 +76,36 @@ const KARL_TERRITORY_DETAILED_ICON = `<svg xmlns="http://www.w3.org/2000/svg" vi
 </svg>`;
 
 /**
- * Fog-rail Clear (daytime): sun only — no cloud — reusing the approved warm
- * sun palette so it stays distinct from the grey fog states.
+ * Clear (daytime): sun only — no cloud — using the approved warm sun palette so
+ * it stays distinct from the grey fog states. Shared by the Fog Intensity rail
+ * and the phone-portrait Clear map markers.
  */
-const FOG_RAIL_CLEAR_SUN_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" aria-hidden="true" fill="none">
+const CLEAR_SUN_ONLY_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" aria-hidden="true" fill="none">
   <circle cx="24" cy="24" r="9" fill="#F2A326" opacity="0.95" />
   <circle cx="24" cy="24" r="6.8" fill="#F6C15A" opacity="0.9" />
   <path d="M24 5.5v4.2M24 38.3v4.2M5.5 24h4.2M38.3 24h4.2M11 11l3 3M34 34l3 3M11 37l3-3M34 14l3-3" stroke="#F2A326" stroke-width="2" stroke-linecap="round" opacity="0.9" />
 </svg>`;
 
 /**
- * Fog-rail Clear (nighttime): crescent moon only — no cloud — reusing the
- * approved icy-blue moon palette.
+ * Clear (nighttime): crescent moon only — no cloud — using the approved
+ * icy-blue moon palette. Shared by the Fog Intensity rail and the
+ * phone-portrait Clear map markers.
  */
-const FOG_RAIL_CLEAR_MOON_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" aria-hidden="true" fill="none">
+const CLEAR_MOON_ONLY_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" aria-hidden="true" fill="none">
   <path d="M24 10A14 14 0 0 0 24 38 A26 26 0 0 1 24 10Z" fill="#9FC4E6" opacity="0.92" />
 </svg>`;
+
+/**
+ * Cloud-free Clear artwork resolved by day/night — the single source of truth
+ * for both the Fog Intensity rail and phone-portrait Clear map markers.
+ */
+function getPhonePortraitClearSkyIconSvg(
+  options: PhonePortraitPresentationOptions = {},
+): string {
+  return resolvePhonePortraitIsNighttime(options)
+    ? CLEAR_MOON_ONLY_ICON
+    : CLEAR_SUN_ONLY_ICON;
+}
 
 export function getPhonePortraitConditionIconSvg(
   intensity: FogIntensity,
@@ -122,9 +136,7 @@ export function getPhonePortraitFogRailConditionIconDataUri(
 ): string {
   const svg =
     intensity === "clear"
-      ? resolvePhonePortraitIsNighttime(options)
-        ? FOG_RAIL_CLEAR_MOON_ICON
-        : FOG_RAIL_CLEAR_SUN_ICON
+      ? getPhonePortraitClearSkyIconSvg(options)
       : getPhonePortraitConditionIconSvg(intensity, options);
 
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
@@ -143,7 +155,15 @@ export function getPhonePortraitMarkerIconMarkup(
   intensity: FogIntensity,
   options: PhonePortraitPresentationOptions = {},
 ): string {
-  return getPhonePortraitConditionIconSvg(intensity, options).replace(
+  // Clear markers reuse the approved cloud-free sun (day) / moon (night)
+  // artwork so they match the Fog Intensity rail; the other intensities keep
+  // their detailed fog artwork.
+  const svg =
+    intensity === "clear"
+      ? getPhonePortraitClearSkyIconSvg(options)
+      : getPhonePortraitConditionIconSvg(intensity, options);
+
+  return svg.replace(
     '<svg xmlns="http://www.w3.org/2000/svg"',
     '<svg class="karl-universal-map-marker__svg" xmlns="http://www.w3.org/2000/svg"',
   );
