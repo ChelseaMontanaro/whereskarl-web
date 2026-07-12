@@ -656,16 +656,21 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
             className="karl-map-phone-portrait-vignette pointer-events-none absolute inset-0 z-[1]"
           />
         ) : null}
-        <MapLayerControls
-          layout={layout}
-          mapStyle={mapStyle}
-          fogLayerEnabled={fogLayerEnabled}
-          onMapStyleChange={onMapStyleChange}
-          onFogLayerChange={onFogLayerChange}
-          onZoomIn={handleZoomIn}
-          onZoomOut={handleZoomOut}
-          onImmersivePanelOpenChange={onImmersiveLayersPanelOpenChange}
-        />
+        {/* Phone-portrait renders the canonical Fog Layer trigger inside
+            MapView's shared control group (above the Fog Intensity rail), so
+            skip the in-map control here to avoid a duplicate trigger. */}
+        {isPhonePortraitWeb ? null : (
+          <MapLayerControls
+            layout={layout}
+            mapStyle={mapStyle}
+            fogLayerEnabled={fogLayerEnabled}
+            onMapStyleChange={onMapStyleChange}
+            onFogLayerChange={onFogLayerChange}
+            onZoomIn={handleZoomIn}
+            onZoomOut={handleZoomOut}
+            onImmersivePanelOpenChange={onImmersiveLayersPanelOpenChange}
+          />
+        )}
         {!isFullBleed && fogLayerEnabled && !isPhonePortraitWeb ? (
           <MapFogLegend layout="mobile" />
         ) : null}

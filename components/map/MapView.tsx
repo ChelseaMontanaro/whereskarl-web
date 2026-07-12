@@ -13,6 +13,7 @@ import { MapBestRightNowTray } from "@/components/map/MapBestRightNowTray";
 import { MapConditionsPanel } from "@/components/map/MapConditionsPanel";
 import { MapPhonePortraitControls } from "@/components/map/MapPhonePortraitControls";
 import { MapPhonePortraitFogRail } from "@/components/map/MapPhonePortraitFogRail";
+import { MapPhonePortraitLayersControl } from "@/components/map/MapLayerControls";
 import { MapPhonePortraitUnifiedCard } from "@/components/map/MapPhonePortraitUnifiedCard";
 import { MapFogLegend } from "@/components/map/MapFogLegend";
 import { MapSelectedLocationCard } from "@/components/map/MapSelectedLocationCard";
@@ -389,57 +390,65 @@ function MobileMapView({ state }: { state: MapViewModel }) {
         />
 
         {!isLayersPanelOpen ? (
-          <>
-            <div
-              className={`pointer-events-auto absolute flex flex-col transition-opacity motion-reduce:transition-none ${
-                isPhonePortrait
-                  ? "inset-x-3 top-[calc(1.375rem+env(safe-area-inset-top))] gap-0"
-                  : "left-3 top-3 max-w-[min(100%,13.5rem)] gap-1.5 sm:left-4 sm:top-4 sm:max-w-xs md:top-[4.5rem] md:max-w-xs"
-              } opacity-100`}
-            >
-              {isPhonePortrait ? (
-                <MapPhonePortraitControls
-                  selectedRegionId={phonePortraitRegionId}
-                  onSelectRegion={handlePhonePortraitSelectRegion}
-                  isPhonePortrait
-                />
-              ) : (
-                <>
-                  <MapConditionsPanel
-                    isLoading={currentQuery.isLoading && !currentQuery.data}
-                    selectedRegionId={
-                      selectedLocation ? null : mapQuery.activeRegionId
-                    }
-                    onSelectRegion={handleSelectRegion}
-                  />
-                  <MapFogLegend
-                    layout="desktop-stack"
-                    activeIntensity={intensityFilter}
-                    onSelectIntensity={handleSelectIntensity}
-                  />
-                </>
-              )}
-              <MapQueryWarnings
-                unknownLocationId={unknownLocationId}
-                unknownRegionId={mapQuery.unknownRegionId}
-                variant="desktop"
-              />
-            </div>
-
+          <div
+            className={`pointer-events-auto absolute flex flex-col transition-opacity motion-reduce:transition-none ${
+              isPhonePortrait
+                ? "inset-x-3 top-[calc(1.375rem+env(safe-area-inset-top))] gap-0"
+                : "left-3 top-3 max-w-[min(100%,13.5rem)] gap-1.5 sm:left-4 sm:top-4 sm:max-w-xs md:top-[4.5rem] md:max-w-xs"
+            } opacity-100`}
+          >
             {isPhonePortrait ? (
-              <div
-                className="pointer-events-none absolute left-3 top-[calc(6rem+env(safe-area-inset-top))] bottom-[calc(9.5rem+env(safe-area-inset-bottom))] flex flex-col justify-center"
-              >
-                <div className="pointer-events-auto">
-                  <MapPhonePortraitFogRail
-                    activeIntensity={intensityFilter}
-                    onSelectIntensity={handleSelectIntensity}
-                  />
-                </div>
-              </div>
-            ) : null}
+              <MapPhonePortraitControls
+                selectedRegionId={phonePortraitRegionId}
+                onSelectRegion={handlePhonePortraitSelectRegion}
+                isPhonePortrait
+              />
+            ) : (
+              <>
+                <MapConditionsPanel
+                  isLoading={currentQuery.isLoading && !currentQuery.data}
+                  selectedRegionId={
+                    selectedLocation ? null : mapQuery.activeRegionId
+                  }
+                  onSelectRegion={handleSelectRegion}
+                />
+                <MapFogLegend
+                  layout="desktop-stack"
+                  activeIntensity={intensityFilter}
+                  onSelectIntensity={handleSelectIntensity}
+                />
+              </>
+            )}
+            <MapQueryWarnings
+              unknownLocationId={unknownLocationId}
+              unknownRegionId={mapQuery.unknownRegionId}
+              variant="desktop"
+            />
+          </div>
+        ) : null}
 
-          </>
+        {isPhonePortrait ? (
+          <div className="pointer-events-none absolute left-3 top-[calc(6rem+env(safe-area-inset-top))] bottom-[calc(9.5rem+env(safe-area-inset-bottom))] flex flex-col justify-center">
+            {/* Shared phone-portrait control group: canonical Fog Layer menu
+                trigger stacked directly above the Fog Intensity rail with a
+                small, intentional gap. The trigger stays mounted while the
+                layers panel is open; the rail hides so the panel stays clear. */}
+            <div className="pointer-events-auto flex flex-col items-start gap-2">
+              <MapPhonePortraitLayersControl
+                mapStyle={mapStyle}
+                fogLayerEnabled={fogLayerEnabled}
+                onMapStyleChange={setMapStyle}
+                onFogLayerChange={setFogLayerEnabled}
+                onOpenChange={setIsLayersPanelOpen}
+              />
+              {!isLayersPanelOpen ? (
+                <MapPhonePortraitFogRail
+                  activeIntensity={intensityFilter}
+                  onSelectIntensity={handleSelectIntensity}
+                />
+              ) : null}
+            </div>
+          </div>
         ) : null}
 
         <div

@@ -9,7 +9,10 @@ vi.mock("@/lib/hooks/usePhonePortrait", () => ({
   usePhonePortrait: () => usePhonePortraitMock(),
 }));
 
-import { MapLayerControls } from "@/components/map/MapLayerControls";
+import {
+  MapLayerControls,
+  MapPhonePortraitLayersControl,
+} from "@/components/map/MapLayerControls";
 
 describe("MapLayerControls", () => {
   afterEach(() => {
@@ -118,62 +121,13 @@ describe("MapLayerControls", () => {
   });
 });
 
-describe("MapLayerControls immersive", () => {
+describe("MapLayerControls immersive (tablet)", () => {
   afterEach(() => {
     cleanup();
     usePhonePortraitMock.mockReturnValue(false);
   });
 
-  it("starts collapsed on phone portrait with a compact layers button", () => {
-    usePhonePortraitMock.mockReturnValue(true);
-
-    render(
-      <MapLayerControls
-        layout="immersive"
-        mapStyle="standard"
-        fogLayerEnabled
-        onMapStyleChange={vi.fn()}
-        onFogLayerChange={vi.fn()}
-      />,
-    );
-
-    expect(screen.queryByRole("radio", { name: "Satellite" })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Open map layers" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Zoom in" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Zoom out" })).not.toBeInTheDocument();
-
-    const layersButton = screen.getByRole("button", { name: "Open map layers" });
-    const controls = layersButton.parentElement;
-    expect(controls?.className).toContain("7rem");
-    expect(controls?.className).not.toContain("12.5rem");
-  });
-
-  it("notifies when the immersive layers panel opens on phone portrait", () => {
-    usePhonePortraitMock.mockReturnValue(true);
-    const onImmersivePanelOpenChange = vi.fn();
-
-    render(
-      <MapLayerControls
-        layout="immersive"
-        mapStyle="standard"
-        fogLayerEnabled
-        onMapStyleChange={vi.fn()}
-        onFogLayerChange={vi.fn()}
-        onImmersivePanelOpenChange={onImmersivePanelOpenChange}
-      />,
-    );
-
-    expect(onImmersivePanelOpenChange).toHaveBeenCalledWith(false);
-
-    fireEvent.click(screen.getByRole("button", { name: "Open map layers" }));
-
-    expect(onImmersivePanelOpenChange).toHaveBeenLastCalledWith(true);
-    expect(screen.getByRole("button", { name: "Close map layers" })).toBeInTheDocument();
-  });
-
   it("keeps the immersive layers panel within the tablet viewport", () => {
-    usePhonePortraitMock.mockReturnValue(false);
-
     render(
       <MapLayerControls
         layout="immersive"
@@ -190,5 +144,101 @@ describe("MapLayerControls immersive", () => {
     expect(controls?.className).toContain("right-3");
     expect(controls?.className).not.toContain("100vw");
     expect(controls?.className).toContain("items-stretch");
+  });
+
+  it("renders zoom controls and an expanded layers panel by default on tablet", () => {
+    render(
+      <MapLayerControls
+        layout="immersive"
+        mapStyle="standard"
+        fogLayerEnabled
+        onMapStyleChange={vi.fn()}
+        onFogLayerChange={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Zoom in" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Zoom out" })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "Satellite" })).toBeInTheDocument();
+  });
+});
+
+describe("MapPhonePortraitLayersControl", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it("renders a single collapsed Fog Layer trigger and wires open state", () => {
+    const onOpenChange = vi.fn();
+
+    render(
+      <MapPhonePortraitLayersControl
+        mapStyle="standard"
+        fogLayerEnabled
+        onMapStyleChange={vi.fn()}
+        onFogLayerChange={vi.fn()}
+        onOpenChange={onOpenChange}
+      />,
+    );
+
+    const trigger = screen.getByRole("button", { name: "Open map layers" });
+    expect(trigger).toHaveAttribute("aria-expanded", "false");
+    expect(trigger).toHaveAttribute("aria-controls", "map-layer-panel-phone");
+    // Exactly one Fog Layer trigger exists.
+    expect(screen.getAllByRole("button", { name: "Open map layers" })).toHaveLength(1);
+    expect(screen.queryByRole("radio", { name: "Satellite" })).not.toBeInTheDocument();
+    expect(onOpenChange).toHaveBeenLastCalledWith(false);
+
+    fireEvent.click(trigger);
+
+    expect(onOpenChange).toHaveBeenLastCalledWith(true);
+    expect(trigger).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("radio", { name: "Satellite" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Close map layers" }),
+    ).toBeInTheDocument();
+  });
+
+  it("keeps the trigger wired to map style and fog layer state", () => {
+    const onMapStyleChange = vi.fn();
+    const onFogLayerChange = vi.fn();
+
+    render(
+      <MapPhonePortraitLayersControl
+        mapStyle="standard"
+        fogLayerEnabled
+        onMapStyleChange={onMapStyleChange}
+        onFogLayerChange={onFogLayerChange}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Open map layers" }));
+
+    fireEvent.click(screen.getByRole("radio", { name: "Satellite" }));
+    expect(onMapStyleChange).toHaveBeenCalledWith("satellite");
+
+    fireEvent.click(screen.getByRole("switch", { name: "Fog Layer" }));
+    expect(onFogLayerChange).toHaveBeenCalledWith(false);
+  });
+
+  it("closes the panel from the backdrop and collapse control", () => {
+    const onOpenChange = vi.fn();
+
+    render(
+      <MapPhonePortraitLayersControl
+        mapStyle="standard"
+        fogLayerEnabled
+        onMapStyleChange={vi.fn()}
+        onFogLayerChange={vi.fn()}
+        onOpenChange={onOpenChange}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Open map layers" }));
+    expect(onOpenChange).toHaveBeenLastCalledWith(true);
+
+    fireEvent.click(screen.getByRole("button", { name: "Close map layers" }));
+    expect(onOpenChange).toHaveBeenLastCalledWith(false);
+    expect(screen.queryByRole("radio", { name: "Satellite" })).not.toBeInTheDocument();
   });
 });

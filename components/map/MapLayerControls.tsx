@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 
 import { desktopGlassCardClass } from "@/components/home/desktopGlass";
-import { usePhonePortrait } from "@/lib/hooks/usePhonePortrait";
 import {
   KARL_MAP_STYLE_OPTIONS,
   type KarlMapStyleId,
@@ -254,6 +253,9 @@ function DesktopMapLayerControls({
   );
 }
 
+// Tablet immersive controls only. The phone-portrait Fog Layer trigger is the
+// canonical `MapPhonePortraitLayersControl` below, positioned by MapView inside
+// the shared phone-portrait control group above the Fog Intensity rail.
 function ImmersiveMapLayerControls({
   mapStyle,
   fogLayerEnabled,
@@ -263,12 +265,7 @@ function ImmersiveMapLayerControls({
   onZoomOut,
   onImmersivePanelOpenChange,
 }: Omit<MapLayerControlsProps, "layout">) {
-  const isPhonePortrait = usePhonePortrait();
-  const [isLayersCollapsed, setIsLayersCollapsed] = useState(true);
-
-  useEffect(() => {
-    setIsLayersCollapsed(isPhonePortrait);
-  }, [isPhonePortrait]);
+  const [isLayersCollapsed, setIsLayersCollapsed] = useState(false);
 
   useEffect(() => {
     onImmersivePanelOpenChange?.(!isLayersCollapsed);
@@ -278,35 +275,15 @@ function ImmersiveMapLayerControls({
   const closeLayersPanel = () => setIsLayersCollapsed(true);
 
   return (
-    <>
-      {!isLayersCollapsed && isPhonePortrait ? (
-        <button
-          type="button"
-          aria-label="Close map layers"
-          className="fixed inset-0 z-[15] bg-black/42 backdrop-blur-[1px] motion-reduce:transition-none"
-          onClick={closeLayersPanel}
-        />
-      ) : null}
-
+    <div className="absolute right-3 top-3 z-20 flex w-[min(17rem,calc(100%-0.75rem))] max-w-full flex-col items-stretch gap-1.5 sm:top-4 sm:gap-2 md:top-[4.5rem]">
       <div
-        className={`absolute z-20 flex flex-col gap-1.5 sm:top-4 sm:gap-2 md:top-[4.5rem] ${
-          isPhonePortrait
-            ? `right-3 top-[calc(7rem+env(safe-area-inset-top))] items-end${
-                !isLayersCollapsed ? " w-[min(calc(100vw-1.5rem),17rem)]" : ""
-              }`
-            : "top-3 right-3 w-[min(17rem,calc(100%-0.75rem))] max-w-full items-stretch"
-        } ${!isLayersCollapsed && isPhonePortrait ? "z-30" : "z-20"}`}
+        className={`${desktopGlassCardClass} flex flex-col items-center p-0.5 sm:p-1`}
+        aria-label="Map zoom controls"
       >
-      {!isPhonePortrait ? (
-        <div
-          className={`${desktopGlassCardClass} flex flex-col items-center p-0.5 sm:p-1`}
-          aria-label="Map zoom controls"
-        >
-          <ZoomButton label="Zoom in" onClick={onZoomIn} compact={isPhonePortrait} />
-          <div className="my-0.5 h-px w-5 bg-white/10 sm:w-6" aria-hidden="true" />
-          <ZoomButton label="Zoom out" onClick={onZoomOut} compact={isPhonePortrait} />
-        </div>
-      ) : null}
+        <ZoomButton label="Zoom in" onClick={onZoomIn} />
+        <div className="my-0.5 h-px w-5 bg-white/10 sm:w-6" aria-hidden="true" />
+        <ZoomButton label="Zoom out" onClick={onZoomOut} />
+      </div>
 
       {isLayersCollapsed ? (
         <button
@@ -317,12 +294,8 @@ function ImmersiveMapLayerControls({
           onClick={openLayersPanel}
           className={`${desktopGlassCardClass} flex items-center gap-2 px-2.5 py-2 text-xs font-semibold text-white/80 transition-colors hover:text-karl-gold motion-reduce:transition-none sm:px-3`}
         >
-          <LayersIcon className={isPhonePortrait ? "h-3.5 w-3.5" : "h-4 w-4"} />
-          {isPhonePortrait ? (
-            <span className="sr-only">Layers</span>
-          ) : (
-            <span>Layers</span>
-          )}
+          <LayersIcon className="h-4 w-4" />
+          <span>Layers</span>
         </button>
       ) : (
         <div
@@ -352,6 +325,89 @@ function ImmersiveMapLayerControls({
           />
         </div>
       )}
+    </div>
+  );
+}
+
+type MapPhonePortraitLayersControlProps = Pick<
+  MapLayerControlsProps,
+  "mapStyle" | "fogLayerEnabled" | "onMapStyleChange" | "onFogLayerChange"
+> & {
+  onOpenChange?: (isOpen: boolean) => void;
+};
+
+/**
+ * Canonical phone-portrait Fog Layer menu trigger. Renders the same glass
+ * hamburger button + layers panel used everywhere else, but inline so the
+ * shared phone-portrait control group in MapView can position it directly above
+ * the Fog Intensity rail. The trigger stays mounted while the panel is open so
+ * the menu (a fixed backdrop + anchored panel) can toggle and stay reachable.
+ */
+export function MapPhonePortraitLayersControl({
+  mapStyle,
+  fogLayerEnabled,
+  onMapStyleChange,
+  onFogLayerChange,
+  onOpenChange,
+}: MapPhonePortraitLayersControlProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    onOpenChange?.(isOpen);
+  }, [isOpen, onOpenChange]);
+
+  return (
+    <>
+      {isOpen ? (
+        <button
+          type="button"
+          aria-label="Close map layers"
+          className="fixed inset-0 z-[15] bg-black/42 backdrop-blur-[1px] motion-reduce:transition-none"
+          onClick={() => setIsOpen(false)}
+        />
+      ) : null}
+
+      <div className="relative z-30 flex flex-col">
+        <button
+          type="button"
+          aria-expanded={isOpen}
+          aria-controls="map-layer-panel-phone"
+          aria-label="Open map layers"
+          onClick={() => setIsOpen((open) => !open)}
+          className={`${desktopGlassCardClass} flex items-center gap-2 px-2.5 py-2 text-xs font-semibold text-white/80 transition-colors hover:text-karl-gold motion-reduce:transition-none sm:px-3`}
+        >
+          <LayersIcon className="h-3.5 w-3.5" />
+          <span className="sr-only">Layers</span>
+        </button>
+
+        {isOpen ? (
+          <div
+            id="map-layer-panel-phone"
+            className={`${desktopGlassCardClass} absolute left-0 top-[calc(100%+0.5rem)] z-30 w-[min(calc(100vw-1.5rem),17rem)] p-3 shadow-xl`}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-white">Map Layers</p>
+                <p className="text-xs text-white/55">Customize the Karl map</p>
+              </div>
+              <button
+                type="button"
+                aria-label="Collapse layers panel"
+                onClick={() => setIsOpen(false)}
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/12 bg-white/[0.04] text-sm text-white/65 transition-colors hover:border-white/20 hover:text-white motion-reduce:transition-none"
+              >
+                ×
+              </button>
+            </div>
+            <LayerPanelContent
+              mapStyle={mapStyle}
+              fogLayerEnabled={fogLayerEnabled}
+              onMapStyleChange={onMapStyleChange}
+              onFogLayerChange={onFogLayerChange}
+              vertical
+            />
+          </div>
+        ) : null}
       </div>
     </>
   );
