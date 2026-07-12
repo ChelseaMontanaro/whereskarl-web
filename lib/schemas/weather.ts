@@ -30,6 +30,10 @@ export const locationWeatherSchema = z
     weatherCode: z.number(),
     iconName: z.string(),
     fogScore: z.number(),
+    // Optional AQI slot: the backend does not populate this yet. Declared here
+    // (nullable + optional) so the Selected Location card can render a canonical
+    // Air Quality slot the moment real data lands, without inventing values.
+    aqi: z.number().nullable().optional(),
     updatedAt: apiDateTimeSchema,
     karlReason: z.string(),
     primaryDrivers: z.array(z.string()),

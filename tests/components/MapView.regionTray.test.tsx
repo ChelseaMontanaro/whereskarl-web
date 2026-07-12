@@ -3,7 +3,13 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { createElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -75,12 +81,6 @@ function getTrayLocationIds() {
   return screen
     .getAllByRole("button", { name: /Select .+ on map$/ })
     .map((button) => button.getAttribute("data-location-id"));
-}
-
-function cyclePhonePortraitBestRightNow() {
-  fireEvent.click(
-    screen.getByRole("button", { name: "Show next Best Right Now location" }),
-  );
 }
 
 function renderMap() {
@@ -195,63 +195,71 @@ describe("MapView region tray behavior", () => {
     });
   });
 
-  describe("phone portrait", () => {
+  describe("phone portrait (selection-driven)", () => {
     beforeEach(() => {
       usePhonePortraitMock.mockReturnValue(true);
     });
 
-    it("keeps Best Right Now bay-wide when SF is selected", async () => {
-      useSearchParamsMock.mockReturnValue(
-        new URLSearchParams("region=san-francisco"),
-      );
+    it("auto-selects the canonical Best Right Now location on a clean entry", async () => {
+      // Canonical recommendation (shared with Home) wins over the top score.
+      vi.spyOn(weatherApi, "getBestSunshine").mockResolvedValue({
+        locationID: "palo-alto",
+      } as never);
 
-      const { container } = renderMap();
+      renderMap();
 
-      expect(
-        await screen.findByRole("heading", { name: "Karl Around the Bay" }),
-      ).toBeInTheDocument();
-      expect(screen.queryByText("Explore live fog & clear skies around the Bay.")).not.toBeInTheDocument();
-      expect(screen.getByRole("button", { name: "Karl Territory" })).toBeInTheDocument();
-      expect(container.querySelector(".grid.grid-cols-2")).toBeNull();
-      expect(container.querySelector(".flex.flex-col.gap-1")).toBeTruthy();
-
-      await screen.findByLabelText("Best Right Now");
-      expect(getTrayLocationIds()).toEqual(["san-jose"]);
-      expect(screen.getAllByRole("button", { name: /Select .+ on map$/ })).toHaveLength(
-        1,
-      );
-
-      cyclePhonePortraitBestRightNow();
-      expect(getTrayLocationIds()).toEqual(["palo-alto"]);
-
-      cyclePhonePortraitBestRightNow();
-      expect(getTrayLocationIds()).toEqual(["ocean-beach"]);
-
-      cyclePhonePortraitBestRightNow();
-      expect(getTrayLocationIds()).toEqual(["tiburon"]);
+      await waitFor(() => {
+        expect(replaceMock).toHaveBeenCalledWith("/map?location=palo-alto", {
+          scroll: false,
+        });
+      });
     });
 
-    it("shows the empty state only when no bay-wide location scores at least 70", async () => {
-      vi.spyOn(weatherApi, "getLocations").mockResolvedValue({
-        locations: [
-          createRegionLocation("ocean-beach", "Ocean Beach", "san-francisco", 45),
-          createRegionLocation("presidio", "Presidio", "san-francisco", 52),
-          createRegionLocation("tiburon", "Tiburon", "north-bay", 68),
-        ],
-      });
+    it("falls back to the top-scored location when no recommendation is available", async () => {
+      vi.spyOn(weatherApi, "getBestSunshine").mockRejectedValue(
+        new Error("unavailable"),
+      );
 
+      renderMap();
+
+      await waitFor(() => {
+        expect(replaceMock).toHaveBeenCalledWith("/map?location=san-jose", {
+          scroll: false,
+        });
+      });
+    });
+
+    it("does not render a Best Right Now tray on the map", async () => {
       useSearchParamsMock.mockReturnValue(
-        new URLSearchParams("region=san-francisco"),
+        new URLSearchParams("location=palo-alto"),
       );
 
       renderMap();
 
       expect(
-        await screen.findByText("No clear spots above 70 right now"),
+        await screen.findByLabelText("Selected location: Palo Alto"),
       ).toBeInTheDocument();
+      expect(screen.queryByLabelText("Best Right Now")).not.toBeInTheDocument();
       expect(
         screen.queryByRole("button", { name: /Select .+ on map$/ }),
       ).not.toBeInTheDocument();
+    });
+
+    it("does not auto-select while explicitly browsing a region", async () => {
+      useSearchParamsMock.mockReturnValue(
+        new URLSearchParams("region=south-bay"),
+      );
+
+      renderMap();
+
+      expect(
+        await screen.findByRole("heading", { name: "Karl Around the Bay" }),
+      ).toBeInTheDocument();
+      expect(
+        replaceMock.mock.calls.some(([href]) =>
+          String(href).startsWith("/map?location="),
+        ),
+      ).toBe(false);
     });
   });
 });

@@ -217,7 +217,115 @@ describe("MapSelectedLocationCard", () => {
     expect(label.className).toContain("max-lg:text-[0.625rem]");
     expect(score?.textContent).toBe("82");
     expect(score?.className).toContain("max-lg:text-[2rem]");
-    expect(score?.className).toContain("text-karl-gold");
     expect(score?.className).toContain("text-[1.35rem]");
+  });
+
+  it("colors the score with the canonical Clear Skies band", () => {
+    render(<MapSelectedLocationCard location={location} onClose={vi.fn()} />);
+
+    const score = screen.getByTestId("clear-skies-score");
+    // 82 → clear (green) per canonical thresholds.
+    expect(score).toHaveAttribute("data-score-band", "clear");
+    expect(score.getAttribute("style")).toContain("#22E36B");
+  });
+});
+
+describe("MapSelectedLocationCard phone portrait", () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+
+  afterEach(() => {
+    cleanup();
+    window.localStorage.clear();
+  });
+
+  it("renders Karl's Read with the location name and score band", () => {
+    render(<MapSelectedLocationCard location={location} phonePortrait />);
+
+    expect(screen.getByRole("heading", { name: "Tiburon" })).toBeInTheDocument();
+    expect(screen.getByText("Karl's Read")).toBeInTheDocument();
+    expect(
+      screen.getByText("Mostly clear across Tiburon."),
+    ).toBeInTheDocument();
+
+    const score = screen.getByTestId("clear-skies-score");
+    expect(score.textContent).toBe("82");
+    expect(score).toHaveAttribute("data-score-band", "clear");
+  });
+
+  it("shows a canonical Air Quality slot that awaits data when AQI is absent", () => {
+    render(<MapSelectedLocationCard location={location} phonePortrait />);
+
+    const slot = screen.getByTestId("air-quality-slot");
+    expect(slot).toHaveTextContent("Air Quality");
+    expect(slot).toHaveTextContent("Coming Soon");
+  });
+
+  it("renders the AQI category and band when a value exists", () => {
+    render(
+      <MapSelectedLocationCard
+        location={{ ...location, aqi: 42 }}
+        phonePortrait
+      />,
+    );
+
+    const slot = screen.getByTestId("air-quality-slot");
+    expect(slot).toHaveTextContent("42");
+    expect(slot).toHaveTextContent("Good");
+    expect(slot.querySelector("[data-aqi-band='good']")).toBeTruthy();
+  });
+
+  it("renders the weather summary metrics", () => {
+    render(<MapSelectedLocationCard location={location} phonePortrait />);
+
+    const summary = screen.getByText(/Humidity 60%/);
+    expect(summary).toHaveTextContent("Fog 18%");
+    expect(summary).toHaveTextContent("Wind W 8 mph");
+    expect(summary).toHaveTextContent("68°F");
+  });
+
+  it("shows a forecast preview when a prediction is available and no View Full Forecast button", () => {
+    render(
+      <MapSelectedLocationCard
+        location={{
+          ...location,
+          prediction: {
+            predictionConfidenceScore: 80,
+            predictionConfidenceLabel: "High",
+            predictionReason: "Sun breaks through by 11 AM.",
+            trend: "clearing",
+          },
+        }}
+        phonePortrait
+      />,
+    );
+
+    expect(screen.getByText("Next hour")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /View Full Forecast/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /View Full Forecast/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("omits the forecast section when prediction data is unavailable", () => {
+    render(<MapSelectedLocationCard location={location} phonePortrait />);
+
+    expect(screen.queryByText("Next hour")).not.toBeInTheDocument();
+  });
+
+  it("toggles favorite from the phone portrait card", () => {
+    render(<MapSelectedLocationCard location={location} phonePortrait />);
+
+    const favoriteButton = screen.getByRole("button", {
+      name: "Add Tiburon to favorites",
+    });
+    fireEvent.click(favoriteButton);
+
+    expect(
+      screen.getByRole("button", { name: "Remove Tiburon from favorites" }),
+    ).toHaveAttribute("aria-pressed", "true");
   });
 });

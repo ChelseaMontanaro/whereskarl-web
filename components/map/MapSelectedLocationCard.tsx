@@ -2,13 +2,19 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import { KarlLogo } from "@/components/brand/KarlLogo";
 import { MapLocationConditionIcon } from "@/components/map/MapLocationConditionIcon";
 import { MapPhonePortraitConditionIcon } from "@/components/map/MapPhonePortraitConditionIcon";
 import { desktopGlassCardClass } from "@/components/home/desktopGlass";
 import {
+  getLocationConditionLabel,
   resolveLocationFogIntensity,
 } from "@/lib/map/conditions";
 import { locationWeatherMetadataItems } from "@/lib/map/locationMetadata";
+import { nextHourOutlookSummary } from "@/lib/home/weatherDisplay";
+import { useIsNighttime } from "@/lib/hooks/useIsNighttime";
+import { presentClearSkiesScore } from "@/lib/score/clearSkiesScore";
+import { presentAirQuality } from "@/lib/weather/airQuality";
 import {
   isFavoriteLocation,
   toggleFavoriteLocation,
@@ -22,7 +28,6 @@ type MapSelectedLocationCardProps = {
   onClose?: () => void;
   phonePortrait?: boolean;
   showCloseButton?: boolean;
-  embedded?: boolean;
 };
 
 function FavoriteHeartIcon({
@@ -61,24 +66,74 @@ function getConditionSentence(location: LocationWeather): string {
   return status || reason || "Conditions unavailable";
 }
 
-export function MapSelectedLocationCard({
-  location,
-  onClose,
-  phonePortrait = false,
-  showCloseButton = true,
-  embedded = false,
-}: MapSelectedLocationCardProps) {
-  const conditionSentence = getConditionSentence(location);
-  const isDegraded = isLocationDataDegraded(location.dataStatus);
-  const metadataItems = locationWeatherMetadataItems(location);
-
+function useFavoriteToggle(locationId: string) {
   const [isFavorite, setIsFavorite] = useState(() =>
-    isFavoriteLocation(location.id),
+    isFavoriteLocation(locationId),
   );
 
   const handleToggleFavorite = useCallback(() => {
-    setIsFavorite(toggleFavoriteLocation(location.id));
-  }, [location.id]);
+    setIsFavorite(toggleFavoriteLocation(locationId));
+  }, [locationId]);
+
+  return { isFavorite, handleToggleFavorite };
+}
+
+function FavoriteButton({
+  location,
+  isFavorite,
+  onToggle,
+  size = "md",
+}: {
+  location: LocationWeather;
+  isFavorite: boolean;
+  onToggle: () => void;
+  size?: "sm" | "md";
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-pressed={isFavorite}
+      aria-label={
+        isFavorite
+          ? `Remove ${location.name} from favorites`
+          : `Add ${location.name} to favorites`
+      }
+      className={`flex shrink-0 items-center justify-center rounded-full transition-colors motion-reduce:transition-none ${
+        size === "sm" ? "h-5 w-5" : "h-6 w-6"
+      } ${
+        isFavorite
+          ? "text-karl-gold"
+          : "text-white/42 hover:bg-white/[0.05] hover:text-karl-gold/85"
+      }`}
+    >
+      <FavoriteHeartIcon
+        filled={isFavorite}
+        className={size === "sm" ? "h-3.5 w-3.5" : "h-4 w-4"}
+      />
+    </button>
+  );
+}
+
+function PhonePortraitSelectedCard({
+  location,
+  onClose,
+  showCloseButton,
+}: {
+  location: LocationWeather;
+  onClose?: () => void;
+  showCloseButton: boolean;
+}) {
+  const isNighttime = useIsNighttime();
+  const isDegraded = isLocationDataDegraded(location.dataStatus);
+  const intensity = resolveLocationFogIntensity(location);
+  const conditionLabel = getLocationConditionLabel(location, isNighttime);
+  const karlRead = getConditionSentence(location);
+  const score = presentClearSkiesScore(location.sunshineScore);
+  const airQuality = presentAirQuality(location.aqi);
+  const forecastSummary = nextHourOutlookSummary(location.prediction);
+
+  const { isFavorite, handleToggleFavorite } = useFavoriteToggle(location.id);
 
   useEffect(() => {
     if (!onClose) {
@@ -86,152 +141,259 @@ export function MapSelectedLocationCard({
     }
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") {
-        return;
+      if (event.key === "Escape") {
+        onClose();
       }
-
-      onClose();
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [onClose]);
 
-  const panelClass = embedded
-    ? "relative flex min-w-0 flex-1 items-center"
-    : phonePortrait
-      ? "relative flex min-h-[5.0625rem] w-full items-center rounded-2xl border border-[rgb(160_185_210/0.24)] bg-[rgb(6_15_27/0.92)] px-2.5 py-3 shadow-[0_10px_18px_rgb(0_0_0/0.45)]"
-      : `${desktopGlassCardClass} relative max-w-[28rem] px-4 py-3 shadow-[0_8px_28px_rgba(0,0,0,0.28)]`;
-
-  const Wrapper = embedded ? "div" : "article";
+  const humidity =
+    typeof location.humidity === "number" && Number.isFinite(location.humidity)
+      ? `Humidity ${Math.round(location.humidity)}%`
+      : null;
+  const weatherSummary = [
+    ...locationWeatherMetadataItems(location).map((item) =>
+      item.replace(/^Fog: /, "Fog ").replace(/^Wind: /, "Wind "),
+    ),
+    humidity,
+  ].filter((item): item is string => Boolean(item));
 
   return (
-    <Wrapper
-      className={panelClass}
-      aria-label={embedded ? undefined : `Selected location: ${location.name}`}
+    <article
+      aria-label={`Selected location: ${location.name}`}
+      className="relative w-full rounded-2xl border border-[rgb(160_185_210/0.24)] bg-[rgb(6_15_27/0.92)] px-3 py-2.5 shadow-[0_10px_18px_rgb(0_0_0/0.45)]"
     >
       {showCloseButton && onClose ? (
-      <button
-        type="button"
-        onClick={onClose}
-        aria-label="Close selected location"
-        className="absolute right-2.5 top-2.5 flex h-5 w-5 items-center justify-center rounded-full text-sm leading-none text-white/45 transition-colors hover:bg-white/[0.06] hover:text-white/75 motion-reduce:transition-none"
-      >
-        ×
-      </button>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close selected location"
+          className="absolute right-2.5 top-2.5 flex h-5 w-5 items-center justify-center rounded-full text-sm leading-none text-white/45 transition-colors hover:bg-white/[0.06] hover:text-white/75 motion-reduce:transition-none"
+        >
+          ×
+        </button>
       ) : null}
 
-      <div
-        className={`flex w-full items-center ${
-          embedded || phonePortrait ? "gap-2.5 pr-4" : "gap-3 pr-5"
-        }`}
-      >
-        {embedded || phonePortrait ? (
-          <MapPhonePortraitConditionIcon
-            intensity={resolveLocationFogIntensity(location)}
-            className="h-5 w-5 shrink-0"
-          />
-        ) : (
-          <MapLocationConditionIcon location={location} />
-        )}
+      {/* Top row: location name + favorite */}
+      <div className="flex items-center gap-1.5 pr-6">
+        <h2 className="min-w-0 flex-1 truncate text-[0.9375rem] font-semibold leading-tight tracking-tight text-white">
+          {location.name}
+        </h2>
+        <FavoriteButton
+          location={location}
+          isFavorite={isFavorite}
+          onToggle={handleToggleFavorite}
+          size="sm"
+        />
+      </div>
 
-        <div
-          className={`min-w-0 flex-1 ${
-            embedded || phonePortrait ? "flex flex-col justify-center gap-0.5" : ""
-          }`}
-        >
+      {isDegraded ? <DegradedDataLabel variant="location" className="mt-1" /> : null}
+
+      {/* Primary metrics: condition · Karl's Read · Clear Skies Score */}
+      <div className="mt-2 grid grid-cols-[auto_1fr_auto] items-stretch gap-2.5">
+        <div className="flex flex-col items-center justify-center gap-0.5 text-center">
+          <MapPhonePortraitConditionIcon
+            intensity={intensity}
+            className="h-6 w-6"
+          />
+          <span className="text-[0.5625rem] font-medium leading-none text-white/60">
+            {conditionLabel}
+          </span>
+        </div>
+
+        <div className="flex min-w-0 flex-col justify-center border-x border-[rgb(150_175_200/0.16)] px-2.5">
           <div className="flex items-center gap-1">
-            <h2
-              className={`font-semibold tracking-tight text-white ${
-                embedded || phonePortrait
-                  ? "text-[0.8125rem] leading-3"
-                  : "text-[1.05rem] leading-tight"
-              }`}
+            <KarlLogo className="h-4 w-4" />
+            <span className="text-[0.5rem] font-bold uppercase leading-none tracking-[0.08em] text-karl-gold/90">
+              Karl&apos;s Read
+            </span>
+          </div>
+          <p className="mt-1 line-clamp-2 text-[0.6875rem] leading-snug text-white/78">
+            {karlRead}
+          </p>
+        </div>
+
+        <div className="flex flex-col items-center justify-center text-center">
+          <span className="text-[0.5rem] font-bold uppercase leading-none tracking-[0.06em] text-white/40">
+            Clear Skies
+          </span>
+          <span
+            className="mt-0.5 text-2xl font-light leading-none"
+            style={{ color: score.color }}
+            data-score-band={score.band}
+            data-testid="clear-skies-score"
+          >
+            {score.score}
+          </span>
+        </div>
+      </div>
+
+      {/* Secondary metrics: Air Quality + weather summary */}
+      <div className="mt-2 space-y-1.5 border-t border-[rgb(150_175_200/0.16)] pt-2">
+        <div
+          className="flex items-center justify-between gap-2"
+          data-testid="air-quality-slot"
+        >
+          <span className="text-[0.5625rem] font-bold uppercase tracking-[0.08em] text-white/40">
+            Air Quality
+          </span>
+          {airQuality.available ? (
+            <span
+              className="text-[0.6875rem] font-semibold leading-none"
+              style={{ color: airQuality.color ?? undefined }}
+              data-aqi-band={airQuality.band ?? undefined}
             >
+              {airQuality.aqi} · {airQuality.label}
+            </span>
+          ) : (
+            <span className="text-[0.6875rem] font-medium leading-none text-white/38">
+              Coming Soon
+            </span>
+          )}
+        </div>
+
+        {weatherSummary.length > 0 ? (
+          <p className="text-[0.625rem] font-medium leading-snug text-white/55">
+            {weatherSummary.join("  ·  ")}
+          </p>
+        ) : null}
+      </div>
+
+      {/* Forecast preview — the card is the primary forecast experience. */}
+      {forecastSummary ? (
+        <div className="mt-2 border-t border-[rgb(150_175_200/0.16)] pt-2">
+          <p className="text-[0.5rem] font-bold uppercase leading-none tracking-[0.08em] text-white/40">
+            Next hour
+          </p>
+          <p className="mt-1 text-[0.6875rem] leading-snug text-white/72">
+            {forecastSummary}
+          </p>
+        </div>
+      ) : null}
+    </article>
+  );
+}
+
+function DesktopSelectedCard({
+  location,
+  onClose,
+  showCloseButton,
+}: {
+  location: LocationWeather;
+  onClose?: () => void;
+  showCloseButton: boolean;
+}) {
+  const conditionSentence = getConditionSentence(location);
+  const isDegraded = isLocationDataDegraded(location.dataStatus);
+  const metadataItems = locationWeatherMetadataItems(location);
+  const score = presentClearSkiesScore(location.sunshineScore);
+
+  const { isFavorite, handleToggleFavorite } = useFavoriteToggle(location.id);
+
+  useEffect(() => {
+    if (!onClose) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
+  return (
+    <article
+      className={`${desktopGlassCardClass} relative max-w-[28rem] px-4 py-3 shadow-[0_8px_28px_rgba(0,0,0,0.28)]`}
+      aria-label={`Selected location: ${location.name}`}
+    >
+      {showCloseButton && onClose ? (
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close selected location"
+          className="absolute right-2.5 top-2.5 flex h-5 w-5 items-center justify-center rounded-full text-sm leading-none text-white/45 transition-colors hover:bg-white/[0.06] hover:text-white/75 motion-reduce:transition-none"
+        >
+          ×
+        </button>
+      ) : null}
+
+      <div className="flex w-full items-center gap-3 pr-5">
+        <MapLocationConditionIcon location={location} />
+
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1">
+            <h2 className="text-[1.05rem] font-semibold leading-tight tracking-tight text-white">
               {location.name}
             </h2>
-            <button
-              type="button"
-              onClick={handleToggleFavorite}
-              aria-pressed={isFavorite}
-              aria-label={
-                isFavorite
-                  ? `Remove ${location.name} from favorites`
-                  : `Add ${location.name} to favorites`
-              }
-              className={`flex shrink-0 items-center justify-center rounded-full transition-colors motion-reduce:transition-none ${
-                embedded || phonePortrait ? "h-5 w-5" : "h-6 w-6"
-              } ${
-                isFavorite
-                  ? "text-karl-gold"
-                  : "text-white/42 hover:bg-white/[0.05] hover:text-karl-gold/85"
-              }`}
-            >
-              <FavoriteHeartIcon
-                filled={isFavorite}
-                className={embedded || phonePortrait ? "h-3.5 w-3.5" : "h-4 w-4"}
-              />
-            </button>
+            <FavoriteButton
+              location={location}
+              isFavorite={isFavorite}
+              onToggle={handleToggleFavorite}
+            />
           </div>
-          <p
-            className={`text-white/72 ${
-              embedded || phonePortrait
-                ? "mt-px line-clamp-1 text-[0.625rem] leading-tight"
-                : "mt-0.5 line-clamp-2 text-[0.75rem] leading-snug"
-            }`}
-          >
+          <p className="mt-0.5 line-clamp-2 text-[0.75rem] leading-snug text-white/72">
             {conditionSentence}
           </p>
 
           {isDegraded ? (
-            <DegradedDataLabel
-              variant="location"
-              className={embedded || phonePortrait ? "mt-px" : "mt-1"}
-            />
+            <DegradedDataLabel variant="location" className="mt-1" />
           ) : null}
 
           {metadataItems.length > 0 ? (
-            <p
-              className={`font-medium text-white/48 ${
-                embedded || phonePortrait
-                  ? "mt-0.5 text-[0.5625rem] leading-none"
-                  : "mt-1.5 text-[0.65rem]"
-              }`}
-            >
+            <p className="mt-1.5 text-[0.65rem] font-medium text-white/48">
               {metadataItems.join(" • ")}
             </p>
           ) : null}
         </div>
 
-        <div
-          className={`flex shrink-0 flex-col items-center justify-center border-l ${
-            embedded || phonePortrait
-              ? "min-w-[3.25rem] self-stretch border-[rgb(150_175_200/0.16)] py-0.5 pl-2.5"
-              : "min-w-[4.5rem] self-center border-white/10 pl-3"
-          }`}
-        >
+        <div className="flex min-w-[4.5rem] shrink-0 flex-col items-center justify-center self-center border-l border-white/10 pl-3">
           <div className="text-center">
-            <p
-              className={`font-bold uppercase text-white/40 ${
-                embedded || phonePortrait
-                  ? "text-[0.5rem] tracking-[0.06em]"
-                  : "text-[0.5rem] tracking-[0.14em] max-lg:text-[0.625rem] max-lg:tracking-[0.12em]"
-              }`}
-            >
+            <p className="text-[0.5rem] font-bold uppercase tracking-[0.14em] text-white/40 max-lg:text-[0.625rem] max-lg:tracking-[0.12em]">
               Clear Skies Score
             </p>
             <p
-              className={`font-light leading-none text-[#22E36B] ${
-                embedded || phonePortrait
-                  ? "mt-px text-xl leading-5"
-                  : "mt-0.5 text-[1.35rem] max-lg:mt-1 max-lg:text-[2rem]"
-              }`}
+              className="mt-0.5 text-[1.35rem] font-light leading-none max-lg:mt-1 max-lg:text-[2rem]"
+              style={{ color: score.color }}
+              data-score-band={score.band}
+              data-testid="clear-skies-score"
             >
-              {location.sunshineScore}
+              {score.score}
             </p>
           </div>
         </div>
       </div>
-    </Wrapper>
+    </article>
+  );
+}
+
+export function MapSelectedLocationCard({
+  location,
+  onClose,
+  phonePortrait = false,
+  showCloseButton = true,
+}: MapSelectedLocationCardProps) {
+  if (phonePortrait) {
+    return (
+      <PhonePortraitSelectedCard
+        location={location}
+        onClose={onClose}
+        showCloseButton={showCloseButton}
+      />
+    );
+  }
+
+  return (
+    <DesktopSelectedCard
+      location={location}
+      onClose={onClose}
+      showCloseButton={showCloseButton}
+    />
   );
 }

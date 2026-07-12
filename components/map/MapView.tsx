@@ -14,20 +14,22 @@ import { MapConditionsPanel } from "@/components/map/MapConditionsPanel";
 import { MapPhonePortraitControls } from "@/components/map/MapPhonePortraitControls";
 import { MapPhonePortraitFogRail } from "@/components/map/MapPhonePortraitFogRail";
 import { MapPhonePortraitLayersControl } from "@/components/map/MapLayerControls";
-import { MapPhonePortraitUnifiedCard } from "@/components/map/MapPhonePortraitUnifiedCard";
 import { MapFogLegend } from "@/components/map/MapFogLegend";
 import { MapSelectedLocationCard } from "@/components/map/MapSelectedLocationCard";
 import { GlassCard } from "@/components/ui/GlassCard";
-import { getCurrent, getLocations } from "@/lib/api/weather";
+import { getBestSunshine, getCurrent, getLocations } from "@/lib/api/weather";
 import { WEATHER_STALE_TIME_MS } from "@/lib/constants/config";
+import { bestRightNowLocationItems } from "@/lib/home/weatherDisplay";
 import { useMinWidth } from "@/lib/hooks/useMinWidth";
 import { usePhonePortrait } from "@/lib/hooks/usePhonePortrait";
 import type { FogIntensity } from "@/lib/map/conditions";
-import { findBayAreaProductRegion, isBayAreaProductRegionId } from "@/lib/map/config";
+import {
+  findBayAreaProductRegion,
+  isBayAreaProductRegionId,
+  type BayAreaProductRegionId,
+} from "@/lib/map/config";
 import {
   mapBestRightNowTrayItems,
-  PHONE_PORTRAIT_BEST_RIGHT_NOW_EMPTY_MESSAGE,
-  phonePortraitBestRightNowTrayItems,
   shouldShowDesktopBestRightNowTray,
   toggleIntensityFilter,
 } from "@/lib/map/intensityFilter";
@@ -40,11 +42,16 @@ import {
 } from "@/lib/map/routing";
 import type { KarlMapStyleId } from "@/lib/map/styles";
 import { filterLocationsForPhonePortraitSfComposition } from "@/lib/map/phonePortraitMapPresentation";
-
-const PHONE_PORTRAIT_SKIP_DEFAULT_REGION_KEY =
-  "whereskarl:phone-map:skip-default-region";
 import { filterLocationsByProductRegion } from "@/lib/map/regions";
 import type { LocationWeather } from "@/lib/schemas/weather";
+
+/**
+ * Phone-portrait map is selection-driven: when nothing is selected on a clean
+ * entry, the camera still frames this region (matching the prior behavior)
+ * while the canonical Best Right Now location is auto-selected into the card.
+ */
+const PHONE_PORTRAIT_DEFAULT_CAMERA_REGION: BayAreaProductRegionId =
+  "san-francisco";
 
 function initialMapStyle(): KarlMapStyleId {
   if (typeof window === "undefined") {
@@ -122,6 +129,8 @@ type MapViewModel = {
   activeRegion: ReturnType<typeof findBayAreaProductRegion>;
   markerLocations: MapMarkerLocation[];
   bestRightNowItems: ReturnType<typeof mapBestRightNowTrayItems>;
+  /** Canonical Best Right Now location id (matches Home's recommendation). */
+  bestRightNowLocationId: string | null;
   suppressViewportUpdateRef: MutableRefObject<boolean>;
   handleSelectLocation: (locationId: string) => void;
   handleSelectRegion: (regionId: string) => void;
@@ -153,10 +162,35 @@ function useMapViewState(): MapViewModel {
     staleTime: WEATHER_STALE_TIME_MS,
   });
 
+  // Canonical Best Right Now recommendation, shared with the Home page.
+  const bestSunshineQuery = useQuery({
+    queryKey: ["best-sunshine"],
+    queryFn: () => getBestSunshine(),
+    staleTime: WEATHER_STALE_TIME_MS,
+  });
+
   const locations = useMemo(
     () => locationsQuery.data?.locations ?? [],
     [locationsQuery.data?.locations],
   );
+
+  const bestSunshinePending = bestSunshineQuery.isPending;
+  const bestRightNowLocationId = useMemo(() => {
+    const recommendedId = bestSunshineQuery.data?.locationID;
+    if (recommendedId && locations.some((item) => item.id === recommendedId)) {
+      return recommendedId;
+    }
+
+    // Wait for the canonical recommendation (or its failure) before falling
+    // back so we don't briefly auto-select the top-scored spot and then swap.
+    if (bestSunshinePending || locations.length === 0) {
+      return null;
+    }
+
+    // Fall back to the top-scored location so the map can still auto-select a
+    // Best Right Now spot when the recommendation endpoint is unavailable.
+    return bestRightNowLocationItems(locations, null, 1)[0]?.locationId ?? null;
+  }, [bestSunshineQuery.data?.locationID, bestSunshinePending, locations]);
 
   const { selectedLocation, unknownLocationId } = resolveMapLocationFocus({
     requestedLocationId: mapQuery.requestedLocationId,
@@ -236,6 +270,7 @@ function useMapViewState(): MapViewModel {
     activeRegion,
     markerLocations,
     bestRightNowItems,
+    bestRightNowLocationId,
     suppressViewportUpdateRef,
     handleSelectLocation,
     handleSelectRegion,
@@ -258,11 +293,11 @@ function MobileMapView({ state }: { state: MapViewModel }) {
     setFogLayerEnabled,
     locationsQuery,
     currentQuery,
-    locations,
     selectedLocation,
     unknownLocationId,
     markerLocations,
     bestRightNowItems,
+    bestRightNowLocationId,
     handleSelectLocation,
     handleSelectRegion,
     handleClearSelectedLocation,
@@ -271,44 +306,43 @@ function MobileMapView({ state }: { state: MapViewModel }) {
     suppressViewportUpdateRef,
   } = state;
 
-  const phonePortraitRegionId = selectedLocation ? null : mapQuery.activeRegionId;
+  // Region that frames the phone-portrait camera. It stays independent of the
+  // canonical selection so auto-selecting Best Right Now on entry keeps the
+  // exact same camera as before (default: San Francisco framing).
+  const phonePortraitCameraRegionId =
+    mapQuery.activeRegionId ?? PHONE_PORTRAIT_DEFAULT_CAMERA_REGION;
+  // Markers are region-scoped only while explicitly browsing a region; once a
+  // location is selected we show every marker so the selected one is always
+  // visible. This intentionally does NOT use the SF camera default so an
+  // unscoped map still renders every marker (matching prior behavior).
+  const phonePortraitFilterRegionId = selectedLocation
+    ? null
+    : mapQuery.activeRegionId;
 
-  const handlePhonePortraitSelectRegion = useCallback(
-    (regionId: string) => {
-      suppressViewportUpdateRef.current = false;
-      if (!isBayAreaProductRegionId(regionId)) {
-        return;
-      }
-
-      if (mapQuery.activeRegionId === regionId) {
-        sessionStorage.setItem(PHONE_PORTRAIT_SKIP_DEFAULT_REGION_KEY, "1");
-        router.replace("/map", { scroll: false });
-        return;
-      }
-
-      router.replace(buildMapRegionHref(regionId), { scroll: false });
-    },
-    [mapQuery.activeRegionId, router, suppressViewportUpdateRef],
-  );
-
+  // Selection-driven entry: on a clean map open (no explicit location/region),
+  // auto-select the canonical Best Right Now location so the card immediately
+  // becomes the selected-location experience. The camera is unaffected.
   useEffect(() => {
     if (
       !isPhonePortrait ||
-      mapQuery.activeRegionId ||
-      selectedLocation ||
       mapQuery.requestedLocationId ||
-      sessionStorage.getItem(PHONE_PORTRAIT_SKIP_DEFAULT_REGION_KEY)
+      mapQuery.activeRegionId ||
+      mapQuery.unknownRegionId ||
+      !bestRightNowLocationId
     ) {
       return;
     }
 
-    router.replace(buildMapRegionHref("san-francisco"), { scroll: false });
+    suppressViewportUpdateRef.current = false;
+    router.replace(buildMapHref(bestRightNowLocationId), { scroll: false });
   }, [
+    bestRightNowLocationId,
     isPhonePortrait,
     mapQuery.activeRegionId,
     mapQuery.requestedLocationId,
+    mapQuery.unknownRegionId,
     router,
-    selectedLocation,
+    suppressViewportUpdateRef,
   ]);
 
   const phonePortraitMarkerLocations = useMemo(() => {
@@ -317,13 +351,13 @@ function MobileMapView({ state }: { state: MapViewModel }) {
     }
 
     const regionFiltered =
-      phonePortraitRegionId === "san-francisco"
+      phonePortraitFilterRegionId === "san-francisco"
         ? filterLocationsForPhonePortraitSfComposition(markerLocations)
-        : phonePortraitRegionId
+        : phonePortraitFilterRegionId
           ? filterLocationsByProductRegion(
               markerLocations,
-              isBayAreaProductRegionId(phonePortraitRegionId)
-                ? phonePortraitRegionId
+              isBayAreaProductRegionId(phonePortraitFilterRegionId)
+                ? phonePortraitFilterRegionId
                 : null,
             )
           : markerLocations;
@@ -345,18 +379,10 @@ function MobileMapView({ state }: { state: MapViewModel }) {
     intensityFilter,
     isPhonePortrait,
     markerLocations,
-    phonePortraitRegionId,
+    phonePortraitFilterRegionId,
     selectedLocation?.id,
   ]);
 
-  const phonePortraitBestRightNowItems = useMemo(
-    () => phonePortraitBestRightNowTrayItems(locations, null),
-    [locations],
-  );
-
-  const trayItems = isPhonePortrait
-    ? phonePortraitBestRightNowItems
-    : bestRightNowItems;
   const mapLocations = isPhonePortrait
     ? phonePortraitMarkerLocations
     : markerLocations;
@@ -367,7 +393,13 @@ function MobileMapView({ state }: { state: MapViewModel }) {
         ref={mapRef}
         locations={mapLocations}
         selectedLocationId={selectedLocation?.id ?? null}
-        selectedRegionId={phonePortraitRegionId}
+        selectedRegionId={
+          isPhonePortrait
+            ? phonePortraitCameraRegionId
+            : selectedLocation
+              ? null
+              : mapQuery.activeRegionId
+        }
         onSelectLocation={handleSelectLocation}
         mapStyle={mapStyle}
         fogLayerEnabled={fogLayerEnabled}
@@ -399,8 +431,8 @@ function MobileMapView({ state }: { state: MapViewModel }) {
           >
             {isPhonePortrait ? (
               <MapPhonePortraitControls
-                selectedRegionId={phonePortraitRegionId}
-                onSelectRegion={handlePhonePortraitSelectRegion}
+                selectedRegionId={mapQuery.activeRegionId}
+                onSelectRegion={handleSelectRegion}
                 isPhonePortrait
               />
             ) : (
@@ -463,20 +495,24 @@ function MobileMapView({ state }: { state: MapViewModel }) {
           }`}
         >
           {isPhonePortrait ? (
-            <MapPhonePortraitUnifiedCard
-              items={trayItems}
-              selectedLocation={selectedLocation}
-              onSelectLocation={handleSelectLocation}
-              onClearSelection={handleClearSelectedLocation}
-              isLoading={locationsQuery.isLoading}
-              showBestRightNow={shouldShowDesktopBestRightNowTray(intensityFilter)}
-              emptyMessage={PHONE_PORTRAIT_BEST_RIGHT_NOW_EMPTY_MESSAGE}
-            />
+            selectedLocation ? (
+              <MapSelectedLocationCard
+                location={selectedLocation}
+                phonePortrait
+                showCloseButton={false}
+              />
+            ) : locationsQuery.isLoading ? (
+              <div className="w-full rounded-2xl border border-white/12 bg-[rgb(6_15_27/0.55)] px-4 py-3 backdrop-blur-md">
+                <p className="text-xs text-white/50">
+                  Finding the clearest spot…
+                </p>
+              </div>
+            ) : null
           ) : (
             <>
               {shouldShowDesktopBestRightNowTray(intensityFilter) ? (
                 <MapBestRightNowTray
-                  items={trayItems}
+                  items={bestRightNowItems}
                   selectedLocationId={selectedLocation?.id ?? null}
                   onSelectLocation={handleSelectLocation}
                   isLoading={locationsQuery.isLoading}
