@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { MapSelectedLocationCard } from "@/components/map/MapSelectedLocationCard";
@@ -319,11 +319,54 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(quality.className).toContain("font-semibold");
 
     // Secondary values are larger than before but still smaller than the score.
+    // Temp keeps the canonical 28px secondary size (Fog is length-responsive and
+    // asserted separately). Both remain clearly subordinate to the 38px score.
     const metrics = screen.getByTestId("selected-location-metrics");
-    const fogValue = screen.getByText("18%");
-    expect(metrics).toContainElement(fogValue);
-    expect(fogValue.className).toContain("text-[28px]");
+    const tempValue = within(metrics).getByText("68°");
+    expect(metrics).toContainElement(tempValue);
+    expect(tempValue.className).toContain("text-[28px]");
+    expect(tempValue.className).not.toContain("text-[38px]");
+
+    const fogValue = screen.getByTestId("fog-value");
     expect(fogValue.className).not.toContain("text-[38px]");
+  });
+
+  it("sizes the Fog value responsively by rendered string length so it never overflows its column", () => {
+    // The Fog column is the narrowest hero column at 390px, so 2-digit
+    // percentages and "100%" would overflow at the 28px secondary size. The Fog
+    // value size is chosen purely from the formatted string length (typography
+    // only — fogScore and canonical labels are untouched): "0%"–"99%" → 23px,
+    // "100%" → 19px, and the "—" placeholder keeps the 28px secondary size.
+    // Widths verified at 390×844 in Geist (col ≈50.7px): "99%"≈46.1px, "100%"≈46.2px.
+    const twoDigit = render(
+      <MapSelectedLocationCard
+        location={{ ...location, fogScore: 85 }}
+        phonePortrait
+      />,
+    );
+    expect(twoDigit.getByTestId("fog-value")).toHaveTextContent("85%");
+    expect(twoDigit.getByTestId("fog-value").className).toContain("text-[23px]");
+    twoDigit.unmount();
+
+    const full = render(
+      <MapSelectedLocationCard
+        location={{ ...location, fogScore: 100 }}
+        phonePortrait
+      />,
+    );
+    expect(full.getByTestId("fog-value")).toHaveTextContent("100%");
+    expect(full.getByTestId("fog-value").className).toContain("text-[19px]");
+    full.unmount();
+
+    const placeholder = render(
+      <MapSelectedLocationCard
+        location={{ ...location, fogScore: Number.NaN, sunshineScore: Number.NaN }}
+        phonePortrait
+      />,
+    );
+    const fogPlaceholder = placeholder.getByTestId("fog-value");
+    expect(fogPlaceholder).toHaveTextContent("—");
+    expect(fogPlaceholder.className).toContain("text-[28px]");
   });
 
   it("renders all metric titles in white uppercase semibold typography", () => {
@@ -355,11 +398,13 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     for (const column of columns) {
       const supporting = column.querySelector("[data-testid='clear-skies-quality']")
         ?? column.lastElementChild;
-      // Shared reserved height keeps every supporting label on the same bottom
-      // baseline and leaves room for two-line labels ("Coming Soon") to wrap
-      // without colliding or clipping.
-      expect(supporting?.className).toContain("min-h-[2.25rem]");
-      expect(supporting?.className).toContain("items-end");
+      // Every supporting label sits a compact 4px (mt-1) below its value and
+      // starts at the same y across all five columns (fixed title + value rows),
+      // so single-line labels share one baseline directly beneath their values
+      // without a tall empty reserve. Long labels wrap to two compact lines.
+      expect(supporting?.className).toContain("mt-1");
+      expect(supporting?.className).toContain("min-h-[0.9rem]");
+      expect(supporting?.className).toContain("items-start");
     }
 
     expect(screen.getByTestId("clear-skies-quality")).toHaveTextContent("Excellent");

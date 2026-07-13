@@ -280,18 +280,44 @@ const SCORE_TITLE_CLASS =
   "text-[10px] font-semibold uppercase tracking-[0.02em] text-white";
 /** Secondary-metric value (white unless a canonical color is set). */
 const SECONDARY_VALUE_CLASS = "text-[28px] font-light leading-none text-white";
+
+/**
+ * Fog value size is responsive to the *rendered string length only* — never the
+ * underlying fogScore or its canonical classification/label. The Fog column is
+ * the narrowest hero column (~50.7px at 390px), so 2-digit percentages ("22%",
+ * "85%", "99%") and the whole-number "100%" would bleed past the column and into
+ * AQI at the 28px secondary size. This keeps the value visually large while
+ * guaranteeing it fits with margin (verified at 390×844 in Geist):
+ *   - "—" placeholder → 28px (matches the other secondary values)
+ *   - "0%"–"99%"      → 23px (largest size that fits the widest "99%" ≈46.1px)
+ *   - "100%"          → 19px (slightly smaller; keeps the % on the same line ≈46.2px)
+ * Typography only: no effect on Fog meaning, classification, or the supporting
+ * canonical label.
+ */
+function fogValueClassName(formatted: string): string {
+  if (!formatted.includes("%")) {
+    return SECONDARY_VALUE_CLASS;
+  }
+  const size = formatted.length >= 4 ? "text-[19px]" : "text-[23px]";
+  return `${size} font-light leading-none text-white`;
+}
 /** Title row — single line for every metric title, shared baseline. */
 const METRIC_TITLE_ROW_CLASS =
-  "flex h-[1.5rem] w-full items-end justify-center leading-none";
+  "flex h-5 w-full items-end justify-center leading-none";
+/** Fixed value row — every value bottom-aligns here so the five columns share a
+ * value baseline and the supporting labels start at the same y (44px fits the
+ * 38px score without clipping). */
+const METRIC_VALUE_ROW_CLASS =
+  "flex h-11 w-full items-end justify-center leading-none";
 /**
- * Shared supporting-label row. Reserves enough height for a label to wrap onto
- * two lines inside a narrow column (e.g. "Karl Territory", "Coming Soon") so
- * labels never collide with a neighbor or clip — without shrinking typography.
- * `items-end` keeps every label sharing one bottom baseline across all five
- * columns; wrapped labels grow upward into the reserved space.
+ * Shared supporting-label row. Sits just 4px below the value (mt-1) and reserves
+ * only a single compact line by default; long labels ("Karl Territory",
+ * "Coming Soon") wrap to at most two compact lines that stay close to the value.
+ * Top-aligned so single-line labels across all five columns share one baseline
+ * directly beneath their values without a tall empty reserve.
  */
 const METRIC_SUPPORTING_ROW_CLASS =
-  "flex min-h-[2.25rem] items-end justify-center text-balance leading-[1.15] text-[13px] font-normal text-white";
+  "mt-1 flex min-h-[0.9rem] items-start justify-center text-balance leading-[1.1] text-[13px] font-normal text-white";
 
 /** Right-pointing arrow for the Wind supporting row (#F5B000 per mockup). */
 function WindArrowIcon({ className = "h-3 w-3" }: { className?: string }) {
@@ -361,7 +387,7 @@ function MetricColumn({
         {title}
       </span>
       <span
-        className={`flex min-h-[3rem] flex-1 w-full items-center justify-center leading-none ${valueClassName} ${
+        className={`${METRIC_VALUE_ROW_CLASS} ${valueClassName} ${
           noWrapValue ? "whitespace-nowrap" : ""
         }`}
         style={valueColor ? { color: valueColor } : undefined}
@@ -465,6 +491,7 @@ function PhonePortraitSelectedCard({
   const windSupporting: ReactNode = hasWindSpeed ? (
     <WindSupportingLabel />
   ) : undefined;
+  const fogValue = fogScore !== null ? `${fogScore}%` : "—";
   const tempValue =
     typeof location.temperature === "number" &&
     Number.isFinite(location.temperature)
@@ -502,7 +529,7 @@ function PhonePortraitSelectedCard({
         */}
         <span
           data-testid="location-image-placeholder"
-          className="flex h-[4.15rem] w-[4.15rem] shrink-0 flex-col items-center justify-center gap-0.5 overflow-hidden rounded-full border border-white/15 bg-gradient-to-br from-white/[0.18] via-white/[0.06] to-transparent text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
+          className="flex h-16 w-16 shrink-0 flex-col items-center justify-center gap-0.5 overflow-hidden rounded-full border border-white/15 bg-gradient-to-br from-white/[0.18] via-white/[0.06] to-transparent text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
         >
           <span className="px-1 text-[0.5625rem] font-semibold leading-[1.05] tracking-tight text-white/70">
             Location Image
@@ -513,14 +540,14 @@ function PhonePortraitSelectedCard({
         </span>
 
         <div className="min-w-0 flex-1">
-          <h2 className="truncate text-[1.1875rem] font-semibold leading-tight tracking-tight text-white">
+          <h2 className="truncate text-[1.375rem] font-semibold leading-tight tracking-tight text-white">
             {location.name}
           </h2>
-          <p className="mt-1 flex items-center gap-1 text-[0.8125rem] leading-tight text-white/65">
+          <p className="mt-0.5 flex items-center gap-1 text-[0.9375rem] leading-tight text-white/65">
             <LocationPinIcon className="h-3.5 w-3.5 shrink-0 text-white/45" />
             <span className="truncate">{subtitle}</span>
           </p>
-          <p className="mt-1 text-[0.6875rem] leading-tight text-white/45">
+          <p className="mt-0.5 text-[0.75rem] leading-tight text-white/45">
             {updatedLabel}
           </p>
         </div>
@@ -551,7 +578,7 @@ function PhonePortraitSelectedCard({
       {/* Unified metrics row — canonical helpers only. Five equal visual columns
           separated by vertical dividers; typography matches approved mockup. */}
       <div
-        className="mt-6 flex items-stretch gap-0 border-t border-white/10 pt-5"
+        className="mt-3 flex items-stretch gap-0 border-t border-white/10 pt-3"
         data-testid="selected-location-metrics"
       >
         <MetricColumn
@@ -570,7 +597,9 @@ function PhonePortraitSelectedCard({
         />
         <MetricColumn
           title="Fog"
-          value={fogScore !== null ? `${fogScore}%` : "—"}
+          value={fogValue}
+          valueClassName={fogValueClassName(fogValue)}
+          testId="fog-value"
           supporting={fogLabel}
         />
         {/*
@@ -638,7 +667,7 @@ function PhonePortraitSelectedCard({
       {/* Hourly outlook — the sheet is the forecast experience. */}
       <section
         aria-label="Hourly outlook"
-        className="mt-5 border-t border-white/10 pt-4"
+        className="mt-4 border-t border-white/10 pt-4"
       >
         <SectionLabel variant="white">Hourly Outlook</SectionLabel>
         <div className="mt-3 flex gap-5 overflow-x-auto overscroll-x-contain pb-1">
