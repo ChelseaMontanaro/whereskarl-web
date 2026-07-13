@@ -262,28 +262,33 @@ function SectionLabel({
  * tinted background.
  */
 /*
- * Row balance: the Clear Sky Score column takes ~29% of the row (flex-[1.72]
- * against four flex-1 columns → 1.72 / 5.72 ≈ 30%); Fog / AQI / Temp / Wind
- * split the remaining ~71% evenly (~17.5% each). Because Wind now shows only a
- * short speed value (direction moved to the supporting label), every secondary
- * value is compact ("18%", "68°", "12") and can be sized comfortably. Sizes
- * below are verified at a real 390px CSS viewport with no overlap / clip /
- * overflow via getBoundingClientRect.
+ * Phone portrait metrics row — typography verified at 390×844 against the
+ * approved mockup. Titles are white 14px semibold; secondary values 28px light;
+ * score 38px semibold (canonical color); Wind direction+speed 19px semibold;
+ * supporting labels 13px regular on a shared baseline (canonical colors applied
+ * where helpers provide them). Vertical dividers separate the five columns.
  */
-/** Secondary-metric title: uppercase gray, one line. */
-const SECONDARY_TITLE_CLASS =
-  "text-[10px] font-bold uppercase tracking-[0.04em] text-white/40";
+/** All metric titles: white, uppercase, 14px semibold. */
+const METRIC_TITLE_CLASS =
+  "text-[14px] font-semibold uppercase tracking-[0.04em] text-white";
+/**
+ * Clear Sky Score title. Same white/uppercase/semibold treatment as the other
+ * titles, but the multi-word label needs a slightly smaller size to stay on a
+ * single line inside its column at 390px (verified via getBoundingClientRect).
+ */
+const SCORE_TITLE_CLASS =
+  "text-[10px] font-semibold uppercase tracking-[0.02em] text-white";
 /** Secondary-metric value (white unless a canonical color is set). */
 const SECONDARY_VALUE_CLASS = "text-[28px] font-light leading-none text-white";
-/** Shared supporting-label row height — every column ends on this baseline. */
+/** Title row — single line for every metric title, shared baseline. */
+const METRIC_TITLE_ROW_CLASS =
+  "flex h-[1.5rem] w-full items-end justify-center leading-none";
+/** Shared supporting-label row — one baseline, white 13px regular default. */
 const METRIC_SUPPORTING_ROW_CLASS =
-  "flex min-h-[1.25rem] items-end justify-center whitespace-nowrap leading-tight text-[11px] font-medium text-white/45";
-/** Value row — tall enough for the hero score, centers every value vertically. */
-const METRIC_VALUE_ROW_CLASS =
-  "flex min-h-[3rem] w-full items-center justify-center leading-none";
+  "flex min-h-[1.375rem] items-end justify-center whitespace-nowrap leading-tight text-[13px] font-normal text-white";
 
-/** Small compass arrow for the Wind supporting label (presentation only). */
-function WindDirectionArrow({ className = "h-3 w-3" }: { className?: string }) {
+/** Right-pointing arrow for the Wind supporting row (#F5B000 per mockup). */
+function WindArrowIcon({ className = "h-3 w-3" }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 12 12"
@@ -291,16 +296,16 @@ function WindDirectionArrow({ className = "h-3 w-3" }: { className?: string }) {
       className={className}
       fill="currentColor"
     >
-      <path d="M6 1.5 9.25 8.25H6V10.5H2.75V8.25H2.75L6 1.5Z" />
+      <path d="M2 6h6.5L6.5 4.25 7.75 3 11 6l-3.25 3-1.25-1.25L8.5 6.75H2V6Z" />
     </svg>
   );
 }
 
-/** Gold arrow + "mph" — the Wind supporting row, matching the approved mockup. */
+/** Gold arrow (#F5B000) + white "mph" — Wind supporting row per approved mockup. */
 function WindSupportingLabel() {
   return (
-    <span className="inline-flex items-center gap-1">
-      <WindDirectionArrow className="h-3 w-3 shrink-0 text-karl-gold/90" />
+    <span className="inline-flex items-center gap-0.5 text-white">
+      <WindArrowIcon className="h-3 w-3 shrink-0 text-[#F5B000]" />
       <span>mph</span>
     </span>
   );
@@ -310,7 +315,7 @@ function MetricColumn({
   title,
   value,
   valueColor,
-  titleClassName = SECONDARY_TITLE_CLASS,
+  titleClassName = METRIC_TITLE_CLASS,
   valueClassName = SECONDARY_VALUE_CLASS,
   supporting,
   supportingColor,
@@ -321,8 +326,9 @@ function MetricColumn({
   containerTestId,
   noWrapValue = false,
   columnClassName = "flex-1",
+  showDivider = true,
 }: {
-  title: string;
+  title: ReactNode;
   value: ReactNode;
   valueColor?: string;
   titleClassName?: string;
@@ -336,19 +342,20 @@ function MetricColumn({
   containerTestId?: string;
   noWrapValue?: boolean;
   columnClassName?: string;
+  showDivider?: boolean;
 }) {
   return (
     <div
-      className={`flex min-w-0 ${columnClassName} flex-col items-center text-center`}
+      className={`flex min-w-0 ${columnClassName} flex-col items-center text-center ${
+        showDivider ? "border-r border-white/10 last:border-r-0" : ""
+      }`}
       data-testid={containerTestId}
     >
-      <span
-        className={`flex min-h-[1.125rem] items-end justify-center leading-none ${titleClassName}`}
-      >
+      <span className={`${METRIC_TITLE_ROW_CLASS} ${titleClassName}`}>
         {title}
       </span>
       <span
-        className={`${METRIC_VALUE_ROW_CLASS} ${valueClassName} ${
+        className={`flex min-h-[3rem] flex-1 w-full items-center justify-center leading-none ${valueClassName} ${
           noWrapValue ? "whitespace-nowrap" : ""
         }`}
         style={valueColor ? { color: valueColor } : undefined}
@@ -531,22 +538,19 @@ function PhonePortraitSelectedCard({
         <DegradedDataLabel variant="location" className="mt-1.5" />
       ) : null}
 
-      {/* Unified metrics row — canonical helpers only. Clear Sky Score leads the
-          row with the strongest hierarchy (gold title, larger canonical-colored
-          value, canonical quality label) but stays inline with Fog / AQI / Temp
-          / Wind. No boxed or tinted background — emphasis comes from typography,
-          color, and spacing. */}
+      {/* Unified metrics row — canonical helpers only. Five equal visual columns
+          separated by vertical dividers; typography matches approved mockup. */}
       <div
-        className="mt-4 flex items-start gap-1 border-t border-white/10 pt-4"
+        className="mt-4 flex items-stretch gap-0 border-t border-white/10 pt-4"
         data-testid="selected-location-metrics"
       >
         <MetricColumn
           title="Clear Sky Score"
-          titleClassName="whitespace-nowrap text-[11px] font-bold uppercase tracking-[0.02em] text-karl-gold/90"
-          columnClassName="flex-[1.35]"
+          titleClassName={`whitespace-nowrap ${SCORE_TITLE_CLASS}`}
+          columnClassName="flex-[2]"
           value={score.score}
           valueColor={score.color}
-          valueClassName="text-[38px] font-light"
+          valueClassName="text-[38px] font-semibold"
           supporting={score.qualityLabel}
           supportingColor={score.color}
           supportingClassName={`${METRIC_SUPPORTING_ROW_CLASS} text-[14px] font-semibold`}
@@ -580,8 +584,8 @@ function PhonePortraitSelectedCard({
           }
           supportingClassName={
             airQuality.available
-              ? METRIC_SUPPORTING_ROW_CLASS
-              : `${METRIC_SUPPORTING_ROW_CLASS} text-[10px] tracking-tight`
+              ? `${METRIC_SUPPORTING_ROW_CLASS} font-semibold`
+              : METRIC_SUPPORTING_ROW_CLASS
           }
           band={airQuality.available ? (airQuality.band ?? undefined) : undefined}
           containerTestId="air-quality-slot"
@@ -592,12 +596,13 @@ function PhonePortraitSelectedCard({
         <MetricColumn
           title="Wind"
           value={windValue}
-          valueClassName="text-[19px] font-light leading-none text-white"
-          columnClassName="flex-[1.45]"
+          valueClassName="text-[19px] font-semibold leading-none text-white"
+          columnClassName="flex-[1.6]"
           supporting={windSupporting}
           testId="wind-value"
           supportingTestId="wind-direction"
           noWrapValue
+          showDivider={false}
         />
       </div>
     </>

@@ -284,19 +284,24 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
   it("renders the canonical 'CLEAR SKY SCORE' title (singular, uppercased via CSS)", () => {
     render(<MapSelectedLocationCard location={location} phonePortrait />);
 
-    const title = screen.getByText("Clear Sky Score");
+    const title = screen.getByText(/Clear Sky/i);
     expect(title).toBeInTheDocument();
     // Uppercasing is presentational; the DOM text is the singular wording.
     expect(title.className).toContain("uppercase");
     expect(screen.queryByText("Clear Skies Score")).not.toBeInTheDocument();
   });
 
-  it("keeps the Clear Sky Score title on one line", () => {
+  it("keeps the Clear Sky Score title on a single line", () => {
+    // Verified at 390x844 via getBoundingClientRect: the title renders on one
+    // line (getClientRects().length === 1) without clipping. The multi-word
+    // label uses a slightly smaller font (10px vs the 14px single-word titles)
+    // so it fits its column on one line — still white, uppercase, semibold.
     render(<MapSelectedLocationCard location={location} phonePortrait />);
 
     const title = screen.getByText("Clear Sky Score");
     expect(title.className).toContain("whitespace-nowrap");
     expect(title.textContent).toBe("Clear Sky Score");
+    expect(title.querySelector("br")).toBeNull();
   });
 
   it("makes the Clear Sky Score the hero metric with a larger value than the secondary metrics", () => {
@@ -307,7 +312,7 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
 
     const score = screen.getByTestId("clear-skies-score");
     expect(score.className).toContain("text-[38px]");
-    expect(score.className).toContain("font-light");
+    expect(score.className).toContain("font-semibold");
 
     // Quality label is semibold in the canonical score color.
     const quality = screen.getByTestId("clear-skies-quality");
@@ -321,16 +326,24 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(fogValue.className).not.toContain("text-[38px]");
   });
 
-  it("keeps the gold Clear Sky Score title and gray secondary titles", () => {
+  it("renders all metric titles in white uppercase semibold typography", () => {
     render(<MapSelectedLocationCard location={location} phonePortrait />);
 
-    const scoreTitle = screen.getByText("Clear Sky Score");
-    expect(scoreTitle.className).toContain("text-karl-gold/90");
-    expect(scoreTitle.className).toContain("whitespace-nowrap");
+    for (const titleText of ["Fog", "AQI", "Temp", "Wind"]) {
+      const title = screen.getByText(titleText);
+      expect(title.className).toContain("text-white");
+      expect(title.className).toContain("text-[14px]");
+      expect(title.className).toContain("font-semibold");
+      expect(title.className).toContain("uppercase");
+    }
 
-    const fogTitle = screen.getByText("Fog");
-    expect(fogTitle.className).toContain("text-white/40");
-    expect(fogTitle.className).toContain("uppercase");
+    // Clear Sky Score keeps the same white/uppercase/semibold treatment but a
+    // slightly smaller size so its multi-word label stays on one line at 390px.
+    const scoreTitle = screen.getByText("Clear Sky Score");
+    expect(scoreTitle.className).toContain("text-white");
+    expect(scoreTitle.className).toContain("text-[10px]");
+    expect(scoreTitle.className).toContain("font-semibold");
+    expect(scoreTitle.className).toContain("uppercase");
   });
 
   it("aligns supporting labels across all five metric columns", () => {
@@ -343,7 +356,7 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
       const supporting = column.querySelector("[data-testid='clear-skies-quality']")
         ?? column.lastElementChild;
       // Shared min-height keeps every supporting label on the same baseline row.
-      expect(supporting?.className).toContain("min-h-[1.25rem]");
+      expect(supporting?.className).toContain("min-h-[1.375rem]");
     }
 
     expect(screen.getByTestId("clear-skies-quality")).toHaveTextContent("Excellent");
@@ -453,6 +466,7 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     // Wind value uses the largest size that fits three-letter directions at
     // 390x844 — slightly smaller than the 28px secondary values, by necessity.
     expect(windValue.className).toContain("text-[19px]");
+    expect(windValue.className).toContain("font-semibold");
 
     // Supporting row is the gold arrow + "mph".
     const windSupporting = screen.getByTestId("wind-direction");
