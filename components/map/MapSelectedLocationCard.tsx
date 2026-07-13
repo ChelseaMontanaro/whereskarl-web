@@ -280,22 +280,26 @@ const SCORE_TITLE_CLASS =
   "text-[10px] font-semibold uppercase tracking-[0.02em] text-white";
 /** Secondary-metric value (white unless a canonical color is set). */
 const SECONDARY_VALUE_CLASS = "text-[28px] font-light leading-none text-white";
+/** Neutral placeholder shown when a metric value is unavailable. */
+const METRIC_VALUE_PLACEHOLDER = "\u2014";
 
 /**
- * Fog value size is responsive to the *rendered string length only* — never the
- * underlying fogScore or its canonical classification/label. The Fog column is
- * the narrowest hero column (~50.7px at 390px), so 2-digit percentages ("22%",
- * "85%", "99%") and the whole-number "100%" would bleed past the column and into
- * AQI at the 28px secondary size. This keeps the value visually large while
- * guaranteeing it fits with margin (verified at 390×844 in Geist):
- *   - "—" placeholder → 28px (matches the other secondary values)
- *   - "0%"–"99%"      → 23px (largest size that fits the widest "99%" ≈46.1px)
- *   - "100%"          → 19px (slightly smaller; keeps the % on the same line ≈46.2px)
- * Typography only: no effect on Fog meaning, classification, or the supporting
- * canonical label.
+ * Compact secondary-value size, responsive to the *rendered string length only*
+ * — never the underlying score/classification. Fog and Temp share this so the
+ * two carry equal visual prominence: the Fog column is the narrowest hero column
+ * (~50.7px at 390px), so 2-digit percentages ("22%", "85%", "99%"), the
+ * whole-number "100%", and 3-digit temps ("100°") would bleed past the column
+ * into the neighbor at the 28px secondary size. This keeps the value visually
+ * large while guaranteeing it fits with margin (verified at 390×844 in Geist):
+ *   - "—" placeholder     → 28px (matches AQI's placeholder)
+ *   - ≤ 3 chars ("85%", "66°") → 23px (largest size that fits the widest "99%" ≈46.1px)
+ *   - ≥ 4 chars ("100%", "100°") → 19px (keeps the value on one line ≈46.2px)
+ * AQI intentionally does NOT use this — its value stays 28px so the column keeps
+ * horizontal room for real numbers + categories. Typography only: no effect on
+ * any metric's meaning, classification, or supporting label.
  */
-function fogValueClassName(formatted: string): string {
-  if (!formatted.includes("%")) {
+function compactSecondaryValueClassName(formatted: string): string {
+  if (formatted === METRIC_VALUE_PLACEHOLDER) {
     return SECONDARY_VALUE_CLASS;
   }
   const size = formatted.length >= 4 ? "text-[19px]" : "text-[23px]";
@@ -491,12 +495,12 @@ function PhonePortraitSelectedCard({
   const windSupporting: ReactNode = hasWindSpeed ? (
     <WindSupportingLabel />
   ) : undefined;
-  const fogValue = fogScore !== null ? `${fogScore}%` : "—";
+  const fogValue = fogScore !== null ? `${fogScore}%` : METRIC_VALUE_PLACEHOLDER;
   const tempValue =
     typeof location.temperature === "number" &&
     Number.isFinite(location.temperature)
       ? `${Math.round(location.temperature)}°`
-      : "—";
+      : METRIC_VALUE_PLACEHOLDER;
 
   const { isFavorite, handleToggleFavorite } = useFavoriteToggle(location.id);
 
@@ -598,7 +602,7 @@ function PhonePortraitSelectedCard({
         <MetricColumn
           title="Fog"
           value={fogValue}
-          valueClassName={fogValueClassName(fogValue)}
+          valueClassName={compactSecondaryValueClassName(fogValue)}
           testId="fog-value"
           supporting={fogLabel}
         />
@@ -631,7 +635,12 @@ function PhonePortraitSelectedCard({
           testId="air-quality-value"
           supportingTestId="air-quality-supporting"
         />
-        <MetricColumn title="Temp" value={tempValue} />
+        <MetricColumn
+          title="Temp"
+          value={tempValue}
+          valueClassName={compactSecondaryValueClassName(tempValue)}
+          testId="temp-value"
+        />
         <MetricColumn
           title="Wind"
           value={windValue}

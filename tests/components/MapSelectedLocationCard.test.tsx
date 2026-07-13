@@ -318,17 +318,45 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     const quality = screen.getByTestId("clear-skies-quality");
     expect(quality.className).toContain("font-semibold");
 
-    // Secondary values are larger than before but still smaller than the score.
-    // Temp keeps the canonical 28px secondary size (Fog is length-responsive and
-    // asserted separately). Both remain clearly subordinate to the 38px score.
+    // Fog and Temp share one compact secondary size (length-responsive) so they
+    // carry equal visual prominence, and both stay clearly subordinate to the
+    // 38px hero score. For the default fixture ("18%" / "68°", both ≤3 chars)
+    // that shared size is 23px.
     const metrics = screen.getByTestId("selected-location-metrics");
-    const tempValue = within(metrics).getByText("68°");
-    expect(metrics).toContainElement(tempValue);
-    expect(tempValue.className).toContain("text-[28px]");
-    expect(tempValue.className).not.toContain("text-[38px]");
-
+    const tempValue = screen.getByTestId("temp-value");
     const fogValue = screen.getByTestId("fog-value");
+    expect(metrics).toContainElement(tempValue);
+    expect(tempValue.className).toContain("text-[23px]");
+    expect(fogValue.className).toContain("text-[23px]");
+    expect(tempValue.className).not.toContain("text-[38px]");
     expect(fogValue.className).not.toContain("text-[38px]");
+  });
+
+  it("gives Temp the same compact size as Fog so Fog/Temp read with equal prominence", () => {
+    // Presentation only: Temp mirrors Fog's length-responsive sizing so it never
+    // looks larger than Fog. AQI intentionally stays 28px to preserve horizontal
+    // room for future real values + categories.
+    const { getByTestId } = render(
+      <MapSelectedLocationCard
+        location={{ ...location, temperature: 66, fogScore: 85 }}
+        phonePortrait
+      />,
+    );
+    const fogSize = getByTestId("fog-value").className.match(/text-\[\d+px\]/)?.[0];
+    const tempSize = getByTestId("temp-value").className.match(/text-\[\d+px\]/)?.[0];
+    expect(tempSize).toBe(fogSize);
+    expect(tempSize).toBe("text-[23px]");
+  });
+
+  it("shrinks a 3-digit Temp to 19px so it fits its column like Fog's '100%'", () => {
+    const { getByTestId } = render(
+      <MapSelectedLocationCard
+        location={{ ...location, temperature: 100 }}
+        phonePortrait
+      />,
+    );
+    expect(getByTestId("temp-value")).toHaveTextContent("100°");
+    expect(getByTestId("temp-value").className).toContain("text-[19px]");
   });
 
   it("sizes the Fog value responsively by rendered string length so it never overflows its column", () => {
