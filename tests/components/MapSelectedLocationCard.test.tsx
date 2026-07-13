@@ -275,9 +275,10 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(metrics).toHaveTextContent("Temp");
     expect(metrics).toHaveTextContent("68°");
     expect(metrics).toHaveTextContent("Wind");
-    // Wind large value shows the speed only; the compass direction rides in the
-    // supporting label so the value stays as compact as the other metrics.
-    expect(screen.getByTestId("wind-direction")).toHaveTextContent("W");
+    // Wind value shows direction + speed together (mockup); the supporting row
+    // is the gold arrow + "mph".
+    expect(screen.getByTestId("wind-value")).toHaveTextContent("W 8");
+    expect(screen.getByTestId("wind-direction")).toHaveTextContent("mph");
   });
 
   it("renders the canonical 'CLEAR SKY SCORE' title (singular, uppercased via CSS)", () => {
@@ -301,7 +302,7 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
   it("makes the Clear Sky Score the hero metric with a larger value than the secondary metrics", () => {
     // Sizes verified at a real 390px viewport via getBoundingClientRect. The
     // score value is the hero (38px) and the secondary values are substantial
-    // and easily readable (21px) but still clearly subordinate to the score.
+    // and easily readable (28px) but still clearly subordinate to the score.
     render(<MapSelectedLocationCard location={location} phonePortrait />);
 
     const score = screen.getByTestId("clear-skies-score");
@@ -316,7 +317,7 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     const metrics = screen.getByTestId("selected-location-metrics");
     const fogValue = screen.getByText("18%");
     expect(metrics).toContainElement(fogValue);
-    expect(fogValue.className).toContain("text-[21px]");
+    expect(fogValue.className).toContain("text-[28px]");
     expect(fogValue.className).not.toContain("text-[38px]");
   });
 
@@ -342,14 +343,14 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
       const supporting = column.querySelector("[data-testid='clear-skies-quality']")
         ?? column.lastElementChild;
       // Shared min-height keeps every supporting label on the same baseline row.
-      expect(supporting?.className).toContain("min-h-[1rem]");
+      expect(supporting?.className).toContain("min-h-[1.25rem]");
     }
 
     expect(screen.getByTestId("clear-skies-quality")).toHaveTextContent("Excellent");
     expect(metrics).toHaveTextContent("Clear");
     expect(metrics).toHaveTextContent("Coming Soon");
-    // Wind's supporting label carries the compass direction.
-    expect(screen.getByTestId("wind-direction")).toHaveTextContent("W");
+    // Wind's supporting label is the gold arrow + "mph".
+    expect(screen.getByTestId("wind-direction")).toHaveTextContent("mph");
   });
 
   it("keeps Clear Sky Score inline as the first of five metric columns", () => {
@@ -437,7 +438,7 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(score.className).not.toContain("border");
   });
 
-  it("shows the Wind speed as the large value and the direction as the supporting label", () => {
+  it("shows the Wind direction + speed together as the value with a gold arrow + mph supporting label", () => {
     render(
       <MapSelectedLocationCard
         location={{ ...location, windDirection: "NNW", windSpeed: 12 }}
@@ -445,15 +446,18 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
       />,
     );
 
-    const metrics = screen.getByTestId("selected-location-metrics");
-    // Large value is the speed only (no combined direction+speed string).
-    const windValue = screen.getByText("12");
-    expect(metrics).toContainElement(windValue);
+    // Value row carries direction + speed together, on a single line.
+    const windValue = screen.getByTestId("wind-value");
+    expect(windValue).toHaveTextContent("NNW 12");
     expect(windValue.className).toContain("whitespace-nowrap");
+    // Wind value uses the largest size that fits three-letter directions at
+    // 390x844 — slightly smaller than the 28px secondary values, by necessity.
+    expect(windValue.className).toContain("text-[19px]");
 
-    // Direction is shown separately in the supporting label.
-    expect(screen.getByTestId("wind-direction")).toHaveTextContent("NNW");
-    expect(metrics).not.toHaveTextContent("NNW 12");
+    // Supporting row is the gold arrow + "mph".
+    const windSupporting = screen.getByTestId("wind-direction");
+    expect(windSupporting).toHaveTextContent("mph");
+    expect(windSupporting.querySelector("svg")).not.toBeNull();
   });
 
   it("renders the AQI placeholder using the same title/value/supporting structure as every metric", () => {

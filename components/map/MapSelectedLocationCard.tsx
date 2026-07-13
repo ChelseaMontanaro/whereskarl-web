@@ -274,7 +274,37 @@ function SectionLabel({
 const SECONDARY_TITLE_CLASS =
   "text-[10px] font-bold uppercase tracking-[0.04em] text-white/40";
 /** Secondary-metric value (white unless a canonical color is set). */
-const SECONDARY_VALUE_CLASS = "text-[21px] font-light text-white";
+const SECONDARY_VALUE_CLASS = "text-[28px] font-light leading-none text-white";
+/** Shared supporting-label row height — every column ends on this baseline. */
+const METRIC_SUPPORTING_ROW_CLASS =
+  "flex min-h-[1.25rem] items-end justify-center whitespace-nowrap leading-tight text-[11px] font-medium text-white/45";
+/** Value row — tall enough for the hero score, centers every value vertically. */
+const METRIC_VALUE_ROW_CLASS =
+  "flex min-h-[3rem] w-full items-center justify-center leading-none";
+
+/** Small compass arrow for the Wind supporting label (presentation only). */
+function WindDirectionArrow({ className = "h-3 w-3" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 12 12"
+      aria-hidden="true"
+      className={className}
+      fill="currentColor"
+    >
+      <path d="M6 1.5 9.25 8.25H6V10.5H2.75V8.25H2.75L6 1.5Z" />
+    </svg>
+  );
+}
+
+/** Gold arrow + "mph" — the Wind supporting row, matching the approved mockup. */
+function WindSupportingLabel() {
+  return (
+    <span className="inline-flex items-center gap-1">
+      <WindDirectionArrow className="h-3 w-3 shrink-0 text-karl-gold/90" />
+      <span>mph</span>
+    </span>
+  );
+}
 
 function MetricColumn({
   title,
@@ -284,7 +314,7 @@ function MetricColumn({
   valueClassName = SECONDARY_VALUE_CLASS,
   supporting,
   supportingColor,
-  supportingClassName = "text-[11px] font-medium text-white/45",
+  supportingClassName = METRIC_SUPPORTING_ROW_CLASS,
   band,
   testId,
   supportingTestId,
@@ -297,7 +327,7 @@ function MetricColumn({
   valueColor?: string;
   titleClassName?: string;
   valueClassName?: string;
-  supporting?: string;
+  supporting?: ReactNode;
   supportingColor?: string;
   supportingClassName?: string;
   band?: string;
@@ -318,7 +348,7 @@ function MetricColumn({
         {title}
       </span>
       <span
-        className={`flex min-h-[2.75rem] items-end justify-center leading-none ${valueClassName} ${
+        className={`${METRIC_VALUE_ROW_CLASS} ${valueClassName} ${
           noWrapValue ? "whitespace-nowrap" : ""
         }`}
         style={valueColor ? { color: valueColor } : undefined}
@@ -327,11 +357,9 @@ function MetricColumn({
       >
         {value}
       </span>
-      {/* Supporting labels, all aligned on a shared baseline row. The text
-          appearance (size/weight/color) comes entirely from supportingClassName
-          so callers can override it without conflicting size utilities. */}
+      {/* Supporting labels share one baseline row across all five columns. */}
       <span
-        className={`mt-1 flex min-h-[1rem] items-start justify-center leading-tight ${supportingClassName}`}
+        className={supportingClassName}
         style={supportingColor ? { color: supportingColor } : undefined}
         data-testid={supportingTestId}
       >
@@ -403,19 +431,23 @@ function PhonePortraitSelectedCard({
   const subtitle = `${getProductRegionNameForLocation(location) ?? "Bay Area"}, CA`;
   const updatedLabel = relativeUpdatedLabel(location.updatedAt);
 
-  // Wind is split so the large value carries only the speed (short, like the
-  // other metric values) and the compass direction rides in the supporting
-  // label. Keeping direction out of the large value is what lets every
-  // secondary value be sized comfortably — the previous combined "WSW 12"
-  // string was the sole width constraint on the whole row.
+  // Wind value carries the compass direction + speed together (e.g. "NW 8",
+  // "WSW 12") to match the approved mockup; the supporting row is the gold arrow
+  // + "mph". The combined value is the widest metric string, so the Wind value
+  // uses a slightly smaller size that fits three-letter directions cleanly at
+  // 390px — Fog / AQI / Temp keep the full 28px hierarchy (never shrunk for Wind).
   const hasWindSpeed =
     typeof location.windSpeed === "number" &&
     Number.isFinite(location.windSpeed);
-  const windValue = hasWindSpeed ? `${Math.round(location.windSpeed)}` : "—";
   const windDirection = location.windDirection?.trim();
-  const windSupporting = hasWindSpeed
-    ? windDirection || "mph"
-    : undefined;
+  const windValue = hasWindSpeed
+    ? windDirection
+      ? `${windDirection} ${Math.round(location.windSpeed)}`
+      : `${Math.round(location.windSpeed)}`
+    : "—";
+  const windSupporting: ReactNode = hasWindSpeed ? (
+    <WindSupportingLabel />
+  ) : undefined;
   const tempValue =
     typeof location.temperature === "number" &&
     Number.isFinite(location.temperature)
@@ -511,13 +543,13 @@ function PhonePortraitSelectedCard({
         <MetricColumn
           title="Clear Sky Score"
           titleClassName="whitespace-nowrap text-[11px] font-bold uppercase tracking-[0.02em] text-karl-gold/90"
-          columnClassName="flex-[1.72]"
+          columnClassName="flex-[1.35]"
           value={score.score}
           valueColor={score.color}
           valueClassName="text-[38px] font-light"
           supporting={score.qualityLabel}
           supportingColor={score.color}
-          supportingClassName="text-[14px] font-semibold"
+          supportingClassName={`${METRIC_SUPPORTING_ROW_CLASS} text-[14px] font-semibold`}
           band={score.band}
           testId="clear-skies-score"
           supportingTestId="clear-skies-quality"
@@ -548,8 +580,8 @@ function PhonePortraitSelectedCard({
           }
           supportingClassName={
             airQuality.available
-              ? undefined
-              : "whitespace-nowrap text-[8px] font-medium tracking-tight text-white/45"
+              ? METRIC_SUPPORTING_ROW_CLASS
+              : `${METRIC_SUPPORTING_ROW_CLASS} text-[10px] tracking-tight`
           }
           band={airQuality.available ? (airQuality.band ?? undefined) : undefined}
           containerTestId="air-quality-slot"
@@ -560,7 +592,10 @@ function PhonePortraitSelectedCard({
         <MetricColumn
           title="Wind"
           value={windValue}
+          valueClassName="text-[19px] font-light leading-none text-white"
+          columnClassName="flex-[1.45]"
           supporting={windSupporting}
+          testId="wind-value"
           supportingTestId="wind-direction"
           noWrapValue
         />
