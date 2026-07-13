@@ -171,3 +171,83 @@ describe("BayAreaMap phone-portrait icon anchoring", () => {
     }
   });
 });
+
+describe("BayAreaMap phone-portrait marker root anchoring (stacking regression)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    document.body.innerHTML = "";
+  });
+
+  afterEach(() => {
+    cleanup();
+    document.body.innerHTML = "";
+  });
+
+  // The stacking bug displaced markers because the root fell into normal flow;
+  // the *placement contract* is that every marker is anchored purely by MapLibre
+  // with a [0,0] marker-level offset, so DOM order can never change placement.
+  // (The CSS `position: absolute` contract is covered in
+  // tests/map/phonePortraitMarkerAnchorCss.test.ts, since external stylesheet
+  // layout is not applied by the unit-test DOM.)
+  const anchorSet = [
+    "berkeley",
+    "oakland",
+    "tiburon",
+    "sausalito",
+    "mill-valley",
+    "stinson-beach",
+    "san-jose",
+  ];
+
+  it("gives every marker a [0,0] MapLibre offset regardless of DOM order", async () => {
+    renderPhonePortrait(anchorSet.map((id) => phoneLocation(id, id)));
+
+    await waitFor(() => {
+      expect(root("san-jose")).not.toBeNull();
+    });
+
+    for (const id of anchorSet) {
+      const applied = JSON.parse(root(id)!.dataset.markerOffset ?? "null");
+      expect(applied, `marker offset for ${id}`).toEqual([0, 0]);
+    }
+  });
+
+  it("keeps [0,0] offsets even when the DOM order is reversed", async () => {
+    renderPhonePortrait([...anchorSet].reverse().map((id) => phoneLocation(id, id)));
+
+    await waitFor(() => {
+      expect(root("berkeley")).not.toBeNull();
+    });
+
+    for (const id of anchorSet) {
+      const applied = JSON.parse(root(id)!.dataset.markerOffset ?? "null");
+      expect(applied, `marker offset for ${id}`).toEqual([0, 0]);
+    }
+  });
+
+  it("does not change a later marker's placement when an earlier marker is hidden", async () => {
+    renderPhonePortrait(anchorSet.map((id) => phoneLocation(id, id)));
+
+    await waitFor(() => {
+      expect(root("san-jose")).not.toBeNull();
+    });
+
+    const laterIds = ["mill-valley", "stinson-beach", "san-jose"];
+    const before = laterIds.map((id) => ({
+      offset: root(id)!.dataset.markerOffset,
+      transform: root(id)!.style.transform,
+    }));
+
+    // Hide an earlier marker in the DOM (what decluttering does).
+    root("tiburon")!.style.display = "none";
+
+    laterIds.forEach((id, i) => {
+      expect(root(id)!.dataset.markerOffset, `offset ${id}`).toBe(
+        before[i]!.offset,
+      );
+      expect(root(id)!.style.transform, `transform ${id}`).toBe(
+        before[i]!.transform,
+      );
+    });
+  });
+});

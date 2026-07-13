@@ -24,8 +24,18 @@
     );
 }
 
+/* MapLibre injects `maplibregl-marker` (position: absolute; top: 0; left: 0)
+   onto every custom marker element and positions it purely via a CSS transform
+   from the pane origin. The previous `position: relative` override put the roots
+   back into normal document flow, so visible roots stacked vertically and every
+   marker after the first was displaced downward by one marker height. Keeping
+   the root `absolute` (matching MapLibre's own contract, exactly like the
+   non-phone marker roots) makes each icon land on its projected coordinate
+   regardless of DOM order. `top`/`left` are inherited from `maplibregl-marker`,
+   so they are intentionally not repeated here. This element also stays the
+   positioned ancestor for the absolutely positioned `__meta` label/score group. */
 .karl-universal-map-marker-root.is-phone-portrait {
-  position: relative;
+  position: absolute;
   gap: 0.18rem;
   z-index: 2;
 }
