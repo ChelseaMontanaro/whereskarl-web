@@ -289,6 +289,45 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(screen.queryByText("Clear Skies Score")).not.toBeInTheDocument();
   });
 
+  it("keeps the Clear Sky Score title on one line", () => {
+    render(<MapSelectedLocationCard location={location} phonePortrait />);
+
+    const title = screen.getByText("Clear Sky Score");
+    expect(title.className).toContain("whitespace-nowrap");
+    expect(title.textContent).toBe("Clear Sky Score");
+  });
+
+  it("renders larger secondary metric values that remain subordinate to the score", () => {
+    render(<MapSelectedLocationCard location={location} phonePortrait />);
+
+    const score = screen.getByTestId("clear-skies-score");
+    expect(score.className).toContain("text-xl");
+
+    const metrics = screen.getByTestId("selected-location-metrics");
+    const fogValue = screen.getByText("18%");
+    expect(metrics).toContainElement(fogValue);
+    expect(fogValue.className).toContain("text-lg");
+    expect(fogValue.className).not.toContain("text-xl");
+  });
+
+  it("aligns supporting labels across all five metric columns", () => {
+    render(<MapSelectedLocationCard location={location} phonePortrait />);
+
+    const metrics = screen.getByTestId("selected-location-metrics");
+    const columns = Array.from(metrics.children);
+
+    for (const column of columns) {
+      const supporting = column.querySelector("[data-testid='clear-skies-quality']")
+        ?? column.lastElementChild;
+      expect(supporting?.className).toContain("min-h-[0.875rem]");
+    }
+
+    expect(screen.getByTestId("clear-skies-quality")).toHaveTextContent("Excellent");
+    expect(metrics).toHaveTextContent("Clear");
+    expect(metrics).toHaveTextContent("Coming Soon");
+    expect(metrics).toHaveTextContent("mph");
+  });
+
   it("keeps Clear Sky Score inline as the first of five metric columns", () => {
     render(<MapSelectedLocationCard location={location} phonePortrait />);
 
@@ -428,7 +467,10 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(karlSection).toHaveTextContent("Karl's Read");
     expect(karlSection).toHaveTextContent("Mostly clear across Tiburon.");
     // The Karl logo image (brand asset) is rendered, not a generic icon.
-    expect(container.querySelector('img[src*="wheres-karl-logo"]')).toBeTruthy();
+    const logo = container.querySelector('img[src*="wheres-karl-logo"]');
+    expect(logo).toBeTruthy();
+    expect(logo?.className).toContain("h-14");
+    expect(logo?.className).toContain("w-14");
   });
 
   it("reads Karl's Read as the insight paragraph, not the terse condition label", () => {
@@ -483,6 +525,14 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(
       screen.queryByRole("link", { name: /View Full Forecast/i }),
     ).not.toBeInTheDocument();
+  });
+
+  it("renders the Hourly Outlook title in white, not gold", () => {
+    render(<MapSelectedLocationCard location={location} phonePortrait />);
+
+    const title = screen.getByText("Hourly Outlook");
+    expect(title.className).toContain("text-white");
+    expect(title.className).not.toContain("text-karl-gold");
   });
 
   it("renders hourly periods as a lightweight strip with no tile background or border", () => {

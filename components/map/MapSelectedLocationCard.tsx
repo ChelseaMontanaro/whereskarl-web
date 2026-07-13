@@ -234,9 +234,19 @@ function FavoriteButton({
   );
 }
 
-function SectionLabel({ children }: { children: ReactNode }) {
+function SectionLabel({
+  children,
+  variant = "gold",
+}: {
+  children: ReactNode;
+  variant?: "gold" | "white";
+}) {
   return (
-    <p className="text-[0.625rem] font-bold uppercase tracking-[0.14em] text-karl-gold/90">
+    <p
+      className={`text-[0.625rem] font-bold uppercase tracking-[0.14em] ${
+        variant === "white" ? "text-white/90" : "text-karl-gold/90"
+      }`}
+    >
       {children}
     </p>
   );
@@ -255,15 +265,17 @@ function MetricColumn({
   title,
   value,
   valueColor,
-  valueClassName = "text-[0.9375rem] font-semibold",
+  valueClassName = "text-lg font-semibold",
   supporting,
   supportingColor,
   goldTitle = false,
+  titleNoWrap = false,
   band,
   testId,
   supportingTestId,
   containerTestId,
   noWrapValue = false,
+  columnClassName = "flex-1",
 }: {
   title: string;
   value: ReactNode;
@@ -272,26 +284,28 @@ function MetricColumn({
   supporting?: string;
   supportingColor?: string;
   goldTitle?: boolean;
+  titleNoWrap?: boolean;
   band?: string;
   testId?: string;
   supportingTestId?: string;
   containerTestId?: string;
   noWrapValue?: boolean;
+  columnClassName?: string;
 }) {
   return (
     <div
-      className="flex min-w-0 flex-1 flex-col items-center gap-1 text-center"
+      className={`flex min-w-0 ${columnClassName} flex-col items-center text-center`}
       data-testid={containerTestId}
     >
       <span
-        className={`text-[0.5rem] font-bold uppercase leading-tight tracking-[0.08em] ${
+        className={`flex min-h-[1.125rem] items-end justify-center text-[0.5rem] font-bold uppercase leading-none tracking-[0.08em] ${
           goldTitle ? "text-karl-gold/90" : "text-white/40"
-        }`}
+        } ${titleNoWrap ? "whitespace-nowrap tracking-[0.04em]" : ""}`}
       >
         {title}
       </span>
       <span
-        className={`leading-none ${valueClassName} ${
+        className={`flex min-h-[1.375rem] items-center justify-center leading-none ${valueClassName} ${
           noWrapValue ? "whitespace-nowrap" : ""
         }`}
         style={valueColor ? { color: valueColor } : undefined}
@@ -301,11 +315,11 @@ function MetricColumn({
         {value}
       </span>
       <span
-        className="min-h-[0.75rem] text-[0.5625rem] font-medium leading-tight text-white/45"
+        className="flex min-h-[0.875rem] items-start justify-center text-[0.5625rem] font-medium leading-tight text-white/45"
         style={supportingColor ? { color: supportingColor } : undefined}
         data-testid={supportingTestId}
       >
-        {supporting ?? ""}
+        {supporting ?? "\u00A0"}
       </span>
     </div>
   );
@@ -468,12 +482,14 @@ function PhonePortraitSelectedCard({
           / Wind. No boxed or tinted background — emphasis comes from typography,
           color, and spacing. */}
       <div
-        className="mt-4 flex items-start gap-2 border-t border-white/10 pt-4"
+        className="mt-4 flex items-start gap-1.5 border-t border-white/10 pt-4"
         data-testid="selected-location-metrics"
       >
         <MetricColumn
           title="Clear Sky Score"
           goldTitle
+          titleNoWrap
+          columnClassName="flex-[1.15]"
           value={score.score}
           valueColor={score.color}
           valueClassName="text-xl font-semibold"
@@ -527,7 +543,7 @@ function PhonePortraitSelectedCard({
       <section aria-label="Karl's Read" className="border-t border-white/10 pt-4">
         <SectionLabel>Karl&apos;s Read</SectionLabel>
         <div className="mt-3 flex items-start gap-3.5">
-          <KarlLogo className="h-12 w-12 shrink-0" />
+          <KarlLogo className="h-14 w-14 shrink-0" />
           <p className="text-[0.8125rem] leading-relaxed text-white/80">
             {karlRead}
           </p>
@@ -539,7 +555,7 @@ function PhonePortraitSelectedCard({
         aria-label="Hourly outlook"
         className="mt-5 border-t border-white/10 pt-4"
       >
-        <SectionLabel>Hourly Outlook</SectionLabel>
+        <SectionLabel variant="white">Hourly Outlook</SectionLabel>
         <div className="mt-3 flex gap-5 overflow-x-auto overscroll-x-contain pb-1">
           {forecastPeriods.map((period) => (
             <ForecastPeriod
