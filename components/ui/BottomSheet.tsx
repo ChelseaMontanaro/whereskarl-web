@@ -5,6 +5,7 @@ import {
   useId,
   useRef,
   useState,
+  type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
@@ -23,6 +24,8 @@ import {
  *   - a persistent `header` (peek) region that is always visible so the user
  *     can immediately understand what is selected
  *   - a collapsible `children` body revealed when expanded
+ *   - (opt-in) tapping anywhere on the collapsed surface expands the sheet,
+ *     while interactive descendants keep their own behavior
  *
  * The sheet is presentational only — it owns no selection, data, or camera
  * state. Consumers pass content and (optionally) control the expanded detent.
@@ -30,6 +33,15 @@ import {
 
 /** Distance (px) a handle drag must travel before it snaps the detent. */
 const DRAG_SNAP_THRESHOLD = 28;
+
+/**
+ * Descendants whose clicks must NOT be treated as a "tap the surface to expand"
+ * gesture. Covers native interactive elements, ARIA widgets, and an explicit
+ * `data-sheet-no-expand` escape hatch for custom controls. The grab handle is a
+ * `<button>`, so it is naturally excluded and keeps its own tap/keyboard/drag.
+ */
+const INTERACTIVE_DESCENDANT_SELECTOR =
+  'a, button, input, select, textarea, label, [role="button"], [role="switch"], [role="link"], [role="tab"], [contenteditable="true"], [data-sheet-no-expand]';
 
 export type BottomSheetProps = {
   /** Accessible label for the sheet region. */
@@ -43,6 +55,14 @@ export type BottomSheetProps = {
   /** Initial expanded state when uncontrolled. Defaults to collapsed. */
   defaultExpanded?: boolean;
   onExpandedChange?: (expanded: boolean) => void;
+  /**
+   * When true, tapping anywhere on the collapsed sheet surface (that is not an
+   * interactive descendant) expands it — making the whole peek a large, easy
+   * expansion target. Opt-in so consumers that should only expand via the grab
+   * handle keep the default. Never collapses on surface tap (the grab handle
+   * and drag remain the collapse affordances).
+   */
+  expandOnSurfaceTap?: boolean;
   /** Extra classes for the sheet container. */
   className?: string;
   /** Extra classes for the scrollable body wrapper. */
@@ -59,6 +79,7 @@ export function BottomSheet({
   expanded: controlledExpanded,
   defaultExpanded = false,
   onExpandedChange,
+  expandOnSurfaceTap = false,
   className = "",
   bodyClassName = "",
 }: BottomSheetProps) {
@@ -128,10 +149,35 @@ export function BottomSheet({
     toggleExpanded();
   }, [toggleExpanded]);
 
+  // Surface tap (opt-in): while collapsed, a tap anywhere on the sheet that did
+  // not originate from an interactive descendant expands it. It only ever
+  // expands (never collapses), so tapping ordinary expanded content is a no-op.
+  // Interactive children (favorite, close, links, future controls) are ignored
+  // via a single delegated check rather than per-child handlers.
+  const handleSurfaceClick = useCallback(
+    (event: ReactMouseEvent<HTMLElement>) => {
+      if (!expandOnSurfaceTap || expanded) {
+        return;
+      }
+
+      const target = event.target as Element | null;
+      if (target?.closest(INTERACTIVE_DESCENDANT_SELECTOR)) {
+        return;
+      }
+
+      setExpanded(true);
+    },
+    [expandOnSurfaceTap, expanded, setExpanded],
+  );
+
   return (
     <section
       aria-label={ariaLabel}
       className={`${SHEET_CONTAINER_CLASS} ${className}`.trim()}
+      // The grab handle button is the accessible (keyboard/focus) expand
+      // control; this surface tap is a pointer-only enhancement layered on top.
+      // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
+      onClick={expandOnSurfaceTap ? handleSurfaceClick : undefined}
     >
       <button
         type="button"

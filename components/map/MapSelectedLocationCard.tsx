@@ -243,26 +243,38 @@ function SectionLabel({ children }: { children: ReactNode }) {
 }
 
 /**
- * A single secondary metric (Fog / AQI / Temp / Wind). Values come from the
- * canonical helpers — this never derives thresholds or colors itself. The cell
- * is intentionally border-free: hierarchy comes from typography and spacing.
+ * A single column in the unified metrics row. Every metric (including Clear Sky
+ * Score) shares this structure so the five columns stay aligned in one row.
+ * Values, colors, bands, and labels come from the canonical helpers — this
+ * component never derives thresholds, colors, or labels itself. The Clear Sky
+ * Score column gets the strongest hierarchy purely through props (gold title,
+ * larger value, canonical color on both value and quality label) — no boxed or
+ * tinted background.
  */
-function SecondaryMetric({
+function MetricColumn({
   title,
   value,
   valueColor,
+  valueClassName = "text-[0.9375rem] font-semibold",
   supporting,
+  supportingColor,
+  goldTitle = false,
   band,
   testId,
+  supportingTestId,
   containerTestId,
   noWrapValue = false,
 }: {
   title: string;
   value: ReactNode;
   valueColor?: string;
+  valueClassName?: string;
   supporting?: string;
+  supportingColor?: string;
+  goldTitle?: boolean;
   band?: string;
   testId?: string;
+  supportingTestId?: string;
   containerTestId?: string;
   noWrapValue?: boolean;
 }) {
@@ -271,11 +283,15 @@ function SecondaryMetric({
       className="flex min-w-0 flex-1 flex-col items-center gap-1 text-center"
       data-testid={containerTestId}
     >
-      <span className="text-[0.5625rem] font-bold uppercase leading-none tracking-[0.1em] text-white/40">
+      <span
+        className={`text-[0.5rem] font-bold uppercase leading-tight tracking-[0.08em] ${
+          goldTitle ? "text-karl-gold/90" : "text-white/40"
+        }`}
+      >
         {title}
       </span>
       <span
-        className={`text-[0.9375rem] font-semibold leading-none ${
+        className={`leading-none ${valueClassName} ${
           noWrapValue ? "whitespace-nowrap" : ""
         }`}
         style={valueColor ? { color: valueColor } : undefined}
@@ -284,14 +300,24 @@ function SecondaryMetric({
       >
         {value}
       </span>
-      <span className="min-h-[0.75rem] text-[0.5625rem] font-medium leading-tight text-white/45">
+      <span
+        className="min-h-[0.75rem] text-[0.5625rem] font-medium leading-tight text-white/45"
+        style={supportingColor ? { color: supportingColor } : undefined}
+        data-testid={supportingTestId}
+      >
         {supporting ?? ""}
       </span>
     </div>
   );
 }
 
-function ForecastChip({
+/**
+ * One period in the lightweight Hourly Outlook strip. Presentation only: no
+ * tile background, border, or rounded box — periods are separated by spacing
+ * and typography. Time, canonical condition icon, and temperature are
+ * unchanged.
+ */
+function ForecastPeriod({
   period,
   isNighttime,
 }: {
@@ -299,7 +325,10 @@ function ForecastChip({
   isNighttime: boolean;
 }) {
   return (
-    <div className="flex min-w-[3.5rem] shrink-0 flex-col items-center gap-1.5 rounded-2xl bg-white/[0.03] px-3 py-2.5 text-center">
+    <div
+      className="flex min-w-[3rem] shrink-0 flex-col items-center gap-1.5 text-center"
+      data-testid="hourly-outlook-period"
+    >
       <span className="text-[0.5625rem] font-semibold uppercase leading-none tracking-[0.06em] text-white/55">
         {period.label}
       </span>
@@ -433,63 +462,57 @@ function PhonePortraitSelectedCard({
         <DegradedDataLabel variant="location" className="mt-1.5" />
       ) : null}
 
-      {/* At-a-glance metrics — canonical helpers only. The Clear Skies Score
-          leads as the headline metric (large number + quality label, no boxed
-          tint); Fog / AQI / Temp / Wind follow as a lighter typographic row. */}
-      <div className="mt-4" data-testid="selected-location-metrics">
-        <p className="text-[0.625rem] font-bold uppercase tracking-[0.16em] text-karl-gold/90">
-          Clear Sky Score
-        </p>
-        <div className="mt-1 flex items-baseline gap-2.5">
-          <span
-            className="text-[2.75rem] font-light leading-none tracking-tight"
-            style={{ color: score.color }}
-            data-score-band={score.band}
-            data-testid="clear-skies-score"
-          >
-            {score.score}
-          </span>
-          <span
-            className="text-base font-semibold leading-none"
-            style={{ color: score.color }}
-            data-testid="clear-skies-quality"
-          >
-            {score.qualityLabel}
-          </span>
-        </div>
-
-        <div className="mt-4 flex items-start gap-2 border-t border-white/10 pt-4">
-          <SecondaryMetric
-            title="Fog"
-            value={fogScore !== null ? `${fogScore}%` : "—"}
-            supporting={fogLabel}
-          />
-          <SecondaryMetric
-            title="AQI"
-            value={
-              airQuality.available ? (
-                airQuality.aqi
-              ) : (
-                <span className="text-[0.625rem] font-medium leading-tight text-white/45">
-                  Coming Soon
-                </span>
-              )
-            }
-            valueColor={
-              airQuality.available ? (airQuality.color ?? undefined) : undefined
-            }
-            supporting={airQuality.available ? airQuality.label : undefined}
-            band={airQuality.available ? (airQuality.band ?? undefined) : undefined}
-            containerTestId="air-quality-slot"
-          />
-          <SecondaryMetric title="Temp" value={tempValue} />
-          <SecondaryMetric
-            title="Wind"
-            value={windValue}
-            supporting="mph"
-            noWrapValue
-          />
-        </div>
+      {/* Unified metrics row — canonical helpers only. Clear Sky Score leads the
+          row with the strongest hierarchy (gold title, larger canonical-colored
+          value, canonical quality label) but stays inline with Fog / AQI / Temp
+          / Wind. No boxed or tinted background — emphasis comes from typography,
+          color, and spacing. */}
+      <div
+        className="mt-4 flex items-start gap-2 border-t border-white/10 pt-4"
+        data-testid="selected-location-metrics"
+      >
+        <MetricColumn
+          title="Clear Sky Score"
+          goldTitle
+          value={score.score}
+          valueColor={score.color}
+          valueClassName="text-xl font-semibold"
+          supporting={score.qualityLabel}
+          supportingColor={score.color}
+          band={score.band}
+          testId="clear-skies-score"
+          supportingTestId="clear-skies-quality"
+        />
+        <MetricColumn
+          title="Fog"
+          value={fogScore !== null ? `${fogScore}%` : "—"}
+          supporting={fogLabel}
+        />
+        <MetricColumn
+          title="AQI"
+          value={
+            airQuality.available ? (
+              airQuality.aqi
+            ) : (
+              <span className="text-[0.625rem] font-medium leading-tight text-white/45">
+                Coming Soon
+              </span>
+            )
+          }
+          valueColor={
+            airQuality.available ? (airQuality.color ?? undefined) : undefined
+          }
+          supporting={airQuality.available ? airQuality.label : undefined}
+          band={airQuality.available ? (airQuality.band ?? undefined) : undefined}
+          containerTestId="air-quality-slot"
+        />
+        <MetricColumn title="Temp" value={tempValue} />
+        <MetricColumn
+          title="Wind"
+          value={windValue}
+          supporting="mph"
+          noWrapValue
+        />
       </div>
     </>
   );
@@ -498,6 +521,7 @@ function PhonePortraitSelectedCard({
     <BottomSheet
       ariaLabel={`Selected location: ${location.name}`}
       header={header}
+      expandOnSurfaceTap
     >
       {/* Karl's Read — the primary insight section. */}
       <section aria-label="Karl's Read" className="border-t border-white/10 pt-4">
@@ -516,9 +540,9 @@ function PhonePortraitSelectedCard({
         className="mt-5 border-t border-white/10 pt-4"
       >
         <SectionLabel>Hourly Outlook</SectionLabel>
-        <div className="mt-3 flex gap-2.5 overflow-x-auto overscroll-x-contain pb-1">
+        <div className="mt-3 flex gap-5 overflow-x-auto overscroll-x-contain pb-1">
           {forecastPeriods.map((period) => (
-            <ForecastChip
+            <ForecastPeriod
               key={period.key}
               period={period}
               isNighttime={isNighttime}

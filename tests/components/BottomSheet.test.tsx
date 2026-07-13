@@ -79,4 +79,110 @@ describe("BottomSheet (canonical map bottom sheet)", () => {
       screen.getByRole("button", { name: "Expand details" }),
     ).toHaveAttribute("aria-expanded", "false");
   });
+
+  describe("expandOnSurfaceTap", () => {
+    it("expands when a non-interactive collapsed surface area is tapped", () => {
+      render(
+        <BottomSheet
+          ariaLabel="Sheet"
+          header={<span data-testid="peek">Header</span>}
+          expandOnSurfaceTap
+        >
+          <p>Body content</p>
+        </BottomSheet>,
+      );
+
+      expect(
+        screen.getByRole("button", { name: "Expand details" }),
+      ).toHaveAttribute("aria-expanded", "false");
+
+      fireEvent.click(screen.getByTestId("peek"));
+
+      expect(
+        screen.getByRole("button", { name: "Collapse details" }),
+      ).toHaveAttribute("aria-expanded", "true");
+    });
+
+    it("does not expand from interactive descendants while collapsed", () => {
+      const onButton = vi.fn();
+      render(
+        <BottomSheet
+          ariaLabel="Sheet"
+          header={
+            <button type="button" onClick={onButton}>
+              Favorite
+            </button>
+          }
+          expandOnSurfaceTap
+        >
+          <p>Body content</p>
+        </BottomSheet>,
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: "Favorite" }));
+
+      expect(onButton).toHaveBeenCalledTimes(1);
+      expect(
+        screen.getByRole("button", { name: "Expand details" }),
+      ).toHaveAttribute("aria-expanded", "false");
+    });
+
+    it("does not collapse when expanded content is tapped", () => {
+      render(
+        <BottomSheet
+          ariaLabel="Sheet"
+          header={<span data-testid="peek">Header</span>}
+          expandOnSurfaceTap
+          defaultExpanded
+        >
+          <p data-testid="body-text">Body content</p>
+        </BottomSheet>,
+      );
+
+      expect(
+        screen.getByRole("button", { name: "Collapse details" }),
+      ).toHaveAttribute("aria-expanded", "true");
+
+      fireEvent.click(screen.getByTestId("body-text"));
+      fireEvent.click(screen.getByTestId("peek"));
+
+      // Surface tap only ever expands, so it never collapses expanded content.
+      expect(
+        screen.getByRole("button", { name: "Collapse details" }),
+      ).toHaveAttribute("aria-expanded", "true");
+    });
+
+    it("does not expand from the surface when the opt-in is disabled", () => {
+      render(
+        <BottomSheet ariaLabel="Sheet" header={<span data-testid="peek">Header</span>}>
+          <p>Body content</p>
+        </BottomSheet>,
+      );
+
+      fireEvent.click(screen.getByTestId("peek"));
+
+      expect(
+        screen.getByRole("button", { name: "Expand details" }),
+      ).toHaveAttribute("aria-expanded", "false");
+    });
+
+    it("keeps the grab handle working as the expand control", () => {
+      render(
+        <BottomSheet
+          ariaLabel="Sheet"
+          header={<span>Header</span>}
+          expandOnSurfaceTap
+        >
+          <p>Body content</p>
+        </BottomSheet>,
+      );
+
+      const handle = screen.getByRole("button", { name: "Expand details" });
+      fireEvent.click(handle);
+
+      expect(
+        screen.getByRole("button", { name: "Collapse details" }),
+      ).toHaveAttribute("aria-expanded", "true");
+    });
+  });
 });

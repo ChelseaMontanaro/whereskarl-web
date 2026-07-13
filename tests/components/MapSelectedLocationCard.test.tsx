@@ -289,6 +289,40 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(screen.queryByText("Clear Skies Score")).not.toBeInTheDocument();
   });
 
+  it("keeps Clear Sky Score inline as the first of five metric columns", () => {
+    render(<MapSelectedLocationCard location={location} phonePortrait />);
+
+    const metricsRow = screen.getByTestId("selected-location-metrics");
+    // Five equal-width metric columns live in a single flex row.
+    const columns = Array.from(metricsRow.children);
+    expect(columns).toHaveLength(5);
+    expect(metricsRow.className).toContain("flex");
+
+    // The score value and its quality label share the first column with the
+    // Fog / AQI / Temp / Wind columns — no separate full-width score section.
+    const score = screen.getByTestId("clear-skies-score");
+    const firstColumn = columns[0];
+    expect(firstColumn).toContainElement(score);
+    expect(firstColumn).toContainElement(screen.getByTestId("clear-skies-quality"));
+    expect(firstColumn).toHaveTextContent("Clear Sky Score");
+
+    // Column order matches the approved layout.
+    expect(columns[1]).toHaveTextContent("Fog");
+    expect(columns[2]).toHaveTextContent("AQI");
+    expect(columns[3]).toHaveTextContent("Temp");
+    expect(columns[4]).toHaveTextContent("Wind");
+  });
+
+  it("does not render the score as its own oversized headline section", () => {
+    render(<MapSelectedLocationCard location={location} phonePortrait />);
+
+    // The old design used a 2.75rem headline number above the metrics row.
+    const score = screen.getByTestId("clear-skies-score");
+    expect(score.className).not.toContain("text-[2.75rem]");
+    // The score sits inside the shared metrics row container.
+    expect(screen.getByTestId("selected-location-metrics")).toContainElement(score);
+  });
+
   it("consumes the canonical quality label + color from the score helper", () => {
     const quality = () => screen.getByTestId("clear-skies-quality");
     const scoreEl = () => screen.getByTestId("clear-skies-score");
@@ -435,12 +469,12 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(decoded).not.toContain("<rect");
   });
 
-  it("renders an hourly outlook chip strip without a View Full Forecast action", () => {
+  it("renders an hourly outlook strip without a View Full Forecast action", () => {
     render(<MapSelectedLocationCard location={location} phonePortrait />);
 
     const forecast = screen.getByRole("region", { name: "Hourly outlook" });
     expect(forecast).toHaveTextContent("Hourly Outlook");
-    // "Now" chip is always present, populated with the real current temperature.
+    // "Now" period is always present, populated with the real current temperature.
     expect(forecast).toHaveTextContent("Now");
     expect(forecast).toHaveTextContent("68°");
     expect(
@@ -449,6 +483,35 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(
       screen.queryByRole("link", { name: /View Full Forecast/i }),
     ).not.toBeInTheDocument();
+  });
+
+  it("renders hourly periods as a lightweight strip with no tile background or border", () => {
+    render(
+      <MapSelectedLocationCard
+        location={{
+          ...location,
+          prediction: {
+            ...location.prediction,
+            trend: "clearing",
+            projectedFogScore1h: 40,
+          },
+        }}
+        phonePortrait
+      />,
+    );
+
+    const periods = screen.getAllByTestId("hourly-outlook-period");
+    expect(periods.length).toBeGreaterThan(0);
+
+    for (const period of periods) {
+      // No filled tile, no border, no heavy rounded box around each period.
+      expect(period.className).not.toMatch(/\bbg-/);
+      expect(period.className).not.toMatch(/\bborder\b/);
+      expect(period.className).not.toMatch(/\bborder-/);
+      expect(period.className).not.toMatch(/\brounded/);
+      // Each period keeps its time, canonical icon, and temperature.
+      expect(period.querySelector("img")).not.toBeNull();
+    }
   });
 
   it("adds a next-hour chip when a projected fog score exists (no fabricated temps)", () => {
@@ -511,5 +574,67 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(
       screen.getByRole("button", { name: "Remove Tiburon from favorites" }),
     ).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("expands the collapsed sheet when the header identity area is tapped", () => {
+    render(<MapSelectedLocationCard location={location} phonePortrait />);
+
+    expect(
+      screen.getByRole("button", { name: "Expand details" }),
+    ).toHaveAttribute("aria-expanded", "false");
+
+    // Tapping the (non-interactive) location name expands the sheet.
+    fireEvent.click(screen.getByRole("heading", { name: "Tiburon" }));
+
+    expect(
+      screen.getByRole("button", { name: "Collapse details" }),
+    ).toHaveAttribute("aria-expanded", "true");
+  });
+
+  it("expands the collapsed sheet when the metrics row is tapped", () => {
+    render(<MapSelectedLocationCard location={location} phonePortrait />);
+
+    fireEvent.click(screen.getByTestId("selected-location-metrics"));
+
+    expect(
+      screen.getByRole("button", { name: "Collapse details" }),
+    ).toHaveAttribute("aria-expanded", "true");
+  });
+
+  it("does not expand the sheet when the favorite control is tapped", () => {
+    render(<MapSelectedLocationCard location={location} phonePortrait />);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Add Tiburon to favorites" }),
+    );
+
+    // Favorite toggled, but the sheet stayed collapsed.
+    expect(
+      screen.getByRole("button", { name: "Remove Tiburon from favorites" }),
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(
+      screen.getByRole("button", { name: "Expand details" }),
+    ).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("dismisses (does not expand) when the close button is tapped", () => {
+    const onClose = vi.fn();
+    render(
+      <MapSelectedLocationCard
+        location={location}
+        phonePortrait
+        onClose={onClose}
+      />,
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Close selected location" }),
+    );
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+    // The close tap dismissed rather than expanding the sheet.
+    expect(
+      screen.getByRole("button", { name: "Expand details" }),
+    ).toHaveAttribute("aria-expanded", "false");
   });
 });
