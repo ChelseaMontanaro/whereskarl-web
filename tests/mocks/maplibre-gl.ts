@@ -52,6 +52,16 @@ const {
   class Marker {
     element: HTMLElement;
     setLngLat = vi.fn().mockReturnThis();
+    // Mirror the applied offset onto the element so tests can assert the
+    // marker's effective placement offset (the real MapLibre API stores it
+    // internally and applies it as a CSS translate).
+    setOffset = vi.fn(function setOffset(
+      this: Marker,
+      offset: [number, number],
+    ) {
+      this.element.dataset.markerOffset = JSON.stringify(offset);
+      return this;
+    });
     getElement = vi.fn(function getElement(this: Marker) {
       return this.element;
     });
@@ -63,8 +73,17 @@ const {
       this.element.remove();
     });
 
-    constructor({ element }: { element: HTMLElement }) {
+    constructor({
+      element,
+      offset,
+    }: {
+      element: HTMLElement;
+      offset?: [number, number];
+    }) {
       this.element = element;
+      if (offset) {
+        this.element.dataset.markerOffset = JSON.stringify(offset);
+      }
     }
   }
 

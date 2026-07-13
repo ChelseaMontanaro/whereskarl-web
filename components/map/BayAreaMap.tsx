@@ -33,7 +33,6 @@ import {
 } from "@/lib/map/markers";
 import type { FogIntensity } from "@/lib/map/conditions";
 import {
-  getPhonePortraitMarkerMapOffset,
   getPhonePortraitMarkerOffset,
   getPhonePortraitMarkerPriority,
   PHONE_PORTRAIT_MAP_CENTER,
@@ -62,6 +61,38 @@ export type BayAreaMapHandle = {
   resetView: () => void;
   locateMe: () => void;
 };
+
+/**
+ * Phone-portrait markers are a vertical stack (weather icon → label → score).
+ * MapLibre's `anchor: "center"` pins the center of that whole stack to the
+ * coordinate, so the weather icon ends up floating above the real location.
+ *
+ * Measure the rendered icon's center relative to the stack center and return
+ * the pixel delta needed to shift the marker so the weather icon — not the
+ * stack midpoint — sits on the coordinate. This replaces the previous magic
+ * constant base offset with an anchor calculation derived from the actual DOM,
+ * without changing marker layout, size, or the per-location declutter nudge.
+ */
+function getIconCenteredBaseOffset(root: HTMLElement): [number, number] {
+  const icon = root.querySelector<HTMLElement>(".karl-universal-map-marker");
+  if (!icon) {
+    return [0, 0];
+  }
+
+  const rootRect = root.getBoundingClientRect();
+  const iconRect = icon.getBoundingClientRect();
+
+  if (rootRect.height === 0 || iconRect.height === 0) {
+    return [0, 0];
+  }
+
+  const rootCenterX = rootRect.left + rootRect.width / 2;
+  const rootCenterY = rootRect.top + rootRect.height / 2;
+  const iconCenterX = iconRect.left + iconRect.width / 2;
+  const iconCenterY = iconRect.top + iconRect.height / 2;
+
+  return [rootCenterX - iconCenterX, rootCenterY - iconCenterY];
+}
 
 type BayAreaMapProps = {
   locations: MapMarkerLocation[];
@@ -379,6 +410,8 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
               false,
             );
 
+        const placementOffsets = new Map<string, [number, number]>();
+
         for (const location of locations) {
           const isVisible = isMapMarkerVisible(location, {
             intensityFilter,
@@ -409,23 +442,35 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
                 onSelect: (locationId) => onSelectRef.current(locationId),
               });
 
-          const baseOffset = isPhonePortraitWeb
-            ? getPhonePortraitMarkerMapOffset(showLocationLabel)
-            : getMapMarkerPlacementOptions(showLocationLabel).offset ?? [0, 0];
-          const placementOffset = isPhonePortraitWeb
-            ? ([
-                baseOffset[0] + getPhonePortraitMarkerOffset(location.id)[0],
-                baseOffset[1] + getPhonePortraitMarkerOffset(location.id)[1],
-              ] as [number, number])
-            : (baseOffset as [number, number]);
+          // Non-phone markers keep their existing offset. Phone-portrait starts
+          // with the per-location declutter nudge and gets its icon-centering
+          // base offset applied after mount, once the element can be measured.
+          const initialOffset = (
+            isPhonePortraitWeb
+              ? getPhonePortraitMarkerOffset(location.id)
+              : getMapMarkerPlacementOptions(showLocationLabel).offset ?? [0, 0]
+          ) as [number, number];
 
           const marker = new maplibregl.Marker({
             element,
             anchor: "center",
-            offset: placementOffset,
+            offset: initialOffset,
           })
             .setLngLat([location.longitude, location.latitude])
             .addTo(mapRef.current);
+
+          if (isPhonePortraitWeb) {
+            // Center the weather icon on the true coordinate (replacing the
+            // magic base offset), then re-add the per-location declutter nudge.
+            const iconCenteringOffset = getIconCenteredBaseOffset(element);
+            const perLocationOffset = getPhonePortraitMarkerOffset(location.id);
+            const placementOffset: [number, number] = [
+              iconCenteringOffset[0] + perLocationOffset[0],
+              iconCenteringOffset[1] + perLocationOffset[1],
+            ];
+            marker.setOffset(placementOffset);
+            placementOffsets.set(location.id, placementOffset);
+          }
 
           markersRef.current.set(location.id, marker);
         }
@@ -448,7 +493,11 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
                 element: marker.getElement(),
                 longitude: location.longitude,
                 latitude: location.latitude,
-                offset: getPhonePortraitMarkerOffset(location.id),
+                // Use the exact offset the marker is rendered with so collision
+                // detection projects markers to their real on-screen positions.
+                offset:
+                  placementOffsets.get(location.id) ??
+                  getPhonePortraitMarkerOffset(location.id),
                 priority: getPhonePortraitMarkerPriority(location.id),
                 score: location.sunshineScore,
                 isSelected: selectedLocationId === location.id,
