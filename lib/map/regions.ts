@@ -55,7 +55,10 @@ export const LOCATION_BACKEND_REGION_ASSIGNMENTS: Record<
   "palo-alto": "south-bay",
   "mountain-view": "south-bay",
   "san-jose": "south-bay",
-  "half-moon-bay": "south-bay",
+  // Half Moon Bay is a coastal Peninsula town (lon −122.43), not South Bay.
+  // The South Bay camera sits east of it, so as `south-bay` it could never
+  // render in its own region view; the Peninsula owns the coastal belt.
+  "half-moon-bay": "peninsula",
   "daly-city": "peninsula",
   pacifica: "peninsula",
 };
@@ -109,15 +112,59 @@ export function getProductRegionNameForLocation(
   return findBayAreaProductRegion(regionId)?.name ?? null;
 }
 
-export function filterLocationsByProductRegion<T extends LocationWithRegion>(
-  locations: T[],
-  regionId: BayAreaVisibleProductRegionId | null,
-): T[] {
+export type LocationWithOptionalCoordinates = LocationWithRegion & {
+  latitude?: number;
+  longitude?: number;
+};
+
+/**
+ * Canonical product-region membership test. A location belongs to `regionId`
+ * when its resolved product region matches. When the location has no resolvable
+ * region (backend omitted `region` and it is not in the fallback assignment
+ * table) we fall back to the canonical region geometry so a valid coordinate
+ * still appears in the geographically correct region instead of vanishing.
+ *
+ * This mirrors the universal app's `locationMatchesProductRegion` so web and
+ * native share one membership rule and no future backend location silently
+ * disappears from region views (audit RC-2 / RC-7).
+ */
+export function locationMatchesProductRegion<
+  T extends LocationWithOptionalCoordinates,
+>(location: T, regionId: BayAreaVisibleProductRegionId): boolean {
+  const resolvedRegionId = resolveProductRegionId(location);
+  if (resolvedRegionId === regionId) {
+    return true;
+  }
+
+  // A location with a known (but different) region never leaks elsewhere.
+  if (resolvedRegionId !== null) {
+    return false;
+  }
+
+  const region = findBayAreaProductRegion(regionId);
+  if (
+    !region ||
+    typeof location.latitude !== "number" ||
+    typeof location.longitude !== "number"
+  ) {
+    return false;
+  }
+
+  return isLocationWithinProductRegionBounds(
+    location.latitude,
+    location.longitude,
+    region.bounds,
+  );
+}
+
+export function filterLocationsByProductRegion<
+  T extends LocationWithOptionalCoordinates,
+>(locations: T[], regionId: BayAreaVisibleProductRegionId | null): T[] {
   if (!regionId) {
     return locations;
   }
 
-  return locations.filter(
-    (location) => resolveProductRegionId(location) === regionId,
+  return locations.filter((location) =>
+    locationMatchesProductRegion(location, regionId),
   );
 }

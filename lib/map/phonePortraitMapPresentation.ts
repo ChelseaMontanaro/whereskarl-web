@@ -1,5 +1,4 @@
 import type { MapBounds, ViewportPadding } from "@/lib/map/config";
-import { isLocationWithinProductRegionBounds } from "@/lib/map/regions";
 
 export type LocationWithCoordinates = {
   id: string;
@@ -11,12 +10,6 @@ export type LocationWithCoordinates = {
  * Phone-portrait web map presentation — aligned with the approved mobile reference.
  * Camera, marker sizing, and UI scale tokens live here so map chrome stays consistent.
  */
-
-/** Approved SF-tab composition bounds (Marin + central Bay). */
-export const PHONE_PORTRAIT_SF_CENTRAL_BAY_BOUNDS: MapBounds = [
-  [-122.6444, 37.765],
-  [-122.267, 38.115],
-];
 
 /**
  * SF-tab camera bounds: the San Francisco landmass (Ocean Beach through the
@@ -108,32 +101,29 @@ export const PHONE_PORTRAIT_SOUTH_BAY_VIEWPORT_PADDING: ViewportPadding = {
 };
 
 /**
- * Peninsula tab: land corridor only — SSF through Mountain View on the 101
- * strip. East edge stops at the hills/101 corridor so fitBounds does not
- * mathematically center open Bay water or Foster City.
+ * Peninsula tab: the monitored coastal Peninsula belt — Daly City and Pacifica
+ * on the ocean side, down to Half Moon Bay. The previous preset framed empty
+ * Burlingame / San Mateo land (no monitored locations there), which pushed the
+ * only two markers into the top-left corner behind the fog rail (audit RC-1 /
+ * Peninsula screenshot). These bounds frame the actual monitored locations so
+ * they present correctly, using the same fitBounds path as every other region.
  */
 export const PHONE_PORTRAIT_PENINSULA_REGION_BOUNDS: MapBounds = [
-  [-122.502, 37.375],
-  [-122.198, 37.668],
+  [-122.51, 37.44],
+  [-122.41, 37.71],
 ];
 
 /**
  * Padding tuned for Peninsula fitBounds above the bottom tray and beside the
- * fog rail. Heavy right padding intentionally biases the visible center west
- * onto peninsula land instead of the Bay / East Bay.
+ * fog rail. The monitored Peninsula locations are all on the coast (west), so
+ * generous left padding keeps them clear of the fog rail while the frame stays
+ * centered on the markers instead of empty inland land.
  */
 export const PHONE_PORTRAIT_PENINSULA_VIEWPORT_PADDING: ViewportPadding = {
-  top: 112,
-  right: 176,
-  bottom: 215,
-  left: 76,
-};
-
-/** Peninsula tab: Burlingame / San Mateo land centered; bay cropped east. */
-export const PHONE_PORTRAIT_PENINSULA_CAMERA: PhonePortraitCameraPreset = {
-  latitude: 37.528,
-  longitude: -122.402,
-  zoom: 10.18,
+  top: 128,
+  right: 28,
+  bottom: 210,
+  left: 100,
 };
 
 /** Deselected / all-Bay default: wider full Bay Area view. */
@@ -145,19 +135,12 @@ export const PHONE_PORTRAIT_ALL_BAY_CAMERA: PhonePortraitCameraPreset = {
 
 /**
  * Deselected / no-region fallback camera. Every visible product region is
- * framed by {@link fitPhonePortraitRegionViewport} (bounds for SF / North Bay /
- * East Bay / South Bay, the dedicated Peninsula preset for Peninsula), so this
- * helper only supplies the all-Bay camera when no region is active.
+ * framed by {@link fitPhonePortraitRegionViewport} via canonical fitBounds
+ * (SF / North Bay / East Bay / South Bay / Peninsula), so this helper only
+ * supplies the all-Bay camera when no region is active.
  */
-export function getPhonePortraitCameraPreset(
-  regionId: string | null | undefined,
-): PhonePortraitCameraPreset {
-  switch (regionId) {
-    case "peninsula":
-      return PHONE_PORTRAIT_PENINSULA_CAMERA;
-    default:
-      return PHONE_PORTRAIT_ALL_BAY_CAMERA;
-  }
+export function getPhonePortraitCameraPreset(): PhonePortraitCameraPreset {
+  return PHONE_PORTRAIT_ALL_BAY_CAMERA;
 }
 
 export const PHONE_PORTRAIT_MAP_MAX_ZOOM = 10.6;
@@ -197,15 +180,10 @@ export const PHONE_PORTRAIT_MARKER_LABEL_OFFSETS: Record<
   sausalito: [14, 52],
   "stinson-beach": [58, 64],
   "san-francisco": [30, 10],
-  "san-rafael": [-10, -8],
-  novato: [0, -10],
-  "san-anselmo": [12, -2],
-  richmond: [16, 6],
   berkeley: [-26, 4],
   presidio: [-26, -8],
   "golden-gate-park": [-14, 34],
   "ocean-beach": [-34, 12],
-  "ocean-beach-sf": [-34, 12],
   "marin-headlands": [-30, 12],
 };
 
@@ -285,10 +263,6 @@ export const PHONE_PORTRAIT_PRIORITY_LOCATION_IDS = [
   "sausalito",
   "mill-valley",
   "stinson-beach",
-  "san-rafael",
-  "novato",
-  "san-anselmo",
-  "richmond",
 ] as const;
 
 export function getPhonePortraitMarkerPriority(locationId: string): number {
@@ -301,30 +275,23 @@ export function getPhonePortraitMarkerPriority(locationId: string): number {
 export const PHONE_PORTRAIT_MARKER_COLLISION_X = 56;
 export const PHONE_PORTRAIT_MARKER_COLLISION_Y = 76;
 
+/**
+ * The dense San-Francisco-and-coastal cluster (Ocean Beach, Golden Gate Park,
+ * Presidio, Daly City, Pacifica, Marin Headlands, Half Moon Bay) sits so close
+ * together that at the wide all-Bay zoom the markers overlap into an unreadable
+ * knot. This set is decluttered *only in the all-Bay composition* (no active
+ * region) — see {@link declutterPhonePortraitMarkers}. Inside a specific region
+ * camera the region's own members always remain eligible and collision alone
+ * declutters them, so a region view never hides its own locations.
+ */
 export const PHONE_PORTRAIT_LOW_ZOOM_HIDDEN_LOCATION_IDS = new Set([
   "daly-city",
   "pacifica",
   "presidio",
   "golden-gate-park",
   "ocean-beach",
-  "ocean-beach-sf",
   "marin-headlands",
   "half-moon-bay",
 ]);
 
 export const PHONE_PORTRAIT_LOW_ZOOM_HIDE_THRESHOLD = 9.9;
-
-export function filterLocationsForPhonePortraitSfComposition<
-  T extends LocationWithCoordinates,
->(locations: T[]): T[] {
-  return locations.filter(
-    (location) =>
-      typeof location.latitude === "number" &&
-      typeof location.longitude === "number" &&
-      isLocationWithinProductRegionBounds(
-        location.latitude,
-        location.longitude,
-        PHONE_PORTRAIT_SF_CENTRAL_BAY_BOUNDS,
-      ),
-  );
-}

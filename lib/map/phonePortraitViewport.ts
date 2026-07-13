@@ -8,7 +8,7 @@ import {
   PHONE_PORTRAIT_MAP_MAX_ZOOM,
   PHONE_PORTRAIT_NORTH_BAY_REGION_BOUNDS,
   PHONE_PORTRAIT_NORTH_BAY_VIEWPORT_PADDING,
-  PHONE_PORTRAIT_PENINSULA_CAMERA,
+  PHONE_PORTRAIT_PENINSULA_REGION_BOUNDS,
   PHONE_PORTRAIT_PENINSULA_VIEWPORT_PADDING,
   PHONE_PORTRAIT_SF_REGION_BOUNDS,
   PHONE_PORTRAIT_SF_VIEWPORT_PADDING,
@@ -22,7 +22,8 @@ function normalizePhonePortraitPadding(
     | typeof PHONE_PORTRAIT_NORTH_BAY_VIEWPORT_PADDING
     | typeof PHONE_PORTRAIT_EAST_BAY_VIEWPORT_PADDING
     | typeof PHONE_PORTRAIT_PENINSULA_VIEWPORT_PADDING
-    | typeof PHONE_PORTRAIT_SOUTH_BAY_VIEWPORT_PADDING,
+    | typeof PHONE_PORTRAIT_SOUTH_BAY_VIEWPORT_PADDING
+    | number,
 ): { top: number; bottom: number; left: number; right: number } {
   if (typeof padding === "number") {
     return { top: padding, bottom: padding, left: padding, right: padding };
@@ -111,25 +112,20 @@ export function fitPhonePortraitRegionViewport(
   }
 
   if (regionId === "peninsula") {
-    const preset = PHONE_PORTRAIT_PENINSULA_CAMERA;
     const padding = normalizePhonePortraitPadding(
       PHONE_PORTRAIT_PENINSULA_VIEWPORT_PADDING,
     );
-    const camera = {
-      center: [preset.longitude, preset.latitude] as [number, number],
-      zoom: preset.zoom,
-      padding,
-    };
 
-    if (duration > 0) {
-      map.easeTo({ ...camera, duration, essential: true });
-    } else {
-      map.jumpTo(camera);
-    }
+    map.fitBounds(PHONE_PORTRAIT_PENINSULA_REGION_BOUNDS, {
+      padding,
+      maxZoom: PHONE_PORTRAIT_MAP_MAX_ZOOM,
+      duration,
+      essential: true,
+    });
     return;
   }
 
-  const preset = getPhonePortraitCameraPreset(regionId);
+  const preset = getPhonePortraitCameraPreset();
   const camera = {
     center: [preset.longitude, preset.latitude] as [number, number],
     zoom: preset.zoom,

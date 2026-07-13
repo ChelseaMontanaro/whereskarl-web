@@ -192,7 +192,14 @@ function measureLabelGroupCenter(element: HTMLElement): { x: number; y: number }
 export function declutterPhonePortraitMarkers(
   map: MapLibreMap,
   entries: PhonePortraitDeclutterEntry[],
+  options?: { applyLowZoomHiding?: boolean },
 ): void {
+  // Low-zoom hiding of the SF/coastal cluster is only meaningful in the wide
+  // all-Bay composition, where those markers overlap into an unreadable knot.
+  // Inside a specific region camera the region's own members must stay eligible
+  // (collision alone declutters them), so callers pass `false` when a region is
+  // active. Defaults to `true` to preserve the all-Bay behavior for any caller.
+  const applyLowZoomHiding = options?.applyLowZoomHiding ?? true;
   const zoom = map.getZoom();
 
   // Reveal every marker first so the label/score geometry can be measured from
@@ -223,6 +230,7 @@ export function declutterPhonePortraitMarkers(
 
   for (const entry of ordered) {
     if (
+      applyLowZoomHiding &&
       !entry.isSelected &&
       zoom < PHONE_PORTRAIT_LOW_ZOOM_HIDE_THRESHOLD &&
       PHONE_PORTRAIT_LOW_ZOOM_HIDDEN_LOCATION_IDS.has(entry.locationId)

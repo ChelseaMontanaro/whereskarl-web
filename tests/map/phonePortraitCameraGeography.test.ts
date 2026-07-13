@@ -4,7 +4,7 @@ import type { MapBounds } from "@/lib/map/config";
 import {
   PHONE_PORTRAIT_EAST_BAY_REGION_BOUNDS,
   PHONE_PORTRAIT_NORTH_BAY_REGION_BOUNDS,
-  PHONE_PORTRAIT_PENINSULA_CAMERA,
+  PHONE_PORTRAIT_PENINSULA_REGION_BOUNDS,
   PHONE_PORTRAIT_SF_REGION_BOUNDS,
   PHONE_PORTRAIT_SOUTH_BAY_REGION_BOUNDS,
 } from "@/lib/map/phonePortraitMapPresentation";
@@ -28,6 +28,9 @@ const LOCATIONS = {
   sanJose: { lat: 37.3382, lng: -121.8863 },
   fosterCity: { lat: 37.5585, lng: -122.271 },
   fremont: { lat: 37.5485, lng: -121.9886 },
+  dalyCity: { lat: 37.6879, lng: -122.4702 },
+  pacifica: { lat: 37.6138, lng: -122.4869 },
+  halfMoonBay: { lat: 37.4636, lng: -122.4286 },
 } as const;
 
 function contains(bounds: MapBounds, point: { lat: number; lng: number }) {
@@ -97,10 +100,17 @@ describe("phone-portrait region camera geography", () => {
     expect(contains(bounds, LOCATIONS.berkeley)).toBe(false);
   });
 
-  it("keeps the Peninsula preset on the land corridor", () => {
-    expect(PHONE_PORTRAIT_PENINSULA_CAMERA.latitude).toBeGreaterThan(37.4);
-    expect(PHONE_PORTRAIT_PENINSULA_CAMERA.latitude).toBeLessThan(37.65);
-    expect(PHONE_PORTRAIT_PENINSULA_CAMERA.longitude).toBeLessThan(-122.3);
-    expect(PHONE_PORTRAIT_PENINSULA_CAMERA.zoom).toBeGreaterThan(9.5);
+  it("frames the Peninsula on its monitored coastal locations", () => {
+    const bounds = PHONE_PORTRAIT_PENINSULA_REGION_BOUNDS;
+
+    // The monitored Peninsula locations must all be inside the frame so they
+    // present correctly instead of clipping into the corner behind the fog rail.
+    expect(contains(bounds, LOCATIONS.dalyCity)).toBe(true);
+    expect(contains(bounds, LOCATIONS.pacifica)).toBe(true);
+    expect(contains(bounds, LOCATIONS.halfMoonBay)).toBe(true);
+
+    // Stays on the coastal belt — does not sprawl east into the Bay / East Bay.
+    expect(contains(bounds, LOCATIONS.fosterCity)).toBe(false);
+    expect(contains(bounds, LOCATIONS.oakland)).toBe(false);
   });
 });

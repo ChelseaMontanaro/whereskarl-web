@@ -6,7 +6,7 @@ import {
   PHONE_PORTRAIT_EAST_BAY_VIEWPORT_PADDING,
   PHONE_PORTRAIT_NORTH_BAY_REGION_BOUNDS,
   PHONE_PORTRAIT_NORTH_BAY_VIEWPORT_PADDING,
-  PHONE_PORTRAIT_PENINSULA_CAMERA,
+  PHONE_PORTRAIT_PENINSULA_REGION_BOUNDS,
   PHONE_PORTRAIT_PENINSULA_VIEWPORT_PADDING,
   PHONE_PORTRAIT_SF_REGION_BOUNDS,
   PHONE_PORTRAIT_SF_VIEWPORT_PADDING,
@@ -69,6 +69,11 @@ const FIT_BOUNDS_REGIONS = [
     bounds: PHONE_PORTRAIT_SOUTH_BAY_REGION_BOUNDS,
     padding: PHONE_PORTRAIT_SOUTH_BAY_VIEWPORT_PADDING,
   },
+  {
+    id: "peninsula",
+    bounds: PHONE_PORTRAIT_PENINSULA_REGION_BOUNDS,
+    padding: PHONE_PORTRAIT_PENINSULA_VIEWPORT_PADDING,
+  },
 ] as const;
 
 describe("fitPhonePortraitRegionViewport", () => {
@@ -93,20 +98,22 @@ describe("fitPhonePortraitRegionViewport", () => {
     },
   );
 
-  it("uses the Peninsula camera preset instead of the all-Bay fallback", () => {
-    const { map, jumpTo, fitBounds } = createMapSpies();
+  it("frames the Peninsula on its monitored coastal locations via fitBounds", () => {
+    const { map, jumpTo, easeTo, fitBounds } = createMapSpies();
 
     fitPhonePortraitRegionViewport(map, "peninsula");
 
-    expect(fitBounds).not.toHaveBeenCalled();
-    expect(jumpTo).toHaveBeenCalledWith({
-      center: [
-        PHONE_PORTRAIT_PENINSULA_CAMERA.longitude,
-        PHONE_PORTRAIT_PENINSULA_CAMERA.latitude,
-      ],
-      zoom: PHONE_PORTRAIT_PENINSULA_CAMERA.zoom,
-      padding: PHONE_PORTRAIT_PENINSULA_VIEWPORT_PADDING,
-    });
+    // Canonical camera system: Peninsula uses the same fitBounds path as every
+    // other region (no bespoke preset), framing the monitored coastal belt.
+    expect(fitBounds).toHaveBeenCalledWith(
+      PHONE_PORTRAIT_PENINSULA_REGION_BOUNDS,
+      expect.objectContaining({
+        padding: normalizePadding(PHONE_PORTRAIT_PENINSULA_VIEWPORT_PADDING),
+        duration: 0,
+      }),
+    );
+    expect(jumpTo).not.toHaveBeenCalled();
+    expect(easeTo).not.toHaveBeenCalled();
   });
 
   it("uses the same canonical region target on direct load and on chip switch", () => {
@@ -126,24 +133,6 @@ describe("fitPhonePortraitRegionViewport", () => {
         load.fitBounds.mock.calls[0]?.[0],
       );
     }
-
-    // Peninsula shares its preset across both paths (jump vs ease).
-    const peninsulaLoad = createMapSpies();
-    const peninsulaSwitch = createMapSpies();
-    fitPhonePortraitRegionViewport(peninsulaLoad.map, "peninsula");
-    fitPhonePortraitRegionViewport(peninsulaSwitch.map, "peninsula", {
-      duration: 450,
-    });
-    const expectedCenter = [
-      PHONE_PORTRAIT_PENINSULA_CAMERA.longitude,
-      PHONE_PORTRAIT_PENINSULA_CAMERA.latitude,
-    ];
-    expect(peninsulaLoad.jumpTo.mock.calls[0]?.[0]?.center).toEqual(
-      expectedCenter,
-    );
-    expect(peninsulaSwitch.easeTo.mock.calls[0]?.[0]?.center).toEqual(
-      expectedCenter,
-    );
   });
 
   it("falls back to the all-Bay camera only when no region is selected", () => {
@@ -167,11 +156,10 @@ describe("fitPhonePortraitRegionViewport", () => {
     for (const { id } of FIT_BOUNDS_REGIONS) {
       fitPhonePortraitRegionViewport(map, id);
     }
-    fitPhonePortraitRegionViewport(map, "peninsula");
     fitPhonePortraitRegionViewport(map, null);
 
-    // One reset per application (4 fitBounds regions + Peninsula + all-Bay).
-    expect(setPadding).toHaveBeenCalledTimes(6);
+    // One reset per application (5 fitBounds regions incl. Peninsula + all-Bay).
+    expect(setPadding).toHaveBeenCalledTimes(FIT_BOUNDS_REGIONS.length + 1);
     for (const call of setPadding.mock.calls) {
       expect(call[0]).toEqual({ top: 0, right: 0, bottom: 0, left: 0 });
     }
@@ -187,8 +175,8 @@ describe("fitPhonePortraitRegionViewport", () => {
       "peninsula",
     ] as const;
 
-    // Three full cycles including the Peninsula preset (which sets persistent
-    // padding) so any leftover-padding regression would surface on cycle 2+.
+    // Three full cycles so any leftover-padding regression would surface on
+    // cycle 2+.
     const CYCLES = 3;
     for (let cycle = 0; cycle < CYCLES; cycle += 1) {
       for (const id of order) {
@@ -217,8 +205,7 @@ describe("fitPhonePortraitRegionViewport", () => {
       void id;
     }
 
-    // Peninsula keeps its dedicated animated preset every cycle.
-    const peninsulaCalls = jumpTo.mock.calls.length; // none (all animated)
-    expect(peninsulaCalls).toBe(0);
+    // No region uses a bespoke jump/preset — every region frames via fitBounds.
+    expect(jumpTo.mock.calls.length).toBe(0);
   });
 });

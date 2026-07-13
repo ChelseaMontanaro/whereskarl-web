@@ -467,10 +467,18 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
         labelOffsetHandler();
         mapInstance.on("zoom", labelOffsetHandler);
 
+        // Low-zoom hiding of the SF/coastal cluster only applies in the all-Bay
+        // composition (no active region). In a region camera the region's own
+        // members stay eligible so a region never hides its own locations
+        // (audit RC-4); collision alone declutters them.
+        const applyLowZoomHiding = !selectedRegionId;
+
         // Declutter runs on move end and re-applies the same zoom-scaled offset
         // before measuring, so collision detection matches the rendered labels.
         declutterHandler = () =>
-          declutterPhonePortraitMarkers(mapInstance, entries);
+          declutterPhonePortraitMarkers(mapInstance, entries, {
+            applyLowZoomHiding,
+          });
         declutterHandler();
         mapInstance.on("moveend", declutterHandler);
       }

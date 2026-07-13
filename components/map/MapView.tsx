@@ -26,7 +26,6 @@ import type { FogIntensity } from "@/lib/map/conditions";
 import {
   findBayAreaProductRegion,
   isBayAreaProductRegionId,
-  type BayAreaProductRegionId,
 } from "@/lib/map/config";
 import {
   mapBestRightNowTrayItems,
@@ -41,17 +40,8 @@ import {
   resolveMapQueryState,
 } from "@/lib/map/routing";
 import type { KarlMapStyleId } from "@/lib/map/styles";
-import { filterLocationsForPhonePortraitSfComposition } from "@/lib/map/phonePortraitMapPresentation";
 import { filterLocationsByProductRegion } from "@/lib/map/regions";
 import type { LocationWeather } from "@/lib/schemas/weather";
-
-/**
- * Phone-portrait map is selection-driven: when nothing is selected on a clean
- * entry, the camera still frames this region (matching the prior behavior)
- * while the canonical Best Right Now location is auto-selected into the card.
- */
-const PHONE_PORTRAIT_DEFAULT_CAMERA_REGION: BayAreaProductRegionId =
-  "san-francisco";
 
 function initialMapStyle(): KarlMapStyleId {
   if (typeof window === "undefined") {
@@ -327,11 +317,12 @@ function MobileMapView({ state }: { state: MapViewModel }) {
     sheetDismissedRef,
   } = state;
 
-  // Region that frames the phone-portrait camera. It stays independent of the
-  // canonical selection so auto-selecting Best Right Now on entry keeps the
-  // exact same camera as before (default: San Francisco framing).
-  const phonePortraitCameraRegionId =
-    mapQuery.activeRegionId ?? PHONE_PORTRAIT_DEFAULT_CAMERA_REGION;
+  // Region that frames the phone-portrait camera. Camera intent is independent
+  // of the canonical selection: when no region is active the camera frames the
+  // full Bay (`null` → PHONE_PORTRAIT_ALL_BAY_CAMERA), even while Best Right Now
+  // is auto-selected into the sheet. Selection never silently swaps the camera
+  // to a region (audit RC-3: "All Bay" must not reuse the San Francisco camera).
+  const phonePortraitCameraRegionId = mapQuery.activeRegionId;
   // Markers are region-scoped only while explicitly browsing a region; once a
   // location is selected we show every marker so the selected one is always
   // visible. This intentionally does NOT use the SF camera default so an
@@ -379,17 +370,19 @@ function MobileMapView({ state }: { state: MapViewModel }) {
       return markerLocations;
     }
 
-    const regionFiltered =
-      phonePortraitFilterRegionId === "san-francisco"
-        ? filterLocationsForPhonePortraitSfComposition(markerLocations)
-        : phonePortraitFilterRegionId
-          ? filterLocationsByProductRegion(
-              markerLocations,
-              isBayAreaProductRegionId(phonePortraitFilterRegionId)
-                ? phonePortraitFilterRegionId
-                : null,
-            )
-          : markerLocations;
+    // Every region (SF included) resolves membership through the one canonical
+    // product-region resolver. The SF chip therefore shows its actual product
+    // region (San Francisco, Golden Gate Park, Ocean Beach, Presidio) instead
+    // of the divergent "central Bay" composition that admitted Marin/East Bay
+    // and excluded Ocean Beach (audit RC-6).
+    const regionFiltered = phonePortraitFilterRegionId
+      ? filterLocationsByProductRegion(
+          markerLocations,
+          isBayAreaProductRegionId(phonePortraitFilterRegionId)
+            ? phonePortraitFilterRegionId
+            : null,
+        )
+      : markerLocations;
 
     if (!intensityFilter) {
       return regionFiltered;

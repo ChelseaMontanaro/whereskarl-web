@@ -73,10 +73,15 @@ export const BAY_AREA_VISIBLE_PRODUCT_REGION_IDS = [
   "peninsula",
 ] as const;
 
-/** Backend `/locations` region values, including the coastal Peninsula belt. */
+/**
+ * Backend `/locations` region values. Every backend region is also a visible
+ * product region on web (Peninsula included), so this is the same canonical set
+ * as {@link BAY_AREA_VISIBLE_PRODUCT_REGION_IDS} — no duplicate `peninsula`
+ * entry. Kept as a distinct export so the schema and region resolver read from a
+ * clearly-named "backend" list even if the two sets diverge again later.
+ */
 export const BAY_AREA_BACKEND_REGION_IDS = [
   ...BAY_AREA_VISIBLE_PRODUCT_REGION_IDS,
-  "peninsula",
 ] as const;
 
 export type BayAreaVisibleProductRegionId =
