@@ -10,6 +10,8 @@ const {
   mockRemoveSource,
   mockGetLayer,
   mockGetSource,
+  mockMapInstances,
+  mockSetZoom,
   MockMap,
   MockMarker,
 } = vi.hoisted(() => {
@@ -22,17 +24,27 @@ const {
   const removeSource = vi.fn();
   const getLayer = vi.fn(() => undefined);
   const getSource = vi.fn(() => undefined);
+  const mapInstances: Map[] = [];
+  // Shared, test-controllable zoom. Defaults to the phone-portrait reference
+  // zoom so label offsets render at full (100%) scale unless a test overrides it.
+  const zoomState = { current: 10.5 };
+  const setZoom = (zoom: number) => {
+    zoomState.current = zoom;
+  };
 
   class Map {
     addControl = vi.fn();
     on = vi.fn((_event: string, callback: () => void) => {
       callback();
     });
+    off = vi.fn();
     once = vi.fn((_event: string, callback: () => void) => {
       callback();
     });
     loaded = vi.fn(() => true);
-    getZoom = vi.fn(() => 10);
+    // Reads the shared, test-controllable zoom (see mockSetZoom). Defaults to
+    // the phone-portrait reference zoom (full-scale label offsets).
+    getZoom = vi.fn(() => zoomState.current);
     project = vi.fn((_lngLat: [number, number]) => ({ x: 0, y: 0 }));
     flyTo = flyTo;
     fitBounds = fitBounds;
@@ -47,6 +59,10 @@ const {
     getLayer = getLayer;
     getSource = getSource;
     remove = vi.fn();
+
+    constructor() {
+      mapInstances.push(this);
+    }
   }
 
   class Marker {
@@ -97,6 +113,8 @@ const {
     mockRemoveSource: removeSource,
     mockGetLayer: getLayer,
     mockGetSource: getSource,
+    mockMapInstances: mapInstances,
+    mockSetZoom: setZoom,
     MockMap: Map,
     MockMarker: Marker,
   };
@@ -117,7 +135,9 @@ export {
   mockFlyTo,
   mockGetLayer,
   mockGetSource,
+  mockMapInstances,
   mockRemoveLayer,
   mockRemoveSource,
   mockSetStyle,
+  mockSetZoom,
 };

@@ -40,6 +40,7 @@ import {
 import {
   createPhonePortraitMapMarkerElement,
   declutterPhonePortraitMarkers,
+  updatePhonePortraitMarkerLabelOffsets,
   type PhonePortraitDeclutterEntry,
 } from "@/lib/map/phonePortraitMarkers";
 import {
@@ -359,6 +360,10 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
 
       let cancelled = false;
       let declutterHandler: (() => void) | null = null;
+      let labelOffsetHandler: (() => void) | null = null;
+      // Capture the exact map instance we attach listeners to so cleanup can
+      // detach from it even after the init effect has cleared mapRef.current.
+      let listenerMap: import("maplibre-gl").Map | null = null;
 
       async function syncMarkers() {
         const maplibregl = (await import("maplibre-gl")).default;
@@ -433,6 +438,7 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
         }
 
         const mapInstance = mapRef.current;
+        listenerMap = mapInstance;
         const entries: PhonePortraitDeclutterEntry[] = locations.flatMap(
           (location) => {
             const marker = markersRef.current.get(location.id);
@@ -452,6 +458,17 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
           },
         );
 
+        // Single map-level zoom handler updates every mounted label/score
+        // group's scaled offset — no per-marker listeners, no React re-render
+        // per zoom frame. `zoom` fires continuously during a zoom gesture so
+        // the offsets scale smoothly toward the icon.
+        labelOffsetHandler = () =>
+          updatePhonePortraitMarkerLabelOffsets(mapInstance, entries);
+        labelOffsetHandler();
+        mapInstance.on("zoom", labelOffsetHandler);
+
+        // Declutter runs on move end and re-applies the same zoom-scaled offset
+        // before measuring, so collision detection matches the rendered labels.
         declutterHandler = () =>
           declutterPhonePortraitMarkers(mapInstance, entries);
         declutterHandler();
@@ -462,8 +479,13 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
 
       return () => {
         cancelled = true;
-        if (declutterHandler && mapRef.current) {
-          mapRef.current.off("moveend", declutterHandler);
+        if (listenerMap) {
+          if (labelOffsetHandler) {
+            listenerMap.off("zoom", labelOffsetHandler);
+          }
+          if (declutterHandler) {
+            listenerMap.off("moveend", declutterHandler);
+          }
         }
         const markers = markersRef.current;
         markers.forEach((marker) => marker.remove());

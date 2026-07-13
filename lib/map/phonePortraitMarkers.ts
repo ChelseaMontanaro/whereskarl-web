@@ -14,6 +14,7 @@ import {
   PHONE_PORTRAIT_LOW_ZOOM_HIDE_THRESHOLD,
   PHONE_PORTRAIT_MARKER_COLLISION_X,
   PHONE_PORTRAIT_MARKER_COLLISION_Y,
+  resolvePhonePortraitMarkerLabelOffset,
 } from "@/lib/map/phonePortraitMapPresentation";
 import {
   mapMarkerAriaLabel,
@@ -92,13 +93,17 @@ export function createPhonePortraitMapMarkerElement(input: {
 
   // Label + score live in an absolutely positioned group so their per-location
   // declutter offset never moves the coordinate-anchored icon. The group sits
-  // below the icon by default; the offset shifts only this group.
+  // below the icon by default; the offset shifts only this group. The offset is
+  // scaled toward the icon as the map zooms out (see
+  // resolvePhonePortraitMarkerLabelOffset); the configured value is retained in
+  // dataset as the canonical source, and the initial render uses the configured
+  // (reference-zoom) offset until the first zoom-aware pass runs.
   const meta = document.createElement("div");
   meta.className = "karl-universal-map-marker__meta";
   const labelOffset = getPhonePortraitMarkerLabelOffset(input.location.id);
-  meta.style.transform = `translate(calc(-50% + ${labelOffset[0]}px), ${labelOffset[1]}px)`;
   meta.dataset.labelOffsetX = String(labelOffset[0]);
   meta.dataset.labelOffsetY = String(labelOffset[1]);
+  writePhonePortraitMetaOffset(meta, labelOffset[0], labelOffset[1]);
 
   if (input.showLocationLabel) {
     const label = document.createElement("span");
@@ -117,6 +122,57 @@ export function createPhonePortraitMapMarkerElement(input: {
   root.append(meta);
 
   return root;
+}
+
+/**
+ * Writes the rendered label/score offset onto the __meta group. Centralized so
+ * marker creation and every zoom-aware update produce an identical transform
+ * string and record the rendered offset consistently in dataset.
+ */
+function writePhonePortraitMetaOffset(
+  meta: HTMLElement,
+  x: number,
+  y: number,
+): void {
+  meta.style.transform = `translate(calc(-50% + ${x}px), ${y}px)`;
+  meta.dataset.renderedOffsetX = String(x);
+  meta.dataset.renderedOffsetY = String(y);
+}
+
+/**
+ * Applies the zoom-scaled canonical label/score offset to a single marker's
+ * __meta group. The coordinate-anchored icon is never touched. Safe to call
+ * repeatedly (idempotent for a given zoom).
+ */
+export function applyPhonePortraitMarkerLabelOffset(
+  root: HTMLElement,
+  locationId: string,
+  zoom: number,
+): void {
+  const meta = root.querySelector<HTMLElement>(
+    ".karl-universal-map-marker__meta",
+  );
+  if (!meta) {
+    return;
+  }
+
+  const [x, y] = resolvePhonePortraitMarkerLabelOffset(locationId, zoom);
+  writePhonePortraitMetaOffset(meta, x, y);
+}
+
+/**
+ * Zoom-aware update for every mounted phone-portrait marker. Intended to be
+ * driven by a single map-level `zoom` handler so the label/score groups scale
+ * smoothly without any per-marker listeners or React re-renders.
+ */
+export function updatePhonePortraitMarkerLabelOffsets(
+  map: MapLibreMap,
+  entries: PhonePortraitDeclutterEntry[],
+): void {
+  const zoom = map.getZoom();
+  for (const entry of entries) {
+    applyPhonePortraitMarkerLabelOffset(entry.element, entry.locationId, zoom);
+  }
 }
 
 /**
@@ -144,6 +200,14 @@ export function declutterPhonePortraitMarkers(
   // an intermediate all-visible frame before collided markers are re-hidden.
   for (const entry of entries) {
     entry.element.style.display = "";
+  }
+
+  // Apply the current zoom-scaled offset to every label/score group *before*
+  // measuring, so collision detection operates on exactly the rendered
+  // position. Rendering and decluttering share one offset source and can never
+  // diverge.
+  for (const entry of entries) {
+    applyPhonePortraitMarkerLabelOffset(entry.element, entry.locationId, zoom);
   }
 
   const placed: Array<{ x: number; y: number }> = [];

@@ -216,6 +216,68 @@ export function getPhonePortraitMarkerLabelOffset(
   return PHONE_PORTRAIT_MARKER_LABEL_OFFSETS[locationId] ?? [0, 0];
 }
 
+/**
+ * Zoom breakpoints for scaling the canonical label/score offsets.
+ *
+ * The offsets in {@link PHONE_PORTRAIT_MARKER_LABEL_OFFSETS} are tuned at the
+ * SF-composition reference zoom. A fixed pixel offset represents a growing
+ * geographic distance as the map zooms out, so at lower zoom the label/score
+ * group drifts away from its coordinate-anchored icon (into open water, etc.).
+ * We keep the single canonical offset table and scale it toward the icon as
+ * zoom decreases. Scaling never touches the icon — only the label/score group.
+ *
+ * Curve (linear between breakpoints, then clamped):
+ *   zoom >= FULL_SCALE_ZOOM (10.3)  -> 1.0  (100% of configured offset)
+ *   zoom == 9.3                      -> 0.6  (~60%)
+ *   zoom <= MIN_SCALE_ZOOM  (8.3)    -> MIN_SCALE (0.2, ~20%)
+ */
+export const PHONE_PORTRAIT_LABEL_OFFSET_FULL_SCALE_ZOOM = 10.3;
+export const PHONE_PORTRAIT_LABEL_OFFSET_MIN_SCALE_ZOOM = 8.3;
+export const PHONE_PORTRAIT_LABEL_OFFSET_MIN_SCALE = 0.2;
+
+/**
+ * Canonical, deterministic, monotonic scale factor for the label/score offset
+ * at a given map zoom. Always clamped to [0, 1] (and never below the configured
+ * minimum floor). Shared by every location so scaling stays uniform.
+ */
+export function getPhonePortraitLabelOffsetScale(zoom: number): number {
+  if (!Number.isFinite(zoom)) {
+    return 1;
+  }
+  if (zoom >= PHONE_PORTRAIT_LABEL_OFFSET_FULL_SCALE_ZOOM) {
+    return 1;
+  }
+  if (zoom <= PHONE_PORTRAIT_LABEL_OFFSET_MIN_SCALE_ZOOM) {
+    return PHONE_PORTRAIT_LABEL_OFFSET_MIN_SCALE;
+  }
+
+  const span =
+    PHONE_PORTRAIT_LABEL_OFFSET_FULL_SCALE_ZOOM -
+    PHONE_PORTRAIT_LABEL_OFFSET_MIN_SCALE_ZOOM;
+  const progress =
+    (zoom - PHONE_PORTRAIT_LABEL_OFFSET_MIN_SCALE_ZOOM) / span;
+  const scale =
+    PHONE_PORTRAIT_LABEL_OFFSET_MIN_SCALE +
+    progress * (1 - PHONE_PORTRAIT_LABEL_OFFSET_MIN_SCALE);
+
+  return Math.min(1, Math.max(0, scale));
+}
+
+/**
+ * Zoom-aware rendered label/score offset: the canonical per-location offset
+ * scaled by {@link getPhonePortraitLabelOffsetScale}. This is the single source
+ * of truth for both rendering (the __meta transform) and collision math so they
+ * can never diverge.
+ */
+export function resolvePhonePortraitMarkerLabelOffset(
+  locationId: string,
+  zoom: number,
+): [number, number] {
+  const [x, y] = getPhonePortraitMarkerLabelOffset(locationId);
+  const scale = getPhonePortraitLabelOffsetScale(zoom);
+  return [x * scale, y * scale];
+}
+
 export const PHONE_PORTRAIT_PRIORITY_LOCATION_IDS = [
   "san-francisco",
   "berkeley",

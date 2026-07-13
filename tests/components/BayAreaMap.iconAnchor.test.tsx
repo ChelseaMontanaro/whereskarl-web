@@ -1,13 +1,16 @@
 // @vitest-environment happy-dom
 
-import "../mocks/maplibre-gl";
+import { mockMapInstances, mockSetZoom } from "../mocks/maplibre-gl";
 
 import { cleanup, render, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { BayAreaMap } from "@/components/map/BayAreaMap";
 import type { MapMarkerLocation } from "@/lib/map/markers";
-import { getPhonePortraitMarkerLabelOffset } from "@/lib/map/phonePortraitMapPresentation";
+import {
+  getPhonePortraitMarkerLabelOffset,
+  resolvePhonePortraitMarkerLabelOffset,
+} from "@/lib/map/phonePortraitMapPresentation";
 
 /**
  * Verifies the phone-portrait marker architecture:
@@ -172,6 +175,13 @@ describe("BayAreaMap phone-portrait icon anchoring", () => {
   });
 });
 
+function meta(id: string): HTMLElement | null {
+  return (
+    root(id)?.querySelector<HTMLElement>(".karl-universal-map-marker__meta") ??
+    null
+  );
+}
+
 describe("BayAreaMap phone-portrait marker root anchoring (stacking regression)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -249,5 +259,188 @@ describe("BayAreaMap phone-portrait marker root anchoring (stacking regression)"
         before[i]!.transform,
       );
     });
+  });
+});
+
+describe("BayAreaMap phone-portrait zoom-scaled label offsets", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    document.body.innerHTML = "";
+    mockSetZoom(10.5);
+  });
+
+  afterEach(() => {
+    cleanup();
+    document.body.innerHTML = "";
+    mockSetZoom(10.5);
+  });
+
+  it("renders full configured offsets at the reference zoom (>= 10.3)", async () => {
+    mockSetZoom(10.5);
+    renderPhonePortrait([
+      phoneLocation("stinson-beach", "Stinson Beach"),
+      phoneLocation("oakland", "Oakland"),
+    ]);
+
+    await waitFor(() => {
+      expect(meta("stinson-beach")).not.toBeNull();
+    });
+
+    const stinson = meta("stinson-beach")!;
+    // Configured stays canonical; rendered equals configured at full scale.
+    expect(stinson.dataset.labelOffsetX).toBe("58");
+    expect(stinson.dataset.labelOffsetY).toBe("64");
+    expect(stinson.dataset.renderedOffsetX).toBe("58");
+    expect(stinson.dataset.renderedOffsetY).toBe("64");
+    expect(stinson.style.transform).toContain("58px");
+    expect(stinson.style.transform).toContain("64px");
+  });
+
+  it("renders proportionally reduced offsets at mid zoom (9.3)", async () => {
+    mockSetZoom(9.3);
+    renderPhonePortrait([phoneLocation("stinson-beach", "Stinson Beach")]);
+
+    await waitFor(() => {
+      expect(meta("stinson-beach")).not.toBeNull();
+    });
+
+    const [rx, ry] = resolvePhonePortraitMarkerLabelOffset(
+      "stinson-beach",
+      9.3,
+    );
+    const stinson = meta("stinson-beach")!;
+    // Configured is preserved; rendered is scaled (~60%).
+    expect(stinson.dataset.labelOffsetX).toBe("58");
+    expect(stinson.dataset.labelOffsetY).toBe("64");
+    expect(Number(stinson.dataset.renderedOffsetX)).toBeCloseTo(rx, 5);
+    expect(Number(stinson.dataset.renderedOffsetY)).toBeCloseTo(ry, 5);
+    expect(Number(stinson.dataset.renderedOffsetX)).toBeCloseTo(58 * 0.6, 5);
+  });
+
+  it("renders strongly reduced offsets at low zoom (8.3)", async () => {
+    mockSetZoom(8.3);
+    renderPhonePortrait([phoneLocation("mill-valley", "Mill Valley")]);
+
+    await waitFor(() => {
+      expect(meta("mill-valley")).not.toBeNull();
+    });
+
+    const millValley = meta("mill-valley")!;
+    expect(Number(millValley.dataset.renderedOffsetX)).toBeCloseTo(-14 * 0.2, 5);
+    expect(Number(millValley.dataset.renderedOffsetY)).toBeCloseTo(-48 * 0.2, 5);
+  });
+
+  it("keeps the icon anchored at [0,0] and untransformed regardless of zoom", async () => {
+    mockSetZoom(8);
+    renderPhonePortrait([
+      phoneLocation("stinson-beach", "Stinson Beach"),
+      phoneLocation("oakland", "Oakland"),
+    ]);
+
+    await waitFor(() => {
+      expect(root("stinson-beach")).not.toBeNull();
+    });
+
+    for (const id of ["stinson-beach", "oakland"]) {
+      const applied = JSON.parse(root(id)!.dataset.markerOffset ?? "null");
+      expect(applied, `marker offset for ${id}`).toEqual([0, 0]);
+      const icon = root(id)!.querySelector<HTMLElement>(
+        ".karl-universal-map-marker",
+      )!;
+      // The icon carries no per-location transform (only the optional selected
+      // scale CSS variable); zoom never moves it.
+      expect(icon.style.transform).toBe("");
+    }
+  });
+
+  it("uses the same scaled offset for rendering and collision measurement", async () => {
+    mockSetZoom(9.3);
+    // Force the two meta groups to overlap so declutter must hide one; the
+    // measurement runs on the live DOM after the scaled transform is applied.
+    const rectSpy = vi
+      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+      .mockImplementation(function getBoundingClientRect(this: HTMLElement) {
+        const empty = {
+          left: 0,
+          top: 0,
+          width: 0,
+          height: 0,
+          right: 0,
+          bottom: 0,
+          x: 0,
+          y: 0,
+        };
+        if (this.classList.contains("karl-universal-map-marker__meta")) {
+          const r = {
+            left: 100,
+            top: 100,
+            width: 40,
+            height: 20,
+            right: 140,
+            bottom: 120,
+            x: 100,
+            y: 100,
+          };
+          return { ...r, toJSON: () => r } as DOMRect;
+        }
+        return { ...empty, toJSON: () => empty } as DOMRect;
+      });
+
+    try {
+      renderPhonePortrait([
+        phoneLocation("san-francisco", "San Francisco"),
+        phoneLocation("berkeley", "Berkeley"),
+      ]);
+
+      await waitFor(() => {
+        expect(root("berkeley")).not.toBeNull();
+      });
+
+      // Rendered offsets reflect the mid-zoom scale for both markers...
+      const [sfx, sfy] = resolvePhonePortraitMarkerLabelOffset(
+        "san-francisco",
+        9.3,
+      );
+      expect(Number(meta("san-francisco")!.dataset.renderedOffsetX)).toBeCloseTo(
+        sfx,
+        5,
+      );
+      expect(Number(meta("san-francisco")!.dataset.renderedOffsetY)).toBeCloseTo(
+        sfy,
+        5,
+      );
+      // ...and the overlapping (lower-priority) label was decluttered using that
+      // same rendered geometry.
+      expect(root("san-francisco")!.style.display).not.toBe("none");
+      expect(root("berkeley")!.style.display).toBe("none");
+    } finally {
+      rectSpy.mockRestore();
+    }
+  });
+
+  it("registers exactly one zoom listener and removes it on unmount", async () => {
+    mockSetZoom(10.5);
+    const { unmount } = renderPhonePortrait([
+      phoneLocation("tiburon", "Tiburon"),
+    ]);
+
+    await waitFor(() => {
+      expect(root("tiburon")).not.toBeNull();
+    });
+
+    const mapInstance = mockMapInstances.at(-1)!;
+    const zoomOnCalls = mapInstance.on.mock.calls.filter(
+      (call: unknown[]) => call[0] === "zoom",
+    );
+    expect(zoomOnCalls).toHaveLength(1);
+
+    unmount();
+
+    const zoomOffCalls = mapInstance.off.mock.calls.filter(
+      (call: unknown[]) => call[0] === "zoom",
+    );
+    expect(zoomOffCalls).toHaveLength(1);
+    // The same handler reference is added and removed (no stale/duplicate).
+    expect(zoomOffCalls[0]![1]).toBe(zoomOnCalls[0]![1]);
   });
 });
