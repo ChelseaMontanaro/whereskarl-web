@@ -283,9 +283,15 @@ const SECONDARY_VALUE_CLASS = "text-[28px] font-light leading-none text-white";
 /** Title row — single line for every metric title, shared baseline. */
 const METRIC_TITLE_ROW_CLASS =
   "flex h-[1.5rem] w-full items-end justify-center leading-none";
-/** Shared supporting-label row — one baseline, white 13px regular default. */
+/**
+ * Shared supporting-label row. Reserves enough height for a label to wrap onto
+ * two lines inside a narrow column (e.g. "Karl Territory", "Coming Soon") so
+ * labels never collide with a neighbor or clip — without shrinking typography.
+ * `items-end` keeps every label sharing one bottom baseline across all five
+ * columns; wrapped labels grow upward into the reserved space.
+ */
 const METRIC_SUPPORTING_ROW_CLASS =
-  "flex min-h-[1.375rem] items-end justify-center whitespace-nowrap leading-tight text-[13px] font-normal text-white";
+  "flex min-h-[2.25rem] items-end justify-center text-balance leading-[1.15] text-[13px] font-normal text-white";
 
 /** Right-pointing arrow for the Wind supporting row (#F5B000 per mockup). */
 function WindArrowIcon({ className = "h-3 w-3" }: { className?: string }) {
@@ -432,7 +438,11 @@ function PhonePortraitSelectedCard({
   const score = presentClearSkiesScore(location.sunshineScore);
   const airQuality = presentAirQuality(location.aqi);
   const fogScore = resolveFogScore(location);
-  const fogLabel = getFogIntensityLabel(headerIntensity, isNighttime);
+  // Metrics row shows the canonical Fog Intensity label only (Clear / Light Fog
+  // / Foggy / Karl Territory) — never a nighttime or forecast phrasing. The
+  // nighttime "Clear Night" wording belongs to Karl's Read, not this label, so
+  // we intentionally omit the isNighttime flag here.
+  const fogLabel = getFogIntensityLabel(headerIntensity);
   const forecastPeriods = buildForecastPeriods(location, isNighttime);
 
   const subtitle = `${getProductRegionNameForLocation(location) ?? "Bay Area"}, CA`;
@@ -480,7 +490,7 @@ function PhonePortraitSelectedCard({
 
   const header = (
     <>
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-3.5">
         {/*
           Location image placeholder. The backend does not yet expose a
           canonical per-location image URL, so this renders a neutral, premium
@@ -492,25 +502,25 @@ function PhonePortraitSelectedCard({
         */}
         <span
           data-testid="location-image-placeholder"
-          className="flex h-14 w-14 shrink-0 flex-col items-center justify-center gap-0.5 overflow-hidden rounded-full border border-white/15 bg-gradient-to-br from-white/[0.18] via-white/[0.06] to-transparent text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
+          className="flex h-[4.15rem] w-[4.15rem] shrink-0 flex-col items-center justify-center gap-0.5 overflow-hidden rounded-full border border-white/15 bg-gradient-to-br from-white/[0.18] via-white/[0.06] to-transparent text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
         >
-          <span className="px-1 text-[0.5rem] font-semibold leading-[1.05] tracking-tight text-white/70">
+          <span className="px-1 text-[0.5625rem] font-semibold leading-[1.05] tracking-tight text-white/70">
             Location Image
           </span>
-          <span className="text-[0.4375rem] font-medium uppercase leading-[1.05] tracking-[0.08em] text-white/45">
+          <span className="text-[0.5rem] font-medium uppercase leading-[1.05] tracking-[0.08em] text-white/45">
             Coming Soon
           </span>
         </span>
 
         <div className="min-w-0 flex-1">
-          <h2 className="truncate text-[1.0625rem] font-semibold leading-tight tracking-tight text-white">
+          <h2 className="truncate text-[1.1875rem] font-semibold leading-tight tracking-tight text-white">
             {location.name}
           </h2>
-          <p className="mt-0.5 flex items-center gap-1 text-[0.75rem] leading-tight text-white/60">
-            <LocationPinIcon className="h-3 w-3 shrink-0 text-white/45" />
+          <p className="mt-1 flex items-center gap-1 text-[0.8125rem] leading-tight text-white/65">
+            <LocationPinIcon className="h-3.5 w-3.5 shrink-0 text-white/45" />
             <span className="truncate">{subtitle}</span>
           </p>
-          <p className="mt-0.5 text-[0.625rem] leading-tight text-white/40">
+          <p className="mt-1 text-[0.6875rem] leading-tight text-white/45">
             {updatedLabel}
           </p>
         </div>
@@ -541,7 +551,7 @@ function PhonePortraitSelectedCard({
       {/* Unified metrics row — canonical helpers only. Five equal visual columns
           separated by vertical dividers; typography matches approved mockup. */}
       <div
-        className="mt-4 flex items-stretch gap-0 border-t border-white/10 pt-4"
+        className="mt-6 flex items-stretch gap-0 border-t border-white/10 pt-5"
         data-testid="selected-location-metrics"
       >
         <MetricColumn

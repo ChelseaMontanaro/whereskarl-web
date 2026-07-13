@@ -355,8 +355,11 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     for (const column of columns) {
       const supporting = column.querySelector("[data-testid='clear-skies-quality']")
         ?? column.lastElementChild;
-      // Shared min-height keeps every supporting label on the same baseline row.
-      expect(supporting?.className).toContain("min-h-[1.375rem]");
+      // Shared reserved height keeps every supporting label on the same bottom
+      // baseline and leaves room for two-line labels ("Coming Soon") to wrap
+      // without colliding or clipping.
+      expect(supporting?.className).toContain("min-h-[2.25rem]");
+      expect(supporting?.className).toContain("items-end");
     }
 
     expect(screen.getByTestId("clear-skies-quality")).toHaveTextContent("Excellent");
