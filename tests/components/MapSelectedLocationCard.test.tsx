@@ -275,8 +275,9 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(metrics).toHaveTextContent("Temp");
     expect(metrics).toHaveTextContent("68°");
     expect(metrics).toHaveTextContent("Wind");
-    expect(metrics).toHaveTextContent("W 8");
-    expect(metrics).toHaveTextContent("mph");
+    // Wind large value shows the speed only; the compass direction rides in the
+    // supporting label so the value stays as compact as the other metrics.
+    expect(screen.getByTestId("wind-direction")).toHaveTextContent("W");
   });
 
   it("renders the canonical 'CLEAR SKY SCORE' title (singular, uppercased via CSS)", () => {
@@ -297,17 +298,38 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(title.textContent).toBe("Clear Sky Score");
   });
 
-  it("renders larger secondary metric values that remain subordinate to the score", () => {
+  it("makes the Clear Sky Score the hero metric with a larger value than the secondary metrics", () => {
+    // Sizes verified at a real 390px viewport via getBoundingClientRect. The
+    // score value is the hero (38px) and the secondary values are substantial
+    // and easily readable (21px) but still clearly subordinate to the score.
     render(<MapSelectedLocationCard location={location} phonePortrait />);
 
     const score = screen.getByTestId("clear-skies-score");
-    expect(score.className).toContain("text-xl");
+    expect(score.className).toContain("text-[38px]");
+    expect(score.className).toContain("font-light");
 
+    // Quality label is semibold in the canonical score color.
+    const quality = screen.getByTestId("clear-skies-quality");
+    expect(quality.className).toContain("font-semibold");
+
+    // Secondary values are larger than before but still smaller than the score.
     const metrics = screen.getByTestId("selected-location-metrics");
     const fogValue = screen.getByText("18%");
     expect(metrics).toContainElement(fogValue);
-    expect(fogValue.className).toContain("text-lg");
-    expect(fogValue.className).not.toContain("text-xl");
+    expect(fogValue.className).toContain("text-[21px]");
+    expect(fogValue.className).not.toContain("text-[38px]");
+  });
+
+  it("keeps the gold Clear Sky Score title and gray secondary titles", () => {
+    render(<MapSelectedLocationCard location={location} phonePortrait />);
+
+    const scoreTitle = screen.getByText("Clear Sky Score");
+    expect(scoreTitle.className).toContain("text-karl-gold/90");
+    expect(scoreTitle.className).toContain("whitespace-nowrap");
+
+    const fogTitle = screen.getByText("Fog");
+    expect(fogTitle.className).toContain("text-white/40");
+    expect(fogTitle.className).toContain("uppercase");
   });
 
   it("aligns supporting labels across all five metric columns", () => {
@@ -319,13 +341,15 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     for (const column of columns) {
       const supporting = column.querySelector("[data-testid='clear-skies-quality']")
         ?? column.lastElementChild;
-      expect(supporting?.className).toContain("min-h-[0.875rem]");
+      // Shared min-height keeps every supporting label on the same baseline row.
+      expect(supporting?.className).toContain("min-h-[1rem]");
     }
 
     expect(screen.getByTestId("clear-skies-quality")).toHaveTextContent("Excellent");
     expect(metrics).toHaveTextContent("Clear");
     expect(metrics).toHaveTextContent("Coming Soon");
-    expect(metrics).toHaveTextContent("mph");
+    // Wind's supporting label carries the compass direction.
+    expect(screen.getByTestId("wind-direction")).toHaveTextContent("W");
   });
 
   it("keeps Clear Sky Score inline as the first of five metric columns", () => {
@@ -413,7 +437,7 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(score.className).not.toContain("border");
   });
 
-  it("keeps the Wind compass direction and speed on a single line", () => {
+  it("shows the Wind speed as the large value and the direction as the supporting label", () => {
     render(
       <MapSelectedLocationCard
         location={{ ...location, windDirection: "NNW", windSpeed: 12 }}
@@ -422,28 +446,45 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     );
 
     const metrics = screen.getByTestId("selected-location-metrics");
-    const windValue = screen.getByText("NNW 12");
+    // Large value is the speed only (no combined direction+speed string).
+    const windValue = screen.getByText("12");
     expect(metrics).toContainElement(windValue);
     expect(windValue.className).toContain("whitespace-nowrap");
+
+    // Direction is shown separately in the supporting label.
+    expect(screen.getByTestId("wind-direction")).toHaveTextContent("NNW");
+    expect(metrics).not.toHaveTextContent("NNW 12");
   });
 
-  it("shows the canonical Air Quality slot as 'Coming Soon' when AQI is absent", () => {
+  it("renders the AQI placeholder using the same title/value/supporting structure as every metric", () => {
     render(<MapSelectedLocationCard location={location} phonePortrait />);
 
     const slot = screen.getByTestId("air-quality-slot");
+    // Title.
     expect(slot).toHaveTextContent("AQI");
-    expect(slot).toHaveTextContent("Coming Soon");
+    // Value is the neutral em-dash placeholder — never "Coming Soon", "N/A",
+    // "Pending", "0", or "X" — and lives in the shared value position.
+    const value = screen.getByTestId("air-quality-value");
+    expect(value).toHaveTextContent("—");
+    expect(value).not.toHaveTextContent("Coming Soon");
+    // "Coming Soon" is the supporting label beneath the dash (same slot that
+    // will later show the canonical category).
+    const supporting = screen.getByTestId("air-quality-supporting");
+    expect(supporting).toHaveTextContent("Coming Soon");
   });
 
-  it("renders the AQI category when a value exists", () => {
+  it("keeps the same AQI structure when a value exists (— → number, Coming Soon → category)", () => {
     render(
       <MapSelectedLocationCard location={{ ...location, aqi: 42 }} phonePortrait />,
     );
 
-    const slot = screen.getByTestId("air-quality-slot");
-    expect(slot).toHaveTextContent("42");
-    expect(slot).toHaveTextContent("Good");
-    expect(slot).not.toHaveTextContent("Coming Soon");
+    const value = screen.getByTestId("air-quality-value");
+    const supporting = screen.getByTestId("air-quality-supporting");
+    // Value position now holds the number; supporting holds the category.
+    expect(value).toHaveTextContent("42");
+    expect(value).not.toHaveTextContent("—");
+    expect(supporting).toHaveTextContent("Good");
+    expect(supporting).not.toHaveTextContent("Coming Soon");
   });
 
   it("renders a neutral premium location-image placeholder with no per-location image pipeline", () => {

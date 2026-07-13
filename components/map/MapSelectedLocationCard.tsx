@@ -261,15 +261,30 @@ function SectionLabel({
  * larger value, canonical color on both value and quality label) — no boxed or
  * tinted background.
  */
+/*
+ * Row balance: the Clear Sky Score column takes ~29% of the row (flex-[1.72]
+ * against four flex-1 columns → 1.72 / 5.72 ≈ 30%); Fog / AQI / Temp / Wind
+ * split the remaining ~71% evenly (~17.5% each). Because Wind now shows only a
+ * short speed value (direction moved to the supporting label), every secondary
+ * value is compact ("18%", "68°", "12") and can be sized comfortably. Sizes
+ * below are verified at a real 390px CSS viewport with no overlap / clip /
+ * overflow via getBoundingClientRect.
+ */
+/** Secondary-metric title: uppercase gray, one line. */
+const SECONDARY_TITLE_CLASS =
+  "text-[10px] font-bold uppercase tracking-[0.04em] text-white/40";
+/** Secondary-metric value (white unless a canonical color is set). */
+const SECONDARY_VALUE_CLASS = "text-[21px] font-light text-white";
+
 function MetricColumn({
   title,
   value,
   valueColor,
-  valueClassName = "text-lg font-semibold",
+  titleClassName = SECONDARY_TITLE_CLASS,
+  valueClassName = SECONDARY_VALUE_CLASS,
   supporting,
   supportingColor,
-  goldTitle = false,
-  titleNoWrap = false,
+  supportingClassName = "text-[11px] font-medium text-white/45",
   band,
   testId,
   supportingTestId,
@@ -280,11 +295,11 @@ function MetricColumn({
   title: string;
   value: ReactNode;
   valueColor?: string;
+  titleClassName?: string;
   valueClassName?: string;
   supporting?: string;
   supportingColor?: string;
-  goldTitle?: boolean;
-  titleNoWrap?: boolean;
+  supportingClassName?: string;
   band?: string;
   testId?: string;
   supportingTestId?: string;
@@ -298,14 +313,12 @@ function MetricColumn({
       data-testid={containerTestId}
     >
       <span
-        className={`flex min-h-[1.125rem] items-end justify-center text-[0.5rem] font-bold uppercase leading-none tracking-[0.08em] ${
-          goldTitle ? "text-karl-gold/90" : "text-white/40"
-        } ${titleNoWrap ? "whitespace-nowrap tracking-[0.04em]" : ""}`}
+        className={`flex min-h-[1.125rem] items-end justify-center leading-none ${titleClassName}`}
       >
         {title}
       </span>
       <span
-        className={`flex min-h-[1.375rem] items-center justify-center leading-none ${valueClassName} ${
+        className={`flex min-h-[2.75rem] items-end justify-center leading-none ${valueClassName} ${
           noWrapValue ? "whitespace-nowrap" : ""
         }`}
         style={valueColor ? { color: valueColor } : undefined}
@@ -314,8 +327,11 @@ function MetricColumn({
       >
         {value}
       </span>
+      {/* Supporting labels, all aligned on a shared baseline row. The text
+          appearance (size/weight/color) comes entirely from supportingClassName
+          so callers can override it without conflicting size utilities. */}
       <span
-        className="flex min-h-[0.875rem] items-start justify-center text-[0.5625rem] font-medium leading-tight text-white/45"
+        className={`mt-1 flex min-h-[1rem] items-start justify-center leading-tight ${supportingClassName}`}
         style={supportingColor ? { color: supportingColor } : undefined}
         data-testid={supportingTestId}
       >
@@ -387,12 +403,19 @@ function PhonePortraitSelectedCard({
   const subtitle = `${getProductRegionNameForLocation(location) ?? "Bay Area"}, CA`;
   const updatedLabel = relativeUpdatedLabel(location.updatedAt);
 
-  const windValue =
-    typeof location.windSpeed === "number" && Number.isFinite(location.windSpeed)
-      ? location.windDirection?.trim()
-        ? `${location.windDirection.trim()} ${Math.round(location.windSpeed)}`
-        : `${Math.round(location.windSpeed)}`
-      : "—";
+  // Wind is split so the large value carries only the speed (short, like the
+  // other metric values) and the compass direction rides in the supporting
+  // label. Keeping direction out of the large value is what lets every
+  // secondary value be sized comfortably — the previous combined "WSW 12"
+  // string was the sole width constraint on the whole row.
+  const hasWindSpeed =
+    typeof location.windSpeed === "number" &&
+    Number.isFinite(location.windSpeed);
+  const windValue = hasWindSpeed ? `${Math.round(location.windSpeed)}` : "—";
+  const windDirection = location.windDirection?.trim();
+  const windSupporting = hasWindSpeed
+    ? windDirection || "mph"
+    : undefined;
   const tempValue =
     typeof location.temperature === "number" &&
     Number.isFinite(location.temperature)
@@ -482,19 +505,19 @@ function PhonePortraitSelectedCard({
           / Wind. No boxed or tinted background — emphasis comes from typography,
           color, and spacing. */}
       <div
-        className="mt-4 flex items-start gap-1.5 border-t border-white/10 pt-4"
+        className="mt-4 flex items-start gap-1 border-t border-white/10 pt-4"
         data-testid="selected-location-metrics"
       >
         <MetricColumn
           title="Clear Sky Score"
-          goldTitle
-          titleNoWrap
-          columnClassName="flex-[1.15]"
+          titleClassName="whitespace-nowrap text-[11px] font-bold uppercase tracking-[0.02em] text-karl-gold/90"
+          columnClassName="flex-[1.72]"
           value={score.score}
           valueColor={score.color}
-          valueClassName="text-xl font-semibold"
+          valueClassName="text-[38px] font-light"
           supporting={score.qualityLabel}
           supportingColor={score.color}
+          supportingClassName="text-[14px] font-semibold"
           band={score.band}
           testId="clear-skies-score"
           supportingTestId="clear-skies-quality"
@@ -504,29 +527,41 @@ function PhonePortraitSelectedCard({
           value={fogScore !== null ? `${fogScore}%` : "—"}
           supporting={fogLabel}
         />
+        {/*
+          AQI uses the exact same three-level structure as every other metric
+          (title / value / supporting). While the canonical helper reports no
+          value, the value renders a neutral "—" placeholder (same typography as
+          the other metric values) and the supporting label reads "Coming Soon".
+          When backend AQI arrives the value becomes the number and the
+          supporting label becomes the canonical category — no structural or
+          layout change required here.
+        */}
         <MetricColumn
           title="AQI"
-          value={
-            airQuality.available ? (
-              airQuality.aqi
-            ) : (
-              <span className="text-[0.625rem] font-medium leading-tight text-white/45">
-                Coming Soon
-              </span>
-            )
-          }
+          value={airQuality.available ? airQuality.aqi : "—"}
           valueColor={
             airQuality.available ? (airQuality.color ?? undefined) : undefined
           }
-          supporting={airQuality.available ? airQuality.label : undefined}
+          supporting={airQuality.available ? airQuality.label : "Coming Soon"}
+          supportingColor={
+            airQuality.available ? (airQuality.color ?? undefined) : undefined
+          }
+          supportingClassName={
+            airQuality.available
+              ? undefined
+              : "whitespace-nowrap text-[8px] font-medium tracking-tight text-white/45"
+          }
           band={airQuality.available ? (airQuality.band ?? undefined) : undefined}
           containerTestId="air-quality-slot"
+          testId="air-quality-value"
+          supportingTestId="air-quality-supporting"
         />
         <MetricColumn title="Temp" value={tempValue} />
         <MetricColumn
           title="Wind"
           value={windValue}
-          supporting="mph"
+          supporting={windSupporting}
+          supportingTestId="wind-direction"
           noWrapValue
         />
       </div>
