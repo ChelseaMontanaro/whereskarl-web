@@ -27,10 +27,16 @@ export const CLEAR_SKIES_SCORE_COLORS: Record<ClearSkiesScoreBand, string> = {
   poor: "#FF5A5F",
 };
 
+/**
+ * Canonical Clear Sky Score quality labels (product spec):
+ *   75–100 → green  → Excellent
+ *   50–74  → orange → Good
+ *    0–49  → red    → Poor
+ */
 const CLEAR_SKIES_SCORE_QUALITY_LABELS: Record<ClearSkiesScoreBand, string> = {
-  clear: "Clear",
-  moderate: "Partly clear",
-  poor: "Fogged in",
+  clear: "Excellent",
+  moderate: "Good",
+  poor: "Poor",
 };
 
 export function clampClearSkiesScore(score: number): number {

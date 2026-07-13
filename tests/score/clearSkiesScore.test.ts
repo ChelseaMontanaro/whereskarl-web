@@ -32,10 +32,16 @@ describe("clearSkiesScore presentation", () => {
     expect(clampClearSkiesScore(72.6)).toBe(73);
   });
 
-  it("exposes a future-facing quality label", () => {
-    expect(clearSkiesScoreQualityLabel(90)).toBe("Clear");
-    expect(clearSkiesScoreQualityLabel(60)).toBe("Partly clear");
-    expect(clearSkiesScoreQualityLabel(10)).toBe("Fogged in");
+  it("owns the canonical quality label for each band", () => {
+    // 75–100 → green → Excellent
+    expect(clearSkiesScoreQualityLabel(90)).toBe("Excellent");
+    expect(clearSkiesScoreQualityLabel(75)).toBe("Excellent");
+    // 50–74 → orange → Good
+    expect(clearSkiesScoreQualityLabel(60)).toBe("Good");
+    expect(clearSkiesScoreQualityLabel(50)).toBe("Good");
+    // 0–49 → red → Poor
+    expect(clearSkiesScoreQualityLabel(49)).toBe("Poor");
+    expect(clearSkiesScoreQualityLabel(10)).toBe("Poor");
   });
 
   it("presents a full record for consumers", () => {
@@ -43,7 +49,7 @@ describe("clearSkiesScore presentation", () => {
       score: 82,
       band: "clear",
       color: CLEAR_SKIES_SCORE_COLORS.clear,
-      qualityLabel: "Clear",
+      qualityLabel: "Excellent",
     });
   });
 });

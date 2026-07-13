@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState, type ReactNode } from "react";
 
 import { KarlLogo } from "@/components/brand/KarlLogo";
 import { MapLocationConditionIcon } from "@/components/map/MapLocationConditionIcon";
-import { MapPhonePortraitConditionIcon } from "@/components/map/MapPhonePortraitConditionIcon";
 import { BottomSheet } from "@/components/ui/BottomSheet";
 import { desktopGlassCardClass } from "@/components/home/desktopGlass";
 import {
@@ -14,6 +13,7 @@ import {
   resolveLocationFogIntensity,
   type FogIntensity,
 } from "@/lib/map/conditions";
+import { getPhonePortraitFogRailConditionIconDataUri } from "@/lib/map/phonePortraitConditionIcons";
 import { getProductRegionNameForLocation } from "@/lib/map/regions";
 import { locationWeatherMetadataItems } from "@/lib/map/locationMetadata";
 import { useIsNighttime } from "@/lib/hooks/useIsNighttime";
@@ -70,6 +70,27 @@ function getConditionSentence(location: LocationWeather): string {
   return status || reason || "Conditions unavailable";
 }
 
+/**
+ * Karl's Read always reads as a natural insight paragraph, never a bare
+ * condition label. `karlReason` is the authored insight sentence, so it wins;
+ * we fall back to the prediction narrative and only use the terse `status`
+ * label as a last resort.
+ */
+function getKarlReadParagraph(location: LocationWeather): string {
+  const reason = location.karlReason?.trim();
+  if (reason) {
+    return reason;
+  }
+
+  const predictionReason = location.prediction?.predictionReason?.trim();
+  if (predictionReason) {
+    return predictionReason;
+  }
+
+  return location.status?.trim() || "Conditions unavailable";
+}
+
+
 function useFavoriteToggle(locationId: string) {
   const [isFavorite, setIsFavorite] = useState(() =>
     isFavoriteLocation(locationId),
@@ -124,15 +145,6 @@ function relativeUpdatedLabel(updatedAt: string): string {
 
   const diffDays = Math.round(diffHours / 24);
   return `Updated ${diffDays}d ago`;
-}
-
-/** hex → rgba string for subtle inline tints (e.g. the score metric cell). */
-function hexToRgba(hex: string, alpha: number): string {
-  const normalized = hex.replace("#", "");
-  const r = parseInt(normalized.slice(0, 2), 16);
-  const g = parseInt(normalized.slice(2, 4), 16);
-  const b = parseInt(normalized.slice(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
 type MapForecastPeriod = {
@@ -231,79 +243,79 @@ function SectionLabel({ children }: { children: ReactNode }) {
 }
 
 /**
- * A single metric column in the sheet's at-a-glance metrics row. Values and
- * colors come from the canonical presentation helpers — this component never
- * derives thresholds or colors itself.
+ * A single secondary metric (Fog / AQI / Temp / Wind). Values come from the
+ * canonical helpers — this never derives thresholds or colors itself. The cell
+ * is intentionally border-free: hierarchy comes from typography and spacing.
  */
-function MetricCell({
+function SecondaryMetric({
   title,
   value,
   valueColor,
-  valueClassName = "text-lg font-light",
   supporting,
-  goldTitle = false,
-  highlightColor,
   band,
   testId,
   containerTestId,
+  noWrapValue = false,
 }: {
   title: string;
   value: ReactNode;
   valueColor?: string;
-  valueClassName?: string;
   supporting?: string;
-  goldTitle?: boolean;
-  highlightColor?: string;
   band?: string;
   testId?: string;
   containerTestId?: string;
+  noWrapValue?: boolean;
 }) {
-  const highlightStyle = highlightColor
-    ? {
-        backgroundColor: hexToRgba(highlightColor, 0.12),
-        boxShadow: `inset 0 0 0 1px ${hexToRgba(highlightColor, 0.32)}`,
-      }
-    : undefined;
-
   return (
     <div
-      className="flex flex-1 flex-col items-center justify-start gap-0.5 rounded-2xl px-1 py-1.5 text-center"
-      style={highlightStyle}
+      className="flex min-w-0 flex-1 flex-col items-center gap-1 text-center"
       data-testid={containerTestId}
     >
-      <span
-        className={`text-[0.5rem] font-bold uppercase leading-none tracking-[0.08em] ${
-          goldTitle ? "text-karl-gold/90" : "text-white/45"
-        }`}
-      >
+      <span className="text-[0.5625rem] font-bold uppercase leading-none tracking-[0.1em] text-white/40">
         {title}
       </span>
       <span
-        className={`mt-0.5 leading-none ${valueClassName}`}
+        className={`text-[0.9375rem] font-semibold leading-none ${
+          noWrapValue ? "whitespace-nowrap" : ""
+        }`}
         style={valueColor ? { color: valueColor } : undefined}
         data-score-band={band}
         data-testid={testId}
       >
         {value}
       </span>
-      <span className="min-h-[0.6875rem] text-[0.5rem] font-medium leading-tight text-white/50">
+      <span className="min-h-[0.75rem] text-[0.5625rem] font-medium leading-tight text-white/45">
         {supporting ?? ""}
       </span>
     </div>
   );
 }
 
-function ForecastChip({ period }: { period: MapForecastPeriod }) {
+function ForecastChip({
+  period,
+  isNighttime,
+}: {
+  period: MapForecastPeriod;
+  isNighttime: boolean;
+}) {
   return (
-    <div className="flex min-w-[3.25rem] shrink-0 flex-col items-center gap-1 rounded-2xl border border-white/10 bg-white/[0.04] px-2.5 py-2 text-center">
-      <span className="text-[0.5625rem] font-semibold uppercase leading-none tracking-[0.04em] text-white/55">
+    <div className="flex min-w-[3.5rem] shrink-0 flex-col items-center gap-1.5 rounded-2xl bg-white/[0.03] px-3 py-2.5 text-center">
+      <span className="text-[0.5625rem] font-semibold uppercase leading-none tracking-[0.06em] text-white/55">
         {period.label}
       </span>
-      <MapPhonePortraitConditionIcon
-        intensity={period.intensity}
-        className="h-6 w-6"
+      {/* Canonical condition icon (Clear → cloud-free sun), matching the map
+          markers and Fog Intensity rail. */}
+      <img
+        src={getPhonePortraitFogRailConditionIconDataUri(period.intensity, {
+          isNighttime,
+        })}
+        alt=""
+        aria-hidden
+        width={28}
+        height={28}
+        className="h-7 w-7"
       />
-      <span className="text-[0.75rem] font-semibold leading-none text-white">
+      <span className="text-sm font-semibold leading-none text-white">
         {period.tempF !== null ? `${period.tempF}°` : (period.caption ?? "—")}
       </span>
     </div>
@@ -322,7 +334,7 @@ function PhonePortraitSelectedCard({
   const isNighttime = useIsNighttime();
   const isDegraded = isLocationDataDegraded(location.dataStatus);
   const headerIntensity = resolveLocationFogIntensity(location);
-  const karlRead = getConditionSentence(location);
+  const karlRead = getKarlReadParagraph(location);
   const score = presentClearSkiesScore(location.sunshineScore);
   const airQuality = presentAirQuality(location.aqi);
   const fogScore = resolveFogScore(location);
@@ -421,45 +433,63 @@ function PhonePortraitSelectedCard({
         <DegradedDataLabel variant="location" className="mt-1.5" />
       ) : null}
 
-      {/* At-a-glance metrics row — canonical helpers only. */}
-      <div
-        className="mt-3 flex items-stretch gap-1"
-        data-testid="selected-location-metrics"
-      >
-        <MetricCell
-          title="Clear Skies"
-          value={score.score}
-          valueColor={score.color}
-          valueClassName="text-xl font-semibold"
-          supporting={score.qualityLabel}
-          goldTitle
-          highlightColor={score.color}
-          band={score.band}
-          testId="clear-skies-score"
-        />
-        <MetricCell
-          title="Fog"
-          value={fogScore !== null ? `${fogScore}%` : "—"}
-          supporting={fogLabel}
-        />
-        <MetricCell
-          title="AQI"
-          value={
-            airQuality.available ? (
-              airQuality.aqi
-            ) : (
-              <span className="text-[0.5625rem] font-medium leading-tight text-white/45">
-                Coming Soon
-              </span>
-            )
-          }
-          valueColor={airQuality.available ? (airQuality.color ?? undefined) : undefined}
-          supporting={airQuality.available ? airQuality.label : undefined}
-          band={airQuality.available ? (airQuality.band ?? undefined) : undefined}
-          containerTestId="air-quality-slot"
-        />
-        <MetricCell title="Temp" value={tempValue} />
-        <MetricCell title="Wind" value={windValue} supporting="mph" />
+      {/* At-a-glance metrics — canonical helpers only. The Clear Skies Score
+          leads as the headline metric (large number + quality label, no boxed
+          tint); Fog / AQI / Temp / Wind follow as a lighter typographic row. */}
+      <div className="mt-4" data-testid="selected-location-metrics">
+        <p className="text-[0.625rem] font-bold uppercase tracking-[0.16em] text-karl-gold/90">
+          Clear Sky Score
+        </p>
+        <div className="mt-1 flex items-baseline gap-2.5">
+          <span
+            className="text-[2.75rem] font-light leading-none tracking-tight"
+            style={{ color: score.color }}
+            data-score-band={score.band}
+            data-testid="clear-skies-score"
+          >
+            {score.score}
+          </span>
+          <span
+            className="text-base font-semibold leading-none"
+            style={{ color: score.color }}
+            data-testid="clear-skies-quality"
+          >
+            {score.qualityLabel}
+          </span>
+        </div>
+
+        <div className="mt-4 flex items-start gap-2 border-t border-white/10 pt-4">
+          <SecondaryMetric
+            title="Fog"
+            value={fogScore !== null ? `${fogScore}%` : "—"}
+            supporting={fogLabel}
+          />
+          <SecondaryMetric
+            title="AQI"
+            value={
+              airQuality.available ? (
+                airQuality.aqi
+              ) : (
+                <span className="text-[0.625rem] font-medium leading-tight text-white/45">
+                  Coming Soon
+                </span>
+              )
+            }
+            valueColor={
+              airQuality.available ? (airQuality.color ?? undefined) : undefined
+            }
+            supporting={airQuality.available ? airQuality.label : undefined}
+            band={airQuality.available ? (airQuality.band ?? undefined) : undefined}
+            containerTestId="air-quality-slot"
+          />
+          <SecondaryMetric title="Temp" value={tempValue} />
+          <SecondaryMetric
+            title="Wind"
+            value={windValue}
+            supporting="mph"
+            noWrapValue
+          />
+        </div>
       </div>
     </>
   );
@@ -470,9 +500,9 @@ function PhonePortraitSelectedCard({
       header={header}
     >
       {/* Karl's Read — the primary insight section. */}
-      <section aria-label="Karl's Read" className="border-t border-white/10 pt-3">
+      <section aria-label="Karl's Read" className="border-t border-white/10 pt-4">
         <SectionLabel>Karl&apos;s Read</SectionLabel>
-        <div className="mt-2 flex items-start gap-3">
+        <div className="mt-3 flex items-start gap-3.5">
           <KarlLogo className="h-12 w-12 shrink-0" />
           <p className="text-[0.8125rem] leading-relaxed text-white/80">
             {karlRead}
@@ -483,12 +513,16 @@ function PhonePortraitSelectedCard({
       {/* Hourly outlook — the sheet is the forecast experience. */}
       <section
         aria-label="Hourly outlook"
-        className="mt-3 border-t border-white/10 pt-3"
+        className="mt-5 border-t border-white/10 pt-4"
       >
         <SectionLabel>Hourly Outlook</SectionLabel>
-        <div className="mt-2 flex gap-2 overflow-x-auto overscroll-x-contain pb-1">
+        <div className="mt-3 flex gap-2.5 overflow-x-auto overscroll-x-contain pb-1">
           {forecastPeriods.map((period) => (
-            <ForecastChip key={period.key} period={period} />
+            <ForecastChip
+              key={period.key}
+              period={period}
+              isNighttime={isNighttime}
+            />
           ))}
         </div>
       </section>

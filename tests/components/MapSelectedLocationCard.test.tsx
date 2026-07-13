@@ -268,7 +268,7 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(score).toHaveAttribute("data-score-band", "clear");
 
     const metrics = screen.getByTestId("selected-location-metrics");
-    expect(metrics).toHaveTextContent("Clear Skies");
+    expect(metrics).toHaveTextContent("Clear Sky Score");
     expect(metrics).toHaveTextContent("Fog");
     expect(metrics).toHaveTextContent("18%");
     expect(metrics).toHaveTextContent("AQI");
@@ -277,6 +277,81 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(metrics).toHaveTextContent("Wind");
     expect(metrics).toHaveTextContent("W 8");
     expect(metrics).toHaveTextContent("mph");
+  });
+
+  it("renders the canonical 'CLEAR SKY SCORE' title (singular, uppercased via CSS)", () => {
+    render(<MapSelectedLocationCard location={location} phonePortrait />);
+
+    const title = screen.getByText("Clear Sky Score");
+    expect(title).toBeInTheDocument();
+    // Uppercasing is presentational; the DOM text is the singular wording.
+    expect(title.className).toContain("uppercase");
+    expect(screen.queryByText("Clear Skies Score")).not.toBeInTheDocument();
+  });
+
+  it("consumes the canonical quality label + color from the score helper", () => {
+    const quality = () => screen.getByTestId("clear-skies-quality");
+    const scoreEl = () => screen.getByTestId("clear-skies-score");
+
+    // 75–100 → Excellent, green.
+    const excellent = render(
+      <MapSelectedLocationCard
+        location={{ ...location, sunshineScore: 82 }}
+        phonePortrait
+      />,
+    );
+    expect(quality().textContent).toBe("Excellent");
+    expect(scoreEl().getAttribute("style")).toContain("#22E36B");
+    expect(quality().getAttribute("style")).toContain("#22E36B");
+    excellent.unmount();
+
+    // 50–74 → Good, orange.
+    const good = render(
+      <MapSelectedLocationCard
+        location={{ ...location, sunshineScore: 60, fogScore: 45 }}
+        phonePortrait
+      />,
+    );
+    expect(quality().textContent).toBe("Good");
+    expect(scoreEl().getAttribute("style")).toContain("#F5A623");
+    expect(quality().getAttribute("style")).toContain("#F5A623");
+    good.unmount();
+
+    // 0–49 → Poor, red.
+    render(
+      <MapSelectedLocationCard
+        location={{ ...location, sunshineScore: 20, fogScore: 85 }}
+        phonePortrait
+      />,
+    );
+    expect(quality().textContent).toBe("Poor");
+    expect(scoreEl().getAttribute("style")).toContain("#FF5A5F");
+    expect(quality().getAttribute("style")).toContain("#FF5A5F");
+  });
+
+  it("does not render the score inside an orange highlighted box", () => {
+    render(<MapSelectedLocationCard location={location} phonePortrait />);
+
+    const score = screen.getByTestId("clear-skies-score");
+    // The score number carries no boxed background/border tint.
+    const style = score.getAttribute("style") ?? "";
+    expect(style).not.toContain("background");
+    expect(style).not.toContain("box-shadow");
+    expect(score.className).not.toContain("border");
+  });
+
+  it("keeps the Wind compass direction and speed on a single line", () => {
+    render(
+      <MapSelectedLocationCard
+        location={{ ...location, windDirection: "NNW", windSpeed: 12 }}
+        phonePortrait
+      />,
+    );
+
+    const metrics = screen.getByTestId("selected-location-metrics");
+    const windValue = screen.getByText("NNW 12");
+    expect(metrics).toContainElement(windValue);
+    expect(windValue.className).toContain("whitespace-nowrap");
   });
 
   it("shows the canonical Air Quality slot as 'Coming Soon' when AQI is absent", () => {
@@ -320,6 +395,44 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(karlSection).toHaveTextContent("Mostly clear across Tiburon.");
     // The Karl logo image (brand asset) is rendered, not a generic icon.
     expect(container.querySelector('img[src*="wheres-karl-logo"]')).toBeTruthy();
+  });
+
+  it("reads Karl's Read as the insight paragraph, not the terse condition label", () => {
+    render(
+      <MapSelectedLocationCard
+        location={{
+          ...location,
+          status: "Foggy",
+          fogScore: 80,
+          sunshineScore: 20,
+          karlReason:
+            "A marine layer is holding along the shoreline but should thin by early afternoon.",
+        }}
+        phonePortrait
+      />,
+    );
+
+    const karlSection = screen.getByRole("region", { name: "Karl's Read" });
+    expect(karlSection).toHaveTextContent(
+      "A marine layer is holding along the shoreline but should thin by early afternoon.",
+    );
+    // The bare status label must not stand in for the insight paragraph.
+    expect(karlSection).not.toHaveTextContent("Foggy");
+  });
+
+  it("uses the canonical clear condition icon (cloud-free sun) in the hourly outlook", () => {
+    const { container } = render(
+      <MapSelectedLocationCard location={location} phonePortrait />,
+    );
+
+    const forecast = screen.getByRole("region", { name: "Hourly outlook" });
+    const icon = forecast.querySelector("img");
+    expect(icon).not.toBeNull();
+
+    const decoded = decodeURIComponent(icon?.getAttribute("src") ?? "");
+    // Canonical clear icon is the warm sun with no cloud rectangles.
+    expect(decoded).toContain("#F2A326");
+    expect(decoded).not.toContain("<rect");
   });
 
   it("renders an hourly outlook chip strip without a View Full Forecast action", () => {
