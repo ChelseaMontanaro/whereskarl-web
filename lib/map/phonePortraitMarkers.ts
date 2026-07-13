@@ -9,6 +9,7 @@ import {
   getPhonePortraitMarkerIconMarkup,
 } from "@/lib/map/phonePortraitConditionIcons";
 import {
+  getPhonePortraitMarkerLabelOffset,
   PHONE_PORTRAIT_LOW_ZOOM_HIDDEN_LOCATION_IDS,
   PHONE_PORTRAIT_LOW_ZOOM_HIDE_THRESHOLD,
   PHONE_PORTRAIT_MARKER_COLLISION_X,
@@ -24,9 +25,6 @@ const CLEAR_SUN_COLOR = "rgb(242 163 38)";
 export type PhonePortraitDeclutterEntry = {
   locationId: string;
   element: HTMLElement;
-  longitude: number;
-  latitude: number;
-  offset: [number, number];
   priority: number;
   score: number;
   isSelected: boolean;
@@ -88,30 +86,66 @@ export function createPhonePortraitMapMarkerElement(input: {
     input.onSelect(input.location.id);
   });
 
-  const scoreBadge = document.createElement("span");
-  scoreBadge.className = "karl-universal-map-marker__score";
-  scoreBadge.textContent = String(score);
-  scoreBadge.setAttribute("aria-hidden", "true");
-
+  // The weather icon is the only in-flow child, so the MapLibre marker (anchor
+  // "center", zero offset) pins the icon center exactly on the coordinate.
   root.append(button);
+
+  // Label + score live in an absolutely positioned group so their per-location
+  // declutter offset never moves the coordinate-anchored icon. The group sits
+  // below the icon by default; the offset shifts only this group.
+  const meta = document.createElement("div");
+  meta.className = "karl-universal-map-marker__meta";
+  const labelOffset = getPhonePortraitMarkerLabelOffset(input.location.id);
+  meta.style.transform = `translate(calc(-50% + ${labelOffset[0]}px), ${labelOffset[1]}px)`;
+  meta.dataset.labelOffsetX = String(labelOffset[0]);
+  meta.dataset.labelOffsetY = String(labelOffset[1]);
 
   if (input.showLocationLabel) {
     const label = document.createElement("span");
     label.className = "karl-universal-map-marker__label";
     label.textContent = input.location.name;
     label.setAttribute("aria-hidden", "true");
-    root.append(label);
+    meta.append(label);
   }
 
-  root.append(scoreBadge);
+  const scoreBadge = document.createElement("span");
+  scoreBadge.className = "karl-universal-map-marker__score";
+  scoreBadge.textContent = String(score);
+  scoreBadge.setAttribute("aria-hidden", "true");
+  meta.append(scoreBadge);
+
+  root.append(meta);
 
   return root;
+}
+
+/**
+ * Returns the center of the rendered label/score group in viewport pixels.
+ * This reads the live DOM (including MapLibre's translate and the per-location
+ * label offset) so collision math matches exactly what the user sees. Falls
+ * back to the marker root when the meta group is unexpectedly absent.
+ */
+function measureLabelGroupCenter(element: HTMLElement): { x: number; y: number } {
+  const meta = element.querySelector<HTMLElement>(
+    ".karl-universal-map-marker__meta",
+  );
+  const rect = (meta ?? element).getBoundingClientRect();
+  return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
 }
 
 export function declutterPhonePortraitMarkers(
   map: MapLibreMap,
   entries: PhonePortraitDeclutterEntry[],
 ): void {
+  const zoom = map.getZoom();
+
+  // Reveal every marker first so the label/score geometry can be measured from
+  // the live DOM. This whole pass is synchronous, so the browser never paints
+  // an intermediate all-visible frame before collided markers are re-hidden.
+  for (const entry of entries) {
+    entry.element.style.display = "";
+  }
+
   const placed: Array<{ x: number; y: number }> = [];
   const ordered = [...entries].sort((a, b) => {
     if (a.isSelected !== b.isSelected) {
@@ -123,8 +157,6 @@ export function declutterPhonePortraitMarkers(
     return b.score - a.score;
   });
 
-  const zoom = map.getZoom();
-
   for (const entry of ordered) {
     if (
       !entry.isSelected &&
@@ -135,9 +167,10 @@ export function declutterPhonePortraitMarkers(
       continue;
     }
 
-    const projected = map.project([entry.longitude, entry.latitude]);
-    const x = projected.x + entry.offset[0];
-    const y = projected.y + entry.offset[1];
+    // Collision is evaluated on the rendered label/score group position — the
+    // coordinate-anchored icon is never used to displace the marker. A marker
+    // is hidden only when its visible label/score group would collide.
+    const { x, y } = measureLabelGroupCenter(entry.element);
 
     const collides = placed.some(
       (other) =>
@@ -148,7 +181,6 @@ export function declutterPhonePortraitMarkers(
     if (collides && !entry.isSelected) {
       entry.element.style.display = "none";
     } else {
-      entry.element.style.display = "";
       placed.push({ x, y });
     }
   }

@@ -7,63 +7,32 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { BayAreaMap } from "@/components/map/BayAreaMap";
 import type { MapMarkerLocation } from "@/lib/map/markers";
-import { getPhonePortraitMarkerOffset } from "@/lib/map/phonePortraitMapPresentation";
+import { getPhonePortraitMarkerLabelOffset } from "@/lib/map/phonePortraitMapPresentation";
 
 /**
- * Verifies the safe anchor correctness fix: the phone-portrait marker's weather
- * icon must sit on the true coordinate. MapLibre centers the whole marker box
- * (icon → label → score), so BayAreaMap measures the icon's position within the
- * box and offsets the marker to cancel that drift. The intentional per-location
- * declutter nudge is preserved on top.
+ * Verifies the phone-portrait marker architecture:
+ *   - the weather icon is anchored on the coordinate (MapLibre marker offset is
+ *     [0,0]; the per-location declutter offset is NOT passed to MapLibre),
+ *   - the per-location offset is applied only to the label/score meta group,
+ *   - collision detection uses the rendered label/score group position.
  *
- * happy-dom reports zero-sized rects, so we stub a realistic marker layout: a
- * 74px-tall stack with the 36px weather icon flush to the top. That puts the
- * icon center 19px above the stack center — exactly the drift the fix removes.
+ * Pixel-exact icon centering is verified separately at a real 390x844 viewport;
+ * happy-dom cannot lay out the map, so these tests assert the wiring instead.
  */
-const ICON = { left: 122, top: 200, width: 36, height: 36 } as const;
-const ROOT = { left: 100, top: 200, width: 80, height: 74 } as const;
-
-const ICON_CENTER = {
-  x: ICON.left + ICON.width / 2,
-  y: ICON.top + ICON.height / 2,
-};
-const ROOT_CENTER = {
-  x: ROOT.left + ROOT.width / 2,
-  y: ROOT.top + ROOT.height / 2,
-};
-// The fixed offset of the icon center relative to the stack center.
-const ICON_MINUS_ROOT = {
-  x: ICON_CENTER.x - ROOT_CENTER.x,
-  y: ICON_CENTER.y - ROOT_CENTER.y,
-};
-
-function makeRect(box: {
-  left: number;
-  top: number;
-  width: number;
-  height: number;
-}): DOMRect {
-  const rect = {
-    left: box.left,
-    top: box.top,
-    width: box.width,
-    height: box.height,
-    right: box.left + box.width,
-    bottom: box.top + box.height,
-    x: box.left,
-    y: box.top,
-  };
-  return { ...rect, toJSON: () => rect } as DOMRect;
-}
-
-const locations: MapMarkerLocation[] = [
-  { id: "ocean-beach", name: "Ocean Beach", latitude: 37.7594, longitude: -122.5107, sunshineScore: 40, fogScore: 70, status: "Patchy Fog" },
-  { id: "tiburon", name: "Tiburon", latitude: 37.8735, longitude: -122.4566, sunshineScore: 82, fogScore: 20, status: "Clear" },
-  { id: "sausalito", name: "Sausalito", latitude: 37.8591, longitude: -122.4853, sunshineScore: 74, fogScore: 41, status: "Patchy Fog" },
-  { id: "berkeley", name: "Berkeley", latitude: 37.8716, longitude: -122.2727, sunshineScore: 80, fogScore: 25, status: "Clear" },
-  { id: "oakland", name: "Oakland", latitude: 37.8044, longitude: -122.2712, sunshineScore: 78, fogScore: 30, status: "Clear" },
-  { id: "san-jose", name: "San Jose", latitude: 37.3382, longitude: -121.8863, sunshineScore: 90, fogScore: 8, status: "Clear" },
-];
+const phoneLocation = (
+  id: string,
+  name: string,
+  extra?: Partial<MapMarkerLocation>,
+): MapMarkerLocation => ({
+  id,
+  name,
+  latitude: 37.77,
+  longitude: -122.42,
+  sunshineScore: 70,
+  fogScore: 20,
+  status: "Clear",
+  ...extra,
+});
 
 const defaultProps = {
   mapStyle: "standard" as const,
@@ -72,77 +41,133 @@ const defaultProps = {
   onFogLayerChange: vi.fn(),
 };
 
-describe("BayAreaMap phone-portrait icon anchoring", () => {
-  let rectSpy: ReturnType<typeof vi.spyOn>;
+function renderPhonePortrait(locations: MapMarkerLocation[]) {
+  return render(
+    <BayAreaMap
+      locations={locations}
+      selectedLocationId={null}
+      selectedRegionId="san-francisco"
+      onSelectLocation={vi.fn()}
+      {...defaultProps}
+      layout="immersive"
+      immersiveOverlayProfile="phone-portrait"
+    />,
+  );
+}
 
+function root(id: string): HTMLElement | null {
+  return document.querySelector<HTMLElement>(
+    `.karl-universal-map-marker-root[data-location-id="${id}"]`,
+  );
+}
+
+describe("BayAreaMap phone-portrait icon anchoring", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     document.body.innerHTML = "";
-    // The mock's project() returns {x:0,y:0} for every coordinate, so screen
-    // positions are measured relative to the projected coordinate origin.
-    rectSpy = vi
-      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
-      .mockImplementation(function getBoundingClientRect(this: HTMLElement) {
-        if (this.classList.contains("karl-universal-map-marker-root")) {
-          return makeRect(ROOT);
-        }
-        if (this.classList.contains("karl-universal-map-marker")) {
-          return makeRect(ICON);
-        }
-        return makeRect({ left: 0, top: 0, width: 0, height: 0 });
-      });
   });
 
   afterEach(() => {
-    rectSpy.mockRestore();
     cleanup();
     document.body.innerHTML = "";
   });
 
-  it("centers the weather icon on the true coordinate (plus the intended declutter nudge)", async () => {
-    render(
-      <BayAreaMap
-        locations={locations}
-        selectedLocationId={null}
-        selectedRegionId="san-francisco"
-        onSelectLocation={vi.fn()}
-        {...defaultProps}
-        layout="immersive"
-        immersiveOverlayProfile="phone-portrait"
-      />,
-    );
+  it("never passes the per-location declutter offset to the MapLibre marker (icon stays on coordinate)", async () => {
+    // Includes a non-zero-offset location (tiburon [46,-30]) and a zero-offset
+    // location (oakland). Both must anchor the icon with a [0,0] marker offset.
+    renderPhonePortrait([
+      phoneLocation("tiburon", "Tiburon"),
+      phoneLocation("oakland", "Oakland"),
+    ]);
 
     await waitFor(() => {
-      expect(
-        document.querySelector(
-          '.karl-universal-map-marker-root[data-location-id="oakland"]',
-        ),
-      ).not.toBeNull();
+      expect(root("oakland")).not.toBeNull();
     });
 
-    for (const location of locations) {
-      const root = document.querySelector<HTMLElement>(
-        `.karl-universal-map-marker-root[data-location-id="${location.id}"]`,
-      );
-      expect(root, `missing marker root for ${location.id}`).not.toBeNull();
+    for (const id of ["tiburon", "oakland"]) {
+      const applied = JSON.parse(root(id)!.dataset.markerOffset ?? "null");
+      expect(applied, `marker offset for ${id}`).toEqual([0, 0]);
+    }
+  });
 
-      const applied = JSON.parse(
-        root!.dataset.markerOffset ?? "null",
-      ) as [number, number] | null;
-      expect(applied, `no offset applied for ${location.id}`).not.toBeNull();
+  it("applies the per-location offset to the label/score meta group only, not the icon", async () => {
+    renderPhonePortrait([
+      phoneLocation("tiburon", "Tiburon"),
+      phoneLocation("oakland", "Oakland"),
+    ]);
 
-      // MapLibre pins the stack center at (projected coordinate + applied
-      // offset). The icon center is fixed relative to that stack center, so:
-      const iconCenter = {
-        x: applied![0] + ICON_MINUS_ROOT.x,
-        y: applied![1] + ICON_MINUS_ROOT.y,
-      };
+    await waitFor(() => {
+      expect(root("tiburon")).not.toBeNull();
+    });
 
-      // The icon should land on the coordinate origin (0,0) plus only the
-      // intentional per-location declutter nudge — no leftover anchor drift.
-      const nudge = getPhonePortraitMarkerOffset(location.id);
-      expect(iconCenter.x).toBeCloseTo(nudge[0], 5);
-      expect(iconCenter.y).toBeCloseTo(nudge[1], 5);
+    // Non-zero location: meta carries the canonical offset; icon has no
+    // per-location transform (only the selected-scale CSS variable).
+    const tiburonMeta = root("tiburon")!.querySelector<HTMLElement>(
+      ".karl-universal-map-marker__meta",
+    )!;
+    const tiburonIcon = root("tiburon")!.querySelector<HTMLElement>(
+      ".karl-universal-map-marker",
+    )!;
+    const [tx, ty] = getPhonePortraitMarkerLabelOffset("tiburon");
+    expect([tx, ty]).toEqual([46, -30]);
+    expect(tiburonMeta.dataset.labelOffsetX).toBe("46");
+    expect(tiburonMeta.dataset.labelOffsetY).toBe("-30");
+    expect(tiburonMeta.style.transform).toContain("46px");
+    expect(tiburonMeta.style.transform).toContain("-30px");
+    expect(tiburonIcon.style.transform).toBe("");
+
+    // Zero-offset location: meta offset is a no-op (stays centered below icon).
+    const oaklandMeta = root("oakland")!.querySelector<HTMLElement>(
+      ".karl-universal-map-marker__meta",
+    )!;
+    expect(oaklandMeta.dataset.labelOffsetX).toBe("0");
+    expect(oaklandMeta.dataset.labelOffsetY).toBe("0");
+    expect(oaklandMeta.style.transform).toBe("translate(calc(-50% + 0px), 0px)");
+  });
+
+  it("hides the lower-priority marker when the rendered label/score groups collide", async () => {
+    // Position the label/score groups via getBoundingClientRect: san-francisco
+    // (priority 0) and berkeley (priority 1) overlap; novato is far away.
+    const metaCenters: Record<string, { x: number; y: number }> = {
+      "san-francisco": { x: 120, y: 110 },
+      berkeley: { x: 130, y: 120 },
+      novato: { x: 400, y: 400 },
+    };
+
+    const rectSpy = vi
+      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+      .mockImplementation(function getBoundingClientRect(this: HTMLElement) {
+        const empty = { left: 0, top: 0, width: 0, height: 0, right: 0, bottom: 0, x: 0, y: 0 };
+        if (!this.classList.contains("karl-universal-map-marker__meta")) {
+          return { ...empty, toJSON: () => empty } as DOMRect;
+        }
+        const host = this.closest<HTMLElement>(
+          ".karl-universal-map-marker-root",
+        );
+        const c = metaCenters[host?.dataset.locationId ?? ""];
+        if (!c) {
+          return { ...empty, toJSON: () => empty } as DOMRect;
+        }
+        const r = { left: c.x - 20, top: c.y - 10, width: 40, height: 20, right: c.x + 20, bottom: c.y + 10, x: c.x - 20, y: c.y - 10 };
+        return { ...r, toJSON: () => r } as DOMRect;
+      });
+
+    try {
+      renderPhonePortrait([
+        phoneLocation("san-francisco", "San Francisco"),
+        phoneLocation("berkeley", "Berkeley"),
+        phoneLocation("novato", "Novato"),
+      ]);
+
+      await waitFor(() => {
+        expect(root("novato")).not.toBeNull();
+      });
+
+      expect(root("san-francisco")!.style.display).not.toBe("none");
+      expect(root("berkeley")!.style.display).toBe("none");
+      expect(root("novato")!.style.display).not.toBe("none");
+    } finally {
+      rectSpy.mockRestore();
     }
   });
 });

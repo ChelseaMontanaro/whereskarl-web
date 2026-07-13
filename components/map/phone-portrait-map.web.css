@@ -25,12 +25,32 @@
 }
 
 .karl-universal-map-marker-root.is-phone-portrait {
+  position: relative;
   gap: 0.18rem;
   z-index: 2;
 }
 
 .karl-universal-map-marker-root.is-phone-portrait.is-selected {
   z-index: 4;
+}
+
+/* Label/score group is positioned relative to the coordinate-anchored icon so
+   per-location declutter offsets never move the icon. By default it sits
+   centered just below the icon (matching the prior in-flow layout); the inline
+   transform adds the per-location offset. */
+.karl-universal-map-marker-root.is-phone-portrait
+  > .karl-universal-map-marker__meta {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.18rem;
+  margin-top: 0.18rem;
+  transform: translate(-50%, 0);
+  pointer-events: none;
+  white-space: nowrap;
 }
 
 .karl-universal-map-marker--phone-portrait.is-filtered-out {

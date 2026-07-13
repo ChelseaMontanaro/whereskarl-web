@@ -177,7 +177,21 @@ export const PHONE_PORTRAIT_MARKER_NAME_REM = "0.8125rem";
 
 export const PHONE_PORTRAIT_MARKER_SCORE_REM = "0.75rem";
 
-export const PHONE_PORTRAIT_MARKER_OFFSETS: Record<string, [number, number]> = {
+/**
+ * Canonical per-location declutter data for the phone-portrait map.
+ *
+ * Semantics: pixel offset applied to the marker's label/score group **relative
+ * to a coordinate-anchored weather icon**. The weather icon always stays on the
+ * true projected coordinate; only the label/score group shifts by these values
+ * to avoid overlap. These values are NOT fed into MapLibre's marker-level
+ * offset (doing so would move the icon off the coordinate).
+ *
+ * Positive x shifts the label group right, positive y shifts it down.
+ */
+export const PHONE_PORTRAIT_MARKER_LABEL_OFFSETS: Record<
+  string,
+  [number, number]
+> = {
   "mill-valley": [-14, -48],
   tiburon: [46, -30],
   sausalito: [14, 52],
@@ -195,14 +209,11 @@ export const PHONE_PORTRAIT_MARKER_OFFSETS: Record<string, [number, number]> = {
   "marin-headlands": [-30, 12],
 };
 
-export function getPhonePortraitMarkerOffset(locationId: string): [number, number] {
-  return PHONE_PORTRAIT_MARKER_OFFSETS[locationId] ?? [0, 0];
-}
-
-export function getPhonePortraitMarkerMapOffset(
-  showLocationLabel: boolean,
+/** Per-location label/score declutter offset (relative to the anchored icon). */
+export function getPhonePortraitMarkerLabelOffset(
+  locationId: string,
 ): [number, number] {
-  return showLocationLabel ? [0, -36] : [0, -6];
+  return PHONE_PORTRAIT_MARKER_LABEL_OFFSETS[locationId] ?? [0, 0];
 }
 
 export const PHONE_PORTRAIT_PRIORITY_LOCATION_IDS = [
