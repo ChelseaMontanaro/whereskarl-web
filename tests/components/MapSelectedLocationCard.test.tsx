@@ -540,9 +540,11 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(windValue).toHaveTextContent("NNW 12");
     expect(windValue.className).toContain("whitespace-nowrap");
     // Wind value uses the largest size that fits three-letter directions at
-    // 390x844 — slightly smaller than the 28px secondary values, by necessity.
+    // 390x844 — slightly smaller than the 28px secondary values, by necessity —
+    // and shares the light weight of Fog/Temp so it never reads bolder.
     expect(windValue.className).toContain("text-[19px]");
-    expect(windValue.className).toContain("font-semibold");
+    expect(windValue.className).toContain("font-light");
+    expect(windValue.className).not.toContain("font-semibold");
 
     // Supporting row is the gold arrow + "mph".
     const windSupporting = screen.getByTestId("wind-direction");

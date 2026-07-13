@@ -264,7 +264,7 @@ function SectionLabel({
 /*
  * Phone portrait metrics row — typography verified at 390×844 against the
  * approved mockup. Titles are white 14px semibold; secondary values 28px light;
- * score 38px semibold (canonical color); Wind direction+speed 19px semibold;
+ * score 38px semibold (canonical color); Wind direction+speed 19px light;
  * supporting labels 13px regular on a shared baseline (canonical colors applied
  * where helpers provide them). Vertical dividers separate the five columns.
  */
@@ -644,7 +644,7 @@ function PhonePortraitSelectedCard({
         <MetricColumn
           title="Wind"
           value={windValue}
-          valueClassName="text-[19px] font-semibold leading-none text-white"
+          valueClassName="text-[19px] font-light leading-none text-white"
           columnClassName="flex-[1.6]"
           supporting={windSupporting}
           testId="wind-value"
