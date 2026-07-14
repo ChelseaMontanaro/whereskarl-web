@@ -53,8 +53,14 @@ const baseLocation: LocationWeather = {
   },
 };
 
+function withLocation(
+  overrides: Partial<LocationWeather> & { airQuality?: AirQuality },
+): LocationWeather {
+  return { ...baseLocation, ...overrides };
+}
+
 function withAirQuality(airQuality: AirQuality): LocationWeather {
-  return { ...baseLocation, airQuality };
+  return withLocation({ airQuality });
 }
 
 function UniversalDetailMetrics({ location }: { location: LocationWeather }) {
@@ -98,7 +104,7 @@ function UniversalDetailMetrics({ location }: { location: LocationWeather }) {
 
 const FIXTURES: Array<{ title: string; location: LocationWeather }> = [
   {
-    title: "Good",
+    title: "Good (short label)",
     location: withAirQuality({
       aqi: 42,
       category: "good",
@@ -112,7 +118,7 @@ const FIXTURES: Array<{ title: string; location: LocationWeather }> = [
     }),
   },
   {
-    title: "Moderate",
+    title: "Moderate (short label)",
     location: withAirQuality({
       aqi: 78,
       category: "moderate",
@@ -127,7 +133,51 @@ const FIXTURES: Array<{ title: string; location: LocationWeather }> = [
     }),
   },
   {
-    title: "Unhealthy for Sensitive Groups",
+    title: "Marin Headlands · Light Fog · Moderate (crowd stress)",
+    location: withLocation({
+      id: "marin-headlands",
+      name: "Marin Headlands",
+      fogScore: 35,
+      sunshineScore: 48,
+      status: "Light Fog",
+      karlReason: "Light fog lingering near Marin Headlands.",
+      airQuality: {
+        aqi: 64,
+        category: "moderate",
+        colorToken: "aqi.moderate",
+        label: "Moderate",
+        description: "Air quality is acceptable.",
+        pollutant: "PM2.5",
+        observedAt: "2026-07-13T20:00:00.000Z",
+        source: "Open-Meteo",
+        isAvailable: true,
+      },
+    }),
+  },
+  {
+    title: "Marin Headlands · Light Fog · Unhealthy for Sensitive Groups",
+    location: withLocation({
+      id: "marin-headlands",
+      name: "Marin Headlands",
+      fogScore: 35,
+      sunshineScore: 48,
+      status: "Light Fog",
+      karlReason: "Light fog lingering near Marin Headlands.",
+      airQuality: {
+        aqi: 125,
+        category: "unhealthy-sensitive",
+        colorToken: "aqi.unhealthy-sensitive",
+        label: "Unhealthy for Sensitive Groups",
+        description: "Members of sensitive groups may experience health effects.",
+        pollutant: "Ozone",
+        observedAt: "2026-07-13T20:00:00.000Z",
+        source: "Open-Meteo",
+        isAvailable: true,
+      },
+    }),
+  },
+  {
+    title: "Unhealthy for Sensitive Groups (longest label)",
     location: withAirQuality({
       aqi: 125,
       category: "unhealthy-sensitive",

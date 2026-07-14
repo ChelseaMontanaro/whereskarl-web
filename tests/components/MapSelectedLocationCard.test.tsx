@@ -271,7 +271,6 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(metrics).toHaveTextContent("Clear Sky Score");
     expect(metrics).toHaveTextContent("Fog");
     expect(metrics).toHaveTextContent("18%");
-    expect(metrics).toHaveTextContent("AQI");
     expect(metrics).toHaveTextContent("Temp");
     expect(metrics).toHaveTextContent("68°");
     expect(metrics).toHaveTextContent("Wind");
@@ -279,6 +278,15 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     // is the gold arrow + "mph".
     expect(screen.getByTestId("wind-value")).toHaveTextContent("W 8");
     expect(screen.getByTestId("wind-direction")).toHaveTextContent("mph");
+
+    // Layer 2 — environmental grid sits below the weather strip (AQI only in production).
+    const env = screen.getByTestId("selected-location-env-metrics");
+    expect(env).toHaveTextContent("AQI");
+    expect(env).toHaveTextContent("Unavailable");
+    expect(env).not.toHaveTextContent("UV");
+    expect(env).toContainElement(screen.getByTestId("air-quality-slot"));
+    expect(metrics).not.toContainElement(screen.getByTestId("air-quality-slot"));
+    expect(screen.queryByTestId("uv-index-slot")).not.toBeInTheDocument();
   });
 
   it("renders the canonical 'CLEAR SKY SCORE' title (singular, uppercased via CSS)", () => {
@@ -333,9 +341,8 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
   });
 
   it("gives Temp the same compact size as Fog so Fog/Temp read with equal prominence", () => {
-    // Presentation only: Temp mirrors Fog's length-responsive sizing so it never
-    // looks larger than Fog. AQI intentionally stays 28px to preserve horizontal
-    // room for future real values + categories.
+    // Presentation only: Temp mirrors Fog's length-responsive sizing so secondary
+    // weather values stay visually equal under the Clear Sky Score hero.
     const { getByTestId } = render(
       <MapSelectedLocationCard
         location={{ ...location, temperature: 66, fogScore: 85 }}
@@ -400,7 +407,7 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
   it("renders all metric titles in white uppercase semibold typography", () => {
     render(<MapSelectedLocationCard location={location} phonePortrait />);
 
-    for (const titleText of ["Fog", "AQI", "Temp", "Wind"]) {
+    for (const titleText of ["Fog", "Temp", "Wind"]) {
       const title = screen.getByText(titleText);
       expect(title.className).toContain("text-white");
       expect(title.className).toContain("text-[14px]");
@@ -417,7 +424,7 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(scoreTitle.className).toContain("uppercase");
   });
 
-  it("aligns supporting labels across all five metric columns", () => {
+  it("aligns supporting labels across the weather-strip columns", () => {
     render(<MapSelectedLocationCard location={location} phonePortrait />);
 
     const metrics = screen.getByTestId("selected-location-metrics");
@@ -427,9 +434,7 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
       const supporting = column.querySelector("[data-testid='clear-skies-quality']")
         ?? column.lastElementChild;
       // Every supporting label sits a compact 4px (mt-1) below its value and
-      // starts at the same y across all five columns (fixed title + value rows),
-      // so single-line labels share one baseline directly beneath their values
-      // without a tall empty reserve. Long labels wrap to two compact lines.
+      // starts at the same y across weather columns (fixed title + value rows).
       expect(supporting?.className).toContain("mt-1");
       expect(supporting?.className).toContain("min-h-[0.9rem]");
       expect(supporting?.className).toContain("items-start");
@@ -437,33 +442,27 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
 
     expect(screen.getByTestId("clear-skies-quality")).toHaveTextContent("Excellent");
     expect(metrics).toHaveTextContent("Clear");
-    expect(metrics).toHaveTextContent("Unavailable");
     // Wind's supporting label is the gold arrow + "mph".
     expect(screen.getByTestId("wind-direction")).toHaveTextContent("mph");
   });
 
-  it("keeps Clear Sky Score inline as the first of five metric columns", () => {
+  it("keeps Clear Sky Score as the first of four weather-strip columns", () => {
     render(<MapSelectedLocationCard location={location} phonePortrait />);
 
     const metricsRow = screen.getByTestId("selected-location-metrics");
-    // Five equal-width metric columns live in a single flex row.
     const columns = Array.from(metricsRow.children);
-    expect(columns).toHaveLength(5);
+    expect(columns).toHaveLength(4);
     expect(metricsRow.className).toContain("flex");
 
-    // The score value and its quality label share the first column with the
-    // Fog / AQI / Temp / Wind columns — no separate full-width score section.
     const score = screen.getByTestId("clear-skies-score");
     const firstColumn = columns[0];
     expect(firstColumn).toContainElement(score);
     expect(firstColumn).toContainElement(screen.getByTestId("clear-skies-quality"));
     expect(firstColumn).toHaveTextContent("Clear Sky Score");
 
-    // Column order matches the approved layout.
     expect(columns[1]).toHaveTextContent("Fog");
-    expect(columns[2]).toHaveTextContent("AQI");
-    expect(columns[3]).toHaveTextContent("Temp");
-    expect(columns[4]).toHaveTextContent("Wind");
+    expect(columns[2]).toHaveTextContent("Temp");
+    expect(columns[3]).toHaveTextContent("Wind");
   });
 
   it("does not render the score as its own oversized headline section", () => {
@@ -539,9 +538,8 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     const windValue = screen.getByTestId("wind-value");
     expect(windValue).toHaveTextContent("NNW 12");
     expect(windValue.className).toContain("whitespace-nowrap");
-    // Wind value uses the largest size that fits three-letter directions at
-    // 390x844 — slightly smaller than the 28px secondary values, by necessity —
-    // and shares the light weight of Fog/Temp so it never reads bolder.
+    // Wind shares the length-responsive secondary system (≥4 chars → 19px) with
+    // Fog/Temp so it never reads as a separate hierarchy.
     expect(windValue.className).toContain("text-[19px]");
     expect(windValue.className).toContain("font-light");
     expect(windValue.className).not.toContain("font-semibold");
@@ -562,6 +560,8 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(value).not.toHaveTextContent("0");
     expect(value).not.toHaveTextContent("Good");
     expect(value).not.toHaveTextContent("NaN");
+    // UV must not ship in production until intentionally released.
+    expect(screen.queryByTestId("uv-index-slot")).not.toBeInTheDocument();
   });
 
   it("renders canonical AQI value and category from the airQuality object", () => {
@@ -591,6 +591,54 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(value).not.toHaveTextContent("Unavailable");
     expect(supporting).toHaveTextContent("Good");
     expect(value.getAttribute("data-score-band")).toBe("good");
+    // Shares secondary hierarchy with Fog/Temp (≤3 chars → 23px).
+    expect(value.className).toContain("text-[23px]");
+  });
+
+  it("keeps AQI on the environmental grid outside the weather strip and wraps long labels", () => {
+    render(
+      <MapSelectedLocationCard
+        location={{
+          ...location,
+          id: "marin-headlands",
+          name: "Marin Headlands",
+          fogScore: 38,
+          sunshineScore: 48,
+          airQuality: {
+            aqi: 125,
+            category: "unhealthy-sensitive",
+            colorToken: "aqi.unhealthy-sensitive",
+            label: "Unhealthy for Sensitive Groups",
+            description: "Sensitive groups may experience health effects.",
+            pollutant: "Ozone",
+            observedAt: "2026-07-13T20:00:00.000Z",
+            source: "Open-Meteo",
+            isAvailable: true,
+          },
+        }}
+        phonePortrait
+      />,
+    );
+
+    const weather = screen.getByTestId("selected-location-metrics");
+    const env = screen.getByTestId("selected-location-env-metrics");
+    expect(weather).toHaveTextContent("Light Fog");
+    expect(weather).not.toHaveTextContent("Unhealthy for Sensitive Groups");
+    expect(weather).not.toContainElement(screen.getByTestId("air-quality-slot"));
+    expect(env).toContainElement(screen.getByTestId("air-quality-slot"));
+    expect(screen.getByTestId("air-quality-supporting")).toHaveTextContent(
+      "Unhealthy for Sensitive Groups",
+    );
+    expect(screen.getByTestId("air-quality-supporting").className).toContain(
+      "break-words",
+    );
+    expect(screen.getByTestId("air-quality-supporting").className).toContain(
+      "min-h-[2.4rem]",
+    );
+    expect(env.className).toContain("mt-3");
+    expect(env.querySelector(".grid-cols-2")).not.toBeNull();
+    // Scaffolded for UV later — not shipped in production yet.
+    expect(screen.queryByTestId("uv-index-slot")).not.toBeInTheDocument();
   });
 
   it("renders desktop compact AQI from the same canonical field", () => {
@@ -616,6 +664,8 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     const desktopAqi = screen.getByTestId("desktop-air-quality");
     expect(desktopAqi).toHaveTextContent("AQI 110 · Unhealthy for Sensitive Groups");
     expect(desktopAqi.getAttribute("data-aqi-category")).toBe("unhealthy-sensitive");
+    expect(desktopAqi.className).toContain("line-clamp-2");
+    expect(screen.queryByTestId("desktop-uv-index")).not.toBeInTheDocument();
   });
 
   it("renders a neutral premium location-image placeholder with no per-location image pipeline", () => {

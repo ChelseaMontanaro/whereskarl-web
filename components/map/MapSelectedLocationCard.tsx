@@ -256,20 +256,15 @@ function SectionLabel({
 }
 
 /**
- * A single column in the unified metrics row. Every metric (including Clear Sky
- * Score) shares this structure so the five columns stay aligned in one row.
- * Values, colors, bands, and labels come from the canonical helpers — this
- * component never derives thresholds, colors, or labels itself. The Clear Sky
- * Score column gets the strongest hierarchy purely through props (gold title,
- * larger value, canonical color on both value and quality label) — no boxed or
- * tinted background.
- */
-/*
- * Phone portrait metrics row — typography verified at 390×844 against the
- * approved mockup. Titles are white 14px semibold; secondary values 28px light;
- * score 38px semibold (canonical color); Wind direction+speed 19px light;
- * supporting labels 13px regular on a shared baseline (canonical colors applied
- * where helpers provide them). Vertical dividers separate the five columns.
+ * Phone selected-location metrics use two layers:
+ *
+ * 1. Weather strip — Clear Sky Score + Fog + Temp + Wind
+ * 2. Environmental grid — AQI today; `grid-cols-2` reserved for a future UV tile
+ *
+ * Environmental metrics must not share equal flex columns with Fog/Temp/Wind —
+ * those ~55px slots cannot hold EPA category copy without crowding/overlap.
+ * Values, colors, bands, and labels come from canonical helpers — these
+ * components never derive thresholds, colors, or labels themselves.
  */
 /** All metric titles: white, uppercase, 14px semibold. */
 const METRIC_TITLE_CLASS =
@@ -287,19 +282,13 @@ const SECONDARY_VALUE_CLASS = "text-[28px] font-light leading-none text-white";
 const METRIC_VALUE_PLACEHOLDER = "\u2014";
 
 /**
- * Compact secondary-value size, responsive to the *rendered string length only*
- * — never the underlying score/classification. Fog and Temp share this so the
- * two carry equal visual prominence: the Fog column is the narrowest hero column
- * (~50.7px at 390px), so 2-digit percentages ("22%", "85%", "99%"), the
- * whole-number "100%", and 3-digit temps ("100°") would bleed past the column
- * into the neighbor at the 28px secondary size. This keeps the value visually
- * large while guaranteeing it fits with margin (verified at 390×844 in Geist):
- *   - "—" placeholder     → 28px (matches AQI's placeholder)
- *   - ≤ 3 chars ("85%", "66°") → 23px (largest size that fits the widest "99%" ≈46.1px)
- *   - ≥ 4 chars ("100%", "100°") → 19px (keeps the value on one line ≈46.2px)
- * AQI intentionally does NOT use this — its value stays 28px so the column keeps
- * horizontal room for real numbers + categories. Typography only: no effect on
- * any metric's meaning, classification, or supporting label.
+ * Shared secondary-value size for Fog, Temp, Wind, and environmental values —
+ * responsive to the *rendered string length only*, never the underlying
+ * classification:
+ *   - "—" placeholder → 28px
+ *   - ≤ 3 chars ("85%", "66°", "78", "W 8") → 23px
+ *   - ≥ 4 chars ("100%", "WNW 8", "Unavailable") → 19px
+ * Clear Sky Score stays the sole hero at 38px. Typography only.
  */
 function compactSecondaryValueClassName(formatted: string): string {
   if (formatted === METRIC_VALUE_PLACEHOLDER) {
@@ -311,20 +300,31 @@ function compactSecondaryValueClassName(formatted: string): string {
 /** Title row — single line for every metric title, shared baseline. */
 const METRIC_TITLE_ROW_CLASS =
   "flex h-5 w-full items-end justify-center leading-none";
-/** Fixed value row — every value bottom-aligns here so the five columns share a
+/** Fixed value row — every value bottom-aligns here so weather columns share a
  * value baseline and the supporting labels start at the same y (44px fits the
  * 38px score without clipping). */
 const METRIC_VALUE_ROW_CLASS =
   "flex h-11 w-full items-end justify-center leading-none";
 /**
- * Shared supporting-label row. Sits just 4px below the value (mt-1) and reserves
- * only a single compact line by default; long labels ("Karl Territory",
- * "Coming Soon") wrap to at most two compact lines that stay close to the value.
- * Top-aligned so single-line labels across all five columns share one baseline
- * directly beneath their values without a tall empty reserve.
+ * Shared supporting-label row for the weather strip. Fog supporting copy
+ * ("Clear" … "Karl Territory") fits the 4-column weather budget; long EPA
+ * category strings belong on the environmental metrics grid instead.
  */
 const METRIC_SUPPORTING_ROW_CLASS =
   "mt-1 flex min-h-[0.9rem] items-start justify-center text-balance leading-[1.1] text-[13px] font-normal text-white";
+
+/**
+ * Supporting copy for environmental metrics. Sized for the longest U.S. AQI
+ * category ("Unhealthy for Sensitive Groups") at phone width in a 2-column grid
+ * (~170px+), with wrap + reserved height so neighbors never collide.
+ * Exact reserved height: 2.4rem (≈38.4px) — fits 3 lines of 12px/leading-snug.
+ */
+const ENV_METRIC_SUPPORTING_CLASS =
+  "mt-1 min-h-[2.4rem] w-full text-left text-[12px] font-semibold leading-snug text-balance break-words";
+
+/** Environmental metric title — slightly quieter than weather strip titles. */
+const ENV_METRIC_TITLE_CLASS =
+  "text-[12px] font-semibold uppercase tracking-[0.06em] text-white/70";
 
 /** Right-pointing arrow for the Wind supporting row (#F5B000 per mockup). */
 function WindArrowIcon({ className = "h-3 w-3" }: { className?: string }) {
@@ -403,7 +403,7 @@ function MetricColumn({
       >
         {value}
       </span>
-      {/* Supporting labels share one baseline row across all five columns. */}
+      {/* Supporting labels share one baseline across weather-strip columns. */}
       <span
         className={supportingClassName}
         style={supportingColor ? { color: supportingColor } : undefined}
@@ -411,6 +411,96 @@ function MetricColumn({
       >
         {supporting ?? "\u00A0"}
       </span>
+    </div>
+  );
+}
+
+type EnvironmentalMetricProps = {
+  title: string;
+  value: ReactNode;
+  valueText: string;
+  valueColor?: string;
+  supporting?: ReactNode;
+  supportingColor?: string;
+  band?: string;
+  unavailable?: boolean;
+  containerTestId?: string;
+  testId?: string;
+  supportingTestId?: string;
+};
+
+/**
+ * One environmental metric tile (AQI today; UV / pollen later without redesign).
+ * Left-aligned in a 2-column grid so long category labels wrap inside the tile
+ * instead of crowding Fog / Temp / Wind. Uses the same secondary value hierarchy
+ * as Fog and Temp.
+ */
+function EnvironmentalMetricTile({
+  title,
+  value,
+  valueText,
+  valueColor,
+  supporting,
+  supportingColor,
+  band,
+  unavailable = false,
+  containerTestId,
+  testId,
+  supportingTestId,
+}: EnvironmentalMetricProps) {
+  return (
+    <div className="min-w-0 text-left" data-testid={containerTestId}>
+      <p className={ENV_METRIC_TITLE_CLASS}>{title}</p>
+      <p
+        className={
+          unavailable
+            ? "mt-0.5 text-[13px] font-normal leading-none text-white/55"
+            : `mt-0.5 ${compactSecondaryValueClassName(valueText)}`
+        }
+        style={!unavailable && valueColor ? { color: valueColor } : undefined}
+        data-score-band={band}
+        data-testid={testId}
+      >
+        {value}
+      </p>
+      <p
+        className={ENV_METRIC_SUPPORTING_CLASS}
+        style={
+          !unavailable && supportingColor ? { color: supportingColor } : undefined
+        }
+        data-testid={supportingTestId}
+      >
+        {supporting ?? "\u00A0"}
+      </p>
+    </div>
+  );
+}
+
+/**
+ * Environmental metrics grid under the weather strip. Always `grid-cols-2` so a
+ * future second tile (UV) can land without redesigning Layer 1. AQI is the only
+ * production tile — do not ship UV here until intentionally released.
+ */
+function EnvironmentalMetricsRow({
+  metrics,
+}: {
+  metrics: EnvironmentalMetricProps[];
+}) {
+  if (metrics.length === 0) {
+    return null;
+  }
+
+  return (
+    <div
+      className="mt-3 border-t border-white/10 pt-3"
+      data-testid="selected-location-env-metrics"
+      aria-label="Environmental metrics"
+    >
+      <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+        {metrics.map((metric) => (
+          <EnvironmentalMetricTile key={metric.title} {...metric} />
+        ))}
+      </div>
     </div>
   );
 }
@@ -482,10 +572,8 @@ function PhonePortraitSelectedCard({
   const updatedLabel = relativeUpdatedLabel(location.updatedAt);
 
   // Wind value carries the compass direction + speed together (e.g. "NW 8",
-  // "WSW 12") to match the approved mockup; the supporting row is the gold arrow
-  // + "mph". The combined value is the widest metric string, so the Wind value
-  // uses a slightly smaller size that fits three-letter directions cleanly at
-  // 390px — Fog / AQI / Temp keep the full 28px hierarchy (never shrunk for Wind).
+  // "WSW 12"); the supporting row is the gold arrow + "mph". Wind shares the
+  // same length-responsive secondary value system as Fog and Temp.
   const hasWindSpeed =
     typeof location.windSpeed === "number" &&
     Number.isFinite(location.windSpeed);
@@ -494,7 +582,7 @@ function PhonePortraitSelectedCard({
     ? windDirection
       ? `${windDirection} ${Math.round(location.windSpeed)}`
       : `${Math.round(location.windSpeed)}`
-    : "—";
+    : METRIC_VALUE_PLACEHOLDER;
   const windSupporting: ReactNode = hasWindSpeed ? (
     <WindSupportingLabel />
   ) : undefined;
@@ -504,6 +592,9 @@ function PhonePortraitSelectedCard({
     Number.isFinite(location.temperature)
       ? `${Math.round(location.temperature)}°`
       : METRIC_VALUE_PLACEHOLDER;
+  const aqiValueText = airQuality.available
+    ? String(airQuality.aqi)
+    : "Unavailable";
 
   const { isFavorite, handleToggleFavorite } = useFavoriteToggle(location.id);
 
@@ -582,8 +673,9 @@ function PhonePortraitSelectedCard({
         <DegradedDataLabel variant="location" className="mt-1.5" />
       ) : null}
 
-      {/* Unified metrics row — canonical helpers only. Five equal visual columns
-          separated by vertical dividers; typography matches approved mockup. */}
+      {/* Layer 1 — Weather strip: Score / Fog / Temp / Wind.
+          Environmental metrics live on Layer 2 so long category labels never
+          share Fog's column budget. */}
       <div
         className="mt-3 flex items-stretch gap-0 border-t border-white/10 pt-3"
         data-testid="selected-location-metrics"
@@ -609,36 +701,6 @@ function PhonePortraitSelectedCard({
           testId="fog-value"
           supporting={fogLabel}
         />
-        {/*
-          AQI uses the same title / value / supporting structure as other metrics.
-          Value and label come from the canonical backend airQuality object via
-          presentAirQuality — this column never derives U.S. AQI bands itself.
-        */}
-        <MetricColumn
-          title="AQI"
-          value={airQuality.available ? airQuality.aqi : "Unavailable"}
-          valueColor={
-            airQuality.available ? (airQuality.color ?? undefined) : undefined
-          }
-          valueClassName={
-            airQuality.available
-              ? SECONDARY_VALUE_CLASS
-              : "text-[13px] font-normal leading-none text-white/55"
-          }
-          supporting={airQuality.available ? airQuality.label : undefined}
-          supportingColor={
-            airQuality.available ? (airQuality.color ?? undefined) : undefined
-          }
-          supportingClassName={
-            airQuality.available
-              ? `${METRIC_SUPPORTING_ROW_CLASS} font-semibold`
-              : METRIC_SUPPORTING_ROW_CLASS
-          }
-          band={airQuality.available ? (airQuality.category ?? undefined) : undefined}
-          containerTestId="air-quality-slot"
-          testId="air-quality-value"
-          supportingTestId="air-quality-supporting"
-        />
         <MetricColumn
           title="Temp"
           value={tempValue}
@@ -648,7 +710,7 @@ function PhonePortraitSelectedCard({
         <MetricColumn
           title="Wind"
           value={windValue}
-          valueClassName="text-[19px] font-light leading-none text-white"
+          valueClassName={compactSecondaryValueClassName(windValue)}
           columnClassName="flex-[1.6]"
           supporting={windSupporting}
           testId="wind-value"
@@ -657,6 +719,32 @@ function PhonePortraitSelectedCard({
           showDivider={false}
         />
       </div>
+
+      {/* Layer 2 — Environmental grid: AQI only in production.
+          Grid stays two-column so UV can release later without redesigning Layer 1. */}
+      <EnvironmentalMetricsRow
+        metrics={[
+          {
+            title: "AQI",
+            value: airQuality.available ? airQuality.aqi : "Unavailable",
+            valueText: aqiValueText,
+            valueColor: airQuality.available
+              ? (airQuality.color ?? undefined)
+              : undefined,
+            supporting: airQuality.available ? airQuality.label : undefined,
+            supportingColor: airQuality.available
+              ? (airQuality.color ?? undefined)
+              : undefined,
+            band: airQuality.available
+              ? (airQuality.category ?? undefined)
+              : undefined,
+            unavailable: !airQuality.available,
+            containerTestId: "air-quality-slot",
+            testId: "air-quality-value",
+            supportingTestId: "air-quality-supporting",
+          },
+        ]}
+      />
     </>
   );
 
@@ -775,7 +863,7 @@ function DesktopSelectedCard({
           ) : null}
 
           <p
-            className="mt-1 text-[0.65rem] font-medium"
+            className="mt-1 line-clamp-2 text-[0.65rem] font-medium leading-snug"
             data-testid="desktop-air-quality"
             data-aqi-category={
               airQuality.available ? airQuality.category ?? undefined : undefined
