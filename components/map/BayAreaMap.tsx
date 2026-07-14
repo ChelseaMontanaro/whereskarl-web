@@ -43,6 +43,7 @@ import {
   updatePhonePortraitMarkerLabelOffsets,
   type PhonePortraitDeclutterEntry,
 } from "@/lib/map/phonePortraitMarkers";
+import { getProductRegionIdForLocation } from "@/lib/map/regions";
 import {
   fitPhonePortraitRegionViewport,
   locatePhonePortraitMap,
@@ -453,6 +454,9 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
                 priority: getPhonePortraitMarkerPriority(location.id),
                 score: location.sunshineScore,
                 isSelected: selectedLocationId === location.id,
+                // Canonical product-region resolver (backend region first,
+                // then fallback assignment) — no second location-to-region map.
+                productRegionId: getProductRegionIdForLocation(location),
               },
             ];
           },

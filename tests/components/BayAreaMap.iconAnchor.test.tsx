@@ -128,7 +128,7 @@ describe("BayAreaMap phone-portrait icon anchoring", () => {
     expect(oaklandMeta.style.transform).toBe("translate(calc(-50% + 0px), 0px)");
   });
 
-  it("hides the lower-priority marker when the rendered label/score groups collide", async () => {
+  it("keeps the colliding lower-priority marker as an icon-only marker (label hidden, icon kept)", async () => {
     // Position the label/score groups via getBoundingClientRect: san-francisco
     // (priority 0) and berkeley (priority 1) overlap; novato is far away.
     const metaCenters: Record<string, { x: number; y: number }> = {
@@ -166,9 +166,17 @@ describe("BayAreaMap phone-portrait icon anchoring", () => {
         expect(root("novato")).not.toBeNull();
       });
 
+      // Label collision never hides the icon: the loser stays as icon-only
+      // (root visible, __meta hidden) so its weather icon keeps its presence.
       expect(root("san-francisco")!.style.display).not.toBe("none");
-      expect(root("berkeley")!.style.display).toBe("none");
+      expect(root("san-francisco")!.dataset.markerVisibility).toBe("full");
+
+      expect(root("berkeley")!.style.display).not.toBe("none");
+      expect(root("berkeley")!.dataset.markerVisibility).toBe("icon-only");
+      expect(meta("berkeley")!.style.display).toBe("none");
+
       expect(root("novato")!.style.display).not.toBe("none");
+      expect(root("novato")!.dataset.markerVisibility).toBe("full");
     } finally {
       rectSpy.mockRestore();
     }
@@ -410,9 +418,11 @@ describe("BayAreaMap phone-portrait zoom-scaled label offsets", () => {
         5,
       );
       // ...and the overlapping (lower-priority) label was decluttered using that
-      // same rendered geometry.
+      // same rendered geometry: the icon stays, only the label is dropped.
       expect(root("san-francisco")!.style.display).not.toBe("none");
-      expect(root("berkeley")!.style.display).toBe("none");
+      expect(root("san-francisco")!.dataset.markerVisibility).toBe("full");
+      expect(root("berkeley")!.style.display).not.toBe("none");
+      expect(root("berkeley")!.dataset.markerVisibility).toBe("icon-only");
     } finally {
       rectSpy.mockRestore();
     }

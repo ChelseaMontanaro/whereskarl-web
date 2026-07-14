@@ -256,6 +256,22 @@ export function resolvePhonePortraitMarkerLabelOffset(
   return [x * scale, y * scale];
 }
 
+/**
+ * Product-defined marker priority ranking for the phone-portrait map.
+ *
+ * Semantic purpose: this is the *editorial / product* ordering used as ONE tier
+ * of the canonical priority model (see {@link getPhonePortraitMarkerPriority} and
+ * `comparePhonePortraitDeclutterOrder` in `phonePortraitMarkers.ts`). It ranks a
+ * curated set of well-known locations so that, all else equal, they claim scarce
+ * label space before generic score-ranked markers.
+ *
+ * It is deliberately NOT a region-anchor table: region-anchor selection is
+ * computed independently from the canonical product-region resolver at declutter
+ * time (`selectPhonePortraitRegionAnchorIds`). Region-anchor priority therefore
+ * sits *above* this list in the priority model and is never duplicated inside it.
+ * A location may appear here and also be chosen as its region's anchor; the two
+ * concerns compose rather than conflict.
+ */
 export const PHONE_PORTRAIT_PRIORITY_LOCATION_IDS = [
   "san-francisco",
   "berkeley",
@@ -272,19 +288,45 @@ export function getPhonePortraitMarkerPriority(locationId: string): number {
   return index === -1 ? Number.MAX_SAFE_INTEGER : index;
 }
 
+/**
+ * Label/score collision box (half-extents in px). A marker's label/score group
+ * is suppressed (icon-only) when its rendered center falls inside another
+ * already-placed label box. This is the primary, common declutter signal.
+ */
 export const PHONE_PORTRAIT_MARKER_COLLISION_X = 56;
 export const PHONE_PORTRAIT_MARKER_COLLISION_Y = 76;
 
 /**
+ * Weather-icon collision box (half-extents in px). Icons are
+ * {@link PHONE_PORTRAIT_MARKER_ICON_PX} (36px); two icons whose centers fall
+ * within this box overlap by roughly a third or more, which is unreadable. This
+ * is the ONLY signal that may fully hide a marker (the canonical icon-collision
+ * fallback) and is intentionally much tighter than the label box so full hiding
+ * stays rarer than icon-only presentation. Label collision alone never hides the
+ * icon. Selected markers are exempt.
+ */
+export const PHONE_PORTRAIT_ICON_COLLISION_X = 24;
+export const PHONE_PORTRAIT_ICON_COLLISION_Y = 24;
+
+/**
  * The dense San-Francisco-and-coastal cluster (Ocean Beach, Golden Gate Park,
  * Presidio, Daly City, Pacifica, Marin Headlands, Half Moon Bay) sits so close
- * together that at the wide all-Bay zoom the markers overlap into an unreadable
- * knot. This set is decluttered *only in the all-Bay composition* (no active
- * region) — see {@link declutterPhonePortraitMarkers}. Inside a specific region
- * camera the region's own members always remain eligible and collision alone
- * declutters them, so a region view never hides its own locations.
+ * together that at the wide all-Bay zoom their *labels* overlap into an
+ * unreadable knot.
+ *
+ * Canonical policy (Phase X): membership here means "not eligible for a label in
+ * the wide all-Bay composition" — i.e. the marker resolves to the `icon-only`
+ * visibility state so its weather icon keeps geographic presence while its
+ * label/score are suppressed. It is NOT a whole-marker hide table: only the
+ * canonical icon-collision fallback may fully hide a marker, and a member that
+ * is chosen as its product region's representative anchor is promoted back to a
+ * label (so e.g. the Peninsula still gets one readable anchor). This set is
+ * applied *only in the all-Bay composition* (no active region) — see
+ * {@link declutterPhonePortraitMarkers}. Inside a specific region camera the
+ * region's own members always remain eligible and collision alone declutters
+ * them, so a region view never hides its own locations.
  */
-export const PHONE_PORTRAIT_LOW_ZOOM_HIDDEN_LOCATION_IDS = new Set([
+export const PHONE_PORTRAIT_LOW_ZOOM_ICON_ONLY_LOCATION_IDS = new Set([
   "daly-city",
   "pacifica",
   "presidio",
