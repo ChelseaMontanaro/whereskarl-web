@@ -175,14 +175,14 @@ export const PHONE_PORTRAIT_MARKER_LABEL_OFFSETS: Record<
   string,
   [number, number]
 > = {
-  "mill-valley": [-6, -16],
-  tiburon: [18, -10],
+  "mill-valley": [-4, 4],
+  tiburon: [0, 4],
   sausalito: [6, 18],
-  "stinson-beach": [18, 20],
+  "stinson-beach": [6, 4],
   "san-francisco": [12, 4],
   berkeley: [-10, 2],
   presidio: [-10, -4],
-  "golden-gate-park": [-6, 12],
+  "golden-gate-park": [-2, 4],
   "ocean-beach": [-10, 4],
   "marin-headlands": [-10, 4],
 };
