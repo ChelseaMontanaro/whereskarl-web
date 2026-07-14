@@ -334,12 +334,12 @@ const METRIC_SUPPORTING_ROW_CLASS =
 
 /**
  * Supporting copy for environmental metrics. Single-line compact labels so
- * every 3-column tile stays equal height (long AQI canonical copy is shortened
+ * every 3-column cell stays equal height (long AQI canonical copy is shortened
  * via `compactAirQualityTileLabel`; a11y keeps the full backend label).
  * Centered to match the approved mockup tile alignment.
  */
 const ENV_METRIC_SUPPORTING_CLASS =
-  "mt-1 min-h-[0.95rem] w-full truncate text-center text-[11px] font-semibold leading-none text-white/55";
+  "mt-2 min-h-[0.95rem] w-full truncate text-center text-[11px] font-semibold leading-none text-white/55";
 
 /** Environmental metric title — centered, mockup-weight presence. */
 const ENV_METRIC_TITLE_CLASS =
@@ -363,17 +363,36 @@ const ENV_COMING_SOON_VALUE_CLASS =
   "flex min-h-[1.625rem] items-center text-[12px] font-normal leading-none text-white/40";
 
 /**
- * Shared glass tile surface for the six Environmental Metrics cells (expanded).
- * Fixed min-height keeps AQI / UV / Pollen / Humidity / Visibility / KHI equal.
- * Content is centered to match the approved mockup.
+ * Environmental Metrics cell (inside one shared glass panel).
+ * Flat metric cell — no per-tile card chrome — so the six metrics read as one
+ * information block. Hierarchy: TITLE → icon → primary value → supporting.
  */
-const ENV_METRIC_TILE_CLASS =
-  "flex h-full min-h-[6.35rem] min-w-0 flex-col items-center rounded-2xl border border-white/[0.09] bg-white/[0.125] px-2 py-2.5 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.22),inset_0_-1px_0_rgba(0,0,0,0.28)]";
+const ENV_METRIC_CELL_CLASS =
+  "flex h-full min-h-[6.35rem] min-w-0 flex-col items-center px-2 py-2.5 text-center";
+
+/** Soft panel wrapping the 3×2 Environmental Metrics block — lighter than six
+ * separate cards; matches the sheet glass language without widget noise. */
+const ENV_METRICS_PANEL_CLASS =
+  "mt-4 overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]";
+
+/** Inset hairline dividers — softer (~0.07) so the panel reads as one surface;
+ * inset-y/x-3 keeps lines off the rounded corners. */
+const ENV_PANEL_V_DIVIDER_CLASS =
+  "pointer-events-none absolute inset-y-3 w-px bg-white/[0.07]";
+const ENV_PANEL_H_DIVIDER_CLASS =
+  "pointer-events-none absolute inset-x-3 h-px bg-white/[0.07]";
 
 /** Glass surface for each Marine Layer / Fog Ceiling card.
- * Secondary roadmap proportions (~90px @ 390) — subordinate to the 3×2 grid. */
+ * Compact supporting-metric height (~82px @ 390) — subordinate to Environmental Metrics. */
 const MARINE_CARD_CLASS =
-  "flex min-h-[5.625rem] max-h-[5.875rem] min-w-0 flex-1 items-center gap-2.5 overflow-hidden rounded-2xl border border-white/[0.09] bg-white/[0.125] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.22),inset_0_-1px_0_rgba(0,0,0,0.28)]";
+  "flex min-h-[5.125rem] max-h-[5.375rem] min-w-0 flex-1 items-center gap-2.5 overflow-hidden rounded-2xl border border-white/[0.09] bg-white/[0.125] px-3 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.22),inset_0_-1px_0_rgba(0,0,0,0.28)]";
+
+/**
+ * Shared Environmental Metrics icon slot — fixed box so AQI / UV / Pollen /
+ * Humidity / Visibility / KHI share one optical center without resizing glyphs.
+ */
+const ENV_ICON_SLOT_CLASS =
+  "inline-flex h-[37px] w-[37px] shrink-0 items-center justify-center";
 
 /**
  * Rich mockup-inspired icon identity colors (independent of live value colorTokens).
@@ -397,12 +416,31 @@ const ENV_POLLEN_ICON_CLASS = "h-[37px] w-[37px]";
 /** KHI heart — slight bump over the default tile icon. */
 const ENV_KHI_ICON_CLASS = "h-[34px] w-[34px]";
 
-/** Marine Layer / Fog Ceiling — premium white icons (compact secondary card). */
-const ENV_MARINE_ICON_CLASS = "h-8 w-8 text-white/95";
+/** Marine Layer / Fog Ceiling — ~5% smaller than the default 32px tile icon. */
+const ENV_MARINE_ICON_CLASS = "h-[30px] w-[30px] text-white/95";
 
 /** Marine half title — left-aligned beside the icon (mockup horizontal stack). */
 const MARINE_TITLE_CLASS =
   "w-full text-left text-[12px] font-semibold uppercase tracking-[0.06em] text-white/78";
+
+/**
+ * Presentation-only soften for AQI value/supporting color (does not change
+ * canonical presenters). Blends ~10% toward white for a calmer moderate orange.
+ */
+function softenAqiPresentationColor(color: string | undefined): string | undefined {
+  if (!color || !/^#([0-9a-f]{6})$/i.test(color)) {
+    return color;
+  }
+  const hex = color.slice(1);
+  const r = Number.parseInt(hex.slice(0, 2), 16);
+  const g = Number.parseInt(hex.slice(2, 4), 16);
+  const b = Number.parseInt(hex.slice(4, 6), 16);
+  const mix = 0.1;
+  const to = (c: number) => Math.round(c + (255 - c) * mix);
+  return `#${[to(r), to(g), to(b)]
+    .map((c) => c.toString(16).padStart(2, "0"))
+    .join("")}`;
+}
 
 function envMetricLiveValueClassName(formatted: string): string {
   return formatted.length >= 5
@@ -526,9 +564,10 @@ type EnvironmentalMetricProps = {
 };
 
 /**
- * One Environmental Metrics glass tile.
+ * One Environmental Metrics cell inside the shared panel.
  * Hierarchy: TITLE → icon → primary value → compact supporting label.
- * All six tiles share equal min-height and internal spacing.
+ * All six cells share equal min-height and internal spacing; borders are
+ * applied by the parent grid so the block reads as one surface.
  */
 function EnvironmentalMetricTile({
   title,
@@ -550,22 +589,25 @@ function EnvironmentalMetricTile({
 }: EnvironmentalMetricProps) {
   return (
     <div
-      className={ENV_METRIC_TILE_CLASS}
+      className={ENV_METRIC_CELL_CLASS}
       data-testid={containerTestId}
       aria-label={ariaLabel ?? title}
       title={titleAttr}
     >
       <p className={ENV_METRIC_TITLE_CLASS}>{title}</p>
-      {/* Icon + value share a centered stack so they read as one unit. */}
+      {/* Icon + value: live metrics keep top rhythm; Coming Soon (KHI) optically
+          centers icon + label in the remaining space while the supporting row
+          still anchors the shared bottom baseline. */}
       <div
-        className={`mt-1.5 flex w-full flex-col items-center ${
-          relaxedIconValueGap ? "gap-1.5" : "gap-0.5"
-        }`}
+        className={
+          comingSoon
+            ? "mt-1.5 flex min-h-0 w-full flex-1 flex-col items-center justify-center gap-2"
+            : `mt-1.5 flex w-full flex-col items-center ${
+                relaxedIconValueGap ? "gap-2" : "gap-1.5"
+              }`
+        }
       >
-        <span
-          className="inline-flex h-9 w-9 shrink-0 items-center justify-center"
-          aria-hidden
-        >
+        <span className={ENV_ICON_SLOT_CLASS} aria-hidden>
           {icon}
         </span>
         <p
@@ -597,11 +639,12 @@ function EnvironmentalMetricTile({
 }
 
 /**
- * Environmental Metrics — approved 3×2 grouping in the expanded body:
+ * Environmental Metrics — cohesive 3×2 block in the expanded body:
  *   [AQI] [UV] [Pollen]
  *   [Humidity] [Visibility] [KHI]
  *
- * Humidity / Visibility are raw canonical values only. KHI is Coming Soon.
+ * One soft glass panel with hairline dividers (Core Weather affinity) instead
+ * of six separate widget cards. Presenters and hierarchy are unchanged.
  */
 function EnvironmentalMetricsSection({
   metrics,
@@ -619,13 +662,19 @@ function EnvironmentalMetricsSection({
       aria-label="Environmental metrics"
     >
       <SectionLabel>Environmental Metrics</SectionLabel>
-      <div
-        className="mt-2.5 grid grid-cols-3 items-stretch gap-x-2 gap-y-2"
-        data-testid="selected-location-env-grid"
-      >
-        {metrics.map((metric) => (
-          <EnvironmentalMetricTile key={metric.title} {...metric} />
-        ))}
+      <div className={ENV_METRICS_PANEL_CLASS} data-testid="selected-location-env-panel">
+        <div
+          className="relative grid grid-cols-3 items-stretch"
+          data-testid="selected-location-env-grid"
+        >
+          {/* Inset dividers — inset-y/x-3 keeps lines off the rounded corners. */}
+          <div aria-hidden className={`${ENV_PANEL_V_DIVIDER_CLASS} left-1/3`} />
+          <div aria-hidden className={`${ENV_PANEL_V_DIVIDER_CLASS} left-2/3`} />
+          <div aria-hidden className={`${ENV_PANEL_H_DIVIDER_CLASS} top-1/2`} />
+          {metrics.map((metric) => (
+            <EnvironmentalMetricTile key={metric.title} {...metric} />
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -641,11 +690,11 @@ type MarinePlaceholderColumn = {
 
 /**
  * Marine Layer + Fog Ceiling cards (Coming Soon placeholders).
- * Two equal-width rounded cards with a small horizontal gap (~8px) — not one
- * shared container with a center divider. Each card keeps the approved
- * horizontal composition: [ICON] title / Coming Soon — icon left, vertically
- * centered; text left-aligned. Lives in the expanded body so the collapsed
- * peek preserves map area.
+ * Two equal-width rounded cards with a small horizontal gap (~8px) — visually
+ * distinct from the Environmental Metrics panel above (≈12px top margin).
+ * Each card keeps the approved horizontal composition:
+ * [ICON] title / Coming Soon — icon left, vertically centered; text left-aligned.
+ * Lives in the expanded body so the collapsed peek preserves map area.
  */
 function MarineFogCeilingCard({
   columns,
@@ -654,7 +703,7 @@ function MarineFogCeilingCard({
 }) {
   return (
     <div
-      className="flex w-full gap-2"
+      className="mt-3 flex w-full gap-2"
       data-testid="selected-location-marine-card"
       aria-label="Marine layer and fog ceiling"
     >
@@ -666,12 +715,12 @@ function MarineFogCeilingCard({
           aria-label={column.ariaLabel}
         >
           <span
-            className="inline-flex h-8 w-8 shrink-0 items-center justify-center drop-shadow-[0_0_6px_rgba(255,255,255,0.28)]"
+            className="inline-flex h-[30px] w-[30px] shrink-0 -translate-y-1 items-center justify-center self-center drop-shadow-[0_0_3px_rgba(255,255,255,0.16)]"
             aria-hidden
           >
             {column.icon}
           </span>
-          <div className="flex min-w-0 flex-col items-start gap-1 text-left">
+          <div className="flex min-w-0 -translate-y-1 flex-col items-start justify-center gap-1.5 self-center text-left">
             <p className={MARINE_TITLE_CLASS}>{column.title}</p>
             <p
               className="text-[12px] font-normal leading-none tracking-[0.01em] text-white/40"
@@ -936,13 +985,13 @@ function PhonePortraitSelectedCard({
             value: airQuality.available ? airQuality.aqi : "Unavailable",
             valueText: aqiValueText,
             valueColor: airQuality.available
-              ? (airQuality.color ?? undefined)
+              ? softenAqiPresentationColor(airQuality.color ?? undefined)
               : undefined,
             supporting: airQuality.available
               ? compactAirQualityTileLabel(airQuality)
               : undefined,
             supportingColor: airQuality.available
-              ? (airQuality.color ?? undefined)
+              ? softenAqiPresentationColor(airQuality.color ?? undefined)
               : undefined,
             band: airQuality.available
               ? (airQuality.category ?? undefined)

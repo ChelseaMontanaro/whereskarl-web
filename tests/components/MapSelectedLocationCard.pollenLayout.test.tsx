@@ -320,13 +320,14 @@ describe("phone environmental metrics 3×2 @ 390px", () => {
     const ceiling = measure(fogSlot);
 
     expect(marineRow.className).toContain("gap-2");
+    expect(marineRow.className).toContain("mt-3");
     expect(marineSlot.className).toContain("rounded-2xl");
     expect(fogSlot.className).toContain("rounded-2xl");
-    expect(marineSlot.className).toContain("min-h-[5.625rem]");
-    expect(fogSlot.className).toContain("min-h-[5.625rem]");
+    expect(marineSlot.className).toContain("min-h-[5.125rem]");
+    expect(fogSlot.className).toContain("min-h-[5.125rem]");
     expect(Math.abs(marine.width - ceiling.width)).toBeLessThan(8);
     expect(ceiling.left - marine.right).toBeGreaterThanOrEqual(6);
-    expect(marine.height).toBeGreaterThanOrEqual(52);
+    expect(marine.height).toBeGreaterThanOrEqual(48);
     expect(ceiling.height).toBe(marine.height);
     expect(screen.getByTestId("marine-layer-value")).toHaveTextContent(
       "Coming Soon",

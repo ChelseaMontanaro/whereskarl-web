@@ -329,6 +329,13 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(env).toHaveTextContent("Humidity");
     expect(env).toHaveTextContent("Visibility");
     expect(env).toHaveTextContent("KHI");
+    // One cohesive panel — not six independent rounded widget cards.
+    const panel = screen.getByTestId("selected-location-env-panel");
+    expect(env).toContainElement(panel);
+    expect(panel.className).toContain("rounded-2xl");
+    expect(screen.getByTestId("air-quality-slot").className).not.toContain(
+      "rounded-2xl",
+    );
     expect(env).toContainElement(screen.getByTestId("air-quality-slot"));
     expect(env).toContainElement(screen.getByTestId("uv-index-slot"));
     expect(env).toContainElement(screen.getByTestId("pollen-slot"));
@@ -773,8 +780,11 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(marineRow).toContainElement(marineSlot);
     expect(marineRow).toContainElement(fogSlot);
     expect(marineRow.className).toContain("gap-2");
+    expect(marineRow.className).toContain("mt-3");
     expect(marineSlot.className).toContain("rounded-2xl");
     expect(fogSlot.className).toContain("rounded-2xl");
+    expect(marineSlot.className).toContain("min-h-[5.125rem]");
+    expect(fogSlot.className).toContain("min-h-[5.125rem]");
     expect(marineSlot.className).not.toContain("border-l");
     expect(fogSlot.className).not.toContain("border-l");
     expect(screen.getByTestId("marine-layer-value")).toHaveTextContent(
