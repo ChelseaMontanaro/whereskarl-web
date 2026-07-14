@@ -38,6 +38,32 @@ export type AirQuality = {
   isAvailable: boolean;
 };
 
+export type UltravioletIndexCategory =
+  | 'low'
+  | 'moderate'
+  | 'high'
+  | 'very-high'
+  | 'extreme';
+
+export type UltravioletIndexColorToken =
+  | 'uv.low'
+  | 'uv.moderate'
+  | 'uv.high'
+  | 'uv.very-high'
+  | 'uv.extreme'
+  | 'uv.unavailable';
+
+export type UltravioletIndex = {
+  value: number | null;
+  category: UltravioletIndexCategory | null;
+  colorToken?: UltravioletIndexColorToken;
+  label: string;
+  description?: string | null;
+  observedAt?: string | null;
+  source?: string | null;
+  isAvailable: boolean;
+};
+
 export type LocationWeather = {
   id: string;
   name: string;
@@ -57,6 +83,7 @@ export type LocationWeather = {
   iconName: string;
   fogScore: number;
   airQuality?: AirQuality;
+  uvIndex?: UltravioletIndex;
   updatedAt: string;
   karlReason: string;
   primaryDrivers: string[];
@@ -86,6 +113,7 @@ export type CurrentResponse = {
   updatedAt: string;
   source: ApiSource;
   airQuality?: AirQuality;
+  uvIndex?: UltravioletIndex;
   dataStatus?: DataStatus;
 } & ConfidenceFields;
 
@@ -107,6 +135,7 @@ export type BestSunshineResponse = {
   updatedAt: string;
   source: ApiSource;
   airQuality?: AirQuality;
+  uvIndex?: UltravioletIndex;
   dataStatus?: DataStatus;
   recommendationMode: RecommendationMode;
   lookaheadMinutes: number;

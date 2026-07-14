@@ -3,6 +3,10 @@ import {
   formatAirQualityCompact,
   presentAirQuality,
 } from '@/lib/weather/airQuality';
+import {
+  formatUvIndexCompact,
+  presentUvIndex,
+} from '@/lib/weather/uvIndex';
 import type { LocationWeather } from '@/types/weather';
 
 export function formatFogPercent(location: LocationWeather): string | null {
@@ -44,12 +48,18 @@ export function formatAirQuality(location: LocationWeather): string | null {
   return `AQI ${formatAirQualityCompact(presentation)}`;
 }
 
+export function formatUvIndex(location: LocationWeather): string | null {
+  const presentation = presentUvIndex(location.uvIndex);
+  return `UV ${formatUvIndexCompact(presentation)}`;
+}
+
 export function locationWeatherMetadataItems(
   location: LocationWeather,
 ): string[] {
   return [
     formatFogPercent(location),
     formatAirQuality(location),
+    formatUvIndex(location),
     formatWind(location),
     formatTemperature(location),
   ].filter((item): item is string => Boolean(item));

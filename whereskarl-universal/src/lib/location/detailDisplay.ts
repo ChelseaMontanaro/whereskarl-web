@@ -11,6 +11,10 @@ import {
   formatAirQualityCompact,
   presentAirQuality,
 } from '@/lib/weather/airQuality';
+import {
+  formatUvIndexCompact,
+  presentUvIndex,
+} from '@/lib/weather/uvIndex';
 import type { WeatherPrediction } from '@/types/shared';
 import type { LocationWeather } from '@/types/weather';
 
@@ -137,6 +141,7 @@ export type LocationMetric = {
 
 export function getLocationMetrics(location: LocationWeather): LocationMetric[] {
   const airQuality = presentAirQuality(location.airQuality);
+  const uvIndex = presentUvIndex(location.uvIndex);
 
   const metrics: LocationMetric[] = [
     {
@@ -152,6 +157,10 @@ export function getLocationMetrics(location: LocationWeather): LocationMetric[] 
       value: formatAirQualityCompact(airQuality),
     },
     {
+      label: 'UV',
+      value: formatUvIndexCompact(uvIndex),
+    },
+    {
       label: 'Cloud cover',
       value: `${Math.round(location.cloudCover)}%`,
     },
@@ -165,6 +174,13 @@ export function getLocationMetrics(location: LocationWeather): LocationMetric[] 
     metrics.push({
       label: 'Air quality',
       value: airQuality.description,
+    });
+  }
+
+  if (uvIndex.available && uvIndex.description) {
+    metrics.push({
+      label: 'Ultraviolet',
+      value: uvIndex.description,
     });
   }
 

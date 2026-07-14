@@ -22,6 +22,7 @@ import {
   formatAirQualityCompact,
   presentAirQuality,
 } from "@/lib/weather/airQuality";
+import { presentUvIndex } from "@/lib/weather/uvIndex";
 import {
   isFavoriteLocation,
   toggleFavoriteLocation,
@@ -259,7 +260,7 @@ function SectionLabel({
  * Phone selected-location metrics use two layers:
  *
  * 1. Weather strip — Clear Sky Score + Fog + Temp + Wind
- * 2. Environmental grid — AQI today; `grid-cols-2` reserved for a future UV tile
+ * 2. Environmental grid — AQI + UV (two-column; scalable for future tiles)
  *
  * Environmental metrics must not share equal flex columns with Fog/Temp/Wind —
  * those ~55px slots cannot hold EPA category copy without crowding/overlap.
@@ -430,7 +431,7 @@ type EnvironmentalMetricProps = {
 };
 
 /**
- * One environmental metric tile (AQI today; UV / pollen later without redesign).
+ * One environmental metric tile (AQI + UV today; pollen / etc. later).
  * Left-aligned in a 2-column grid so long category labels wrap inside the tile
  * instead of crowding Fog / Temp / Wind. Uses the same secondary value hierarchy
  * as Fog and Temp.
@@ -477,9 +478,9 @@ function EnvironmentalMetricTile({
 }
 
 /**
- * Environmental metrics grid under the weather strip. Always `grid-cols-2` so a
- * future second tile (UV) can land without redesigning Layer 1. AQI is the only
- * production tile — do not ship UV here until intentionally released.
+ * Environmental metrics grid under the weather strip. Always `grid-cols-2` so
+ * AQI + UV share equal columns today and future tiles can land without
+ * redesigning Layer 1.
  */
 function EnvironmentalMetricsRow({
   metrics,
@@ -560,6 +561,7 @@ function PhonePortraitSelectedCard({
   const karlRead = getKarlReadParagraph(location);
   const score = presentClearSkiesScore(location.sunshineScore);
   const airQuality = presentAirQuality(location.airQuality);
+  const ultraviolet = presentUvIndex(location.uvIndex);
   const fogScore = resolveFogScore(location);
   // Metrics row shows the canonical Fog Intensity label only (Clear / Light Fog
   // / Foggy / Karl Territory) — never a nighttime or forecast phrasing. The
@@ -594,6 +596,9 @@ function PhonePortraitSelectedCard({
       : METRIC_VALUE_PLACEHOLDER;
   const aqiValueText = airQuality.available
     ? String(airQuality.aqi)
+    : "Unavailable";
+  const uvValueText = ultraviolet.available
+    ? String(ultraviolet.value)
     : "Unavailable";
 
   const { isFavorite, handleToggleFavorite } = useFavoriteToggle(location.id);
@@ -720,8 +725,8 @@ function PhonePortraitSelectedCard({
         />
       </div>
 
-      {/* Layer 2 — Environmental grid: AQI only in production.
-          Grid stays two-column so UV can release later without redesigning Layer 1. */}
+      {/* Layer 2 — Environmental grid: AQI + UV from canonical backend objects.
+          Temp/Wind stay on Layer 1; AQI layout/slots unchanged from Commit #1. */}
       <EnvironmentalMetricsRow
         metrics={[
           {
@@ -742,6 +747,25 @@ function PhonePortraitSelectedCard({
             containerTestId: "air-quality-slot",
             testId: "air-quality-value",
             supportingTestId: "air-quality-supporting",
+          },
+          {
+            title: "UV",
+            value: ultraviolet.available ? ultraviolet.value : "Unavailable",
+            valueText: uvValueText,
+            valueColor: ultraviolet.available
+              ? (ultraviolet.color ?? undefined)
+              : undefined,
+            supporting: ultraviolet.available ? ultraviolet.label : undefined,
+            supportingColor: ultraviolet.available
+              ? (ultraviolet.color ?? undefined)
+              : undefined,
+            band: ultraviolet.available
+              ? (ultraviolet.category ?? undefined)
+              : undefined,
+            unavailable: !ultraviolet.available,
+            containerTestId: "uv-index-slot",
+            testId: "uv-index-value",
+            supportingTestId: "uv-index-supporting",
           },
         ]}
       />
@@ -862,6 +886,10 @@ function DesktopSelectedCard({
             </p>
           ) : null}
 
+          {/* Product decision (not a technical limit): desktop/tablet keep the
+              compact AQI chip only for now. UV ships first on phone Selected
+              Location's environmental grid; desktop/tablet UV is a separate
+              roadmap layout item so we don't bolt UV onto this dense chip. */}
           <p
             className="mt-1 line-clamp-2 text-[0.65rem] font-medium leading-snug"
             data-testid="desktop-air-quality"

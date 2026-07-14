@@ -279,14 +279,16 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(screen.getByTestId("wind-value")).toHaveTextContent("W 8");
     expect(screen.getByTestId("wind-direction")).toHaveTextContent("mph");
 
-    // Layer 2 — environmental grid sits below the weather strip (AQI only in production).
+    // Layer 2 — environmental grid: AQI + UV as twin tiles under the weather strip.
     const env = screen.getByTestId("selected-location-env-metrics");
     expect(env).toHaveTextContent("AQI");
-    expect(env).toHaveTextContent("Unavailable");
-    expect(env).not.toHaveTextContent("UV");
+    expect(env).toHaveTextContent("UV");
     expect(env).toContainElement(screen.getByTestId("air-quality-slot"));
+    expect(env).toContainElement(screen.getByTestId("uv-index-slot"));
+    expect(screen.getByTestId("air-quality-value")).toHaveTextContent("Unavailable");
+    expect(screen.getByTestId("uv-index-value")).toHaveTextContent("Unavailable");
     expect(metrics).not.toContainElement(screen.getByTestId("air-quality-slot"));
-    expect(screen.queryByTestId("uv-index-slot")).not.toBeInTheDocument();
+    expect(metrics).not.toContainElement(screen.getByTestId("uv-index-slot"));
   });
 
   it("renders the canonical 'CLEAR SKY SCORE' title (singular, uppercased via CSS)", () => {
@@ -560,8 +562,8 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(value).not.toHaveTextContent("0");
     expect(value).not.toHaveTextContent("Good");
     expect(value).not.toHaveTextContent("NaN");
-    // UV must not ship in production until intentionally released.
-    expect(screen.queryByTestId("uv-index-slot")).not.toBeInTheDocument();
+    // UV still occupies the second grid column as Unavailable when missing.
+    expect(screen.getByTestId("uv-index-value")).toHaveTextContent("Unavailable");
   });
 
   it("renders canonical AQI value and category from the airQuality object", () => {
@@ -595,7 +597,7 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(value.className).toContain("text-[23px]");
   });
 
-  it("keeps AQI on the environmental grid outside the weather strip and wraps long labels", () => {
+    it("keeps AQI and UV on the environmental grid outside the weather strip and wraps long labels", () => {
     render(
       <MapSelectedLocationCard
         location={{
@@ -615,6 +617,16 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
             source: "Open-Meteo",
             isAvailable: true,
           },
+          uvIndex: {
+            value: 8,
+            category: "very-high",
+            colorToken: "uv.very-high",
+            label: "Very High",
+            description: "Sun protection is strongly recommended.",
+            observedAt: "2026-07-13T20:00:00.000Z",
+            source: "Open-Meteo",
+            isAvailable: true,
+          },
         }}
         phonePortrait
       />,
@@ -624,21 +636,50 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     const env = screen.getByTestId("selected-location-env-metrics");
     expect(weather).toHaveTextContent("Light Fog");
     expect(weather).not.toHaveTextContent("Unhealthy for Sensitive Groups");
+    expect(weather).not.toHaveTextContent("Very High");
     expect(weather).not.toContainElement(screen.getByTestId("air-quality-slot"));
+    expect(weather).not.toContainElement(screen.getByTestId("uv-index-slot"));
     expect(env).toContainElement(screen.getByTestId("air-quality-slot"));
+    expect(env).toContainElement(screen.getByTestId("uv-index-slot"));
     expect(screen.getByTestId("air-quality-supporting")).toHaveTextContent(
       "Unhealthy for Sensitive Groups",
     );
     expect(screen.getByTestId("air-quality-supporting").className).toContain(
-      "break-words",
-    );
-    expect(screen.getByTestId("air-quality-supporting").className).toContain(
       "min-h-[2.4rem]",
     );
-    expect(env.className).toContain("mt-3");
+    expect(screen.getByTestId("uv-index-value")).toHaveTextContent("8");
+    expect(screen.getByTestId("uv-index-supporting")).toHaveTextContent("Very High");
+    expect(screen.getByTestId("uv-index-value").className).toContain("text-[23px]");
     expect(env.querySelector(".grid-cols-2")).not.toBeNull();
-    // Scaffolded for UV later — not shipped in production yet.
-    expect(screen.queryByTestId("uv-index-slot")).not.toBeInTheDocument();
+  });
+
+  it("renders canonical UV from uvIndex colorToken without inventing a fake Low", () => {
+    render(
+      <MapSelectedLocationCard
+        location={{
+          ...location,
+          id: "stinson-beach",
+          name: "Stinson Beach",
+          uvIndex: {
+            value: 11,
+            category: "extreme",
+            colorToken: "uv.extreme",
+            label: "Extreme",
+            description: "Take all precautions.",
+            observedAt: "2026-07-13T20:00:00.000Z",
+            source: "Open-Meteo",
+            isAvailable: true,
+          },
+        }}
+        phonePortrait
+      />,
+    );
+
+    const value = screen.getByTestId("uv-index-value");
+    expect(value).toHaveTextContent("11");
+    expect(value).toHaveAttribute("data-score-band", "extreme");
+    expect(screen.getByTestId("uv-index-supporting")).toHaveTextContent("Extreme");
+    expect(value).not.toHaveTextContent("Low");
   });
 
   it("renders desktop compact AQI from the same canonical field", () => {

@@ -44,6 +44,36 @@ export const airQualitySchema = z.object({
   isAvailable: z.boolean(),
 });
 
+export const ultravioletIndexCategorySchema = z.enum([
+  "low",
+  "moderate",
+  "high",
+  "very-high",
+  "extreme",
+]);
+
+export const ultravioletIndexColorTokenSchema = z.enum([
+  "uv.low",
+  "uv.moderate",
+  "uv.high",
+  "uv.very-high",
+  "uv.extreme",
+  "uv.unavailable",
+]);
+
+export const ultravioletIndexSchema = z.object({
+  value: z.number().nullable(),
+  category: ultravioletIndexCategorySchema.nullable(),
+  // Backend-owned semantic presentation token. Platforms map this to local
+  // design colors once; they must not invent alternate UV Index band keys.
+  colorToken: ultravioletIndexColorTokenSchema.optional(),
+  label: z.string(),
+  description: z.string().nullable().optional(),
+  observedAt: apiDateTimeSchema.nullable().optional(),
+  source: z.string().nullable().optional(),
+  isAvailable: z.boolean(),
+});
+
 export const locationWeatherSchema = z
   .object({
     id: z.string(),
@@ -66,6 +96,11 @@ export const locationWeatherSchema = z
     // Canonical AQI object from the backend pipeline. Optional for backward
     // compatibility with older payloads; when absent, UI treats as unavailable.
     airQuality: airQualitySchema.optional(),
+    // Canonical UV Index from the shared environmental pipeline. Optional for
+    // backward compatibility; when absent, consumers treat as unavailable.
+    // Selected Location is the first UI consumer — the field is intentionally
+    // surface-agnostic for Map / Home / Favorites / Notifications / etc.
+    uvIndex: ultravioletIndexSchema.optional(),
     updatedAt: apiDateTimeSchema,
     karlReason: z.string(),
     primaryDrivers: z.array(z.string()),
@@ -83,6 +118,10 @@ export type LocationWeather = z.infer<typeof locationWeatherSchema>;
 export type LocationsResponse = z.infer<typeof locationsResponseSchema>;
 export type AirQuality = z.infer<typeof airQualitySchema>;
 export type AirQualityCategory = z.infer<typeof airQualityCategorySchema>;
+export type UltravioletIndex = z.infer<typeof ultravioletIndexSchema>;
+export type UltravioletIndexCategory = z.infer<
+  typeof ultravioletIndexCategorySchema
+>;
 
 export const currentResponseSchema = z
   .object({
@@ -102,6 +141,7 @@ export const currentResponseSchema = z
     updatedAt: apiDateTimeSchema,
     source: apiSourceSchema,
     airQuality: airQualitySchema.optional(),
+    uvIndex: ultravioletIndexSchema.optional(),
     dataStatus: dataStatusSchema.optional(),
   })
   .merge(confidenceFieldsSchema);
@@ -127,6 +167,7 @@ export const bestSunshineResponseSchema = z
     updatedAt: apiDateTimeSchema,
     source: apiSourceSchema,
     airQuality: airQualitySchema.optional(),
+    uvIndex: ultravioletIndexSchema.optional(),
     dataStatus: dataStatusSchema.optional(),
     recommendationMode: recommendationModeSchema,
     lookaheadMinutes: z.number(),
