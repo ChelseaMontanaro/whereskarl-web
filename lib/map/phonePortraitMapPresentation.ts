@@ -161,13 +161,18 @@ export const PHONE_PORTRAIT_MARKER_NAME_REM = "0.8125rem";
 export const PHONE_PORTRAIT_MARKER_SCORE_REM = "0.75rem";
 
 /**
- * Canonical per-location declutter data for the phone-portrait map.
+ * Exception-only pixel offsets for the phone-portrait label/score (`__meta`)
+ * group, relative to a coordinate-anchored weather icon.
  *
- * Semantics: pixel offset applied to the marker's label/score group **relative
- * to a coordinate-anchored weather icon**. The weather icon always stays on the
- * true projected coordinate; only the label/score group shifts by these values
- * to avoid overlap. These values are NOT fed into MapLibre's marker-level
- * offset (doing so would move the icon off the coordinate).
+ * Ordinary full markers must use `[0, 0]`. Attachment (icon → name → score) is
+ * owned by CSS: `__meta` is centered under the icon with `margin-top` for the
+ * icon-to-name gap and an internal flex gap for name-to-score. These values are
+ * NOT fed into MapLibre's marker-level offset (that would move the icon).
+ *
+ * Keep an entry here only when a measurable geographic or viewport-edge defect
+ * remains after the CSS baseline, and decluttering cannot correctly handle it.
+ * Do not use this table to re-attach stacks, compensate for long names, force
+ * more labels into a dense composition, or invent a universal non-zero Y.
  *
  * Positive x shifts the label group right, positive y shifts it down.
  */
@@ -175,16 +180,7 @@ export const PHONE_PORTRAIT_MARKER_LABEL_OFFSETS: Record<
   string,
   [number, number]
 > = {
-  "mill-valley": [-4, 4],
-  tiburon: [0, 4],
-  sausalito: [6, 4],
-  "stinson-beach": [6, 4],
-  "san-francisco": [12, 4],
-  berkeley: [-10, 2],
-  presidio: [-10, -4],
-  "golden-gate-park": [-2, 4],
-  "ocean-beach": [-10, 4],
-  "marin-headlands": [-10, 4],
+  // Empty by design: CSS owns ordinary attachment. Add proven exceptions only.
 };
 
 /** Per-location label/score declutter offset (relative to the anchored icon). */
@@ -195,14 +191,14 @@ export function getPhonePortraitMarkerLabelOffset(
 }
 
 /**
- * Zoom breakpoints for scaling the canonical label/score offsets.
+ * Zoom breakpoints for scaling genuine exception offsets only.
  *
- * The offsets in {@link PHONE_PORTRAIT_MARKER_LABEL_OFFSETS} are tuned at the
- * SF-composition reference zoom. A fixed pixel offset represents a growing
- * geographic distance as the map zooms out, so at lower zoom the label/score
- * group drifts away from its coordinate-anchored icon (into open water, etc.).
- * We keep the single canonical offset table and scale it toward the icon as
- * zoom decreases. Scaling never touches the icon — only the label/score group.
+ * Ordinary markers stay at `[0, 0]` at every zoom (CSS owns attachment). When a
+ * rare geographic/viewport exception is present in
+ * {@link PHONE_PORTRAIT_MARKER_LABEL_OFFSETS}, a fixed pixel offset represents a
+ * growing geographic distance as the map zooms out, so the exception is scaled
+ * toward the icon as zoom decreases. Scaling never touches the icon — only the
+ * label/score group — and never invents a non-zero baseline for ordinary markers.
  *
  * Curve (linear between breakpoints, then clamped):
  *   zoom >= FULL_SCALE_ZOOM (10.3)  -> 1.0  (100% of configured offset)

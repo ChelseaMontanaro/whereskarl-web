@@ -9,6 +9,7 @@ import { BayAreaMap } from "@/components/map/BayAreaMap";
 import type { MapMarkerLocation } from "@/lib/map/markers";
 import {
   getPhonePortraitMarkerLabelOffset,
+  PHONE_PORTRAIT_MARKER_LABEL_OFFSETS,
   resolvePhonePortraitMarkerLabelOffset,
 } from "@/lib/map/phonePortraitMapPresentation";
 
@@ -76,8 +77,8 @@ describe("BayAreaMap phone-portrait icon anchoring", () => {
   });
 
   it("never passes the per-location declutter offset to the MapLibre marker (icon stays on coordinate)", async () => {
-    // Includes a non-zero-offset location (tiburon [0,4]) and a zero-offset
-    // location (oakland). Both must anchor the icon with a [0,0] marker offset.
+    // Ordinary markers (no exceptions) and any future exception location must
+    // still anchor the icon with a [0,0] MapLibre marker offset.
     renderPhonePortrait([
       phoneLocation("tiburon", "Tiburon"),
       phoneLocation("oakland", "Oakland"),
@@ -93,39 +94,66 @@ describe("BayAreaMap phone-portrait icon anchoring", () => {
     }
   });
 
-  it("applies the per-location offset to the label/score meta group only, not the icon", async () => {
+  it("centers ordinary label/score meta beneath the icon with [0, 0] (CSS owns attachment)", async () => {
     renderPhonePortrait([
       phoneLocation("tiburon", "Tiburon"),
       phoneLocation("oakland", "Oakland"),
+      phoneLocation("sausalito", "Sausalito"),
     ]);
 
     await waitFor(() => {
       expect(root("tiburon")).not.toBeNull();
     });
 
-    // Non-zero location: meta carries the canonical offset; icon has no
-    // per-location transform (only the selected-scale CSS variable).
-    const tiburonMeta = root("tiburon")!.querySelector<HTMLElement>(
-      ".karl-universal-map-marker__meta",
-    )!;
-    const tiburonIcon = root("tiburon")!.querySelector<HTMLElement>(
-      ".karl-universal-map-marker",
-    )!;
-    const [tx, ty] = getPhonePortraitMarkerLabelOffset("tiburon");
-    expect([tx, ty]).toEqual([0, 4]);
-    expect(tiburonMeta.dataset.labelOffsetX).toBe("0");
-    expect(tiburonMeta.dataset.labelOffsetY).toBe("4");
-    expect(tiburonMeta.style.transform).toContain("0px");
-    expect(tiburonMeta.style.transform).toContain("4px");
-    expect(tiburonIcon.style.transform).toBe("");
+    for (const id of ["tiburon", "oakland", "sausalito"]) {
+      expect(getPhonePortraitMarkerLabelOffset(id)).toEqual([0, 0]);
+      const metaEl = root(id)!.querySelector<HTMLElement>(
+        ".karl-universal-map-marker__meta",
+      )!;
+      const icon = root(id)!.querySelector<HTMLElement>(
+        ".karl-universal-map-marker",
+      )!;
+      expect(metaEl.dataset.labelOffsetX).toBe("0");
+      expect(metaEl.dataset.labelOffsetY).toBe("0");
+      expect(metaEl.style.transform).toBe(
+        "translate(calc(-50% + 0px), 0px)",
+      );
+      expect(icon.style.transform).toBe("");
+    }
+  });
 
-    // Zero-offset location: meta offset is a no-op (stays centered below icon).
-    const oaklandMeta = root("oakland")!.querySelector<HTMLElement>(
-      ".karl-universal-map-marker__meta",
-    )!;
-    expect(oaklandMeta.dataset.labelOffsetX).toBe("0");
-    expect(oaklandMeta.dataset.labelOffsetY).toBe("0");
-    expect(oaklandMeta.style.transform).toBe("translate(calc(-50% + 0px), 0px)");
+  it("applies a genuine exception offset to the meta group only, not the icon", async () => {
+    PHONE_PORTRAIT_MARKER_LABEL_OFFSETS["__test-exception"] = [8, 12];
+    try {
+      renderPhonePortrait([
+        phoneLocation("__test-exception", "Exception"),
+        phoneLocation("oakland", "Oakland"),
+      ]);
+
+      await waitFor(() => {
+        expect(root("__test-exception")).not.toBeNull();
+      });
+
+      const metaEl = root("__test-exception")!.querySelector<HTMLElement>(
+        ".karl-universal-map-marker__meta",
+      )!;
+      const icon = root("__test-exception")!.querySelector<HTMLElement>(
+        ".karl-universal-map-marker",
+      )!;
+      expect(getPhonePortraitMarkerLabelOffset("__test-exception")).toEqual([
+        8, 12,
+      ]);
+      expect(metaEl.dataset.labelOffsetX).toBe("8");
+      expect(metaEl.dataset.labelOffsetY).toBe("12");
+      expect(metaEl.style.transform).toContain("8px");
+      expect(metaEl.style.transform).toContain("12px");
+      expect(icon.style.transform).toBe("");
+      expect(
+        JSON.parse(root("__test-exception")!.dataset.markerOffset ?? "null"),
+      ).toEqual([0, 0]);
+    } finally {
+      delete PHONE_PORTRAIT_MARKER_LABEL_OFFSETS["__test-exception"];
+    }
   });
 
   it("keeps the colliding lower-priority marker as an icon-only marker (label hidden, icon kept)", async () => {
@@ -271,100 +299,120 @@ describe("BayAreaMap phone-portrait marker root anchoring (stacking regression)"
 });
 
 describe("BayAreaMap phone-portrait zoom-scaled label offsets", () => {
+  const EXCEPTION_ID = "__test-geographic-exception";
+
   beforeEach(() => {
     vi.clearAllMocks();
     document.body.innerHTML = "";
     mockSetZoom(10.5);
+    delete PHONE_PORTRAIT_MARKER_LABEL_OFFSETS[EXCEPTION_ID];
   });
 
   afterEach(() => {
     cleanup();
     document.body.innerHTML = "";
     mockSetZoom(10.5);
+    delete PHONE_PORTRAIT_MARKER_LABEL_OFFSETS[EXCEPTION_ID];
   });
 
-  it("renders full configured offsets at the reference zoom (>= 10.3)", async () => {
-    mockSetZoom(10.5);
-    renderPhonePortrait([
-      phoneLocation("stinson-beach", "Stinson Beach"),
-      phoneLocation("oakland", "Oakland"),
-    ]);
-
-    await waitFor(() => {
-      expect(meta("stinson-beach")).not.toBeNull();
-    });
-
-    const stinson = meta("stinson-beach")!;
-    // Configured stays canonical; rendered equals configured at full scale.
-    expect(stinson.dataset.labelOffsetX).toBe("6");
-    expect(stinson.dataset.labelOffsetY).toBe("4");
-    expect(stinson.dataset.renderedOffsetX).toBe("6");
-    expect(stinson.dataset.renderedOffsetY).toBe("4");
-    expect(stinson.style.transform).toContain("6px");
-    expect(stinson.style.transform).toContain("4px");
-  });
-
-  it("renders proportionally reduced offsets at mid zoom (9.3)", async () => {
+  it("keeps ordinary markers at [0, 0] rendered offsets at every zoom", async () => {
     mockSetZoom(9.3);
-    renderPhonePortrait([phoneLocation("stinson-beach", "Stinson Beach")]);
-
-    await waitFor(() => {
-      expect(meta("stinson-beach")).not.toBeNull();
-    });
-
-    const [rx, ry] = resolvePhonePortraitMarkerLabelOffset(
-      "stinson-beach",
-      9.3,
-    );
-    const stinson = meta("stinson-beach")!;
-    // Configured is preserved; rendered is scaled (~60%).
-    expect(stinson.dataset.labelOffsetX).toBe("6");
-    expect(stinson.dataset.labelOffsetY).toBe("4");
-    expect(Number(stinson.dataset.renderedOffsetX)).toBeCloseTo(rx, 5);
-    expect(Number(stinson.dataset.renderedOffsetY)).toBeCloseTo(ry, 5);
-    expect(Number(stinson.dataset.renderedOffsetX)).toBeCloseTo(6 * 0.6, 5);
-  });
-
-  it("renders strongly reduced offsets at low zoom (8.3)", async () => {
-    mockSetZoom(8.3);
-    renderPhonePortrait([phoneLocation("mill-valley", "Mill Valley")]);
-
-    await waitFor(() => {
-      expect(meta("mill-valley")).not.toBeNull();
-    });
-
-    const millValley = meta("mill-valley")!;
-    expect(Number(millValley.dataset.renderedOffsetX)).toBeCloseTo(-4 * 0.2, 5);
-    expect(Number(millValley.dataset.renderedOffsetY)).toBeCloseTo(4 * 0.2, 5);
-  });
-
-  it("keeps the icon anchored at [0,0] and untransformed regardless of zoom", async () => {
-    mockSetZoom(8);
     renderPhonePortrait([
       phoneLocation("stinson-beach", "Stinson Beach"),
       phoneLocation("oakland", "Oakland"),
     ]);
 
     await waitFor(() => {
-      expect(root("stinson-beach")).not.toBeNull();
+      expect(meta("stinson-beach")).not.toBeNull();
     });
 
     for (const id of ["stinson-beach", "oakland"]) {
+      const el = meta(id)!;
+      expect(el.dataset.labelOffsetX).toBe("0");
+      expect(el.dataset.labelOffsetY).toBe("0");
+      expect(el.dataset.renderedOffsetX).toBe("0");
+      expect(el.dataset.renderedOffsetY).toBe("0");
+      expect(el.style.transform).toBe("translate(calc(-50% + 0px), 0px)");
+    }
+  });
+
+  it("renders full configured exception offsets at the reference zoom (>= 10.3)", async () => {
+    PHONE_PORTRAIT_MARKER_LABEL_OFFSETS[EXCEPTION_ID] = [6, 4];
+    mockSetZoom(10.5);
+    renderPhonePortrait([
+      phoneLocation(EXCEPTION_ID, "Exception"),
+      phoneLocation("oakland", "Oakland"),
+    ]);
+
+    await waitFor(() => {
+      expect(meta(EXCEPTION_ID)).not.toBeNull();
+    });
+
+    const exception = meta(EXCEPTION_ID)!;
+    expect(exception.dataset.labelOffsetX).toBe("6");
+    expect(exception.dataset.labelOffsetY).toBe("4");
+    expect(exception.dataset.renderedOffsetX).toBe("6");
+    expect(exception.dataset.renderedOffsetY).toBe("4");
+    expect(exception.style.transform).toContain("6px");
+    expect(exception.style.transform).toContain("4px");
+  });
+
+  it("renders proportionally reduced exception offsets at mid zoom (9.3)", async () => {
+    PHONE_PORTRAIT_MARKER_LABEL_OFFSETS[EXCEPTION_ID] = [6, 4];
+    mockSetZoom(9.3);
+    renderPhonePortrait([phoneLocation(EXCEPTION_ID, "Exception")]);
+
+    await waitFor(() => {
+      expect(meta(EXCEPTION_ID)).not.toBeNull();
+    });
+
+    const [rx, ry] = resolvePhonePortraitMarkerLabelOffset(EXCEPTION_ID, 9.3);
+    const exception = meta(EXCEPTION_ID)!;
+    expect(exception.dataset.labelOffsetX).toBe("6");
+    expect(exception.dataset.labelOffsetY).toBe("4");
+    expect(Number(exception.dataset.renderedOffsetX)).toBeCloseTo(rx, 5);
+    expect(Number(exception.dataset.renderedOffsetY)).toBeCloseTo(ry, 5);
+    expect(Number(exception.dataset.renderedOffsetX)).toBeCloseTo(6 * 0.6, 5);
+  });
+
+  it("renders strongly reduced exception offsets at low zoom (8.3)", async () => {
+    PHONE_PORTRAIT_MARKER_LABEL_OFFSETS[EXCEPTION_ID] = [-4, 4];
+    mockSetZoom(8.3);
+    renderPhonePortrait([phoneLocation(EXCEPTION_ID, "Exception")]);
+
+    await waitFor(() => {
+      expect(meta(EXCEPTION_ID)).not.toBeNull();
+    });
+
+    const exception = meta(EXCEPTION_ID)!;
+    expect(Number(exception.dataset.renderedOffsetX)).toBeCloseTo(-4 * 0.2, 5);
+    expect(Number(exception.dataset.renderedOffsetY)).toBeCloseTo(4 * 0.2, 5);
+  });
+
+  it("keeps the icon anchored at [0,0] and untransformed regardless of zoom", async () => {
+    PHONE_PORTRAIT_MARKER_LABEL_OFFSETS[EXCEPTION_ID] = [6, 4];
+    mockSetZoom(8);
+    renderPhonePortrait([
+      phoneLocation(EXCEPTION_ID, "Exception"),
+      phoneLocation("oakland", "Oakland"),
+    ]);
+
+    await waitFor(() => {
+      expect(root(EXCEPTION_ID)).not.toBeNull();
+    });
+
+    for (const id of [EXCEPTION_ID, "oakland"]) {
       const applied = JSON.parse(root(id)!.dataset.markerOffset ?? "null");
       expect(applied, `marker offset for ${id}`).toEqual([0, 0]);
       const icon = root(id)!.querySelector<HTMLElement>(
         ".karl-universal-map-marker",
       )!;
-      // The icon carries no per-location transform (only the optional selected
-      // scale CSS variable); zoom never moves it.
       expect(icon.style.transform).toBe("");
     }
   });
 
   it("uses the same scaled offset for rendering and collision measurement", async () => {
     mockSetZoom(9.3);
-    // Force the two meta groups to overlap so declutter must hide one; the
-    // measurement runs on the live DOM after the scaled transform is applied.
     const rectSpy = vi
       .spyOn(HTMLElement.prototype, "getBoundingClientRect")
       .mockImplementation(function getBoundingClientRect(this: HTMLElement) {
@@ -404,11 +452,12 @@ describe("BayAreaMap phone-portrait zoom-scaled label offsets", () => {
         expect(root("berkeley")).not.toBeNull();
       });
 
-      // Rendered offsets reflect the mid-zoom scale for both markers...
       const [sfx, sfy] = resolvePhonePortraitMarkerLabelOffset(
         "san-francisco",
         9.3,
       );
+      expect(sfx).toBe(0);
+      expect(sfy).toBe(0);
       expect(Number(meta("san-francisco")!.dataset.renderedOffsetX)).toBeCloseTo(
         sfx,
         5,
@@ -417,8 +466,6 @@ describe("BayAreaMap phone-portrait zoom-scaled label offsets", () => {
         sfy,
         5,
       );
-      // ...and the overlapping (lower-priority) label was decluttered using that
-      // same rendered geometry: the icon stays, only the label is dropped.
       expect(root("san-francisco")!.style.display).not.toBe("none");
       expect(root("san-francisco")!.dataset.markerVisibility).toBe("full");
       expect(root("berkeley")!.style.display).not.toBe("none");
@@ -450,7 +497,6 @@ describe("BayAreaMap phone-portrait zoom-scaled label offsets", () => {
       (call: unknown[]) => call[0] === "zoom",
     );
     expect(zoomOffCalls).toHaveLength(1);
-    // The same handler reference is added and removed (no stale/duplicate).
     expect(zoomOffCalls[0]![1]).toBe(zoomOnCalls[0]![1]);
   });
 });
