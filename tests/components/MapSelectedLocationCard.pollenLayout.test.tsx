@@ -2,8 +2,8 @@
 
 /**
  * 390px layout checks for the Environmental Metrics 3×2 grid
- * (AQI · UV · Pollen / Humidity · Visibility · KHI) and the shared
- * Marine Layer | Fog Ceiling card.
+ * (AQI · UV · Pollen / Humidity · Visibility · KHI) and the
+ * Marine Layer + Fog Ceiling cards.
  */
 
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
@@ -91,8 +91,8 @@ describe("phone environmental metrics 3×2 @ 390px", () => {
           "visibility-slot": { x: 130, y: row2, width: 110 },
           "karl-health-slot": { x: 248, y: row2, width: 110 },
           "selected-location-marine-card": { x: 12, y: 380, width: 348 },
-          "marine-layer-slot": { x: 12, y: 380, width: 174 },
-          "fog-ceiling-slot": { x: 186, y: 380, width: 174 },
+          "marine-layer-slot": { x: 12, y: 380, width: 170 },
+          "fog-ceiling-slot": { x: 190, y: 380, width: 170 },
         };
         const slot = slots[testId];
         if (slot) {
@@ -301,27 +301,33 @@ describe("phone environmental metrics 3×2 @ 390px", () => {
     expect(screen.getByTestId("karl-health-value")).toHaveTextContent(
       "Coming Soon",
     );
-    expect(screen.getByTestId("selected-location-env-metrics")).not.toHaveTextContent(
+    expect(screen.getByTestId("humidity-supporting")).toHaveTextContent(
       "Comfortable",
     );
 
     root.remove();
   });
 
-  it("renders Marine Layer and Fog Ceiling as one shared card with equal halves", () => {
+  it("renders Marine Layer and Fog Ceiling as two equal cards with a small gap", () => {
     const { root } = renderAt390(base);
 
     fireEvent.click(screen.getByRole("button", { name: "Expand details" }));
 
-    const marineCard = screen.getByTestId("selected-location-marine-card");
-    const marine = measure(screen.getByTestId("marine-layer-slot"));
-    const ceiling = measure(screen.getByTestId("fog-ceiling-slot"));
+    const marineRow = screen.getByTestId("selected-location-marine-card");
+    const marineSlot = screen.getByTestId("marine-layer-slot");
+    const fogSlot = screen.getByTestId("fog-ceiling-slot");
+    const marine = measure(marineSlot);
+    const ceiling = measure(fogSlot);
 
-    expect(marineCard.className).toContain("rounded-xl");
-    expect(marineCard.className).toContain("min-h-[5.25rem]");
+    expect(marineRow.className).toContain("gap-2");
+    expect(marineSlot.className).toContain("rounded-2xl");
+    expect(fogSlot.className).toContain("rounded-2xl");
+    expect(marineSlot.className).toContain("min-h-[5.625rem]");
+    expect(fogSlot.className).toContain("min-h-[5.625rem]");
     expect(Math.abs(marine.width - ceiling.width)).toBeLessThan(8);
-    expect(marine.right).toBeLessThanOrEqual(ceiling.left + 1);
+    expect(ceiling.left - marine.right).toBeGreaterThanOrEqual(6);
     expect(marine.height).toBeGreaterThanOrEqual(52);
+    expect(ceiling.height).toBe(marine.height);
     expect(screen.getByTestId("marine-layer-value")).toHaveTextContent(
       "Coming Soon",
     );
@@ -330,7 +336,7 @@ describe("phone environmental metrics 3×2 @ 390px", () => {
     );
     expect(
       screen.getByTestId("selected-location-env-metrics"),
-    ).not.toContainElement(marineCard);
+    ).not.toContainElement(marineRow);
 
     root.remove();
   });

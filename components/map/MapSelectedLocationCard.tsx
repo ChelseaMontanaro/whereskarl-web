@@ -279,7 +279,7 @@ function SectionLabel({
  * 1. Weather strip (collapsed peek) — Clear Sky Score + Fog + Temp + Wind
  * 2. Environmental Metrics (collapsed peek) — 3×2 grid:
  *    AQI · UV · Pollen / Humidity · Visibility · KHI
- * 3. Marine Layer | Fog Ceiling shared card (expanded body) — Coming Soon
+ * 3. Marine Layer + Fog Ceiling cards (expanded body) — Coming Soon
  *
  * Environmental tiles must not share equal flex columns with Fog/Temp/Wind —
  * those ~55px slots cannot hold long category copy. Values, colors, bands,
@@ -337,55 +337,79 @@ const METRIC_SUPPORTING_ROW_CLASS =
  * Supporting copy for environmental metrics. Single-line compact labels so
  * every 3-column tile stays equal height (long AQI canonical copy is shortened
  * via `compactAirQualityTileLabel`; a11y keeps the full backend label).
+ * Centered to match the approved mockup tile alignment.
  */
 const ENV_METRIC_SUPPORTING_CLASS =
-  "mt-1 min-h-[0.95rem] w-full truncate text-left text-[10px] font-semibold leading-none";
+  "mt-1 min-h-[0.95rem] w-full truncate text-center text-[11px] font-semibold leading-none text-white/55";
 
-/** Environmental metric title — quiet, compact for a 3×2 tile. */
+/** Environmental metric title — centered, mockup-weight presence. */
 const ENV_METRIC_TITLE_CLASS =
-  "text-[10px] font-semibold uppercase tracking-[0.05em] text-white/70";
+  "w-full text-center text-[12px] font-semibold uppercase tracking-[0.06em] text-white/78";
 
-/** Unavailable value size — fits in a third-width tile. */
+/** Live environmental primary values — larger than weather-strip compact sizing. */
+const ENV_METRIC_VALUE_CLASS =
+  "text-[26px] font-light leading-none text-white";
+const ENV_METRIC_VALUE_COMPACT_CLASS =
+  "text-[20px] font-light leading-none text-white";
+
+/** Unavailable value size — reserved value row so tiles stay equal height. */
 const ENV_METRIC_UNAVAILABLE_VALUE_CLASS =
-  "mt-1 text-[12px] font-normal leading-none text-white/55";
+  "min-h-[1.625rem] text-[14px] font-normal leading-none text-white/55";
 
 /**
  * Coming Soon labels (KHI, Marine Layer, Fog Ceiling) — quieter than live
- * values / Unavailable so placeholders sit behind real data hierarchy.
+ * values, but reserves the future primary-value row height.
  */
 const ENV_COMING_SOON_VALUE_CLASS =
-  "mt-1 text-[11px] font-normal leading-none text-white/38";
+  "flex min-h-[1.625rem] items-center text-[12px] font-normal leading-none text-white/40";
 
 /**
  * Shared glass tile surface for the six Environmental Metrics cells.
  * Fixed min-height keeps AQI / UV / Pollen / Humidity / Visibility / KHI equal.
+ * Content is centered to match the approved mockup.
  */
 const ENV_METRIC_TILE_CLASS =
-  "flex h-full min-h-[6.35rem] min-w-0 flex-col rounded-xl border border-white/10 bg-white/[0.04] px-2.5 py-2 text-left";
+  "flex h-full min-h-[6.35rem] min-w-0 flex-col items-center rounded-2xl border border-white/[0.09] bg-white/[0.125] px-2 py-2.5 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.22),inset_0_-1px_0_rgba(0,0,0,0.28)]";
 
-/** Shared glass surface for the full-width Marine Layer | Fog Ceiling card. */
+/** Glass surface for each Marine Layer / Fog Ceiling card.
+ * Secondary roadmap proportions (~90px @ 390) — subordinate to the 3×2 grid. */
 const MARINE_CARD_CLASS =
-  "flex min-h-[5.25rem] w-full overflow-hidden rounded-xl border border-white/10 bg-white/[0.04]";
+  "flex min-h-[5.625rem] max-h-[5.875rem] min-w-0 flex-1 items-center gap-2.5 overflow-hidden rounded-2xl border border-white/[0.09] bg-white/[0.125] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.22),inset_0_-1px_0_rgba(0,0,0,0.28)]";
 
 /**
- * Stable presentation accents for humidity / visibility icons only — not
- * health categories. Values stay white; icons carry restrained chromatics
- * matching the approved mockup's droplet / eye treatment.
+ * Rich mockup-inspired icon identity colors (independent of live value colorTokens).
+ * AQI / UV / Pollen values still use canonical `colorToken` colors.
  */
 const ENV_PRESENTATION_ICON_COLOR = {
-  humidity: "#5B9FD4",
-  visibility: "#A78BFA",
+  aqi: "#3DB4FF",
+  uv: "#FFD012",
+  pollen: "#34D399",
+  humidity: "#38BDF8",
+  visibility: "#C4B5FD",
+  khi: "#FB7185",
 } as const;
 
-/** KHI and other soft placeholders — intentionally quieter than live tiles. */
-const ENV_PLACEHOLDER_ICON_CLASS = "h-4 w-4 text-white/40";
+/** Default ~32px icon slot. */
+const ENV_ICON_CLASS = "h-8 w-8";
+/** AQI waves ~15% larger than sibling icons for mockup presence. */
+const ENV_AQI_ICON_CLASS = "h-[37px] w-[37px]";
+/** Pollen trees matched to AQI / UV visual weight. */
+const ENV_POLLEN_ICON_CLASS = "h-[37px] w-[37px]";
+/** KHI heart — slight bump over the default tile icon. */
+const ENV_KHI_ICON_CLASS = "h-[34px] w-[34px]";
 
-/**
- * Marine Layer / Fog Ceiling icons — ~35–40% brighter than other placeholders
- * so they read closer to AQI / UV / Pollen icon prominence.
- */
-const ENV_MARINE_ICON_CLASS = "h-4 w-4 text-white/60";
+/** Marine Layer / Fog Ceiling — premium white icons (compact secondary card). */
+const ENV_MARINE_ICON_CLASS = "h-8 w-8 text-white/95";
 
+/** Marine half title — left-aligned beside the icon (mockup horizontal stack). */
+const MARINE_TITLE_CLASS =
+  "w-full text-left text-[12px] font-semibold uppercase tracking-[0.06em] text-white/78";
+
+function envMetricLiveValueClassName(formatted: string): string {
+  return formatted.length >= 5
+    ? ENV_METRIC_VALUE_COMPACT_CLASS
+    : ENV_METRIC_VALUE_CLASS;
+}
 /** Right-pointing arrow for the Wind supporting row (#F5B000 per mockup). */
 function WindArrowIcon({ className = "h-3 w-3" }: { className?: string }) {
   return (
@@ -492,6 +516,11 @@ type EnvironmentalMetricProps = {
   unavailable?: boolean;
   /** Quieter Coming Soon presentation (KHI); not used for live Unavailable. */
   comingSoon?: boolean;
+  /**
+   * Second-row tiles (Humidity / Visibility / KHI) use a slightly looser
+   * icon→value gap per approved mockup; top row stays tighter.
+   */
+  relaxedIconValueGap?: boolean;
   containerTestId?: string;
   testId?: string;
   supportingTestId?: string;
@@ -515,6 +544,7 @@ function EnvironmentalMetricTile({
   band,
   unavailable = false,
   comingSoon = false,
+  relaxedIconValueGap = false,
   containerTestId,
   testId,
   supportingTestId,
@@ -527,26 +557,33 @@ function EnvironmentalMetricTile({
       title={titleAttr}
     >
       <p className={ENV_METRIC_TITLE_CLASS}>{title}</p>
-      <span
-        className="mt-1.5 inline-flex h-4 w-4 shrink-0 items-center justify-center"
-        aria-hidden
+      {/* Icon + value share a centered stack so they read as one unit. */}
+      <div
+        className={`mt-1.5 flex w-full flex-col items-center ${
+          relaxedIconValueGap ? "gap-1.5" : "gap-0.5"
+        }`}
       >
-        {icon}
-      </span>
-      <p
-        className={
-          comingSoon
-            ? ENV_COMING_SOON_VALUE_CLASS
-            : unavailable
-              ? ENV_METRIC_UNAVAILABLE_VALUE_CLASS
-              : `mt-1 ${compactSecondaryValueClassName(valueText)}`
-        }
-        style={!unavailable && valueColor ? { color: valueColor } : undefined}
-        data-score-band={band}
-        data-testid={testId}
-      >
-        {value}
-      </p>
+        <span
+          className="inline-flex h-9 w-9 shrink-0 items-center justify-center"
+          aria-hidden
+        >
+          {icon}
+        </span>
+        <p
+          className={
+            comingSoon
+              ? ENV_COMING_SOON_VALUE_CLASS
+              : unavailable
+                ? ENV_METRIC_UNAVAILABLE_VALUE_CLASS
+                : envMetricLiveValueClassName(valueText)
+          }
+          style={!unavailable && valueColor ? { color: valueColor } : undefined}
+          data-score-band={band}
+          data-testid={testId}
+        >
+          {value}
+        </p>
+      </div>
       <p
         className={ENV_METRIC_SUPPORTING_CLASS}
         style={
@@ -604,10 +641,12 @@ type MarinePlaceholderColumn = {
 };
 
 /**
- * Full-width Marine Layer | Fog Ceiling card (Coming Soon placeholders).
- * One shared rounded container with a subtle vertical divider — never two
- * loose grid cells, and never under a separate "Fog & Marine" heading.
- * Lives in the expanded body so the collapsed peek preserves map area.
+ * Marine Layer + Fog Ceiling cards (Coming Soon placeholders).
+ * Two equal-width rounded cards with a small horizontal gap (~8px) — not one
+ * shared container with a center divider. Each card keeps the approved
+ * horizontal composition: [ICON] title / Coming Soon — icon left, vertically
+ * centered; text left-aligned. Lives in the expanded body so the collapsed
+ * peek preserves map area.
  */
 function MarineFogCeilingCard({
   columns,
@@ -616,32 +655,32 @@ function MarineFogCeilingCard({
 }) {
   return (
     <div
-      className={MARINE_CARD_CLASS}
+      className="flex w-full gap-2"
       data-testid="selected-location-marine-card"
       aria-label="Marine layer and fog ceiling"
     >
-      {columns.map((column, index) => (
+      {columns.map((column) => (
         <div
           key={column.title}
-          className={`flex min-w-0 flex-1 flex-col justify-center gap-1.5 px-3.5 py-3.5 text-left ${
-            index > 0 ? "border-l border-white/10" : ""
-          }`}
+          className={MARINE_CARD_CLASS}
           data-testid={column.containerTestId}
           aria-label={column.ariaLabel}
         >
           <span
-            className="inline-flex h-4 w-4 items-center justify-center"
+            className="inline-flex h-8 w-8 shrink-0 items-center justify-center drop-shadow-[0_0_6px_rgba(255,255,255,0.28)]"
             aria-hidden
           >
             {column.icon}
           </span>
-          <p className={ENV_METRIC_TITLE_CLASS}>{column.title}</p>
-          <p
-            className={ENV_COMING_SOON_VALUE_CLASS}
-            data-testid={column.testId}
-          >
-            Coming Soon
-          </p>
+          <div className="flex min-w-0 flex-col items-start gap-1 text-left">
+            <p className={MARINE_TITLE_CLASS}>{column.title}</p>
+            <p
+              className="text-[12px] font-normal leading-none tracking-[0.01em] text-white/40"
+              data-testid={column.testId}
+            >
+              Coming Soon
+            </p>
+          </div>
         </div>
       ))}
     </div>
@@ -884,19 +923,8 @@ function PhonePortraitSelectedCard({
             ariaLabel: airQualityAccessibleLabel(airQuality),
             titleAttr: airQuality.available ? airQuality.label : undefined,
             icon: (
-              <span
-                style={
-                  airQuality.available && airQuality.color
-                    ? { color: airQuality.color }
-                    : undefined
-                }
-                className={
-                  airQuality.available && airQuality.color
-                    ? undefined
-                    : "text-white/40"
-                }
-              >
-                <EnvAqiIcon className="h-4 w-4" />
+              <span style={{ color: ENV_PRESENTATION_ICON_COLOR.aqi }}>
+                <EnvAqiIcon className={ENV_AQI_ICON_CLASS} />
               </span>
             ),
             value: airQuality.available ? airQuality.aqi : "Unavailable",
@@ -924,19 +952,8 @@ function PhonePortraitSelectedCard({
               ? `UV, ${ultraviolet.value}, ${ultraviolet.label}`
               : "UV, Unavailable",
             icon: (
-              <span
-                style={
-                  ultraviolet.available && ultraviolet.color
-                    ? { color: ultraviolet.color }
-                    : undefined
-                }
-                className={
-                  ultraviolet.available && ultraviolet.color
-                    ? undefined
-                    : "text-white/40"
-                }
-              >
-                <EnvUvIcon className="h-4 w-4" />
+              <span style={{ color: ENV_PRESENTATION_ICON_COLOR.uv }}>
+                <EnvUvIcon className={ENV_ICON_CLASS} />
               </span>
             ),
             value: ultraviolet.available ? ultraviolet.value : "Unavailable",
@@ -962,17 +979,8 @@ function PhonePortraitSelectedCard({
               ? `Pollen, ${pollen.value}, ${pollen.label}`
               : "Pollen, Unavailable",
             icon: (
-              <span
-                style={
-                  pollen.available && pollen.color
-                    ? { color: pollen.color }
-                    : undefined
-                }
-                className={
-                  pollen.available && pollen.color ? undefined : "text-white/40"
-                }
-              >
-                <EnvPollenIcon className="h-4 w-4" />
+              <span style={{ color: ENV_PRESENTATION_ICON_COLOR.pollen }}>
+                <EnvPollenIcon className={ENV_POLLEN_ICON_CLASS} />
               </span>
             ),
             value: pollen.available ? pollen.value : "Unavailable",
@@ -992,28 +1000,38 @@ function PhonePortraitSelectedCard({
           },
           {
             title: "Humidity",
+            ariaLabel: humidity.available
+              ? `Humidity, ${humidity.formatted}, ${humidity.label}`
+              : "Humidity, Unavailable",
             icon: (
               <span style={{ color: ENV_PRESENTATION_ICON_COLOR.humidity }}>
-                <EnvHumidityIcon className="h-4 w-4" />
+                <EnvHumidityIcon className={ENV_ICON_CLASS} />
               </span>
             ),
             value: humidity.formatted,
             valueText: humidity.formatted,
             unavailable: !humidity.available,
+            supporting: humidity.available ? humidity.label : undefined,
+            relaxedIconValueGap: true,
             containerTestId: "humidity-slot",
             testId: "humidity-value",
             supportingTestId: "humidity-supporting",
           },
           {
             title: "Visibility",
+            ariaLabel: visibility.available
+              ? `Visibility, ${visibility.formatted}, ${visibility.label}`
+              : "Visibility, Unavailable",
             icon: (
               <span style={{ color: ENV_PRESENTATION_ICON_COLOR.visibility }}>
-                <EnvVisibilityIcon className="h-4 w-4" />
+                <EnvVisibilityIcon className={ENV_ICON_CLASS} />
               </span>
             ),
             value: visibility.formatted,
             valueText: visibility.formatted,
             unavailable: !visibility.available,
+            supporting: visibility.available ? visibility.label : undefined,
+            relaxedIconValueGap: true,
             containerTestId: "visibility-slot",
             testId: "visibility-value",
             supportingTestId: "visibility-supporting",
@@ -1021,11 +1039,16 @@ function PhonePortraitSelectedCard({
           {
             title: "KHI",
             ariaLabel: "Karl Health Index, Coming Soon",
-            icon: <EnvKhiIcon className={ENV_PLACEHOLDER_ICON_CLASS} />,
+            icon: (
+              <span style={{ color: ENV_PRESENTATION_ICON_COLOR.khi }}>
+                <EnvKhiIcon className={ENV_KHI_ICON_CLASS} />
+              </span>
+            ),
             value: "Coming Soon",
             valueText: "Coming Soon",
             unavailable: true,
             comingSoon: true,
+            relaxedIconValueGap: true,
             containerTestId: "karl-health-slot",
             testId: "karl-health-value",
             supportingTestId: "karl-health-supporting",
@@ -1041,7 +1064,7 @@ function PhonePortraitSelectedCard({
       header={header}
       expandOnSurfaceTap
     >
-      {/* Shared Marine Layer | Fog Ceiling card — expanded body only so the
+      {/* Marine Layer + Fog Ceiling cards — expanded body only so the
           collapsed peek stays compact and preserves map visibility. */}
       <MarineFogCeilingCard
         columns={[

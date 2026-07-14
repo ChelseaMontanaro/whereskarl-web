@@ -612,8 +612,8 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(value).not.toHaveTextContent("Unavailable");
     expect(supporting).toHaveTextContent("Good");
     expect(value.getAttribute("data-score-band")).toBe("good");
-    // Shares secondary hierarchy with Fog/Temp (≤3 chars → 23px).
-    expect(value.className).toContain("text-[23px]");
+    // Environmental Metrics live values use a larger mockup-weight scale.
+    expect(value.className).toContain("text-[26px]");
   });
 
     it("keeps AQI, UV, Pollen, Humidity, Visibility, and KHI on one 3×2 Environmental Metrics grid", () => {
@@ -714,24 +714,34 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(screen.getByTestId("pollen-value")).toHaveTextContent("3");
     expect(screen.getByTestId("pollen-supporting")).toHaveTextContent("Moderate");
     expect(screen.getByTestId("humidity-value")).toHaveTextContent("72%");
+    expect(screen.getByTestId("humidity-supporting")).toHaveTextContent(
+      "Comfortable",
+    );
     expect(screen.getByTestId("visibility-value")).toHaveTextContent("10 mi");
+    expect(screen.getByTestId("visibility-supporting")).toHaveTextContent(
+      "Excellent",
+    );
     expect(screen.getByTestId("karl-health-value")).toHaveTextContent(
       "Coming Soon",
     );
-    // No invented qualitative labels on humidity / visibility.
-    expect(env).not.toHaveTextContent("Comfortable");
-    expect(env).not.toHaveTextContent("Excellent");
     expect(env.querySelector(".grid-cols-3")).not.toBeNull();
     expect(env.querySelector(".grid-cols-4")).toBeNull();
     expect(screen.queryByText("Fog & Marine")).not.toBeInTheDocument();
   });
 
-  it("renders Marine Layer and Fog Ceiling in one shared Coming Soon card in the expanded body", () => {
+  it("renders Marine Layer and Fog Ceiling as two equal Coming Soon cards in the expanded body", () => {
     render(<MapSelectedLocationCard location={location} phonePortrait />);
 
-    const marineCard = screen.getByTestId("selected-location-marine-card");
-    expect(marineCard).toContainElement(screen.getByTestId("marine-layer-slot"));
-    expect(marineCard).toContainElement(screen.getByTestId("fog-ceiling-slot"));
+    const marineRow = screen.getByTestId("selected-location-marine-card");
+    const marineSlot = screen.getByTestId("marine-layer-slot");
+    const fogSlot = screen.getByTestId("fog-ceiling-slot");
+    expect(marineRow).toContainElement(marineSlot);
+    expect(marineRow).toContainElement(fogSlot);
+    expect(marineRow.className).toContain("gap-2");
+    expect(marineSlot.className).toContain("rounded-2xl");
+    expect(fogSlot.className).toContain("rounded-2xl");
+    expect(marineSlot.className).not.toContain("border-l");
+    expect(fogSlot.className).not.toContain("border-l");
     expect(screen.getByTestId("marine-layer-value")).toHaveTextContent(
       "Coming Soon",
     );
@@ -741,12 +751,12 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     // Not loose Environmental Metrics cells, and no Fog & Marine heading.
     expect(
       screen.getByTestId("selected-location-env-metrics"),
-    ).not.toContainElement(marineCard);
+    ).not.toContainElement(marineRow);
     expect(screen.queryByTestId("selected-location-fog-marine")).not.toBeInTheDocument();
     expect(screen.queryByText("Fog & Marine")).not.toBeInTheDocument();
-    expect(marineCard).not.toHaveTextContent("1,200");
-    expect(marineCard).not.toHaveTextContent("900");
-    expect(marineCard).not.toHaveTextContent(" ft");
+    expect(marineRow).not.toHaveTextContent("1,200");
+    expect(marineRow).not.toHaveTextContent("900");
+    expect(marineRow).not.toHaveTextContent(" ft");
     expect(screen.getByLabelText("Marine Layer height, Coming Soon")).toBeInTheDocument();
     expect(screen.getByLabelText("Fog Ceiling height, Coming Soon")).toBeInTheDocument();
     expect(screen.getByLabelText("Karl Health Index, Coming Soon")).toBeInTheDocument();

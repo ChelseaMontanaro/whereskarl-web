@@ -1,15 +1,17 @@
 /**
- * Restrained environmental-metric icons for the phone Selected Location sheet.
- * Inline SVGs using currentColor so tiles can apply canonical semantic colors.
- * No new icon package — matches the ConditionIcons stroke/fill idiom.
+ * Environmental-metric icons for the phone Selected Location sheet.
+ * Production-safe SVGs recreating the approved mockup’s bold, rounded
+ * premium glyph language (~32px). Color via currentColor.
  */
 
 type IconProps = {
   className?: string;
 };
 
-/** Soft wave / air quality glyph. */
-export function EnvAqiIcon({ className = "h-4 w-4" }: IconProps) {
+const DEFAULT_SIZE = "h-8 w-8";
+
+/** Three stacked air-quality waves (mockup AQI glyph). */
+export function EnvAqiIcon({ className = DEFAULT_SIZE }: IconProps) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -17,18 +19,18 @@ export function EnvAqiIcon({ className = "h-4 w-4" }: IconProps) {
       className={className}
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.6"
+      strokeWidth="2.85"
       strokeLinecap="round"
     >
-      <path d="M3 9c2.2 0 3.4-1.5 4.6-1.5S10.2 9 12 9s3.2-1.5 4.4-1.5S18.8 9 21 9" />
-      <path d="M3 14c2.2 0 3.4-1.5 4.6-1.5S10.2 14 12 14s3.2-1.5 4.4-1.5S18.8 14 21 14" />
-      <path d="M3 19c2.2 0 3.4-1.5 4.6-1.5S10.2 19 12 19s3.2-1.5 4.4-1.5S18.8 19 21 19" />
+      <path d="M2.6 7.1c2.3 0 3.45-1.75 4.85-1.75S10.9 7.1 12 7.1s3.35-1.75 4.25-1.75 2.7 1.75 5.15 1.75" />
+      <path d="M2.6 12c2.3 0 3.45-1.75 4.85-1.75S10.9 12 12 12s3.35-1.75 4.25-1.75 2.7 1.75 5.15 1.75" />
+      <path d="M2.6 16.9c2.3 0 3.45-1.75 4.85-1.75S10.9 16.9 12 16.9s3.35-1.75 4.25-1.75 2.7 1.75 5.15 1.75" />
     </svg>
   );
 }
 
-/** Compact sun for UV Index. */
-export function EnvUvIcon({ className = "h-4 w-4" }: IconProps) {
+/** Saturated gold sun with short rounded rays (mockup UV glyph). */
+export function EnvUvIcon({ className = DEFAULT_SIZE }: IconProps) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -36,37 +38,17 @@ export function EnvUvIcon({ className = "h-4 w-4" }: IconProps) {
       className={className}
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.55"
+      strokeWidth="2.7"
       strokeLinecap="round"
     >
-      <circle cx="12" cy="12" r="3.4" fill="currentColor" opacity="0.92" />
-      <path d="M12 3.8v2.1M12 18.1v2.1M3.8 12h2.1M18.1 12h2.1M6.3 6.3l1.5 1.5M16.2 16.2l1.5 1.5M6.3 17.7l1.5-1.5M16.2 7.8l1.5-1.5" />
+      <circle cx="12" cy="12" r="4.05" fill="currentColor" stroke="none" />
+      <path d="M12 2.35v2.45M12 19.2v2.45M2.35 12h2.45M19.2 12h2.45M5.35 5.35l1.7 1.7M16.95 16.95l1.7 1.7M5.35 18.65l1.7-1.7M16.95 7.05l1.7-1.7" />
     </svg>
   );
 }
 
-/** Simple tree/leaf glyph for pollen. */
-export function EnvPollenIcon({ className = "h-4 w-4" }: IconProps) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      className={className}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.55"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M12 21v-7" />
-      <path d="M12 14c-3.4-1.1-5.6-3.6-5.6-6.6C6.4 4.8 9 3 12 3c3 0 5.6 1.8 5.6 4.4 0 3-2.2 5.5-5.6 6.6Z" />
-      <path d="M9.2 9.4c1.1.6 2.2.9 2.8.9s1.7-.3 2.8-.9" opacity="0.7" />
-    </svg>
-  );
-}
-
-/** Droplet for humidity. */
-export function EnvHumidityIcon({ className = "h-4 w-4" }: IconProps) {
+/** Twin evergreen trees (mockup Pollen glyph) — fills the 24 box for equal weight. */
+export function EnvPollenIcon({ className = DEFAULT_SIZE }: IconProps) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -74,16 +56,92 @@ export function EnvHumidityIcon({ className = "h-4 w-4" }: IconProps) {
       className={className}
       fill="currentColor"
     >
+      {/* Left tree — shorter */}
+      <path d="M6.2 20h3.4v-1.7H6.2V20Zm1.7-14.4L2.4 13.6h2.85L2.55 17.7h9.5l-2.65-4.1H12L7.9 5.6Z" />
+      {/* Right tree — taller */}
+      <path d="M14.7 20h3.5v-1.75h-3.5V20Zm1.75-16L9.7 11.6h2.85L9.7 16.3h10.7l-2.85-4.7h2.85L16.45 4Z" />
+    </svg>
+  );
+}
+
+/** Rich sky-blue water droplet (mockup Humidity glyph). */
+export function EnvHumidityIcon({ className = DEFAULT_SIZE }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={className}
+      fill="currentColor"
+    >
+      <path d="M12 2.6C12 2.6 5.4 10.5 5.4 14.95a6.6 6.6 0 0 0 13.2 0C18.6 10.5 12 2.6 12 2.6Z" />
+    </svg>
+  );
+}
+
+/** Bright lavender eye (mockup Visibility glyph). */
+export function EnvVisibilityIcon({ className = DEFAULT_SIZE }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.65"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M2 12s3.85-6.6 10-6.6S22 12 22 12s-3.85 6.6-10 6.6S2 12 2 12Z" />
+      <circle cx="12" cy="12" r="3" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+/** Coral/pink heart outline (mockup KHI glyph — used even for Coming Soon). */
+export function EnvKhiIcon({ className = DEFAULT_SIZE }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 20.55 4.6 13.4a4.9 4.9 0 0 1 6.9-6.95L12 7.2l.5.55a4.9 4.9 0 0 1 6.9 6.95L12 20.55Z" />
+    </svg>
+  );
+}
+
+/** Bright white cloud over fog waves (mockup Marine Layer glyph). */
+export function EnvMarineLayerIcon({ className = DEFAULT_SIZE }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.35"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path
-        d="M12 3.2C12 3.2 6.5 10.1 6.5 14.2a5.5 5.5 0 0 0 11 0C17.5 10.1 12 3.2 12 3.2Z"
-        opacity="0.92"
+        fill="currentColor"
+        stroke="none"
+        d="M6.9 11.7h10.4a3.55 3.55 0 0 0 .45-7 5 5 0 0 0-9.55-1.3A3.8 3.8 0 0 0 6.9 11.7Z"
       />
+      <path d="M2.9 15c2.05 0 3.05-1.25 4.2-1.25s2.2 1.25 4.75 1.25 3.35-1.25 4.4-1.25 2.4 1.25 4.35 1.25" />
+      <path d="M4.1 18.15c1.65 0 2.45-1.05 3.4-1.05s1.8 1.05 3.9 1.05 2.7-1.05 3.7-1.05 2.05 1.05 3.7 1.05" />
+      <path d="M5.4 21.15c1.4 0 2.1-.85 2.95-.85s1.55.85 3.35.85 2.3-.85 3.15-.85 1.7.85 3.15.85" />
     </svg>
   );
 }
 
-/** Eye for visibility. */
-export function EnvVisibilityIcon({ className = "h-4 w-4" }: IconProps) {
+/** Bright white cloud outline (mockup Fog Ceiling glyph). */
+export function EnvFogCeilingIcon({ className = DEFAULT_SIZE }: IconProps) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -91,70 +149,11 @@ export function EnvVisibilityIcon({ className = "h-4 w-4" }: IconProps) {
       className={className}
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.55"
+      strokeWidth="2.4"
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="M2.8 12s3.4-5.6 9.2-5.6S21.2 12 21.2 12s-3.4 5.6-9.2 5.6S2.8 12 2.8 12Z" />
-      <circle cx="12" cy="12" r="2.4" fill="currentColor" opacity="0.9" />
-    </svg>
-  );
-}
-
-/** Heart outline for Karl Health Index (placeholder). */
-export function EnvKhiIcon({ className = "h-4 w-4" }: IconProps) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      className={className}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.55"
-      strokeLinejoin="round"
-    >
-      <path d="M12 20.4 4.8 13.6a4.4 4.4 0 0 1 6.2-6.2L12 8.4l1 1a4.4 4.4 0 0 1 6.2 6.2L12 20.4Z" />
-    </svg>
-  );
-}
-
-/** Low marine fog waves for Marine Layer placeholder. */
-export function EnvMarineLayerIcon({ className = "h-4 w-4" }: IconProps) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      className={className}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.55"
-      strokeLinecap="round"
-    >
-      <ellipse cx="12" cy="8.4" rx="5.4" ry="3.2" opacity="0.78" />
-      <path d="M4 14.2c1.8 0 2.8-1.1 3.8-1.1s2 1.1 4.2 1.1 2.9-1.1 4-1.1 2.2 1.1 3.8 1.1" />
-      <path
-        d="M5.5 17.6c1.4 0 2.2-.9 3-.9s1.6.9 3.5.9 2.4-.9 3.3-.9 1.8.9 3.2.9"
-        opacity="0.95"
-      />
-    </svg>
-  );
-}
-
-/** Cloud with ceiling marker for Fog Ceiling placeholder. */
-export function EnvFogCeilingIcon({ className = "h-4 w-4" }: IconProps) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      className={className}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.55"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M7.8 15.2h9.4a3.2 3.2 0 0 0 .4-6.4 4.6 4.6 0 0 0-8.8-1.2A3.5 3.5 0 0 0 7.8 15.2Z" />
-      <path d="M8 19h8" opacity="0.95" />
+      <path d="M6.6 16.85h11.2a3.85 3.85 0 0 0 .5-7.65 5.4 5.4 0 0 0-10.4-1.4A4.15 4.15 0 0 0 6.6 16.85Z" />
     </svg>
   );
 }
