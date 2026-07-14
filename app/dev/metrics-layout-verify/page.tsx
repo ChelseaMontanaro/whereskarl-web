@@ -234,7 +234,8 @@ function MetricsLayoutVerifyContent() {
         Metrics layout verification (390px)
       </h1>
       <p className="mx-auto mb-8 max-w-md text-center text-sm text-white/55">
-        Phone portrait · Weather strip + AQI / UV / Pollen environmental grid
+        Phone portrait · Weather strip + Environmental Metrics row
+        (AQI · UV · Pollen · Health)
       </p>
 
       <div className="mx-auto flex max-w-[420px] flex-col gap-10">

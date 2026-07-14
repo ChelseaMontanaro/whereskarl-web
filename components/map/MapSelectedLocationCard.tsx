@@ -317,16 +317,19 @@ const METRIC_SUPPORTING_ROW_CLASS =
 
 /**
  * Supporting copy for environmental metrics. Sized for the longest U.S. AQI
- * category ("Unhealthy for Sensitive Groups") at phone width in a 2-column grid
- * (~170px+), with wrap + reserved height so neighbors never collide.
- * Exact reserved height: 2.4rem (≈38.4px) — fits 3 lines of 12px/leading-snug.
+ * category ("Unhealthy for Sensitive Groups") in a 4-column phone row
+ * (~85–90px), with wrap + reserved height so siblings never collide.
  */
 const ENV_METRIC_SUPPORTING_CLASS =
-  "mt-1 min-h-[2.4rem] w-full text-left text-[12px] font-semibold leading-snug text-balance break-words";
+  "mt-1 min-h-[2.6rem] w-full text-left text-[10px] font-semibold leading-snug text-balance break-words hyphens-auto";
 
-/** Environmental metric title — slightly quieter than weather strip titles. */
+/** Environmental metric title — quiet, compact for a 4-up phone row. */
 const ENV_METRIC_TITLE_CLASS =
-  "text-[12px] font-semibold uppercase tracking-[0.06em] text-white/70";
+  "text-[10px] font-semibold uppercase tracking-[0.05em] text-white/70";
+
+/** Unavailable value size — fits "Unavailable" in a quarter-width tile. */
+const ENV_METRIC_UNAVAILABLE_VALUE_CLASS =
+  "mt-0.5 text-[11px] font-normal leading-none text-white/55";
 
 /** Right-pointing arrow for the Wind supporting row (#F5B000 per mockup). */
 function WindArrowIcon({ className = "h-3 w-3" }: { className?: string }) {
@@ -419,6 +422,8 @@ function MetricColumn({
 
 type EnvironmentalMetricProps = {
   title: string;
+  /** Optional accessible name when the visible title is abbreviated. */
+  ariaLabel?: string;
   value: ReactNode;
   valueText: string;
   valueColor?: string;
@@ -432,13 +437,13 @@ type EnvironmentalMetricProps = {
 };
 
 /**
- * One environmental metric tile (AQI + UV + pollen today; more later).
- * Left-aligned in a 2-column grid so long category labels wrap inside the tile
- * instead of crowding Fog / Temp / Wind. Uses the same secondary value hierarchy
- * as Fog and Temp.
+ * One environmental metric tile in the shared Environmental Metrics row.
+ * All tiles share the same typography and spacing so AQI / UV / Pollen /
+ * Health (and future metrics) read as one cohesive section.
  */
 function EnvironmentalMetricTile({
   title,
+  ariaLabel,
   value,
   valueText,
   valueColor,
@@ -451,12 +456,16 @@ function EnvironmentalMetricTile({
   supportingTestId,
 }: EnvironmentalMetricProps) {
   return (
-    <div className="min-w-0 text-left" data-testid={containerTestId}>
+    <div
+      className="min-w-0 text-left"
+      data-testid={containerTestId}
+      aria-label={ariaLabel ?? title}
+    >
       <p className={ENV_METRIC_TITLE_CLASS}>{title}</p>
       <p
         className={
           unavailable
-            ? "mt-0.5 text-[13px] font-normal leading-none text-white/55"
+            ? ENV_METRIC_UNAVAILABLE_VALUE_CLASS
             : `mt-0.5 ${compactSecondaryValueClassName(valueText)}`
         }
         style={!unavailable && valueColor ? { color: valueColor } : undefined}
@@ -479,9 +488,10 @@ function EnvironmentalMetricTile({
 }
 
 /**
- * Environmental metrics grid under the weather strip. Always `grid-cols-2` so
- * AQI + UV share equal columns on row 1. An odd trailing tile (Pollen today)
- * spans the full second row so the empty fourth cell never looks broken.
+ * Single Environmental Metrics row under the weather strip.
+ * Equal columns: AQI · UV · Pollen · Health today. Append more tiles to the
+ * metrics array to extend the row; `grid-cols-4` wraps extras without a layout
+ * redesign.
  */
 function EnvironmentalMetricsRow({
   metrics,
@@ -498,20 +508,10 @@ function EnvironmentalMetricsRow({
       data-testid="selected-location-env-metrics"
       aria-label="Environmental metrics"
     >
-      <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-        {metrics.map((metric, index) => {
-          const isTrailingOdd =
-            metrics.length % 2 === 1 && index === metrics.length - 1;
-
-          return (
-            <div
-              key={metric.title}
-              className={isTrailingOdd ? "col-span-2" : undefined}
-            >
-              <EnvironmentalMetricTile {...metric} />
-            </div>
-          );
-        })}
+      <div className="grid grid-cols-4 gap-x-2 gap-y-2">
+        {metrics.map((metric) => (
+          <EnvironmentalMetricTile key={metric.title} {...metric} />
+        ))}
       </div>
     </div>
   );
@@ -740,9 +740,9 @@ function PhonePortraitSelectedCard({
         />
       </div>
 
-      {/* Layer 2 — Environmental grid: AQI + UV + pollen from canonical backend
-          objects. Temp/Wind stay on Layer 1; AQI layout/slots unchanged from
-          Commit #1. Desktop pollen is deferred (same product decision as UV). */}
+      {/* Layer 2 — one Environmental Metrics row: AQI · UV · Pollen · Health.
+          Equal tiles share typography/spacing; unavailable values stay in-tile.
+          Temp/Wind remain Layer 1. Desktop env metrics stay deferred. */}
       <EnvironmentalMetricsRow
         metrics={[
           {
@@ -799,6 +799,16 @@ function PhonePortraitSelectedCard({
             containerTestId: "pollen-slot",
             testId: "pollen-value",
             supportingTestId: "pollen-supporting",
+          },
+          {
+            title: "Health",
+            ariaLabel: "Environmental Health Index",
+            value: "Unavailable",
+            valueText: "Unavailable",
+            unavailable: true,
+            containerTestId: "environmental-health-slot",
+            testId: "environmental-health-value",
+            supportingTestId: "environmental-health-supporting",
           },
         ]}
       />
