@@ -22,6 +22,7 @@ import {
   formatAirQualityCompact,
   presentAirQuality,
 } from "@/lib/weather/airQuality";
+import { presentPollen } from "@/lib/weather/pollen";
 import { presentUvIndex } from "@/lib/weather/uvIndex";
 import {
   isFavoriteLocation,
@@ -431,7 +432,7 @@ type EnvironmentalMetricProps = {
 };
 
 /**
- * One environmental metric tile (AQI + UV today; pollen / etc. later).
+ * One environmental metric tile (AQI + UV + pollen today; more later).
  * Left-aligned in a 2-column grid so long category labels wrap inside the tile
  * instead of crowding Fog / Temp / Wind. Uses the same secondary value hierarchy
  * as Fog and Temp.
@@ -479,8 +480,8 @@ function EnvironmentalMetricTile({
 
 /**
  * Environmental metrics grid under the weather strip. Always `grid-cols-2` so
- * AQI + UV share equal columns today and future tiles can land without
- * redesigning Layer 1.
+ * AQI + UV share equal columns on row 1. An odd trailing tile (Pollen today)
+ * spans the full second row so the empty fourth cell never looks broken.
  */
 function EnvironmentalMetricsRow({
   metrics,
@@ -498,9 +499,19 @@ function EnvironmentalMetricsRow({
       aria-label="Environmental metrics"
     >
       <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-        {metrics.map((metric) => (
-          <EnvironmentalMetricTile key={metric.title} {...metric} />
-        ))}
+        {metrics.map((metric, index) => {
+          const isTrailingOdd =
+            metrics.length % 2 === 1 && index === metrics.length - 1;
+
+          return (
+            <div
+              key={metric.title}
+              className={isTrailingOdd ? "col-span-2" : undefined}
+            >
+              <EnvironmentalMetricTile {...metric} />
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -562,6 +573,7 @@ function PhonePortraitSelectedCard({
   const score = presentClearSkiesScore(location.sunshineScore);
   const airQuality = presentAirQuality(location.airQuality);
   const ultraviolet = presentUvIndex(location.uvIndex);
+  const pollen = presentPollen(location.pollen);
   const fogScore = resolveFogScore(location);
   // Metrics row shows the canonical Fog Intensity label only (Clear / Light Fog
   // / Foggy / Karl Territory) — never a nighttime or forecast phrasing. The
@@ -599,6 +611,9 @@ function PhonePortraitSelectedCard({
     : "Unavailable";
   const uvValueText = ultraviolet.available
     ? String(ultraviolet.value)
+    : "Unavailable";
+  const pollenValueText = pollen.available
+    ? String(pollen.value)
     : "Unavailable";
 
   const { isFavorite, handleToggleFavorite } = useFavoriteToggle(location.id);
@@ -725,8 +740,9 @@ function PhonePortraitSelectedCard({
         />
       </div>
 
-      {/* Layer 2 — Environmental grid: AQI + UV from canonical backend objects.
-          Temp/Wind stay on Layer 1; AQI layout/slots unchanged from Commit #1. */}
+      {/* Layer 2 — Environmental grid: AQI + UV + pollen from canonical backend
+          objects. Temp/Wind stay on Layer 1; AQI layout/slots unchanged from
+          Commit #1. Desktop pollen is deferred (same product decision as UV). */}
       <EnvironmentalMetricsRow
         metrics={[
           {
@@ -766,6 +782,23 @@ function PhonePortraitSelectedCard({
             containerTestId: "uv-index-slot",
             testId: "uv-index-value",
             supportingTestId: "uv-index-supporting",
+          },
+          {
+            title: "Pollen",
+            value: pollen.available ? pollen.value : "Unavailable",
+            valueText: pollenValueText,
+            valueColor: pollen.available
+              ? (pollen.color ?? undefined)
+              : undefined,
+            supporting: pollen.available ? pollen.label : undefined,
+            supportingColor: pollen.available
+              ? (pollen.color ?? undefined)
+              : undefined,
+            band: pollen.available ? (pollen.category ?? undefined) : undefined,
+            unavailable: !pollen.available,
+            containerTestId: "pollen-slot",
+            testId: "pollen-value",
+            supportingTestId: "pollen-supporting",
           },
         ]}
       />
@@ -887,9 +920,10 @@ function DesktopSelectedCard({
           ) : null}
 
           {/* Product decision (not a technical limit): desktop/tablet keep the
-              compact AQI chip only for now. UV ships first on phone Selected
-              Location's environmental grid; desktop/tablet UV is a separate
-              roadmap layout item so we don't bolt UV onto this dense chip. */}
+              compact AQI chip only for now. UV and pollen ship first on phone
+              Selected Location's environmental grid; desktop/tablet UV/pollen
+              are separate roadmap layout items so we don't bolt them onto this
+              dense chip. */}
           <p
             className="mt-1 line-clamp-2 text-[0.65rem] font-medium leading-snug"
             data-testid="desktop-air-quality"

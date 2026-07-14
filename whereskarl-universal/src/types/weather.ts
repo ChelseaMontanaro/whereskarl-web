@@ -64,6 +64,52 @@ export type UltravioletIndex = {
   isAvailable: boolean;
 };
 
+export type PollenCategory =
+  | 'none'
+  | 'very-low'
+  | 'low'
+  | 'moderate'
+  | 'high'
+  | 'very-high';
+
+export type PollenColorToken =
+  | 'pollen.none'
+  | 'pollen.very-low'
+  | 'pollen.low'
+  | 'pollen.moderate'
+  | 'pollen.high'
+  | 'pollen.very-high'
+  | 'pollen.unavailable';
+
+export type PollenDominantType = 'tree' | 'grass' | 'weed';
+
+export type PollenTypeMetric = {
+  value: number | null;
+  category: PollenCategory | null;
+  colorToken?: PollenColorToken;
+  label: string;
+  description?: string | null;
+  inSeason?: boolean | null;
+};
+
+export type Pollen = {
+  value: number | null;
+  category: PollenCategory | null;
+  colorToken?: PollenColorToken;
+  label: string;
+  description?: string | null;
+  dominantType?: PollenDominantType | null;
+  types?: {
+    tree: PollenTypeMetric | null;
+    grass: PollenTypeMetric | null;
+    weed: PollenTypeMetric | null;
+  };
+  /** Daily forecast calendar day (YYYY-MM-DD) — not an observation timestamp. */
+  forecastDate?: string | null;
+  source?: string | null;
+  isAvailable: boolean;
+};
+
 export type LocationWeather = {
   id: string;
   name: string;
@@ -84,6 +130,7 @@ export type LocationWeather = {
   fogScore: number;
   airQuality?: AirQuality;
   uvIndex?: UltravioletIndex;
+  pollen?: Pollen;
   updatedAt: string;
   karlReason: string;
   primaryDrivers: string[];
@@ -114,6 +161,7 @@ export type CurrentResponse = {
   source: ApiSource;
   airQuality?: AirQuality;
   uvIndex?: UltravioletIndex;
+  pollen?: Pollen;
   dataStatus?: DataStatus;
 } & ConfidenceFields;
 
@@ -136,6 +184,7 @@ export type BestSunshineResponse = {
   source: ApiSource;
   airQuality?: AirQuality;
   uvIndex?: UltravioletIndex;
+  pollen?: Pollen;
   dataStatus?: DataStatus;
   recommendationMode: RecommendationMode;
   lookaheadMinutes: number;

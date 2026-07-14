@@ -12,6 +12,10 @@ import {
   presentAirQuality,
 } from '@/lib/weather/airQuality';
 import {
+  formatPollenCompact,
+  presentPollen,
+} from '@/lib/weather/pollen';
+import {
   formatUvIndexCompact,
   presentUvIndex,
 } from '@/lib/weather/uvIndex';
@@ -142,6 +146,7 @@ export type LocationMetric = {
 export function getLocationMetrics(location: LocationWeather): LocationMetric[] {
   const airQuality = presentAirQuality(location.airQuality);
   const uvIndex = presentUvIndex(location.uvIndex);
+  const pollen = presentPollen(location.pollen);
 
   const metrics: LocationMetric[] = [
     {
@@ -159,6 +164,10 @@ export function getLocationMetrics(location: LocationWeather): LocationMetric[] 
     {
       label: 'UV',
       value: formatUvIndexCompact(uvIndex),
+    },
+    {
+      label: 'Pollen',
+      value: formatPollenCompact(pollen),
     },
     {
       label: 'Cloud cover',
@@ -181,6 +190,13 @@ export function getLocationMetrics(location: LocationWeather): LocationMetric[] 
     metrics.push({
       label: 'Ultraviolet',
       value: uvIndex.description,
+    });
+  }
+
+  if (pollen.available && pollen.description) {
+    metrics.push({
+      label: 'Pollen detail',
+      value: pollen.description,
     });
   }
 

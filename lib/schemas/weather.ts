@@ -74,6 +74,63 @@ export const ultravioletIndexSchema = z.object({
   isAvailable: z.boolean(),
 });
 
+/** Calendar day for Google daily pollen forecasts (YYYY-MM-DD). */
+export const pollenForecastDateSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid pollen forecast date");
+
+export const pollenCategorySchema = z.enum([
+  "none",
+  "very-low",
+  "low",
+  "moderate",
+  "high",
+  "very-high",
+]);
+
+export const pollenColorTokenSchema = z.enum([
+  "pollen.none",
+  "pollen.very-low",
+  "pollen.low",
+  "pollen.moderate",
+  "pollen.high",
+  "pollen.very-high",
+  "pollen.unavailable",
+]);
+
+export const pollenDominantTypeSchema = z.enum(["tree", "grass", "weed"]);
+
+export const pollenTypeMetricSchema = z.object({
+  value: z.number().nullable(),
+  category: pollenCategorySchema.nullable(),
+  colorToken: pollenColorTokenSchema.optional(),
+  label: z.string(),
+  description: z.string().nullable().optional(),
+  inSeason: z.boolean().nullable().optional(),
+});
+
+export const pollenSchema = z.object({
+  value: z.number().nullable(),
+  category: pollenCategorySchema.nullable(),
+  // Backend-owned semantic presentation token. Platforms map this to local
+  // design colors once; they must not invent alternate UPI band keys.
+  colorToken: pollenColorTokenSchema.optional(),
+  label: z.string(),
+  description: z.string().nullable().optional(),
+  dominantType: pollenDominantTypeSchema.nullable().optional(),
+  types: z
+    .object({
+      tree: pollenTypeMetricSchema.nullable(),
+      grass: pollenTypeMetricSchema.nullable(),
+      weed: pollenTypeMetricSchema.nullable(),
+    })
+    .optional(),
+  // Daily forecast calendar day — not an observation timestamp.
+  forecastDate: pollenForecastDateSchema.nullable().optional(),
+  source: z.string().nullable().optional(),
+  isAvailable: z.boolean(),
+});
+
 export const locationWeatherSchema = z
   .object({
     id: z.string(),
@@ -101,6 +158,10 @@ export const locationWeatherSchema = z
     // Selected Location is the first UI consumer — the field is intentionally
     // surface-agnostic for Map / Home / Favorites / Notifications / etc.
     uvIndex: ultravioletIndexSchema.optional(),
+    // Canonical pollen from Google UPI via the shared environmental pipeline.
+    // Phone Selected Location is the first UI consumer; desktop defers pollen
+    // (same product decision as UV). Payload remains surface-agnostic.
+    pollen: pollenSchema.optional(),
     updatedAt: apiDateTimeSchema,
     karlReason: z.string(),
     primaryDrivers: z.array(z.string()),
@@ -122,6 +183,9 @@ export type UltravioletIndex = z.infer<typeof ultravioletIndexSchema>;
 export type UltravioletIndexCategory = z.infer<
   typeof ultravioletIndexCategorySchema
 >;
+export type Pollen = z.infer<typeof pollenSchema>;
+export type PollenCategory = z.infer<typeof pollenCategorySchema>;
+export type PollenDominantType = z.infer<typeof pollenDominantTypeSchema>;
 
 export const currentResponseSchema = z
   .object({
@@ -142,6 +206,7 @@ export const currentResponseSchema = z
     source: apiSourceSchema,
     airQuality: airQualitySchema.optional(),
     uvIndex: ultravioletIndexSchema.optional(),
+    pollen: pollenSchema.optional(),
     dataStatus: dataStatusSchema.optional(),
   })
   .merge(confidenceFieldsSchema);
@@ -168,6 +233,7 @@ export const bestSunshineResponseSchema = z
     source: apiSourceSchema,
     airQuality: airQualitySchema.optional(),
     uvIndex: ultravioletIndexSchema.optional(),
+    pollen: pollenSchema.optional(),
     dataStatus: dataStatusSchema.optional(),
     recommendationMode: recommendationModeSchema,
     lookaheadMinutes: z.number(),
