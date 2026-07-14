@@ -284,7 +284,7 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(env).toHaveTextContent("AQI");
     expect(env).toHaveTextContent("UV");
     expect(env).toHaveTextContent("Pollen");
-    expect(env).toHaveTextContent("Health");
+    expect(env).toHaveTextContent("EHI");
     expect(env).toContainElement(screen.getByTestId("air-quality-slot"));
     expect(env).toContainElement(screen.getByTestId("uv-index-slot"));
     expect(env).toContainElement(screen.getByTestId("pollen-slot"));
@@ -293,7 +293,7 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(screen.getByTestId("uv-index-value")).toHaveTextContent("Unavailable");
     expect(screen.getByTestId("pollen-value")).toHaveTextContent("Unavailable");
     expect(screen.getByTestId("environmental-health-value")).toHaveTextContent(
-      "Unavailable",
+      "Coming Soon",
     );
     expect(metrics).not.toContainElement(screen.getByTestId("air-quality-slot"));
     expect(metrics).not.toContainElement(screen.getByTestId("uv-index-slot"));
@@ -610,7 +610,7 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(value.className).toContain("text-[23px]");
   });
 
-    it("keeps AQI, UV, Pollen, and Health on one environmental metrics row outside the weather strip", () => {
+    it("keeps AQI, UV, Pollen, and EHI on one environmental metrics row outside the weather strip", () => {
     render(
       <MapSelectedLocationCard
         location={{
@@ -695,7 +695,7 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(screen.getByTestId("pollen-value")).toHaveTextContent("3");
     expect(screen.getByTestId("pollen-supporting")).toHaveTextContent("Moderate");
     expect(screen.getByTestId("environmental-health-value")).toHaveTextContent(
-      "Unavailable",
+      "Coming Soon",
     );
     expect(env.querySelector(".grid-cols-4")).not.toBeNull();
     expect(env.querySelector(".col-span-2")).toBeNull();

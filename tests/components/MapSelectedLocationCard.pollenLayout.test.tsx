@@ -2,7 +2,7 @@
 
 /**
  * 390px layout checks for the single Environmental Metrics row
- * (AQI · UV · Pollen · Health).
+ * (AQI · UV · Pollen · EHI).
  */
 
 import { cleanup, render, screen } from "@testing-library/react";
@@ -133,7 +133,7 @@ describe("phone environmental metrics row @ 390px", () => {
     cleanup();
   });
 
-  it("places AQI, UV, Pollen, and Health in one equal row", () => {
+  it("places AQI, UV, Pollen, and EHI in one equal row", () => {
     const { root } = renderAt390({
       ...base,
       airQuality: {
@@ -212,7 +212,7 @@ describe("phone environmental metrics row @ 390px", () => {
 
     expect(screen.getByTestId("pollen-value")).toHaveTextContent("2");
     expect(screen.getByTestId("environmental-health-value")).toHaveTextContent(
-      "Unavailable",
+      "Coming Soon",
     );
     expect(
       screen.getByLabelText("Environmental Health Index"),
@@ -278,7 +278,7 @@ describe("phone environmental metrics row @ 390px", () => {
     expect(pollenValue).not.toHaveTextContent("None");
 
     expect(screen.getByTestId("environmental-health-value")).toHaveTextContent(
-      "Unavailable",
+      "Coming Soon",
     );
 
     root.remove();

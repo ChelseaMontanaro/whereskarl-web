@@ -439,7 +439,7 @@ type EnvironmentalMetricProps = {
 /**
  * One environmental metric tile in the shared Environmental Metrics row.
  * All tiles share the same typography and spacing so AQI / UV / Pollen /
- * Health (and future metrics) read as one cohesive section.
+ * Health / EHI (and future metrics) read as one cohesive section.
  */
 function EnvironmentalMetricTile({
   title,
@@ -489,7 +489,7 @@ function EnvironmentalMetricTile({
 
 /**
  * Single Environmental Metrics row under the weather strip.
- * Equal columns: AQI · UV · Pollen · Health today. Append more tiles to the
+ * Equal columns: AQI · UV · Pollen · EHI today. Append more tiles to the
  * metrics array to extend the row; `grid-cols-4` wraps extras without a layout
  * redesign.
  */
@@ -740,7 +740,7 @@ function PhonePortraitSelectedCard({
         />
       </div>
 
-      {/* Layer 2 — one Environmental Metrics row: AQI · UV · Pollen · Health.
+      {/* Layer 2 — one Environmental Metrics row: AQI · UV · Pollen · EHI.
           Equal tiles share typography/spacing; unavailable values stay in-tile.
           Temp/Wind remain Layer 1. Desktop env metrics stay deferred. */}
       <EnvironmentalMetricsRow
@@ -801,10 +801,10 @@ function PhonePortraitSelectedCard({
             supportingTestId: "pollen-supporting",
           },
           {
-            title: "Health",
+            title: "EHI",
             ariaLabel: "Environmental Health Index",
-            value: "Unavailable",
-            valueText: "Unavailable",
+            value: "Coming Soon",
+            valueText: "Coming Soon",
             unavailable: true,
             containerTestId: "environmental-health-slot",
             testId: "environmental-health-value",
