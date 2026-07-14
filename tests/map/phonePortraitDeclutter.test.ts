@@ -66,7 +66,9 @@ function mockRect(
 
 type EntryOptions = {
   labelCenter: { x: number; y: number };
+  labelSize?: { w: number; h: number };
   iconCenter?: { x: number; y: number };
+  iconSize?: { w: number; h: number };
   isSelected?: boolean;
   onSelect?: (id: string) => void;
 };
@@ -86,15 +88,16 @@ function makeEntry(
   const meta = element.querySelector<HTMLElement>(
     ".karl-universal-map-marker__meta",
   )!;
-  mockRect(meta, opts.labelCenter);
+  mockRect(meta, opts.labelCenter, opts.labelSize ?? { w: 40, h: 20 });
 
-  // Only give the icon real geometry when the test exercises icon collision;
-  // otherwise leave it degenerate (0-size) so icon collision is skipped.
+  // Only give the icon real geometry when the test exercises icon or
+  // label↔icon collision; otherwise leave it degenerate (0-size) so icon
+  // collision is skipped.
   if (opts.iconCenter) {
     const icon = element.querySelector<HTMLElement>(
       ".karl-universal-map-marker",
     )!;
-    mockRect(icon, opts.iconCenter, { w: 36, h: 36 });
+    mockRect(icon, opts.iconCenter, opts.iconSize ?? { w: 36, h: 36 });
   }
 
   return {
@@ -371,5 +374,165 @@ describe("deterministic priority ordering", () => {
       .map((e) => e.locationId);
 
     expect(orderF).toEqual(orderR);
+  });
+});
+
+/**
+ * Label ↔ other retained icon (GGP / Ocean Beach acceptance geometry from
+ * production SF @ 390×844). Icons stay geographically anchored; only visibility
+ * changes. No location-specific exceptions.
+ */
+describe("label ↔ retained-icon collision", () => {
+  // Production-inspired boxes (icon 36×36; GGP meta ~93×31 covers Ocean icon).
+  const ggpIcon = { x: 168, y: 438 };
+  const ggpMeta = { x: 166, y: 478 };
+  const ggpMetaSize = { w: 93, h: 31 };
+  const oceanIcon = { x: 125, y: 460 };
+  const oceanMeta = { x: 115, y: 500 };
+  const oceanMetaSize = { w: 70, h: 31 };
+
+  function makePair(scores: { ggp: number; ocean: number }, selectedId?: string) {
+    const ggp = makeEntry(
+      location("golden-gate-park", {
+        region: "san-francisco",
+        sunshineScore: scores.ggp,
+        name: "Golden Gate Park",
+      }),
+      {
+        labelCenter: ggpMeta,
+        labelSize: ggpMetaSize,
+        iconCenter: ggpIcon,
+        isSelected: selectedId === "golden-gate-park",
+      },
+    );
+    const ocean = makeEntry(
+      location("ocean-beach", {
+        region: "san-francisco",
+        sunshineScore: scores.ocean,
+        name: "Ocean Beach",
+      }),
+      {
+        labelCenter: oceanMeta,
+        labelSize: oceanMetaSize,
+        iconCenter: oceanIcon,
+        isSelected: selectedId === "ocean-beach",
+      },
+    );
+    return { ggp, ocean };
+  }
+
+  it("downgrades a full label that covers another retained icon to icon-only", () => {
+    // Far-apart labels alone would allow both full; GGP meta covers Ocean icon.
+    const claimant = makeEntry(location("golden-gate-park", { sunshineScore: 90 }), {
+      labelCenter: ggpMeta,
+      labelSize: ggpMetaSize,
+      iconCenter: ggpIcon,
+    });
+    const covered = makeEntry(location("ocean-beach", { sunshineScore: 40 }), {
+      // Push Ocean's label far away so only label↔icon decides.
+      labelCenter: { x: 800, y: 800 },
+      labelSize: oceanMetaSize,
+      iconCenter: oceanIcon,
+    });
+
+    declutterPhonePortraitMarkers(mapAtZoom(10.5), [claimant, covered], {
+      applyLowZoomHiding: false,
+    });
+
+    expect(visibility(claimant)).toBe("icon-only");
+    expect(visibility(covered)).toBe("full");
+    // Covered icon remains geographically present (not hidden).
+    expect(covered.element.style.display).not.toBe("none");
+    expect(
+      covered.element.querySelector(".karl-universal-map-marker"),
+    ).not.toBeNull();
+  });
+
+  it("when GGP has the higher score, GGP cannot stay full over Ocean Beach's icon", () => {
+    const { ggp, ocean } = makePair({ ggp: 80, ocean: 30 });
+    declutterPhonePortraitMarkers(mapAtZoom(10.5), [ocean, ggp], {
+      applyLowZoomHiding: false,
+    });
+
+    expect(visibility(ggp)).toBe("icon-only");
+    expect(visibility(ocean)).not.toBe("hidden");
+    expect(ocean.element.style.display).not.toBe("none");
+  });
+
+  it("when Ocean Beach has the higher score, it may stay full if its meta misses GGP's icon", () => {
+    const { ggp, ocean } = makePair({ ggp: 30, ocean: 80 });
+    declutterPhonePortraitMarkers(mapAtZoom(10.5), [ggp, ocean], {
+      applyLowZoomHiding: false,
+    });
+
+    expect(visibility(ocean)).toBe("full");
+    expect(visibility(ggp)).toBe("icon-only");
+  });
+
+  it("selected marker stays full and only the covered secondary icon is hidden", () => {
+    const { ggp, ocean } = makePair(
+      { ggp: 80, ocean: 30 },
+      "golden-gate-park",
+    );
+    // Unrelated marker whose icon is far from GGP meta — must stay visible.
+    const far = makeEntry(location("berkeley", { sunshineScore: 70 }), {
+      labelCenter: { x: 700, y: 700 },
+      iconCenter: { x: 700, y: 650 },
+    });
+
+    declutterPhonePortraitMarkers(mapAtZoom(10.5), [far, ocean, ggp], {
+      applyLowZoomHiding: false,
+    });
+
+    expect(visibility(ggp)).toBe("full");
+    expect(visibility(ocean)).toBe("hidden");
+    expect(ocean.element.style.display).toBe("none");
+    expect(visibility(far)).not.toBe("hidden");
+  });
+
+  it("clearing selection restores the covered secondary marker's canonical state", () => {
+    let { ggp, ocean } = makePair(
+      { ggp: 80, ocean: 30 },
+      "golden-gate-park",
+    );
+    declutterPhonePortraitMarkers(mapAtZoom(10.5), [ocean, ggp], {
+      applyLowZoomHiding: false,
+    });
+    expect(visibility(ggp)).toBe("full");
+    expect(visibility(ocean)).toBe("hidden");
+
+    document.body.innerHTML = "";
+    vi.restoreAllMocks();
+    ({ ggp, ocean } = makePair({ ggp: 80, ocean: 30 }));
+    declutterPhonePortraitMarkers(mapAtZoom(10.5), [ocean, ggp], {
+      applyLowZoomHiding: false,
+    });
+    expect(visibility(ggp)).toBe("icon-only");
+    expect(visibility(ocean)).not.toBe("hidden");
+  });
+
+  it("resolves deterministically regardless of input order", () => {
+    const forward = makePair({ ggp: 80, ocean: 30 });
+    declutterPhonePortraitMarkers(
+      mapAtZoom(10.5),
+      [forward.ocean, forward.ggp],
+      { applyLowZoomHiding: false },
+    );
+    const forwardResult = {
+      ggp: visibility(forward.ggp),
+      ocean: visibility(forward.ocean),
+    };
+
+    document.body.innerHTML = "";
+    vi.restoreAllMocks();
+
+    const reverse = makePair({ ggp: 80, ocean: 30 });
+    declutterPhonePortraitMarkers(
+      mapAtZoom(10.5),
+      [reverse.ggp, reverse.ocean],
+      { applyLowZoomHiding: false },
+    );
+    expect(visibility(reverse.ggp)).toBe(forwardResult.ggp);
+    expect(visibility(reverse.ocean)).toBe(forwardResult.ocean);
   });
 });

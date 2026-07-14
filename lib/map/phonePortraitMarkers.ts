@@ -198,33 +198,71 @@ export function updatePhonePortraitMarkerLabelOffsets(
   }
 }
 
+type ViewportBox = {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+};
+
+type IconGeometry = {
+  x: number;
+  y: number;
+  hasGeometry: boolean;
+  box: ViewportBox;
+};
+
+type LabelGeometry = {
+  x: number;
+  y: number;
+  box: ViewportBox;
+};
+
+function viewportBoxFromRect(rect: DOMRect): ViewportBox {
+  return {
+    left: rect.left,
+    top: rect.top,
+    right: rect.right,
+    bottom: rect.bottom,
+  };
+}
+
+function boxesIntersect(a: ViewportBox, b: ViewportBox): boolean {
+  return !(
+    a.right <= b.left ||
+    a.left >= b.right ||
+    a.bottom <= b.top ||
+    a.top >= b.bottom
+  );
+}
+
 /**
  * Returns the center of the rendered label/score group in viewport pixels.
  * This reads the live DOM (including MapLibre's translate and the per-location
  * label offset) so collision math matches exactly what the user sees. Falls
  * back to the marker root when the meta group is unexpectedly absent.
  */
-function measureLabelGroupCenter(element: HTMLElement): { x: number; y: number } {
+function measureLabelGroup(element: HTMLElement): LabelGeometry {
   const meta = element.querySelector<HTMLElement>(
     ".karl-universal-map-marker__meta",
   );
   const rect = (meta ?? element).getBoundingClientRect();
-  return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+  return {
+    x: rect.left + rect.width / 2,
+    y: rect.top + rect.height / 2,
+    box: viewportBoxFromRect(rect),
+  };
 }
 
 /**
- * Returns the rendered center of the coordinate-anchored weather icon. Icon
- * collision only participates when the icon actually has laid-out geometry;
- * when the rect is degenerate (non-layout environments such as the unit-test
- * DOM) `hasGeometry` is false so icon collision is skipped and never
+ * Returns the rendered center and box of the coordinate-anchored weather icon.
+ * Icon collision only participates when the icon actually has laid-out
+ * geometry; when the rect is degenerate (non-layout environments such as the
+ * unit-test DOM) `hasGeometry` is false so icon collision is skipped and never
  * accidentally hides everything at the origin. Pixel-exact icon behavior is
  * verified at a real 390x844 viewport.
  */
-function measureIconCenter(element: HTMLElement): {
-  x: number;
-  y: number;
-  hasGeometry: boolean;
-} {
+function measureIcon(element: HTMLElement): IconGeometry {
   const icon = element.querySelector<HTMLElement>(
     ".karl-universal-map-marker",
   );
@@ -233,6 +271,7 @@ function measureIconCenter(element: HTMLElement): {
     x: rect.left + rect.width / 2,
     y: rect.top + rect.height / 2,
     hasGeometry: rect.width > 0 || rect.height > 0,
+    box: viewportBoxFromRect(rect),
   };
 }
 
@@ -366,15 +405,28 @@ export function comparePhonePortraitDeclutterOrder(
  * {@link applyPhonePortraitMarkerVisibility}. Rendering and collision share the
  * same zoom-scaled label position, so they can never diverge.
  *
- * Policy:
- *   - Selected marker is always `full` and reserves both boxes.
- *   - Icon collision (tight box) is the ONLY whole-marker hide, and only when
- *     the icon has real geometry; selected markers are exempt.
- *   - Label collision, or low-zoom cluster membership in the all-Bay
- *     composition, downgrades a marker to `icon-only` (icon stays visible).
- *   - A region anchor is exempt from low-zoom label suppression, so every
- *     product region keeps one readable labeled representative where geometry
- *     permits.
+ * Two deterministic phases (same priority order, no second pipeline):
+ *
+ *   Phase A — retained icons
+ *     Icon↔icon collision is the only whole-marker hide (`hidden`). Selected
+ *     markers are exempt. Surviving icons keep true MapLibre coordinates
+ *     (marker offset [0,0]); their live boxes are collected for Phase B.
+ *
+ *   Phase B — labels
+ *     A retained marker may become `full` only when its rendered `__meta` is
+ *     not low-zoom-suppressed, does not collide with an already accepted label
+ *     (label↔label), and does not intersect any *other* retained icon
+ *     (label↔icon, AABB). Otherwise it resolves to `icon-only`.
+ *
+ * Selected-state exception (Phase B):
+ *   The selected marker is always `full`. If its visible `__meta` AABB
+ *   intersects another retained secondary icon, only that secondary marker
+ *   becomes `hidden` (identity of the selection wins over geographic presence
+ *   of the covered icon). Unrelated markers are untouched. Re-running the pass
+ *   after selection changes restores ordinary Phase B results.
+ *
+ * Region anchors remain exempt from low-zoom label suppression so every product
+ * region keeps one readable labeled representative where geometry permits.
  */
 export function declutterPhonePortraitMarkers(
   map: MapLibreMap,
@@ -408,20 +460,49 @@ export function declutterPhonePortraitMarkers(
     comparePhonePortraitDeclutterOrder(a, b, anchorIds),
   );
 
-  const placedLabels: Array<{ x: number; y: number }> = [];
-  const placedIcons: Array<{ x: number; y: number }> = [];
+  type RetainedMarker = {
+    entry: PhonePortraitDeclutterEntry;
+    icon: IconGeometry;
+  };
 
-  const iconCollides = (icon: {
-    x: number;
-    y: number;
-    hasGeometry: boolean;
-  }): boolean =>
+  const placedIconCenters: Array<{ x: number; y: number }> = [];
+  const retained: RetainedMarker[] = [];
+
+  const iconCollides = (icon: IconGeometry): boolean =>
     icon.hasGeometry &&
-    placedIcons.some(
+    placedIconCenters.some(
       (other) =>
         Math.abs(other.x - icon.x) < PHONE_PORTRAIT_ICON_COLLISION_X &&
         Math.abs(other.y - icon.y) < PHONE_PORTRAIT_ICON_COLLISION_Y,
     );
+
+  // ---------------------------------------------------------------------------
+  // Phase A — resolve retained icons (never moves coordinates)
+  // ---------------------------------------------------------------------------
+  for (const entry of ordered) {
+    const icon = measureIcon(entry.element);
+
+    if (entry.isSelected) {
+      retained.push({ entry, icon });
+      if (icon.hasGeometry) {
+        placedIconCenters.push({ x: icon.x, y: icon.y });
+      }
+      continue;
+    }
+
+    if (iconCollides(icon)) {
+      applyPhonePortraitMarkerVisibility(entry.element, "hidden");
+      continue;
+    }
+
+    retained.push({ entry, icon });
+    if (icon.hasGeometry) {
+      placedIconCenters.push({ x: icon.x, y: icon.y });
+    }
+  }
+
+  const placedLabels: Array<{ x: number; y: number }> = [];
+  const hiddenBySelectedCover = new Set<string>();
 
   const labelCollides = (label: { x: number; y: number }): boolean =>
     placedLabels.some(
@@ -430,26 +511,49 @@ export function declutterPhonePortraitMarkers(
         Math.abs(other.y - label.y) < PHONE_PORTRAIT_MARKER_COLLISION_Y,
     );
 
-  for (const entry of ordered) {
-    const icon = measureIconCenter(entry.element);
-    const label = measureLabelGroupCenter(entry.element);
+  const metaCoversOtherRetainedIcon = (
+    metaBox: ViewportBox,
+    ownerId: string,
+  ): boolean =>
+    retained.some(
+      (other) =>
+        other.entry.locationId !== ownerId &&
+        !hiddenBySelectedCover.has(other.entry.locationId) &&
+        other.icon.hasGeometry &&
+        boxesIntersect(metaBox, other.icon.box),
+    );
+
+  // ---------------------------------------------------------------------------
+  // Phase B — resolve labels (label↔label + label↔other retained icon)
+  // ---------------------------------------------------------------------------
+  for (const { entry } of retained) {
+    if (hiddenBySelectedCover.has(entry.locationId)) {
+      continue;
+    }
+
+    // Measure after Phase A so AABB coverage matches live offsets / layout
+    // (markers were temporarily revealed as `full` for accurate __meta boxes).
+    const liveLabel = measureLabelGroup(entry.element);
 
     if (entry.isSelected) {
       applyPhonePortraitMarkerVisibility(entry.element, "full");
-      if (icon.hasGeometry) {
-        placedIcons.push(icon);
-      }
-      placedLabels.push(label);
-      continue;
-    }
+      placedLabels.push({ x: liveLabel.x, y: liveLabel.y });
 
-    // Icon collision is the only whole-marker hide, kept rare by a tight box.
-    if (iconCollides(icon)) {
-      applyPhonePortraitMarkerVisibility(entry.element, "hidden");
+      // Selected-state exception: selection identity stays full; only secondary
+      // icons actually covered by the selected __meta become hidden.
+      for (const other of retained) {
+        if (other.entry.locationId === entry.locationId) {
+          continue;
+        }
+        if (!other.icon.hasGeometry) {
+          continue;
+        }
+        if (boxesIntersect(liveLabel.box, other.icon.box)) {
+          applyPhonePortraitMarkerVisibility(other.entry.element, "hidden");
+          hiddenBySelectedCover.add(other.entry.locationId);
+        }
+      }
       continue;
-    }
-    if (icon.hasGeometry) {
-      placedIcons.push(icon);
     }
 
     const isAnchor = anchorIds.has(entry.locationId);
@@ -459,11 +563,17 @@ export function declutterPhonePortraitMarkers(
       zoom < PHONE_PORTRAIT_LOW_ZOOM_HIDE_THRESHOLD &&
       PHONE_PORTRAIT_LOW_ZOOM_ICON_ONLY_LOCATION_IDS.has(entry.locationId);
 
-    if (!lowZoomSuppressed && !labelCollides(label)) {
+    const mayBeFull =
+      !lowZoomSuppressed &&
+      !labelCollides(liveLabel) &&
+      !metaCoversOtherRetainedIcon(liveLabel.box, entry.locationId);
+
+    if (mayBeFull) {
       applyPhonePortraitMarkerVisibility(entry.element, "full");
-      placedLabels.push(label);
+      placedLabels.push({ x: liveLabel.x, y: liveLabel.y });
     } else {
-      // Label collides or is low-zoom-suppressed: keep the icon, drop the label.
+      // Label collides, covers another retained icon, or is low-zoom-suppressed:
+      // keep the geographically anchored icon, drop the label/score group.
       applyPhonePortraitMarkerVisibility(entry.element, "icon-only");
     }
   }
