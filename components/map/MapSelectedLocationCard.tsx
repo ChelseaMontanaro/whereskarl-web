@@ -274,28 +274,27 @@ function SectionLabel({
 }
 
 /**
- * Phone selected-location metrics use layered sections:
+ * Phone selected-location uses a two-stage bottom sheet:
  *
- * 1. Weather strip (collapsed peek) — Clear Sky Score + Fog + Temp + Wind
- * 2. Environmental Metrics (collapsed peek) — 3×2 grid:
- *    AQI · UV · Pollen / Humidity · Visibility · KHI
- * 3. Marine Layer + Fog Ceiling cards (expanded body) — Coming Soon
+ * Collapsed preview (peek header):
+ *   Location identity + Core Weather strip (Clear Sky Score · Fog · Temp · Wind)
+ *
+ * Expanded intelligence body (revealed on tap/drag):
+ *   1. Environmental Metrics — 3×2 grid (AQI · UV · Pollen / Humidity · Visibility · KHI)
+ *   2. Marine Layer + Fog Ceiling cards — Coming Soon
+ *   3. Karl's Read
+ *   4. Hourly Outlook
  *
  * Environmental tiles must not share equal flex columns with Fog/Temp/Wind —
  * those ~55px slots cannot hold long category copy. Values, colors, bands,
  * and labels come from canonical helpers — these components never derive
  * thresholds, colors, or qualitative labels themselves.
  */
-/** All metric titles: white, uppercase, 14px semibold. */
+/** All Core Weather titles (Clear Sky Score · Fog · Temp · Wind): identical
+ * phone-compact tokens — white uppercase semibold, single-line — so the long
+ * Clear Sky Score label fits at 390px without a score-only shrink or wrap. */
 const METRIC_TITLE_CLASS =
-  "text-[14px] font-semibold uppercase tracking-[0.04em] text-white";
-/**
- * Clear Sky Score title. Same white/uppercase/semibold treatment as the other
- * titles, but the multi-word label needs a slightly smaller size to stay on a
- * single line inside its column at 390px (verified via getBoundingClientRect).
- */
-const SCORE_TITLE_CLASS =
-  "text-[10px] font-semibold uppercase tracking-[0.02em] text-white";
+  "text-[11px] font-semibold uppercase leading-none tracking-[0.04em] text-white";
 /** Secondary-metric value (white unless a canonical color is set). */
 const SECONDARY_VALUE_CLASS = "text-[28px] font-light leading-none text-white";
 /** Neutral placeholder shown when a metric value is unavailable. */
@@ -317,9 +316,9 @@ function compactSecondaryValueClassName(formatted: string): string {
   const size = formatted.length >= 4 ? "text-[19px]" : "text-[23px]";
   return `${size} font-light leading-none text-white`;
 }
-/** Title row — single line for every metric title, shared baseline. */
+/** Title row — single line for every Core Weather title, shared baseline. */
 const METRIC_TITLE_ROW_CLASS =
-  "flex h-5 w-full items-end justify-center leading-none";
+  "flex h-5 w-full items-end justify-center text-center leading-none";
 /** Fixed value row — every value bottom-aligns here so weather columns share a
  * value baseline and the supporting labels start at the same y (44px fits the
  * 38px score without clipping). */
@@ -364,7 +363,7 @@ const ENV_COMING_SOON_VALUE_CLASS =
   "flex min-h-[1.625rem] items-center text-[12px] font-normal leading-none text-white/40";
 
 /**
- * Shared glass tile surface for the six Environmental Metrics cells.
+ * Shared glass tile surface for the six Environmental Metrics cells (expanded).
  * Fixed min-height keeps AQI / UV / Pollen / Humidity / Visibility / KHI equal.
  * Content is centered to match the approved mockup.
  */
@@ -598,7 +597,7 @@ function EnvironmentalMetricTile({
 }
 
 /**
- * Environmental Metrics — approved 3×2 grouping under the weather strip:
+ * Environmental Metrics — approved 3×2 grouping in the expanded body:
  *   [AQI] [UV] [Pollen]
  *   [Humidity] [Visibility] [KHI]
  *
@@ -865,17 +864,17 @@ function PhonePortraitSelectedCard({
         <DegradedDataLabel variant="location" className="mt-1.5" />
       ) : null}
 
-      {/* Layer 1 — Weather strip: Score / Fog / Temp / Wind.
-          Environmental metrics live on Layer 2 so long category labels never
-          share Fog's column budget. */}
+      {/* Core Weather strip (collapsed peek): Score / Fog / Temp / Wind.
+          Expanded intelligence (Environmental Metrics onward) lives in the
+          sheet body so the preview stays compact. */}
       <div
         className="mt-3 flex items-stretch gap-0 border-t border-white/10 pt-3"
         data-testid="selected-location-metrics"
       >
         <MetricColumn
           title="Clear Sky Score"
-          titleClassName={`whitespace-nowrap ${SCORE_TITLE_CLASS}`}
-          columnClassName="flex-[2]"
+          titleClassName={`whitespace-nowrap ${METRIC_TITLE_CLASS}`}
+          columnClassName="min-w-0 flex-[2.2] px-1"
           value={score.score}
           valueColor={score.color}
           valueClassName="text-[38px] font-semibold"
@@ -888,6 +887,7 @@ function PhonePortraitSelectedCard({
         />
         <MetricColumn
           title="Fog"
+          columnClassName="min-w-0 flex-[1.25] px-1"
           value={fogValue}
           valueClassName={compactSecondaryValueClassName(fogValue)}
           testId="fog-value"
@@ -895,6 +895,7 @@ function PhonePortraitSelectedCard({
         />
         <MetricColumn
           title="Temp"
+          columnClassName="min-w-0 flex-1 px-1"
           value={tempValue}
           valueClassName={compactSecondaryValueClassName(tempValue)}
           testId="temp-value"
@@ -903,7 +904,7 @@ function PhonePortraitSelectedCard({
           title="Wind"
           value={windValue}
           valueClassName={compactSecondaryValueClassName(windValue)}
-          columnClassName="flex-[1.6]"
+          columnClassName="min-w-0 flex-[1.25] px-1"
           supporting={windSupporting}
           testId="wind-value"
           supportingTestId="wind-direction"
@@ -911,11 +912,16 @@ function PhonePortraitSelectedCard({
           showDivider={false}
         />
       </div>
+    </>
+  );
 
-      {/* Layer 2 — Environmental Metrics (peek): 3×2 grid
-          [AQI] [UV] [Pollen]
-          [Humidity] [Visibility] [KHI]
-          Marine Layer / Fog Ceiling live in the expanded shared card below. */}
+  return (
+    <BottomSheet
+      ariaLabel={`Selected location: ${location.name}`}
+      header={header}
+      expandOnSurfaceTap
+    >
+      {/* Expanded intelligence — identical ordering/styling below Core Weather. */}
       <EnvironmentalMetricsSection
         metrics={[
           {
@@ -1055,17 +1061,7 @@ function PhonePortraitSelectedCard({
           },
         ]}
       />
-    </>
-  );
 
-  return (
-    <BottomSheet
-      ariaLabel={`Selected location: ${location.name}`}
-      header={header}
-      expandOnSurfaceTap
-    >
-      {/* Marine Layer + Fog Ceiling cards — expanded body only so the
-          collapsed peek stays compact and preserves map visibility. */}
       <MarineFogCeilingCard
         columns={[
           {

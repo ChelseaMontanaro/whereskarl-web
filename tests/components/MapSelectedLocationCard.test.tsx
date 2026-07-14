@@ -260,14 +260,20 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(screen.getByText(/,\s*CA$/)).toBeInTheDocument();
   });
 
-  it("renders the canonical metrics row from the presentation helpers", () => {
+  it("renders the compact collapsed preview with Core Weather only", () => {
     render(<MapSelectedLocationCard location={location} phonePortrait />);
+
+    expect(
+      screen.getByRole("button", { name: "Expand details" }),
+    ).toHaveAttribute("aria-expanded", "false");
 
     const score = screen.getByTestId("clear-skies-score");
     expect(score.textContent).toBe("82");
     expect(score).toHaveAttribute("data-score-band", "clear");
+    expect(score).toBeVisible();
 
     const metrics = screen.getByTestId("selected-location-metrics");
+    expect(metrics).toBeVisible();
     expect(metrics).toHaveTextContent("Clear Sky Score");
     expect(metrics).toHaveTextContent("Fog");
     expect(metrics).toHaveTextContent("18%");
@@ -279,10 +285,43 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(screen.getByTestId("wind-value")).toHaveTextContent("W 8");
     expect(screen.getByTestId("wind-direction")).toHaveTextContent("mph");
 
-    // Layer 2 — Environmental Metrics 3×2:
-    // [AQI] [UV] [Pollen]
-    // [Humidity] [Visibility] [KHI]
+    // Expanded intelligence stays in the collapsible body (max-h-0 / opacity-0).
+    const expandButton = screen.getByRole("button", { name: "Expand details" });
+    const bodyId = expandButton.getAttribute("aria-controls");
+    expect(bodyId).toBeTruthy();
+    const body = document.getElementById(bodyId!);
+    expect(body).not.toBeNull();
+    expect(body!.className).toContain("max-h-0");
+    expect(body!.className).toContain("opacity-0");
+    expect(body).toContainElement(
+      screen.getByTestId("selected-location-env-metrics"),
+    );
+    expect(body).toContainElement(
+      screen.getByTestId("selected-location-marine-card"),
+    );
+    expect(body).toContainElement(screen.getByLabelText("Karl's Read"));
+    expect(body).toContainElement(screen.getByLabelText("Hourly outlook"));
+    // Peek header holds Core Weather only — not Environmental Metrics.
+    expect(metrics).not.toContainElement(
+      screen.getByTestId("selected-location-env-metrics"),
+    );
+  });
+
+  it("reveals Environmental Metrics in the expanded body as a 3×2 grid", () => {
+    render(<MapSelectedLocationCard location={location} phonePortrait />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Expand details" }));
+
+    const metrics = screen.getByTestId("selected-location-metrics");
     const env = screen.getByTestId("selected-location-env-metrics");
+    const collapseButton = screen.getByRole("button", {
+      name: "Collapse details",
+    });
+    const body = document.getElementById(
+      collapseButton.getAttribute("aria-controls")!,
+    );
+    expect(body!.className).toContain("max-h-[62dvh]");
+    expect(body!.className).toContain("opacity-100");
     expect(env).toHaveTextContent("Environmental Metrics");
     expect(env).toHaveTextContent("AQI");
     expect(env).toHaveTextContent("UV");
@@ -320,15 +359,17 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(screen.queryByText("Clear Skies Score")).not.toBeInTheDocument();
   });
 
-  it("keeps the Clear Sky Score title on a single line", () => {
-    // Verified at 390x844 via getBoundingClientRect: the title renders on one
-    // line (getClientRects().length === 1) without clipping. The multi-word
-    // label uses a slightly smaller font (10px vs the 14px single-word titles)
-    // so it fits its column on one line — still white, uppercase, semibold.
+  it("keeps the Clear Sky Score title on a single shared-compact line", () => {
+    // Phone Core Weather titles share one compact 11px token so CLEAR SKY SCORE
+    // stays single-line at 390px without a score-only shrink or wrap.
     render(<MapSelectedLocationCard location={location} phonePortrait />);
 
     const title = screen.getByText("Clear Sky Score");
     expect(title.className).toContain("whitespace-nowrap");
+    expect(title.className).toContain("text-[11px]");
+    expect(title.className).toContain("font-semibold");
+    expect(title.className).toContain("uppercase");
+    expect(title.className).toContain("tracking-[0.04em]");
     expect(title.textContent).toBe("Clear Sky Score");
     expect(title.querySelector("br")).toBeNull();
   });
@@ -425,24 +466,18 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(fogPlaceholder.className).toContain("text-[28px]");
   });
 
-  it("renders all metric titles in white uppercase semibold typography", () => {
+  it("renders all Core Weather metric titles with identical typography", () => {
     render(<MapSelectedLocationCard location={location} phonePortrait />);
 
-    for (const titleText of ["Fog", "Temp", "Wind"]) {
+    for (const titleText of ["Clear Sky Score", "Fog", "Temp", "Wind"]) {
       const title = screen.getByText(titleText);
       expect(title.className).toContain("text-white");
-      expect(title.className).toContain("text-[14px]");
+      expect(title.className).toContain("text-[11px]");
       expect(title.className).toContain("font-semibold");
       expect(title.className).toContain("uppercase");
+      expect(title.className).toContain("leading-none");
+      expect(title.className).toContain("tracking-[0.04em]");
     }
-
-    // Clear Sky Score keeps the same white/uppercase/semibold treatment but a
-    // slightly smaller size so its multi-word label stays on one line at 390px.
-    const scoreTitle = screen.getByText("Clear Sky Score");
-    expect(scoreTitle.className).toContain("text-white");
-    expect(scoreTitle.className).toContain("text-[10px]");
-    expect(scoreTitle.className).toContain("font-semibold");
-    expect(scoreTitle.className).toContain("uppercase");
   });
 
   it("aligns supporting labels across the weather-strip columns", () => {
