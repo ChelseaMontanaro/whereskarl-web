@@ -175,16 +175,16 @@ export const PHONE_PORTRAIT_MARKER_LABEL_OFFSETS: Record<
   string,
   [number, number]
 > = {
-  "mill-valley": [-14, -48],
-  tiburon: [46, -30],
-  sausalito: [14, 52],
-  "stinson-beach": [58, 64],
-  "san-francisco": [30, 10],
-  berkeley: [-26, 4],
-  presidio: [-26, -8],
-  "golden-gate-park": [-14, 34],
-  "ocean-beach": [-34, 12],
-  "marin-headlands": [-30, 12],
+  "mill-valley": [-6, -16],
+  tiburon: [18, -10],
+  sausalito: [6, 18],
+  "stinson-beach": [18, 20],
+  "san-francisco": [12, 4],
+  berkeley: [-10, 2],
+  presidio: [-10, -4],
+  "golden-gate-park": [-6, 12],
+  "ocean-beach": [-10, 4],
+  "marin-headlands": [-10, 4],
 };
 
 /** Per-location label/score declutter offset (relative to the anchored icon). */

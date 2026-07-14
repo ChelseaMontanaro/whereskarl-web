@@ -69,7 +69,7 @@ describe("getPhonePortraitLabelOffsetScale", () => {
 describe("resolvePhonePortraitMarkerLabelOffset", () => {
   it("returns the exact configured offset at the reference zoom", () => {
     const configured = getPhonePortraitMarkerLabelOffset("stinson-beach");
-    expect(configured).toEqual([58, 64]);
+    expect(configured).toEqual([18, 20]);
     expect(resolvePhonePortraitMarkerLabelOffset("stinson-beach", 10.3)).toEqual(
       configured,
     );
@@ -77,14 +77,14 @@ describe("resolvePhonePortraitMarkerLabelOffset", () => {
 
   it("proportionally reduces the configured offset at mid zoom", () => {
     const [x, y] = resolvePhonePortraitMarkerLabelOffset("stinson-beach", 9.3);
-    expect(x).toBeCloseTo(58 * 0.6, 5);
-    expect(y).toBeCloseTo(64 * 0.6, 5);
+    expect(x).toBeCloseTo(18 * 0.6, 5);
+    expect(y).toBeCloseTo(20 * 0.6, 5);
   });
 
   it("strongly reduces the configured offset at low zoom", () => {
     const [x, y] = resolvePhonePortraitMarkerLabelOffset("stinson-beach", 8.3);
-    expect(x).toBeCloseTo(58 * 0.2, 5);
-    expect(y).toBeCloseTo(64 * 0.2, 5);
+    expect(x).toBeCloseTo(18 * 0.2, 5);
+    expect(y).toBeCloseTo(20 * 0.2, 5);
   });
 
   it("keeps zero offsets at zero for every zoom (e.g. oakland)", () => {

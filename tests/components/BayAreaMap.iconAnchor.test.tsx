@@ -112,11 +112,11 @@ describe("BayAreaMap phone-portrait icon anchoring", () => {
       ".karl-universal-map-marker",
     )!;
     const [tx, ty] = getPhonePortraitMarkerLabelOffset("tiburon");
-    expect([tx, ty]).toEqual([46, -30]);
-    expect(tiburonMeta.dataset.labelOffsetX).toBe("46");
-    expect(tiburonMeta.dataset.labelOffsetY).toBe("-30");
-    expect(tiburonMeta.style.transform).toContain("46px");
-    expect(tiburonMeta.style.transform).toContain("-30px");
+    expect([tx, ty]).toEqual([18, -10]);
+    expect(tiburonMeta.dataset.labelOffsetX).toBe("18");
+    expect(tiburonMeta.dataset.labelOffsetY).toBe("-10");
+    expect(tiburonMeta.style.transform).toContain("18px");
+    expect(tiburonMeta.style.transform).toContain("-10px");
     expect(tiburonIcon.style.transform).toBe("");
 
     // Zero-offset location: meta offset is a no-op (stays centered below icon).
@@ -296,12 +296,12 @@ describe("BayAreaMap phone-portrait zoom-scaled label offsets", () => {
 
     const stinson = meta("stinson-beach")!;
     // Configured stays canonical; rendered equals configured at full scale.
-    expect(stinson.dataset.labelOffsetX).toBe("58");
-    expect(stinson.dataset.labelOffsetY).toBe("64");
-    expect(stinson.dataset.renderedOffsetX).toBe("58");
-    expect(stinson.dataset.renderedOffsetY).toBe("64");
-    expect(stinson.style.transform).toContain("58px");
-    expect(stinson.style.transform).toContain("64px");
+    expect(stinson.dataset.labelOffsetX).toBe("18");
+    expect(stinson.dataset.labelOffsetY).toBe("20");
+    expect(stinson.dataset.renderedOffsetX).toBe("18");
+    expect(stinson.dataset.renderedOffsetY).toBe("20");
+    expect(stinson.style.transform).toContain("18px");
+    expect(stinson.style.transform).toContain("20px");
   });
 
   it("renders proportionally reduced offsets at mid zoom (9.3)", async () => {
@@ -318,11 +318,11 @@ describe("BayAreaMap phone-portrait zoom-scaled label offsets", () => {
     );
     const stinson = meta("stinson-beach")!;
     // Configured is preserved; rendered is scaled (~60%).
-    expect(stinson.dataset.labelOffsetX).toBe("58");
-    expect(stinson.dataset.labelOffsetY).toBe("64");
+    expect(stinson.dataset.labelOffsetX).toBe("18");
+    expect(stinson.dataset.labelOffsetY).toBe("20");
     expect(Number(stinson.dataset.renderedOffsetX)).toBeCloseTo(rx, 5);
     expect(Number(stinson.dataset.renderedOffsetY)).toBeCloseTo(ry, 5);
-    expect(Number(stinson.dataset.renderedOffsetX)).toBeCloseTo(58 * 0.6, 5);
+    expect(Number(stinson.dataset.renderedOffsetX)).toBeCloseTo(18 * 0.6, 5);
   });
 
   it("renders strongly reduced offsets at low zoom (8.3)", async () => {
@@ -334,8 +334,8 @@ describe("BayAreaMap phone-portrait zoom-scaled label offsets", () => {
     });
 
     const millValley = meta("mill-valley")!;
-    expect(Number(millValley.dataset.renderedOffsetX)).toBeCloseTo(-14 * 0.2, 5);
-    expect(Number(millValley.dataset.renderedOffsetY)).toBeCloseTo(-48 * 0.2, 5);
+    expect(Number(millValley.dataset.renderedOffsetX)).toBeCloseTo(-6 * 0.2, 5);
+    expect(Number(millValley.dataset.renderedOffsetY)).toBeCloseTo(-16 * 0.2, 5);
   });
 
   it("keeps the icon anchored at [0,0] and untransformed regardless of zoom", async () => {
