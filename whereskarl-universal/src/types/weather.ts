@@ -9,6 +9,35 @@ import type {
   WeatherPrediction,
 } from '@/types/shared';
 
+export type AirQualityCategory =
+  | 'good'
+  | 'moderate'
+  | 'unhealthy-sensitive'
+  | 'unhealthy'
+  | 'very-unhealthy'
+  | 'hazardous';
+
+export type AirQualityColorToken =
+  | 'aqi.good'
+  | 'aqi.moderate'
+  | 'aqi.unhealthy-sensitive'
+  | 'aqi.unhealthy'
+  | 'aqi.very-unhealthy'
+  | 'aqi.hazardous'
+  | 'aqi.unavailable';
+
+export type AirQuality = {
+  aqi: number | null;
+  category: AirQualityCategory | null;
+  colorToken?: AirQualityColorToken;
+  label: string;
+  description?: string | null;
+  pollutant?: string | null;
+  observedAt?: string | null;
+  source?: string | null;
+  isAvailable: boolean;
+};
+
 export type LocationWeather = {
   id: string;
   name: string;
@@ -27,6 +56,7 @@ export type LocationWeather = {
   weatherCode: number;
   iconName: string;
   fogScore: number;
+  airQuality?: AirQuality;
   updatedAt: string;
   karlReason: string;
   primaryDrivers: string[];
@@ -55,6 +85,7 @@ export type CurrentResponse = {
   iconName: string;
   updatedAt: string;
   source: ApiSource;
+  airQuality?: AirQuality;
   dataStatus?: DataStatus;
 } & ConfidenceFields;
 
@@ -75,6 +106,7 @@ export type BestSunshineResponse = {
   iconName: string;
   updatedAt: string;
   source: ApiSource;
+  airQuality?: AirQuality;
   dataStatus?: DataStatus;
   recommendationMode: RecommendationMode;
   lookaheadMinutes: number;

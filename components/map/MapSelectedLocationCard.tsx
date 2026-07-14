@@ -18,7 +18,10 @@ import { getProductRegionNameForLocation } from "@/lib/map/regions";
 import { locationWeatherMetadataItems } from "@/lib/map/locationMetadata";
 import { useIsNighttime } from "@/lib/hooks/useIsNighttime";
 import { presentClearSkiesScore } from "@/lib/score/clearSkiesScore";
-import { presentAirQuality } from "@/lib/weather/airQuality";
+import {
+  formatAirQualityCompact,
+  presentAirQuality,
+} from "@/lib/weather/airQuality";
 import {
   isFavoriteLocation,
   toggleFavoriteLocation,
@@ -466,7 +469,7 @@ function PhonePortraitSelectedCard({
   const headerIntensity = resolveLocationFogIntensity(location);
   const karlRead = getKarlReadParagraph(location);
   const score = presentClearSkiesScore(location.sunshineScore);
-  const airQuality = presentAirQuality(location.aqi);
+  const airQuality = presentAirQuality(location.airQuality);
   const fogScore = resolveFogScore(location);
   // Metrics row shows the canonical Fog Intensity label only (Clear / Light Fog
   // / Foggy / Karl Territory) — never a nighttime or forecast phrasing. The
@@ -607,21 +610,22 @@ function PhonePortraitSelectedCard({
           supporting={fogLabel}
         />
         {/*
-          AQI uses the exact same three-level structure as every other metric
-          (title / value / supporting). While the canonical helper reports no
-          value, the value renders a neutral "—" placeholder (same typography as
-          the other metric values) and the supporting label reads "Coming Soon".
-          When backend AQI arrives the value becomes the number and the
-          supporting label becomes the canonical category — no structural or
-          layout change required here.
+          AQI uses the same title / value / supporting structure as other metrics.
+          Value and label come from the canonical backend airQuality object via
+          presentAirQuality — this column never derives U.S. AQI bands itself.
         */}
         <MetricColumn
           title="AQI"
-          value={airQuality.available ? airQuality.aqi : "—"}
+          value={airQuality.available ? airQuality.aqi : "Unavailable"}
           valueColor={
             airQuality.available ? (airQuality.color ?? undefined) : undefined
           }
-          supporting={airQuality.available ? airQuality.label : "Coming Soon"}
+          valueClassName={
+            airQuality.available
+              ? SECONDARY_VALUE_CLASS
+              : "text-[13px] font-normal leading-none text-white/55"
+          }
+          supporting={airQuality.available ? airQuality.label : undefined}
           supportingColor={
             airQuality.available ? (airQuality.color ?? undefined) : undefined
           }
@@ -630,7 +634,7 @@ function PhonePortraitSelectedCard({
               ? `${METRIC_SUPPORTING_ROW_CLASS} font-semibold`
               : METRIC_SUPPORTING_ROW_CLASS
           }
-          band={airQuality.available ? (airQuality.band ?? undefined) : undefined}
+          band={airQuality.available ? (airQuality.category ?? undefined) : undefined}
           containerTestId="air-quality-slot"
           testId="air-quality-value"
           supportingTestId="air-quality-supporting"
@@ -706,6 +710,8 @@ function DesktopSelectedCard({
   const isDegraded = isLocationDataDegraded(location.dataStatus);
   const metadataItems = locationWeatherMetadataItems(location);
   const score = presentClearSkiesScore(location.sunshineScore);
+  const airQuality = presentAirQuality(location.airQuality);
+  const airQualityCompact = formatAirQualityCompact(airQuality);
 
   const { isFavorite, handleToggleFavorite } = useFavoriteToggle(location.id);
 
@@ -767,6 +773,21 @@ function DesktopSelectedCard({
               {metadataItems.join(" • ")}
             </p>
           ) : null}
+
+          <p
+            className="mt-1 text-[0.65rem] font-medium"
+            data-testid="desktop-air-quality"
+            data-aqi-category={
+              airQuality.available ? airQuality.category ?? undefined : undefined
+            }
+            style={
+              airQuality.available && airQuality.color
+                ? { color: airQuality.color }
+                : { color: "rgba(255,255,255,0.48)" }
+            }
+          >
+            AQI {airQualityCompact}
+          </p>
         </div>
 
         <div className="flex min-w-[4.5rem] shrink-0 flex-col items-center justify-center self-center border-l border-white/10 pl-3">

@@ -7,6 +7,10 @@ import {
   getCloudSummary,
   getLocationConditionLabel,
 } from '@/lib/map/locationsDisplay';
+import {
+  formatAirQualityCompact,
+  presentAirQuality,
+} from '@/lib/weather/airQuality';
 import type { WeatherPrediction } from '@/types/shared';
 import type { LocationWeather } from '@/types/weather';
 
@@ -132,6 +136,8 @@ export type LocationMetric = {
 };
 
 export function getLocationMetrics(location: LocationWeather): LocationMetric[] {
+  const airQuality = presentAirQuality(location.airQuality);
+
   const metrics: LocationMetric[] = [
     {
       label: 'Temperature',
@@ -142,6 +148,10 @@ export function getLocationMetrics(location: LocationWeather): LocationMetric[] 
       value: `${Math.round(location.sunshineScore)}%`,
     },
     {
+      label: 'AQI',
+      value: formatAirQualityCompact(airQuality),
+    },
+    {
       label: 'Cloud cover',
       value: `${Math.round(location.cloudCover)}%`,
     },
@@ -150,6 +160,13 @@ export function getLocationMetrics(location: LocationWeather): LocationMetric[] 
       value: `${Math.round(location.fogScore)}%`,
     },
   ];
+
+  if (airQuality.available && airQuality.description) {
+    metrics.push({
+      label: 'Air quality',
+      value: airQuality.description,
+    });
+  }
 
   if (Number.isFinite(location.visibility)) {
     metrics.push({

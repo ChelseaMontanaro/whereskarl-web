@@ -11,6 +11,39 @@ import {
 
 export const backendRegionIdSchema = z.enum(BAY_AREA_BACKEND_REGION_IDS);
 
+export const airQualityCategorySchema = z.enum([
+  "good",
+  "moderate",
+  "unhealthy-sensitive",
+  "unhealthy",
+  "very-unhealthy",
+  "hazardous",
+]);
+
+export const airQualityColorTokenSchema = z.enum([
+  "aqi.good",
+  "aqi.moderate",
+  "aqi.unhealthy-sensitive",
+  "aqi.unhealthy",
+  "aqi.very-unhealthy",
+  "aqi.hazardous",
+  "aqi.unavailable",
+]);
+
+export const airQualitySchema = z.object({
+  aqi: z.number().nullable(),
+  category: airQualityCategorySchema.nullable(),
+  // Backend-owned semantic presentation token. Platforms map this to local
+  // design colors once; they must not invent alternate AQI band keys.
+  colorToken: airQualityColorTokenSchema.optional(),
+  label: z.string(),
+  description: z.string().nullable().optional(),
+  pollutant: z.string().nullable().optional(),
+  observedAt: apiDateTimeSchema.nullable().optional(),
+  source: z.string().nullable().optional(),
+  isAvailable: z.boolean(),
+});
+
 export const locationWeatherSchema = z
   .object({
     id: z.string(),
@@ -30,10 +63,9 @@ export const locationWeatherSchema = z
     weatherCode: z.number(),
     iconName: z.string(),
     fogScore: z.number(),
-    // Optional AQI slot: the backend does not populate this yet. Declared here
-    // (nullable + optional) so the Selected Location card can render a canonical
-    // Air Quality slot the moment real data lands, without inventing values.
-    aqi: z.number().nullable().optional(),
+    // Canonical AQI object from the backend pipeline. Optional for backward
+    // compatibility with older payloads; when absent, UI treats as unavailable.
+    airQuality: airQualitySchema.optional(),
     updatedAt: apiDateTimeSchema,
     karlReason: z.string(),
     primaryDrivers: z.array(z.string()),
@@ -49,6 +81,8 @@ export const locationsResponseSchema = z.object({
 
 export type LocationWeather = z.infer<typeof locationWeatherSchema>;
 export type LocationsResponse = z.infer<typeof locationsResponseSchema>;
+export type AirQuality = z.infer<typeof airQualitySchema>;
+export type AirQualityCategory = z.infer<typeof airQualityCategorySchema>;
 
 export const currentResponseSchema = z
   .object({
@@ -67,6 +101,7 @@ export const currentResponseSchema = z
     iconName: z.string(),
     updatedAt: apiDateTimeSchema,
     source: apiSourceSchema,
+    airQuality: airQualitySchema.optional(),
     dataStatus: dataStatusSchema.optional(),
   })
   .merge(confidenceFieldsSchema);
@@ -91,6 +126,7 @@ export const bestSunshineResponseSchema = z
     iconName: z.string(),
     updatedAt: apiDateTimeSchema,
     source: apiSourceSchema,
+    airQuality: airQualitySchema.optional(),
     dataStatus: dataStatusSchema.optional(),
     recommendationMode: recommendationModeSchema,
     lookaheadMinutes: z.number(),

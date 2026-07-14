@@ -1,4 +1,8 @@
 import { resolveFogScore } from '@/lib/map/locationsDisplay';
+import {
+  formatAirQualityCompact,
+  presentAirQuality,
+} from '@/lib/weather/airQuality';
 import type { LocationWeather } from '@/types/weather';
 
 export function formatFogPercent(location: LocationWeather): string | null {
@@ -35,11 +39,17 @@ export function formatTemperature(location: LocationWeather): string | null {
   return `${Math.round(location.temperature)}°F`;
 }
 
+export function formatAirQuality(location: LocationWeather): string | null {
+  const presentation = presentAirQuality(location.airQuality);
+  return `AQI ${formatAirQualityCompact(presentation)}`;
+}
+
 export function locationWeatherMetadataItems(
   location: LocationWeather,
 ): string[] {
   return [
     formatFogPercent(location),
+    formatAirQuality(location),
     formatWind(location),
     formatTemperature(location),
   ].filter((item): item is string => Boolean(item));

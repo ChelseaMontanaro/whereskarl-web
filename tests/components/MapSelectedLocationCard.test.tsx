@@ -437,7 +437,7 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
 
     expect(screen.getByTestId("clear-skies-quality")).toHaveTextContent("Excellent");
     expect(metrics).toHaveTextContent("Clear");
-    expect(metrics).toHaveTextContent("Coming Soon");
+    expect(metrics).toHaveTextContent("Unavailable");
     // Wind's supporting label is the gold arrow + "mph".
     expect(screen.getByTestId("wind-direction")).toHaveTextContent("mph");
   });
@@ -552,35 +552,70 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(windSupporting.querySelector("svg")).not.toBeNull();
   });
 
-  it("renders the AQI placeholder using the same title/value/supporting structure as every metric", () => {
+  it("renders the AQI unavailable state without inventing a number or Good label", () => {
     render(<MapSelectedLocationCard location={location} phonePortrait />);
 
     const slot = screen.getByTestId("air-quality-slot");
-    // Title.
     expect(slot).toHaveTextContent("AQI");
-    // Value is the neutral em-dash placeholder — never "Coming Soon", "N/A",
-    // "Pending", "0", or "X" — and lives in the shared value position.
     const value = screen.getByTestId("air-quality-value");
-    expect(value).toHaveTextContent("—");
-    expect(value).not.toHaveTextContent("Coming Soon");
-    // "Coming Soon" is the supporting label beneath the dash (same slot that
-    // will later show the canonical category).
-    const supporting = screen.getByTestId("air-quality-supporting");
-    expect(supporting).toHaveTextContent("Coming Soon");
+    expect(value).toHaveTextContent("Unavailable");
+    expect(value).not.toHaveTextContent("0");
+    expect(value).not.toHaveTextContent("Good");
+    expect(value).not.toHaveTextContent("NaN");
   });
 
-  it("keeps the same AQI structure when a value exists (— → number, Coming Soon → category)", () => {
+  it("renders canonical AQI value and category from the airQuality object", () => {
     render(
-      <MapSelectedLocationCard location={{ ...location, aqi: 42 }} phonePortrait />,
+      <MapSelectedLocationCard
+        location={{
+          ...location,
+          airQuality: {
+            aqi: 42,
+            category: "good",
+            colorToken: "aqi.good",
+            label: "Good",
+            description: "Air quality is considered satisfactory.",
+            pollutant: "PM2.5",
+            observedAt: "2026-07-13T20:00:00.000Z",
+            source: "Open-Meteo",
+            isAvailable: true,
+          },
+        }}
+        phonePortrait
+      />,
     );
 
     const value = screen.getByTestId("air-quality-value");
     const supporting = screen.getByTestId("air-quality-supporting");
-    // Value position now holds the number; supporting holds the category.
     expect(value).toHaveTextContent("42");
-    expect(value).not.toHaveTextContent("—");
+    expect(value).not.toHaveTextContent("Unavailable");
     expect(supporting).toHaveTextContent("Good");
-    expect(supporting).not.toHaveTextContent("Coming Soon");
+    expect(value.getAttribute("data-score-band")).toBe("good");
+  });
+
+  it("renders desktop compact AQI from the same canonical field", () => {
+    render(
+      <MapSelectedLocationCard
+        location={{
+          ...location,
+          airQuality: {
+            aqi: 110,
+            category: "unhealthy-sensitive",
+            colorToken: "aqi.unhealthy-sensitive",
+            label: "Unhealthy for Sensitive Groups",
+            description: null,
+            pollutant: null,
+            observedAt: "2026-07-13T20:00:00.000Z",
+            source: "Open-Meteo",
+            isAvailable: true,
+          },
+        }}
+      />,
+    );
+
+    const desktopAqi = screen.getByTestId("desktop-air-quality");
+    expect(desktopAqi).toHaveTextContent("AQI 110 · Unhealthy for Sensitive Groups");
+    expect(desktopAqi.getAttribute("data-aqi-category")).toBe("unhealthy-sensitive");
   });
 
   it("renders a neutral premium location-image placeholder with no per-location image pipeline", () => {
