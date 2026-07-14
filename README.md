@@ -130,6 +130,22 @@ Metadata, sitemap, robots, and canonical URLs use `https://whereskarl.live`. Map
   - `wheresKarl.web.favoriteLocationIDs`
   - `wheresKarl.web.lastKnownWeather`
 
+## Product roadmap (follow-ups)
+
+### Canonical Marine Layer Height & Fog Ceiling Intelligence
+
+Phone Selected Location shows **Marine Layer** and **Fog Ceiling** as **Coming Soon** placeholders. Do not replace them with live feet values until this backend intelligence work lands.
+
+Required before shipping live UI:
+
+1. **Audit reliable upstream sources and station coverage** for marine-layer depth / fog ceiling across catalog locations (NWS/METAR, mesonet, satellite/model candidates).
+2. **Define canonical backend contracts** with value, units, provenance, observed time, confidence, and unavailable handling — same surface-agnostic shape style as AQI / UV / Pollen.
+3. **Determine whether NWS/METAR `ceilingFt`** (already used internally for scoring, not currently exposed on location payloads) is sufficiently representative for each catalog location, or whether per-pin fusion/gaps must be modeled explicitly.
+4. **Develop a defensible marine-layer-height model** rather than deriving height from cloud cover, humidity, visibility, or fog percentage alone.
+5. **Validate against observed Bay Area conditions** before replacing Coming Soon placeholders on phone Selected Location (and later native/universal).
+
+Related deferred product metrics (not part of the above): **Karl Health Index (KHI)** remains Coming Soon with no algorithm or score in the client.
+
 ## Project structure
 
 ```text

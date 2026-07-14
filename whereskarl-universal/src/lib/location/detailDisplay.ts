@@ -19,6 +19,8 @@ import {
   formatUvIndexCompact,
   presentUvIndex,
 } from '@/lib/weather/uvIndex';
+import { presentHumidity } from '@/lib/weather/humidity';
+import { presentVisibility } from '@/lib/weather/visibility';
 import type { WeatherPrediction } from '@/types/shared';
 import type { LocationWeather } from '@/types/weather';
 
@@ -200,17 +202,19 @@ export function getLocationMetrics(location: LocationWeather): LocationMetric[] 
     });
   }
 
-  if (Number.isFinite(location.visibility)) {
+  const visibility = presentVisibility(location.visibility);
+  if (visibility.available) {
     metrics.push({
       label: 'Visibility',
-      value: `${location.visibility.toFixed(1)} mi`,
+      value: visibility.formatted,
     });
   }
 
-  if (Number.isFinite(location.humidity)) {
+  const humidity = presentHumidity(location.humidity);
+  if (humidity.available) {
     metrics.push({
       label: 'Humidity',
-      value: `${Math.round(location.humidity)}%`,
+      value: humidity.formatted,
     });
   }
 

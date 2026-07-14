@@ -1,11 +1,12 @@
 // @vitest-environment happy-dom
 
 /**
- * 390px layout checks for the single Environmental Metrics row
- * (AQI · UV · Pollen · EHI).
+ * 390px layout checks for the Environmental Metrics 3×2 grid
+ * (AQI · UV · Pollen / Humidity · Visibility · KHI) and the shared
+ * Marine Layer | Fog Ceiling card.
  */
 
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { MapSelectedLocationCard } from "@/components/map/MapSelectedLocationCard";
@@ -72,31 +73,39 @@ function renderAt390(location: LocationWeather) {
   return { root, ...view };
 }
 
-describe("phone environmental metrics row @ 390px", () => {
+describe("phone environmental metrics 3×2 @ 390px", () => {
   beforeEach(() => {
     Object.defineProperty(HTMLElement.prototype, "getBoundingClientRect", {
       configurable: true,
       value() {
         const el = this as HTMLElement;
         const testId = el.getAttribute("data-testid") || "";
-        // Approximate equal 4-up geometry for happy-dom (~87px tiles + gaps).
-        const tops = 180;
-        const slots: Record<string, { x: number; width: number }> = {
-          "air-quality-slot": { x: 12, width: 87 },
-          "uv-index-slot": { x: 107, width: 87 },
-          "pollen-slot": { x: 202, width: 87 },
-          "environmental-health-slot": { x: 297, width: 87 },
+        // Approximate equal 3-up tile geometry for happy-dom (~110px + gaps).
+        const row1 = 180;
+        const row2 = 290;
+        const slots: Record<string, { x: number; y: number; width: number }> = {
+          "air-quality-slot": { x: 12, y: row1, width: 110 },
+          "uv-index-slot": { x: 130, y: row1, width: 110 },
+          "pollen-slot": { x: 248, y: row1, width: 110 },
+          "humidity-slot": { x: 12, y: row2, width: 110 },
+          "visibility-slot": { x: 130, y: row2, width: 110 },
+          "karl-health-slot": { x: 248, y: row2, width: 110 },
+          "selected-location-marine-card": { x: 12, y: 380, width: 348 },
+          "marine-layer-slot": { x: 12, y: 380, width: 174 },
+          "fog-ceiling-slot": { x: 186, y: 380, width: 174 },
         };
         const slot = slots[testId];
         if (slot) {
           return {
             x: slot.x,
-            y: tops,
+            y: slot.y,
             width: slot.width,
-            height: 78,
-            top: tops,
+            height: testId.includes("marine") || testId.includes("fog-ceiling") || testId.includes("marine-card")
+              ? 84
+              : 102,
+            top: slot.y,
             left: slot.x,
-            bottom: tops + 78,
+            bottom: slot.y + (testId.includes("marine") || testId.includes("fog-ceiling") || testId.includes("marine-card") ? 84 : 102),
             right: slot.x + slot.width,
             toJSON() {},
           };
@@ -105,12 +114,12 @@ describe("phone environmental metrics row @ 390px", () => {
           return {
             x: 0,
             y: 0,
-            width: 87,
-            height: 41.6,
+            width: 110,
+            height: 38.4,
             top: 0,
             left: 0,
-            bottom: 41.6,
-            right: 87,
+            bottom: 38.4,
+            right: 110,
             toJSON() {},
           };
         }
@@ -133,7 +142,7 @@ describe("phone environmental metrics row @ 390px", () => {
     cleanup();
   });
 
-  it("places AQI, UV, Pollen, and EHI in one equal row", () => {
+  it("places the six Environmental Metrics tiles in a 3×2 grid", () => {
     const { root } = renderAt390({
       ...base,
       airQuality: {
@@ -183,40 +192,43 @@ describe("phone environmental metrics row @ 390px", () => {
     });
 
     const env = screen.getByTestId("selected-location-env-metrics");
-    const aqi = screen.getByTestId("air-quality-slot");
-    const uv = screen.getByTestId("uv-index-slot");
-    const pollen = screen.getByTestId("pollen-slot");
-    const health = screen.getByTestId("environmental-health-slot");
+    const grid = screen.getByTestId("selected-location-env-grid");
+    expect(env).toHaveTextContent("Environmental Metrics");
+    expect(grid.className).toContain("grid-cols-3");
+    expect(grid.className).not.toContain("grid-cols-4");
 
-    expect(env.querySelector(".grid-cols-4")).not.toBeNull();
-    expect(env.querySelector(".col-span-2")).toBeNull();
+    const aqi = measure(screen.getByTestId("air-quality-slot"));
+    const uv = measure(screen.getByTestId("uv-index-slot"));
+    const pollen = measure(screen.getByTestId("pollen-slot"));
+    const humidity = measure(screen.getByTestId("humidity-slot"));
+    const visibility = measure(screen.getByTestId("visibility-slot"));
+    const khi = measure(screen.getByTestId("karl-health-slot"));
 
-    const aqiBox = measure(aqi);
-    const uvBox = measure(uv);
-    const pollenBox = measure(pollen);
-    const healthBox = measure(health);
+    // Row 1 shared top; row 2 below
+    expect(Math.abs(aqi.top - uv.top)).toBeLessThan(1);
+    expect(Math.abs(aqi.top - pollen.top)).toBeLessThan(1);
+    expect(Math.abs(humidity.top - visibility.top)).toBeLessThan(1);
+    expect(Math.abs(humidity.top - khi.top)).toBeLessThan(1);
+    expect(humidity.top).toBeGreaterThan(aqi.bottom - 1);
 
-    // Single row — shared top edge
-    expect(Math.abs(aqiBox.top - uvBox.top)).toBeLessThan(1);
-    expect(Math.abs(aqiBox.top - pollenBox.top)).toBeLessThan(1);
-    expect(Math.abs(aqiBox.top - healthBox.top)).toBeLessThan(1);
+    // Left-to-right without overlap on each row
+    expect(aqi.right).toBeLessThanOrEqual(uv.left + 1);
+    expect(uv.right).toBeLessThanOrEqual(pollen.left + 1);
+    expect(humidity.right).toBeLessThanOrEqual(visibility.left + 1);
+    expect(visibility.right).toBeLessThanOrEqual(khi.left + 1);
 
-    // Left-to-right order without overlap
-    expect(aqiBox.right).toBeLessThanOrEqual(uvBox.left + 1);
-    expect(uvBox.right).toBeLessThanOrEqual(pollenBox.left + 1);
-    expect(pollenBox.right).toBeLessThanOrEqual(healthBox.left + 1);
+    // Equal-ish third widths
+    expect(Math.abs(aqi.width - pollen.width)).toBeLessThan(8);
+    expect(Math.abs(humidity.width - khi.width)).toBeLessThan(8);
+    expect(pollen.width).toBeLessThan(140);
 
-    // Equal-ish quarter widths (not a full-width pollen row)
-    expect(Math.abs(aqiBox.width - pollenBox.width)).toBeLessThan(8);
-    expect(pollenBox.width).toBeLessThan(120);
-
-    expect(screen.getByTestId("pollen-value")).toHaveTextContent("2");
-    expect(screen.getByTestId("environmental-health-value")).toHaveTextContent(
+    expect(screen.getByTestId("humidity-value")).toHaveTextContent("72%");
+    expect(screen.getByTestId("visibility-value")).toHaveTextContent("6 mi");
+    expect(screen.getByTestId("karl-health-value")).toHaveTextContent(
       "Coming Soon",
     );
-    expect(
-      screen.getByLabelText("Environmental Health Index"),
-    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Karl Health Index, Coming Soon")).toBeInTheDocument();
+    expect(screen.queryByText("Fog & Marine")).not.toBeInTheDocument();
 
     expect(screen.getByRole("region", { name: "Karl's Read" })).toBeInTheDocument();
     expect(
@@ -226,7 +238,7 @@ describe("phone environmental metrics row @ 390px", () => {
     root.remove();
   });
 
-  it("keeps long AQI labels inside their tile without inventing pollen/health values", () => {
+  it("keeps long AQI labels inside their tile without inventing humidity/KHI labels", () => {
     const { root } = renderAt390({
       ...base,
       airQuality: {
@@ -268,18 +280,57 @@ describe("phone environmental metrics row @ 390px", () => {
     expect(weather).not.toHaveTextContent("Unhealthy for Sensitive Groups");
 
     const aqiSupporting = screen.getByTestId("air-quality-supporting");
-    expect(aqiSupporting).toHaveTextContent("Unhealthy for Sensitive Groups");
-    expect(aqiSupporting.className).toContain("min-h-[2.6rem]");
-    expect(measure(aqiSupporting).height).toBeGreaterThanOrEqual(2.6 * 16 - 1);
+    expect(aqiSupporting).toHaveTextContent("Sensitive");
+    expect(aqiSupporting).not.toHaveTextContent(
+      "Unhealthy for Sensitive Groups",
+    );
+    expect(aqiSupporting.className).toContain("truncate");
+    expect(aqiSupporting.className).toContain("min-h-[0.95rem]");
+    expect(
+      screen.getByLabelText("AQI, 125, Unhealthy for Sensitive Groups"),
+    ).toBeInTheDocument();
 
-    const pollenValue = screen.getByTestId("pollen-value");
-    expect(pollenValue).toHaveTextContent("Unavailable");
-    expect(pollenValue).not.toHaveTextContent("0");
-    expect(pollenValue).not.toHaveTextContent("None");
+    // Equal tile heights — AQI must not grow taller than UV / Pollen neighbors.
+    const aqiH = measure(screen.getByTestId("air-quality-slot")).height;
+    const uvH = measure(screen.getByTestId("uv-index-slot")).height;
+    const pollenH = measure(screen.getByTestId("pollen-slot")).height;
+    expect(Math.abs(aqiH - uvH)).toBeLessThan(1);
+    expect(Math.abs(aqiH - pollenH)).toBeLessThan(1);
 
-    expect(screen.getByTestId("environmental-health-value")).toHaveTextContent(
+    expect(screen.getByTestId("pollen-value")).toHaveTextContent("Unavailable");
+    expect(screen.getByTestId("karl-health-value")).toHaveTextContent(
       "Coming Soon",
     );
+    expect(screen.getByTestId("selected-location-env-metrics")).not.toHaveTextContent(
+      "Comfortable",
+    );
+
+    root.remove();
+  });
+
+  it("renders Marine Layer and Fog Ceiling as one shared card with equal halves", () => {
+    const { root } = renderAt390(base);
+
+    fireEvent.click(screen.getByRole("button", { name: "Expand details" }));
+
+    const marineCard = screen.getByTestId("selected-location-marine-card");
+    const marine = measure(screen.getByTestId("marine-layer-slot"));
+    const ceiling = measure(screen.getByTestId("fog-ceiling-slot"));
+
+    expect(marineCard.className).toContain("rounded-xl");
+    expect(marineCard.className).toContain("min-h-[5.25rem]");
+    expect(Math.abs(marine.width - ceiling.width)).toBeLessThan(8);
+    expect(marine.right).toBeLessThanOrEqual(ceiling.left + 1);
+    expect(marine.height).toBeGreaterThanOrEqual(52);
+    expect(screen.getByTestId("marine-layer-value")).toHaveTextContent(
+      "Coming Soon",
+    );
+    expect(screen.getByTestId("fog-ceiling-value")).toHaveTextContent(
+      "Coming Soon",
+    );
+    expect(
+      screen.getByTestId("selected-location-env-metrics"),
+    ).not.toContainElement(marineCard);
 
     root.remove();
   });
