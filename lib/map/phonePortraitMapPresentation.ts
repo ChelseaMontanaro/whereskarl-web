@@ -177,7 +177,7 @@ export const PHONE_PORTRAIT_MARKER_LABEL_OFFSETS: Record<
 > = {
   "mill-valley": [-4, 4],
   tiburon: [0, 4],
-  sausalito: [6, 18],
+  sausalito: [6, 4],
   "stinson-beach": [6, 4],
   "san-francisco": [12, 4],
   berkeley: [-10, 2],
