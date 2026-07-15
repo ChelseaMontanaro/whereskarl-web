@@ -192,10 +192,16 @@ describe("phone environmental metrics 3×2 @ 390px", () => {
     });
 
     const env = screen.getByTestId("selected-location-env-metrics");
-    const grid = screen.getByTestId("selected-location-env-grid");
+    const gridHost = screen.getByTestId("selected-location-env-grid");
+    const grid = gridHost.querySelector(".grid-cols-3");
     expect(env).toHaveTextContent("Environmental Metrics");
-    expect(grid.className).toContain("grid-cols-3");
-    expect(grid.className).not.toContain("grid-cols-4");
+    expect(grid).not.toBeNull();
+    expect(grid!.className).toContain("grid-cols-3");
+    expect(grid!.className).not.toContain("grid-cols-4");
+    // Dividers overlay the grid; they must not be auto-placed grid children.
+    expect(grid!.querySelectorAll(":scope > [data-testid$='-slot']")).toHaveLength(
+      6,
+    );
 
     const aqi = measure(screen.getByTestId("air-quality-slot"));
     const uv = measure(screen.getByTestId("uv-index-slot"));

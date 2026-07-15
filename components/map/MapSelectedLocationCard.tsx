@@ -663,17 +663,20 @@ function EnvironmentalMetricsSection({
     >
       <SectionLabel>Environmental Metrics</SectionLabel>
       <div className={ENV_METRICS_PANEL_CLASS} data-testid="selected-location-env-panel">
-        <div
-          className="relative grid grid-cols-3 items-stretch"
-          data-testid="selected-location-env-grid"
-        >
-          {/* Inset dividers — inset-y/x-3 keeps lines off the rounded corners. */}
-          <div aria-hidden className={`${ENV_PANEL_V_DIVIDER_CLASS} left-1/3`} />
-          <div aria-hidden className={`${ENV_PANEL_V_DIVIDER_CLASS} left-2/3`} />
-          <div aria-hidden className={`${ENV_PANEL_H_DIVIDER_CLASS} top-1/2`} />
-          {metrics.map((metric) => (
-            <EnvironmentalMetricTile key={metric.title} {...metric} />
-          ))}
+        {/* Relative host so inset dividers overlay the grid without participating
+            in CSS grid auto-placement (absolute children of a grid can steal
+            tracks in some engines and collapse/clip the first metric row). */}
+        <div className="relative" data-testid="selected-location-env-grid">
+          <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
+            <div className={`${ENV_PANEL_V_DIVIDER_CLASS} left-1/3`} />
+            <div className={`${ENV_PANEL_V_DIVIDER_CLASS} left-2/3`} />
+            <div className={`${ENV_PANEL_H_DIVIDER_CLASS} top-1/2`} />
+          </div>
+          <div className="relative z-[1] grid grid-cols-3 items-stretch">
+            {metrics.map((metric) => (
+              <EnvironmentalMetricTile key={metric.title} {...metric} />
+            ))}
+          </div>
         </div>
       </div>
     </div>

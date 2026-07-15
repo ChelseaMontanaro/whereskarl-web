@@ -2,6 +2,7 @@
 
 import {
   useCallback,
+  useEffect,
   useId,
   useRef,
   useState,
@@ -84,6 +85,7 @@ export function BottomSheet({
   bodyClassName = "",
 }: BottomSheetProps) {
   const bodyId = useId();
+  const bodyRef = useRef<HTMLDivElement | null>(null);
   const isControlled = controlledExpanded !== undefined;
   const [uncontrolledExpanded, setUncontrolledExpanded] =
     useState(defaultExpanded);
@@ -98,6 +100,41 @@ export function BottomSheet({
     },
     [isControlled, onExpandedChange],
   );
+
+  // Expanding must always reveal the body from its top. Async metric/icon
+  // reflow (and CSS scroll anchoring) can otherwise leave scrollTop mid-panel —
+  // clipping Environmental Metrics' first row under the sticky Core Weather peek.
+  // Reset once on expand (and once after the max-height transition settles);
+  // do not pin scrollTop so users can still scroll the expanded body.
+  useEffect(() => {
+    if (!expanded) {
+      return;
+    }
+    const body = bodyRef.current;
+    if (!body) {
+      return;
+    }
+    body.scrollTop = 0;
+    const frame = window.requestAnimationFrame(() => {
+      body.scrollTop = 0;
+    });
+    const onTransitionEnd = (event: TransitionEvent) => {
+      if (event.target !== body) {
+        return;
+      }
+      if (
+        event.propertyName === "max-height" ||
+        event.propertyName === "opacity"
+      ) {
+        body.scrollTop = 0;
+      }
+    };
+    body.addEventListener("transitionend", onTransitionEnd);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      body.removeEventListener("transitionend", onTransitionEnd);
+    };
+  }, [expanded]);
 
   const toggleExpanded = useCallback(() => {
     setExpanded(!expanded);
@@ -201,11 +238,12 @@ export function BottomSheet({
 
       {hasBody ? (
         <div
+          ref={bodyRef}
           id={bodyId}
-          className={`overflow-hidden px-4 transition-[max-height,opacity] duration-300 ease-out motion-reduce:transition-none ${
+          className={`px-4 transition-[max-height,opacity] duration-300 ease-out motion-reduce:transition-none [overflow-anchor:none] ${
             expanded
-              ? "max-h-[62dvh] overflow-y-auto overscroll-contain pb-4 opacity-100"
-              : "max-h-0 pb-0 opacity-0"
+              ? "max-h-[62dvh] overflow-x-hidden overflow-y-auto overscroll-contain pb-4 opacity-100"
+              : "max-h-0 overflow-hidden pb-0 opacity-0"
           } ${bodyClassName}`.trim()}
         >
           {children}

@@ -45,6 +45,26 @@ describe("BottomSheet (canonical map bottom sheet)", () => {
     ).toHaveAttribute("aria-expanded", "false");
   });
 
+  it("resets the expanded body scroll position when opening", () => {
+    render(
+      <BottomSheet ariaLabel="Sheet" header={<span>Header</span>}>
+        <div style={{ height: 800 }}>Tall body</div>
+      </BottomSheet>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Expand details" }));
+    const body = document.getElementById(
+      screen.getByRole("button", { name: "Collapse details" }).getAttribute("aria-controls")!,
+    ) as HTMLDivElement;
+    expect(body.className).toContain("[overflow-anchor:none]");
+    body.scrollTop = 180;
+    expect(body.scrollTop).toBe(180);
+
+    fireEvent.click(screen.getByRole("button", { name: "Collapse details" }));
+    fireEvent.click(screen.getByRole("button", { name: "Expand details" }));
+    expect(body.scrollTop).toBe(0);
+  });
+
   it("respects the defaultExpanded prop", () => {
     render(
       <BottomSheet ariaLabel="Sheet" header={<span>Header</span>} defaultExpanded>
