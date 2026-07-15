@@ -109,6 +109,17 @@ export const pollenTypeMetricSchema = z.object({
   inSeason: z.boolean().nullable().optional(),
 });
 
+/**
+ * Canonical pollen object from the shared `/locations` environmental pipeline.
+ *
+ * Map Selected Location (phone environmental sheet) consumes only:
+ *   isAvailable · value · category · label · colorToken
+ *
+ * Additive backend fields (plants, forecast, summary, timezone, fetchedAt,
+ * expiresAt, unavailableReason, …) are intentionally omitted here so Zod
+ * strips them. The environmental sheet must not couple to forecast/plant UI.
+ * Older backends without those fields remain valid.
+ */
 export const pollenSchema = z.object({
   value: z.number().nullable(),
   category: pollenCategorySchema.nullable(),

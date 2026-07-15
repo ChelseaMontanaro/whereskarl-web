@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   locationWeatherSchema,
   pollenSchema,
+  type Pollen,
 } from "@/lib/schemas/weather";
 
 const baseLocation = {
@@ -152,5 +153,87 @@ describe("pollen schema", () => {
     });
 
     expect(withPollen.pollen?.value).toBe(1);
+  });
+
+  it("retains isAvailable, value, and category for every UPI band", () => {
+    const bands: Array<[number, Pollen["category"], string]> = [
+      [0, "none", "None"],
+      [1, "very-low", "Very Low"],
+      [2, "low", "Low"],
+      [3, "moderate", "Moderate"],
+      [4, "high", "High"],
+      [5, "very-high", "Very High"],
+    ];
+
+    for (const [value, category, label] of bands) {
+      const parsed = pollenSchema.parse({
+        value,
+        category,
+        colorToken: `pollen.${category}`,
+        label,
+        isAvailable: true,
+      });
+      expect(parsed.isAvailable).toBe(true);
+      expect(parsed.value).toBe(value);
+      expect(parsed.category).toBe(category);
+    }
+  });
+
+  it("rejects non-finite value while keeping unavailable payloads valid", () => {
+    expect(() =>
+      pollenSchema.parse({
+        value: Number.NaN,
+        category: "low",
+        label: "Low",
+        isAvailable: true,
+      }),
+    ).toThrow();
+
+    expect(
+      pollenSchema.parse({
+        value: null,
+        category: null,
+        colorToken: "pollen.unavailable",
+        label: "Unavailable",
+        isAvailable: false,
+      }).isAvailable,
+    ).toBe(false);
+  });
+
+  it("strips additive backend fields without losing the Map sheet contract", () => {
+    const parsed = pollenSchema.parse({
+      value: 2,
+      category: "low",
+      colorToken: "pollen.low",
+      label: "Low",
+      description: "Most people will not notice pollen; sensitive groups may.",
+      dominantType: "tree",
+      forecastDate: "2026-07-14",
+      source: "Google Pollen",
+      isAvailable: true,
+      // Additive backend pollen-intelligence fields — unused by Map sheet.
+      summary: "Low · tree",
+      timezone: "America/Los_Angeles",
+      plants: [{ code: "OAK", displayName: "Oak" }],
+      forecast: [{ value: 2, forecastDate: "2026-07-14", isAvailable: true }],
+      fetchedAt: "2026-07-14T18:00:00.000Z",
+      expiresAt: "2026-07-15T06:00:00.000Z",
+      unavailableReason: null,
+      isStale: false,
+    });
+
+    expect(parsed.isAvailable).toBe(true);
+    expect(parsed.value).toBe(2);
+    expect(parsed.category).toBe("low");
+    expect(parsed.label).toBe("Low");
+    expect(
+      Object.prototype.hasOwnProperty.call(parsed, "plants"),
+    ).toBe(false);
+    expect(
+      Object.prototype.hasOwnProperty.call(parsed, "forecast"),
+    ).toBe(false);
+    expect(
+      Object.prototype.hasOwnProperty.call(parsed, "summary"),
+    ).toBe(false);
   });
 });

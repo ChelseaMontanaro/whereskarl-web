@@ -886,6 +886,159 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(value).not.toHaveTextContent("Low");
   });
 
+  it("renders UPI 0 as an available Pollen value, not Unavailable", () => {
+    render(
+      <MapSelectedLocationCard
+        location={{
+          ...location,
+          pollen: {
+            value: 0,
+            category: "none",
+            colorToken: "pollen.none",
+            label: "None",
+            description: "No pollen expected for most people.",
+            dominantType: "tree",
+            forecastDate: "2026-07-14",
+            source: "Google Pollen",
+            isAvailable: true,
+          },
+        }}
+        phonePortrait
+      />,
+    );
+
+    expect(screen.getByTestId("pollen-value")).toHaveTextContent("0");
+    expect(screen.getByTestId("pollen-value")).not.toHaveTextContent("Unavailable");
+    expect(screen.getByTestId("pollen-supporting")).toHaveTextContent("None");
+  });
+
+  it("renders UPI indexes 1 through 5 with their category labels", () => {
+    const bands: Array<[number, string, string]> = [
+      [1, "very-low", "Very Low"],
+      [2, "low", "Low"],
+      [3, "moderate", "Moderate"],
+      [4, "high", "High"],
+      [5, "very-high", "Very High"],
+    ];
+
+    for (const [value, category, label] of bands) {
+      const { unmount } = render(
+        <MapSelectedLocationCard
+          location={{
+            ...location,
+            pollen: {
+              value,
+              category: category as
+                | "very-low"
+                | "low"
+                | "moderate"
+                | "high"
+                | "very-high",
+              colorToken: `pollen.${category}` as
+                | "pollen.very-low"
+                | "pollen.low"
+                | "pollen.moderate"
+                | "pollen.high"
+                | "pollen.very-high",
+              label,
+              forecastDate: "2026-07-14",
+              source: "Google Pollen",
+              isAvailable: true,
+            },
+          }}
+          phonePortrait
+        />,
+      );
+
+      expect(screen.getByTestId("pollen-value")).toHaveTextContent(String(value));
+      expect(screen.getByTestId("pollen-supporting")).toHaveTextContent(label);
+      unmount();
+    }
+  });
+
+  it("keeps Pollen Unavailable when missing, isAvailable false, or value null", () => {
+    const cases = [
+      undefined,
+      {
+        value: null,
+        category: null,
+        colorToken: "pollen.unavailable" as const,
+        label: "Unavailable",
+        isAvailable: false,
+      },
+      {
+        value: null,
+        category: "low" as const,
+        colorToken: "pollen.low" as const,
+        label: "Low",
+        isAvailable: true,
+      },
+    ];
+
+    for (const pollen of cases) {
+      const { unmount } = render(
+        <MapSelectedLocationCard
+          location={{
+            ...location,
+            ...(pollen ? { pollen } : {}),
+          }}
+          phonePortrait
+        />,
+      );
+
+      expect(screen.getByTestId("pollen-value")).toHaveTextContent("Unavailable");
+      unmount();
+    }
+  });
+
+  it("leaves AQI and UV rendering unchanged when Pollen is available", () => {
+    render(
+      <MapSelectedLocationCard
+        location={{
+          ...location,
+          airQuality: {
+            aqi: 42,
+            category: "good",
+            colorToken: "aqi.good",
+            label: "Good",
+            description: null,
+            pollutant: "PM2.5",
+            observedAt: "2026-07-14T14:00:00.000Z",
+            source: "Open-Meteo",
+            isAvailable: true,
+          },
+          uvIndex: {
+            value: 3,
+            category: "moderate",
+            colorToken: "uv.moderate",
+            label: "Moderate",
+            description: null,
+            observedAt: "2026-07-14T14:00:00.000Z",
+            source: "Open-Meteo",
+            isAvailable: true,
+          },
+          pollen: {
+            value: 4,
+            category: "high",
+            colorToken: "pollen.high",
+            label: "High",
+            forecastDate: "2026-07-14",
+            source: "Google Pollen",
+            isAvailable: true,
+          },
+        }}
+        phonePortrait
+      />,
+    );
+
+    expect(screen.getByTestId("air-quality-value")).toHaveTextContent("42");
+    expect(screen.getByTestId("air-quality-supporting")).toHaveTextContent("Good");
+    expect(screen.getByTestId("uv-index-value")).toHaveTextContent("3");
+    expect(screen.getByTestId("uv-index-supporting")).toHaveTextContent("Moderate");
+    expect(screen.getByTestId("pollen-value")).toHaveTextContent("4");
+    expect(screen.getByTestId("pollen-supporting")).toHaveTextContent("High");
+  });
+
   it("renders canonical UV from uvIndex colorToken without inventing a fake Low", () => {
     render(
       <MapSelectedLocationCard

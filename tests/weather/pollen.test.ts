@@ -121,6 +121,58 @@ describe("pollen presentation", () => {
     expect(formatPollenCompact(presentation)).toBe("0 · None");
   });
 
+  it("renders every UPI index 0 through 5 with finite-number checks (not truthiness)", () => {
+    const bands: Array<[number, NonNullable<Pollen["category"]>, string]> = [
+      [0, "none", "None"],
+      [1, "very-low", "Very Low"],
+      [2, "low", "Low"],
+      [3, "moderate", "Moderate"],
+      [4, "high", "High"],
+      [5, "very-high", "Very High"],
+    ];
+
+    for (const [value, category, label] of bands) {
+      const presentation = presentPollen(
+        pollenFixture({
+          value,
+          category,
+          label,
+          colorToken: `pollen.${category}`,
+        }),
+      );
+      expect(presentation.available).toBe(true);
+      expect(presentation.value).toBe(value);
+      expect(presentation.category).toBe(category);
+      expect(presentation.label).toBe(label);
+    }
+  });
+
+  it("treats null value, missing pollen, and NaN as unavailable", () => {
+    expect(
+      presentPollen(
+        pollenFixture({
+          value: null as unknown as number,
+          category: "low",
+          label: "Low",
+          isAvailable: true,
+        }),
+      ).available,
+    ).toBe(false);
+
+    expect(presentPollen(undefined).available).toBe(false);
+    expect(presentPollen(null).available).toBe(false);
+
+    expect(
+      presentPollen(
+        pollenFixture({
+          value: Number.NaN,
+          category: "low",
+          label: "Low",
+        }),
+      ).available,
+    ).toBe(false);
+  });
+
   it("formats compact copy", () => {
     expect(
       formatPollenCompact(

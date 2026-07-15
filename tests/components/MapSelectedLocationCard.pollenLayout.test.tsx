@@ -314,6 +314,57 @@ describe("phone environmental metrics 3×2 @ 390px", () => {
     root.remove();
   });
 
+  it("keeps equal tile heights when Pollen is available instead of Unavailable", () => {
+    const { root } = renderAt390({
+      ...base,
+      airQuality: {
+        aqi: 55,
+        category: "moderate",
+        colorToken: "aqi.moderate",
+        label: "Moderate",
+        description: null,
+        pollutant: "PM2.5",
+        observedAt: "2026-07-14T14:00:00.000Z",
+        source: "Open-Meteo",
+        isAvailable: true,
+      },
+      uvIndex: {
+        value: 4,
+        category: "moderate",
+        colorToken: "uv.moderate",
+        label: "Moderate",
+        description: null,
+        observedAt: "2026-07-14T14:00:00.000Z",
+        source: "Open-Meteo",
+        isAvailable: true,
+      },
+      pollen: {
+        value: 0,
+        category: "none",
+        colorToken: "pollen.none",
+        label: "None",
+        description: null,
+        dominantType: "grass",
+        forecastDate: "2026-07-14",
+        source: "Google Pollen",
+        isAvailable: true,
+      },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Expand details" }));
+
+    expect(screen.getByTestId("pollen-value")).toHaveTextContent("0");
+    expect(screen.getByTestId("pollen-supporting")).toHaveTextContent("None");
+
+    const aqiH = measure(screen.getByTestId("air-quality-slot")).height;
+    const uvH = measure(screen.getByTestId("uv-index-slot")).height;
+    const pollenH = measure(screen.getByTestId("pollen-slot")).height;
+    expect(Math.abs(aqiH - uvH)).toBeLessThan(1);
+    expect(Math.abs(aqiH - pollenH)).toBeLessThan(1);
+
+    root.remove();
+  });
+
   it("renders Marine Layer and Fog Ceiling as two equal cards with a small gap", () => {
     const { root } = renderAt390(base);
 
