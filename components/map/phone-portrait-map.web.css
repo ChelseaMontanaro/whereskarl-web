@@ -149,6 +149,21 @@
   text-shadow: 0 1px 2px rgb(0 0 0 / 0.55);
 }
 
+/*
+ * Collapsed Selected Location — Core Weather sits slightly low in the peek.
+ * Shift the whole metrics block (titles, values, labels, vertical dividers)
+ * up 5px by trimming its top margin. BottomSheet recovers the same 5px as
+ * collapsed header padding (pb-1 → pb-[9px]) so sheet height is unchanged.
+ * Expanded / desktop / tablet are untouched (this selector is collapsed-only;
+ * desktop/tablet never mount BottomSheet).
+ */
+body:has(
+    [aria-label^="Selected location:"] button[aria-expanded="false"]
+  )
+  [data-testid="selected-location-metrics"] {
+  margin-top: calc(0.75rem - 5px); /* mt-3 − 5px */
+}
+
 /* Collapsed Selected Location sheet — stack attrib above the fixed peek. */
 body:has(
     [aria-label^="Selected location:"] button[aria-expanded="false"]

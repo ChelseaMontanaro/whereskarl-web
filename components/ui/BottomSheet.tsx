@@ -234,7 +234,9 @@ export function BottomSheet({
         />
       </button>
 
-      <div className="shrink-0 px-4 pb-1">{header}</div>
+      <div className={`shrink-0 px-4 ${expanded ? "pb-1" : "pb-[9px]"}`}>
+        {header}
+      </div>
 
       {hasBody ? (
         <div
