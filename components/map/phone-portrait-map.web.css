@@ -127,3 +127,78 @@
 .karl-map-canvas.karl-map-phone-portrait-host .maplibregl-ctrl-top-right {
   top: 5.75rem;
 }
+
+/*
+ * Phone-portrait map attribution (custom copy + MapLibre control).
+ * Sit in the extreme bottom-right of the *visible* map area — always above the
+ * bottom nav, and when a Selected Location sheet is open, always above that
+ * sheet whether collapsed or expanded. Never hide attribution (license).
+ *
+ * Peek height (~12.5rem) matches the measured collapsed Selected Location
+ * sheet at 390×844. Expanded body uses the sheet's max-h-[62dvh] so the credit
+ * clears the raised sheet top.
+ */
+.karl-map-attrib--phone {
+  right: 5px;
+  bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px) + 5px);
+  margin: 0;
+  padding: 0;
+  font-size: 9.5px;
+  line-height: 1.2;
+  color: rgb(255 255 255 / 0.65);
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.55);
+}
+
+/* Collapsed Selected Location sheet — stack attrib above the fixed peek. */
+body:has(
+    [aria-label^="Selected location:"] button[aria-expanded="false"]
+  )
+  .karl-map-attrib--phone {
+  bottom: calc(
+    4.75rem + env(safe-area-inset-bottom, 0px) + 12.5rem + 5px
+  );
+}
+
+/* Expanded Selected Location sheet — peek + max expanded body (62dvh). */
+body:has(
+    [aria-label^="Selected location:"] button[aria-expanded="true"]
+  )
+  .karl-map-attrib--phone {
+  bottom: calc(
+    4.75rem + env(safe-area-inset-bottom, 0px) + 12.5rem + 62dvh + 5px
+  );
+}
+
+/* MapLibre compact control — same phone-portrait corner treatment. */
+.karl-map-canvas.karl-map-phone-portrait-host .maplibregl-ctrl-bottom-right {
+  right: 0;
+  bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+}
+
+.karl-map-canvas.karl-map-phone-portrait-host
+  .maplibregl-ctrl-bottom-right
+  .maplibregl-ctrl-attrib {
+  margin: 5px !important;
+  font-size: 9.5px;
+  line-height: 1.2;
+  color: rgb(255 255 255 / 0.65) !important;
+  background: rgb(3 11 20 / 0.45) !important;
+}
+
+body:has(
+    [aria-label^="Selected location:"] button[aria-expanded="false"]
+  )
+  .karl-map-canvas.karl-map-phone-portrait-host
+  .maplibregl-ctrl-bottom-right {
+  bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px) + 12.5rem);
+}
+
+body:has(
+    [aria-label^="Selected location:"] button[aria-expanded="true"]
+  )
+  .karl-map-canvas.karl-map-phone-portrait-host
+  .maplibregl-ctrl-bottom-right {
+  bottom: calc(
+    4.75rem + env(safe-area-inset-bottom, 0px) + 12.5rem + 62dvh
+  );
+}

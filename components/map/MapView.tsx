@@ -549,7 +549,18 @@ function MobileMapView({ state }: { state: MapViewModel }) {
         )}
       </div>
 
-      <p className="pointer-events-none absolute bottom-[calc(5rem+env(safe-area-inset-bottom))] right-3 z-20 text-[0.6rem] text-white/25 sm:right-4">
+      <p
+        className={
+          isPhonePortrait
+            ? // Phone portrait: sit in the extreme bottom-right of the visible
+              // map (above the Selected Location sheet / bottom nav). Collapsed
+              // vs expanded offsets and type treatment live in
+              // phone-portrait-map.web.css so the sheet never overlaps license
+              // attribution. Tablet/desktop keep their existing classes.
+              "karl-map-attrib karl-map-attrib--phone pointer-events-none absolute z-20"
+            : "pointer-events-none absolute bottom-[calc(5rem+env(safe-area-inset-bottom))] right-3 z-20 text-[0.6rem] text-white/25 sm:right-4"
+        }
+      >
         Map data © OpenStreetMap contributors · CARTO
       </p>
     </div>
