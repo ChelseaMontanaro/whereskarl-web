@@ -144,7 +144,7 @@ Required before shipping live UI:
 4. **Develop a defensible marine-layer-height model** rather than deriving height from cloud cover, humidity, visibility, or fog percentage alone.
 5. **Validate against observed Bay Area conditions** before replacing Coming Soon placeholders on phone Selected Location (and later native/universal).
 
-Related deferred product metrics (not part of the above): **Karl Health Index (KHI)** remains Coming Soon with no algorithm or score in the client.
+Canonical **Climate** (Marine / Fog Belt / Transition / Sun Belt / Inland) is backend-owned location metadata shown on the phone Map environmental sheet in place of the former KHI placeholder. It is not derived from the live forecast.
 
 ## Project structure
 

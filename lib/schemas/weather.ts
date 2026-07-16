@@ -8,8 +8,12 @@ import {
   dataStatusSchema,
   weatherPredictionSchema,
 } from "@/lib/schemas/shared";
+import { CLIMATE_VALUES } from "@/lib/weather/climate";
 
 export const backendRegionIdSchema = z.enum(BAY_AREA_BACKEND_REGION_IDS);
+
+/** Canonical Climate classifications from backend location metadata. */
+export const climateSchema = z.enum(CLIMATE_VALUES);
 
 export const airQualityCategorySchema = z.enum([
   "good",
@@ -173,6 +177,9 @@ export const locationWeatherSchema = z
     // Phone Selected Location is the first UI consumer; desktop defers pollen
     // (same product decision as UV). Payload remains surface-agnostic.
     pollen: pollenSchema.optional(),
+    // Canonical Climate metadata (Marine / Fog Belt / …). Optional for older
+    // payloads; invalid strings are stripped so the tile can render Unavailable.
+    climate: climateSchema.optional().catch(undefined),
     updatedAt: apiDateTimeSchema,
     karlReason: z.string(),
     primaryDrivers: z.array(z.string()),
@@ -188,6 +195,7 @@ export const locationsResponseSchema = z.object({
 
 export type LocationWeather = z.infer<typeof locationWeatherSchema>;
 export type LocationsResponse = z.infer<typeof locationsResponseSchema>;
+export type Climate = z.infer<typeof climateSchema>;
 export type AirQuality = z.infer<typeof airQualitySchema>;
 export type AirQualityCategory = z.infer<typeof airQualityCategorySchema>;
 export type UltravioletIndex = z.infer<typeof ultravioletIndexSchema>;

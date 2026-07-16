@@ -235,7 +235,7 @@ function MetricsLayoutVerifyContent() {
       </h1>
       <p className="mx-auto mb-8 max-w-md text-center text-sm text-white/55">
         Phone portrait · Weather strip + Environmental Metrics 3×2
-        (AQI · UV · Pollen / Humidity · Visibility · KHI) · shared Marine card
+        (AQI · UV · Pollen / Humidity · Visibility · Climate) · shared Marine card
       </p>
 
       <div className="mx-auto flex max-w-[420px] flex-col gap-10">

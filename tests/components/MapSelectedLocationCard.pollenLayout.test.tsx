@@ -2,7 +2,7 @@
 
 /**
  * 390px layout checks for the Environmental Metrics 3×2 grid
- * (AQI · UV · Pollen / Humidity · Visibility · KHI) and the
+ * (AQI · UV · Pollen / Humidity · Visibility · Climate) and the
  * Marine Layer + Fog Ceiling cards.
  */
 
@@ -29,6 +29,7 @@ const base: LocationWeather = {
   weatherCode: 2,
   iconName: "cloud.sun.fill",
   fogScore: 38,
+  climate: "Transition",
   karlReason:
     "Light marine layer lingering along the shoreline — expect gradual clearing by early afternoon.",
   primaryDrivers: [],
@@ -89,7 +90,7 @@ describe("phone environmental metrics 3×2 @ 390px", () => {
           "pollen-slot": { x: 248, y: row1, width: 110 },
           "humidity-slot": { x: 12, y: row2, width: 110 },
           "visibility-slot": { x: 130, y: row2, width: 110 },
-          "karl-health-slot": { x: 248, y: row2, width: 110 },
+          "climate-slot": { x: 248, y: row2, width: 110 },
           "selected-location-marine-card": { x: 12, y: 380, width: 348 },
           "marine-layer-slot": { x: 12, y: 380, width: 170 },
           "fog-ceiling-slot": { x: 190, y: 380, width: 170 },
@@ -208,32 +209,33 @@ describe("phone environmental metrics 3×2 @ 390px", () => {
     const pollen = measure(screen.getByTestId("pollen-slot"));
     const humidity = measure(screen.getByTestId("humidity-slot"));
     const visibility = measure(screen.getByTestId("visibility-slot"));
-    const khi = measure(screen.getByTestId("karl-health-slot"));
+    const climate = measure(screen.getByTestId("climate-slot"));
 
     // Row 1 shared top; row 2 below
     expect(Math.abs(aqi.top - uv.top)).toBeLessThan(1);
     expect(Math.abs(aqi.top - pollen.top)).toBeLessThan(1);
     expect(Math.abs(humidity.top - visibility.top)).toBeLessThan(1);
-    expect(Math.abs(humidity.top - khi.top)).toBeLessThan(1);
+    expect(Math.abs(humidity.top - climate.top)).toBeLessThan(1);
     expect(humidity.top).toBeGreaterThan(aqi.bottom - 1);
 
     // Left-to-right without overlap on each row
     expect(aqi.right).toBeLessThanOrEqual(uv.left + 1);
     expect(uv.right).toBeLessThanOrEqual(pollen.left + 1);
     expect(humidity.right).toBeLessThanOrEqual(visibility.left + 1);
-    expect(visibility.right).toBeLessThanOrEqual(khi.left + 1);
+    expect(visibility.right).toBeLessThanOrEqual(climate.left + 1);
 
-    // Equal-ish third widths
+    // Equal-ish third widths and shared tile heights
     expect(Math.abs(aqi.width - pollen.width)).toBeLessThan(8);
-    expect(Math.abs(humidity.width - khi.width)).toBeLessThan(8);
+    expect(Math.abs(humidity.width - climate.width)).toBeLessThan(8);
+    expect(Math.abs(aqi.height - climate.height)).toBeLessThan(1);
     expect(pollen.width).toBeLessThan(140);
 
     expect(screen.getByTestId("humidity-value")).toHaveTextContent("72%");
     expect(screen.getByTestId("visibility-value")).toHaveTextContent("6 mi");
-    expect(screen.getByTestId("karl-health-value")).toHaveTextContent(
-      "Coming Soon",
-    );
-    expect(screen.getByLabelText("Karl Health Index, Coming Soon")).toBeInTheDocument();
+    expect(screen.getByTestId("climate-value")).toHaveTextContent("Transition");
+    expect(screen.getByLabelText("Climate, Transition")).toBeInTheDocument();
+    expect(screen.queryByText("KHI")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("karl-health-slot")).not.toBeInTheDocument();
     expect(screen.queryByText("Fog & Marine")).not.toBeInTheDocument();
 
     expect(screen.getByRole("region", { name: "Karl's Read" })).toBeInTheDocument();
@@ -244,7 +246,7 @@ describe("phone environmental metrics 3×2 @ 390px", () => {
     root.remove();
   });
 
-  it("keeps long AQI labels inside their tile without inventing humidity/KHI labels", () => {
+  it("keeps long AQI labels inside their tile without inventing humidity/Climate labels", () => {
     const { root } = renderAt390({
       ...base,
       airQuality: {
@@ -304,9 +306,7 @@ describe("phone environmental metrics 3×2 @ 390px", () => {
     expect(Math.abs(aqiH - pollenH)).toBeLessThan(1);
 
     expect(screen.getByTestId("pollen-value")).toHaveTextContent("Unavailable");
-    expect(screen.getByTestId("karl-health-value")).toHaveTextContent(
-      "Coming Soon",
-    );
+    expect(screen.getByTestId("climate-value")).toHaveTextContent("Transition");
     expect(screen.getByTestId("humidity-supporting")).toHaveTextContent(
       "Comfortable",
     );

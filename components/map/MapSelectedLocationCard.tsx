@@ -22,6 +22,10 @@ import {
   formatAirQualityCompact,
   presentAirQuality,
 } from "@/lib/weather/airQuality";
+import {
+  CLIMATE_ICON_COLOR,
+  presentClimate,
+} from "@/lib/weather/climate";
 import { presentHumidity } from "@/lib/weather/humidity";
 import { presentPollen } from "@/lib/weather/pollen";
 import { presentUvIndex } from "@/lib/weather/uvIndex";
@@ -32,9 +36,10 @@ import {
 } from "@/lib/weather/environmentalDisplay";
 import {
   EnvAqiIcon,
+  EnvClimateIcon,
+  EnvClimateTransitionIcon,
   EnvFogCeilingIcon,
   EnvHumidityIcon,
-  EnvKhiIcon,
   EnvMarineLayerIcon,
   EnvPollenIcon,
   EnvUvIcon,
@@ -280,7 +285,7 @@ function SectionLabel({
  *   Location identity + Core Weather strip (Clear Sky Score · Fog · Temp · Wind)
  *
  * Expanded intelligence body (revealed on tap/drag):
- *   1. Environmental Metrics — 3×2 grid (AQI · UV · Pollen / Humidity · Visibility · KHI)
+ *   1. Environmental Metrics — 3×2 grid (AQI · UV · Pollen / Humidity · Visibility · Climate)
  *   2. Marine Layer + Fog Ceiling cards — Coming Soon
  *   3. Karl's Read
  *   4. Hourly Outlook
@@ -356,11 +361,18 @@ const ENV_METRIC_UNAVAILABLE_VALUE_CLASS =
   "min-h-[1.625rem] text-[14px] font-normal leading-none text-white/55";
 
 /**
- * Coming Soon labels (KHI, Marine Layer, Fog Ceiling) — quieter than live
- * values, but reserves the future primary-value row height.
+ * Coming Soon labels (Marine Layer, Fog Ceiling) — quieter than live values,
+ * but reserves the future primary-value row height.
  */
 const ENV_COMING_SOON_VALUE_CLASS =
   "flex min-h-[1.625rem] items-center text-[12px] font-normal leading-none text-white/40";
+
+/**
+ * Climate classification labels (e.g. "Fog Belt") — word-scale, not numeric.
+ * Sized to fit multi-word values in the shared tile without shrinking the grid.
+ */
+const ENV_CLIMATE_VALUE_CLASS =
+  "min-h-[1.625rem] px-0.5 text-center text-[15px] font-medium leading-tight text-white";
 
 /**
  * Environmental Metrics cell (inside one shared glass panel).
@@ -389,7 +401,7 @@ const MARINE_CARD_CLASS =
 
 /**
  * Shared Environmental Metrics icon slot — fixed box so AQI / UV / Pollen /
- * Humidity / Visibility / KHI share one optical center without resizing glyphs.
+ * Humidity / Visibility / Climate share one optical center without resizing glyphs.
  */
 const ENV_ICON_SLOT_CLASS =
   "inline-flex h-[37px] w-[37px] shrink-0 items-center justify-center";
@@ -397,6 +409,7 @@ const ENV_ICON_SLOT_CLASS =
 /**
  * Rich mockup-inspired icon identity colors (independent of live value colorTokens).
  * AQI / UV / Pollen values still use canonical `colorToken` colors.
+ * Climate accents live in `CLIMATE_ICON_COLOR`.
  */
 const ENV_PRESENTATION_ICON_COLOR = {
   aqi: "#3DB4FF",
@@ -404,7 +417,7 @@ const ENV_PRESENTATION_ICON_COLOR = {
   pollen: "#34D399",
   humidity: "#38BDF8",
   visibility: "#C4B5FD",
-  khi: "#FB7185",
+  climateUnavailable: "#94A8B8",
 } as const;
 
 /** Default ~32px icon slot. */
@@ -413,8 +426,8 @@ const ENV_ICON_CLASS = "h-8 w-8";
 const ENV_AQI_ICON_CLASS = "h-[37px] w-[37px]";
 /** Pollen trees matched to AQI / UV visual weight. */
 const ENV_POLLEN_ICON_CLASS = "h-[37px] w-[37px]";
-/** KHI heart — slight bump over the default tile icon. */
-const ENV_KHI_ICON_CLASS = "h-[34px] w-[34px]";
+/** Climate glyphs — slight bump over the default tile icon. */
+const ENV_CLIMATE_ICON_CLASS = "h-[34px] w-[34px]";
 
 /** Marine Layer / Fog Ceiling — ~5% smaller than the default 32px tile icon. */
 const ENV_MARINE_ICON_CLASS = "h-[30px] w-[30px] text-white/95";
@@ -551,10 +564,17 @@ type EnvironmentalMetricProps = {
   supportingColor?: string;
   band?: string;
   unavailable?: boolean;
-  /** Quieter Coming Soon presentation (KHI); not used for live Unavailable. */
+  /** Quieter Coming Soon presentation (Marine/Fog Ceiling); not live Unavailable. */
   comingSoon?: boolean;
+  /** Word-scale Climate classification styling (not numeric compact sizing). */
+  climateValue?: boolean;
   /**
-   * Second-row tiles (Humidity / Visibility / KHI) use a slightly looser
+   * When true, the icon slot is not aria-hidden so Climate glyphs can expose
+   * their own accessible names.
+   */
+  exposeIconA11y?: boolean;
+  /**
+   * Second-row tiles (Humidity / Visibility / Climate) use a slightly looser
    * icon→value gap per approved mockup; top row stays tighter.
    */
   relaxedIconValueGap?: boolean;
@@ -582,6 +602,8 @@ function EnvironmentalMetricTile({
   band,
   unavailable = false,
   comingSoon = false,
+  climateValue = false,
+  exposeIconA11y = false,
   relaxedIconValueGap = false,
   containerTestId,
   testId,
@@ -595,9 +617,9 @@ function EnvironmentalMetricTile({
       title={titleAttr}
     >
       <p className={ENV_METRIC_TITLE_CLASS}>{title}</p>
-      {/* Icon + value: live metrics keep top rhythm; Coming Soon (KHI) optically
-          centers icon + label in the remaining space while the supporting row
-          still anchors the shared bottom baseline. */}
+      {/* Icon + value: live metrics keep top rhythm; Coming Soon placeholders
+          optically center icon + label while the supporting row still anchors
+          the shared bottom baseline. */}
       <div
         className={
           comingSoon
@@ -607,7 +629,10 @@ function EnvironmentalMetricTile({
               }`
         }
       >
-        <span className={ENV_ICON_SLOT_CLASS} aria-hidden>
+        <span
+          className={ENV_ICON_SLOT_CLASS}
+          aria-hidden={exposeIconA11y ? undefined : true}
+        >
           {icon}
         </span>
         <p
@@ -616,7 +641,9 @@ function EnvironmentalMetricTile({
               ? ENV_COMING_SOON_VALUE_CLASS
               : unavailable
                 ? ENV_METRIC_UNAVAILABLE_VALUE_CLASS
-                : envMetricLiveValueClassName(valueText)
+                : climateValue
+                  ? ENV_CLIMATE_VALUE_CLASS
+                  : envMetricLiveValueClassName(valueText)
           }
           style={!unavailable && valueColor ? { color: valueColor } : undefined}
           data-score-band={band}
@@ -641,7 +668,7 @@ function EnvironmentalMetricTile({
 /**
  * Environmental Metrics — cohesive 3×2 block in the expanded body:
  *   [AQI] [UV] [Pollen]
- *   [Humidity] [Visibility] [KHI]
+ *   [Humidity] [Visibility] [Climate]
  *
  * One soft glass panel with hairline dividers (Core Weather affinity) instead
  * of six separate widget cards. Presenters and hierarchy are unchanged.
@@ -797,6 +824,7 @@ function PhonePortraitSelectedCard({
   const pollen = presentPollen(location.pollen);
   const humidity = presentHumidity(location.humidity);
   const visibility = presentVisibility(location.visibility);
+  const climate = presentClimate(location.climate);
   const fogScore = resolveFogScore(location);
   // Metrics row shows the canonical Fog Intensity label only (Clear / Light Fog
   // / Foggy / Karl Territory) — never a nighttime or forecast phrasing. The
@@ -1095,21 +1123,41 @@ function PhonePortraitSelectedCard({
             supportingTestId: "visibility-supporting",
           },
           {
-            title: "KHI",
-            ariaLabel: "Karl Health Index, Coming Soon",
+            title: "Climate",
+            ariaLabel: climate.available
+              ? `Climate, ${climate.formatted}`
+              : "Climate, Unavailable",
             icon: (
-              <span style={{ color: ENV_PRESENTATION_ICON_COLOR.khi }}>
-                <EnvKhiIcon className={ENV_KHI_ICON_CLASS} />
+              <span
+                style={{
+                  color: climate.available
+                    ? CLIMATE_ICON_COLOR[climate.value!]
+                    : ENV_PRESENTATION_ICON_COLOR.climateUnavailable,
+                }}
+              >
+                {climate.available && climate.value ? (
+                  <EnvClimateIcon
+                    climate={climate.value}
+                    className={ENV_CLIMATE_ICON_CLASS}
+                    title={climate.iconLabel}
+                  />
+                ) : (
+                  <EnvClimateTransitionIcon
+                    className={ENV_CLIMATE_ICON_CLASS}
+                    title={climate.iconLabel}
+                  />
+                )}
               </span>
             ),
-            value: "Coming Soon",
-            valueText: "Coming Soon",
-            unavailable: true,
-            comingSoon: true,
+            value: climate.formatted,
+            valueText: climate.formatted,
+            unavailable: !climate.available,
+            climateValue: climate.available,
+            exposeIconA11y: true,
             relaxedIconValueGap: true,
-            containerTestId: "karl-health-slot",
-            testId: "karl-health-value",
-            supportingTestId: "karl-health-supporting",
+            containerTestId: "climate-slot",
+            testId: "climate-value",
+            supportingTestId: "climate-supporting",
           },
         ]}
       />
