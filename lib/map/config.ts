@@ -186,9 +186,11 @@ export const BAY_AREA_PRODUCT_REGIONS: BayAreaProductRegion[] = [
     id: "peninsula",
     name: "Peninsula",
     chipLabel: "Peninsula",
+    // Phase 16.2A / 16.2D-1 catalog: Daly City → Pacifica → Half Moon Bay
+    // (coast) and San Mateo → Redwood City → Palo Alto (bay corridor).
     bounds: [
-      [-122.52, 37.38],
-      [-122.12, 37.82],
+      [-122.55, 37.28],
+      [-121.95, 37.74],
     ],
     viewport: {
       padding: 36,
@@ -199,7 +201,7 @@ export const BAY_AREA_PRODUCT_REGIONS: BayAreaProductRegion[] = [
         bottom: 128,
         left: 360,
       },
-      maxZoom: 10.4,
+      maxZoom: 9.8,
     },
   },
 ];

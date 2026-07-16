@@ -31,6 +31,8 @@ const LOCATIONS = {
   dalyCity: { lat: 37.6879, lng: -122.4702 },
   pacifica: { lat: 37.6138, lng: -122.4869 },
   halfMoonBay: { lat: 37.4636, lng: -122.4286 },
+  sanMateo: { lat: 37.563, lng: -122.3255 },
+  redwoodCity: { lat: 37.4858, lng: -122.228 },
 } as const;
 
 function contains(bounds: MapBounds, point: { lat: number; lng: number }) {
@@ -100,17 +102,25 @@ describe("phone-portrait region camera geography", () => {
     expect(contains(bounds, LOCATIONS.berkeley)).toBe(false);
   });
 
-  it("frames the Peninsula on its monitored coastal locations", () => {
+  it("frames the Peninsula on all six monitored catalog locations", () => {
     const bounds = PHONE_PORTRAIT_PENINSULA_REGION_BOUNDS;
+    const [[west, south], [east, north]] = bounds;
 
-    // The monitored Peninsula locations must all be inside the frame so they
-    // present correctly instead of clipping into the corner behind the fog rail.
+    // Full Phase 16.2A / 16.2D-1 Peninsula catalog must fit without zooming out.
     expect(contains(bounds, LOCATIONS.dalyCity)).toBe(true);
     expect(contains(bounds, LOCATIONS.pacifica)).toBe(true);
     expect(contains(bounds, LOCATIONS.halfMoonBay)).toBe(true);
+    expect(contains(bounds, LOCATIONS.sanMateo)).toBe(true);
+    expect(contains(bounds, LOCATIONS.redwoodCity)).toBe(true);
+    expect(contains(bounds, LOCATIONS.paloAlto)).toBe(true);
 
-    // Stays on the coastal belt — does not sprawl east into the Bay / East Bay.
-    expect(contains(bounds, LOCATIONS.fosterCity)).toBe(false);
+    // Covers coast → bay corridor; does not drift into SF core or East Bay hills.
+    expect(north).toBeLessThanOrEqual(37.78);
+    expect(south).toBeLessThanOrEqual(37.3);
+    expect(west).toBeLessThanOrEqual(-122.52);
+    expect(east).toBeGreaterThanOrEqual(-122.0);
+    expect(contains(bounds, LOCATIONS.sanFrancisco)).toBe(false);
     expect(contains(bounds, LOCATIONS.oakland)).toBe(false);
+    expect(contains(bounds, LOCATIONS.sanJose)).toBe(false);
   });
 });

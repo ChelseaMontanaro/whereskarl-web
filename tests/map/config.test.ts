@@ -217,4 +217,27 @@ describe("Bay Area product regions", () => {
       findBayAreaProductRegion("east-bay")?.viewport?.desktopPadding,
     );
   });
+
+  it("frames Peninsula so all six monitored catalog locations fit immediately", () => {
+    const peninsula = findBayAreaProductRegion("peninsula");
+    expect(peninsula).toBeDefined();
+
+    const [[west, south], [east, north]] = peninsula!.bounds;
+
+    expect(pointInBounds(37.6879, -122.4702, peninsula!.bounds)).toBe(true); // Daly City
+    expect(pointInBounds(37.6138, -122.4869, peninsula!.bounds)).toBe(true); // Pacifica
+    expect(pointInBounds(37.4636, -122.4286, peninsula!.bounds)).toBe(true); // Half Moon Bay
+    expect(pointInBounds(37.563, -122.3255, peninsula!.bounds)).toBe(true); // San Mateo
+    expect(pointInBounds(37.4858, -122.228, peninsula!.bounds)).toBe(true); // Redwood City
+    expect(pointInBounds(37.4419, -122.143, peninsula!.bounds)).toBe(true); // Palo Alto
+
+    expect(pointInBounds(37.7749, -122.4194, peninsula!.bounds)).toBe(false); // SF
+    expect(pointInBounds(37.8044, -122.2712, peninsula!.bounds)).toBe(false); // Oakland
+    expect(pointInBounds(37.3382, -121.8863, peninsula!.bounds)).toBe(false); // San Jose
+
+    expect(west).toBe(-122.55);
+    expect(east).toBe(-121.95);
+    expect(south).toBe(37.28);
+    expect(north).toBe(37.74);
+  });
 });

@@ -101,29 +101,32 @@ export const PHONE_PORTRAIT_SOUTH_BAY_VIEWPORT_PADDING: ViewportPadding = {
 };
 
 /**
- * Peninsula tab: the monitored coastal Peninsula belt — Daly City and Pacifica
- * on the ocean side, down to Half Moon Bay. The previous preset framed empty
- * Burlingame / San Mateo land (no monitored locations there), which pushed the
- * only two markers into the top-left corner behind the fog rail (audit RC-1 /
- * Peninsula screenshot). These bounds frame the actual monitored locations so
- * they present correctly, using the same fitBounds path as every other region.
+ * Peninsula tab: the full monitored Peninsula corridor after Phase 16.2A /
+ * 16.2D-1 — Daly City, Pacifica, and Half Moon Bay on the coast plus San Mateo,
+ * Redwood City, and Palo Alto on the bay side. Earlier coastal-only bounds
+ * clipped the three bay-side pins until the user zoomed out.
+ *
+ * Bounds are intentionally a bit looser than the raw pin AABB so phone-portrait
+ * fitBounds (with fog-rail + bottom-tray padding) still keeps every pin above
+ * chrome instead of pinching the southern trio against the tray.
  */
 export const PHONE_PORTRAIT_PENINSULA_REGION_BOUNDS: MapBounds = [
-  [-122.51, 37.44],
-  [-122.41, 37.71],
+  [-122.55, 37.28],
+  [-121.95, 37.74],
 ];
 
 /**
  * Padding tuned for Peninsula fitBounds above the bottom tray and beside the
- * fog rail. The monitored Peninsula locations are all on the coast (west), so
- * generous left padding keeps them clear of the fog rail while the frame stays
- * centered on the markers instead of empty inland land.
+ * fog rail. Coastal pins sit west and bay-side pins sit east, so left padding
+ * clears the fog rail while right padding keeps Palo Alto / Redwood City inside
+ * the frame. Bottom padding is kept moderate so southern pins are not pushed
+ * under the tray on 390×844.
  */
 export const PHONE_PORTRAIT_PENINSULA_VIEWPORT_PADDING: ViewportPadding = {
-  top: 128,
-  right: 28,
-  bottom: 210,
-  left: 100,
+  top: 112,
+  right: 36,
+  bottom: 148,
+  left: 88,
 };
 
 /** Deselected / all-Bay default: wider full Bay Area view. */
