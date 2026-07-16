@@ -901,6 +901,7 @@ describe("isMapMarkerVisible", () => {
     fogScore: 10,
     sunshineScore: 90,
     status: "Clear",
+    region: "san-francisco",
   };
 
   const southBayClear: MapMarkerLocation = {
@@ -911,6 +912,7 @@ describe("isMapMarkerVisible", () => {
     fogScore: 10,
     sunshineScore: 90,
     status: "Clear",
+    region: "south-bay",
   };
 
   const sanFranciscoFoggy: MapMarkerLocation = {
@@ -921,6 +923,7 @@ describe("isMapMarkerVisible", () => {
     fogScore: 96,
     sunshineScore: 18,
     status: "Karl Territory",
+    region: "san-francisco",
   };
 
   it("shows all markers when only a region is selected", () => {

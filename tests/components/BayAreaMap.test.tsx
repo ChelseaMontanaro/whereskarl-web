@@ -785,6 +785,7 @@ describe("BayAreaMap", () => {
             sunshineScore: 90,
             fogScore: 10,
             status: "Clear",
+            region: "san-francisco",
           },
           {
             id: "san-jose",
@@ -794,6 +795,7 @@ describe("BayAreaMap", () => {
             sunshineScore: 90,
             fogScore: 10,
             status: "Clear",
+            region: "south-bay",
           },
           {
             id: "ocean-beach",
@@ -803,6 +805,7 @@ describe("BayAreaMap", () => {
             sunshineScore: 18,
             fogScore: 96,
             status: "Karl Territory",
+            region: "san-francisco",
           },
         ]}
         selectedLocationId={null}

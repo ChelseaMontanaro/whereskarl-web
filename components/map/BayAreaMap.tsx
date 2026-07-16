@@ -454,8 +454,7 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
                 priority: getPhonePortraitMarkerPriority(location.id),
                 score: location.sunshineScore,
                 isSelected: selectedLocationId === location.id,
-                // Canonical product-region resolver (backend region first,
-                // then fallback assignment) — no second location-to-region map.
+                // Canonical product-region from backend `location.region`.
                 productRegionId: getProductRegionIdForLocation(location),
               },
             ];

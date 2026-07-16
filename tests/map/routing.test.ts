@@ -33,6 +33,21 @@ describe("map routing", () => {
     ).toBe("tiburon");
   });
 
+  it("readMapLocationParam remaps ocean-beach-sf to canonical ocean-beach", () => {
+    expect(
+      readMapLocationParam(new URLSearchParams("location=ocean-beach-sf")),
+    ).toBe("ocean-beach");
+    expect(
+      readMapLocationParam(new URLSearchParams("selected=ocean-beach-sf")),
+    ).toBe("ocean-beach");
+  });
+
+  it("readMapLocationParam does not silently remap bare richmond", () => {
+    expect(
+      readMapLocationParam(new URLSearchParams("location=richmond")),
+    ).toBe("richmond");
+  });
+
   it("readMapLocationParam returns null for missing or blank values", () => {
     expect(readMapLocationParam(new URLSearchParams())).toBeNull();
     expect(readMapLocationParam(new URLSearchParams("location="))).toBeNull();

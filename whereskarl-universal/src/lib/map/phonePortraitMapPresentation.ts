@@ -65,12 +65,12 @@ export const PHONE_PORTRAIT_MARKER_OFFSETS: Record<string, [number, number]> = {
   'san-rafael': [-10, -8],
   novato: [0, -10],
   'san-anselmo': [12, -2],
-  richmond: [16, 6],
+  // Reserved future: richmond-district (SF) / richmond-ca (East Bay).
+  // Do not use bare `richmond` — it is ambiguous and not a catalog id.
   berkeley: [-26, 4],
   presidio: [-26, -8],
   'golden-gate-park': [-14, 34],
   'ocean-beach': [-34, 12],
-  'ocean-beach-sf': [-34, 12],
   'marin-headlands': [-30, 12],
 };
 
@@ -99,7 +99,7 @@ export const PHONE_PORTRAIT_PRIORITY_LOCATION_IDS = [
   'san-rafael',
   'novato',
   'san-anselmo',
-  'richmond',
+  // Bare `richmond` intentionally omitted — reserve richmond-district / richmond-ca.
 ] as const;
 
 export function getPhonePortraitMarkerPriority(locationId: string): number {
@@ -125,7 +125,6 @@ export const PHONE_PORTRAIT_LOW_ZOOM_HIDDEN_LOCATION_IDS = new Set([
   'presidio',
   'golden-gate-park',
   'ocean-beach',
-  'ocean-beach-sf',
   'marin-headlands',
   'half-moon-bay',
 ]);

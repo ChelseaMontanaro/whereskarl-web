@@ -7,10 +7,11 @@ import {
 } from "@/lib/map/conditions";
 import { isBayAreaProductRegionId } from "@/lib/map/config";
 import { getMarkerIconMarkup } from "@/lib/map/markerIcons";
-import { getProductRegionIdForLocation } from "@/lib/map/regions";
+import { locationMatchesProductRegion } from "@/lib/map/regions";
 import { isNighttime } from "@/lib/home/weatherDisplay";
 import type { DataStatus } from "@/lib/schemas/shared";
 import { degradedMarkerAriaSuffix } from "@/lib/weather/dataStatus";
+import type { BayAreaVisibleProductRegionId } from "@/lib/map/config";
 
 export type MapMarkerLocation = {
   id: string;
@@ -88,7 +89,12 @@ function isOutsideSelectedRegionWhenCombinedFilter(
     return false;
   }
 
-  return getProductRegionIdForLocation(location) !== selectedRegionId;
+  // Prefer backend `location.region`; when omitted, coordinate geometry keeps
+  // the pin in the correct region view (Phase 16.2A / audit RC-2).
+  return !locationMatchesProductRegion(
+    location,
+    selectedRegionId as BayAreaVisibleProductRegionId,
+  );
 }
 
 export function isMapMarkerVisible(

@@ -117,32 +117,14 @@ const BACKEND_TO_VISIBLE_REGION: Record<
 };
 
 /**
- * Fallback when the API omits `region` (fixtures, older payloads).
- * Prefer `location.region` from `/locations` whenever present.
+ * Phase 16.2A: backend `/locations.region` is the single source of truth.
+ * Do not maintain a parallel frontend catalog→region map.
+ *
+ * Reserved future location IDs (not in catalog; do not invent bare aliases):
+ * - richmond-district — San Francisco Richmond District
+ * - richmond-ca — Richmond, East Bay city
+ * Canonical Ocean Beach id is `ocean-beach` only (`ocean-beach-sf` remaps in routing).
  */
-export const LOCATION_BACKEND_REGION_ASSIGNMENTS: Record<
-  string,
-  BayAreaBackendRegionId
-> = {
-  tiburon: 'north-bay',
-  sausalito: 'north-bay',
-  'mill-valley': 'north-bay',
-  'stinson-beach': 'north-bay',
-  'marin-headlands': 'north-bay',
-  'ocean-beach': 'san-francisco',
-  'san-francisco': 'san-francisco',
-  presidio: 'san-francisco',
-  'golden-gate-park': 'san-francisco',
-  'ocean-beach-sf': 'san-francisco',
-  berkeley: 'east-bay',
-  oakland: 'east-bay',
-  'palo-alto': 'south-bay',
-  'mountain-view': 'south-bay',
-  'san-jose': 'south-bay',
-  'half-moon-bay': 'south-bay',
-  'daly-city': 'peninsula',
-  pacifica: 'peninsula',
-};
 
 export type LocationWithRegion = {
   id: string;
@@ -271,11 +253,6 @@ export function resolveBackendRegionId(
   const apiRegion = location.region?.trim().toLowerCase();
   if (apiRegion && isBayAreaBackendRegionId(apiRegion)) {
     return apiRegion;
-  }
-
-  const fallbackRegion = LOCATION_BACKEND_REGION_ASSIGNMENTS[location.id];
-  if (fallbackRegion && isBayAreaBackendRegionId(fallbackRegion)) {
-    return fallbackRegion;
   }
 
   return null;

@@ -34,46 +34,20 @@ export type LocationWithRegion = {
 };
 
 /**
- * Fallback when the API omits `region` (fixtures, older payloads).
- * Prefer `location.region` from `/locations` whenever present.
+ * Phase 16.2A: backend `/locations.region` is the single source of truth.
+ * Do not maintain a parallel frontend catalog→region map.
+ *
+ * Reserved future location IDs (not in catalog; do not invent bare aliases):
+ * - richmond-district — San Francisco Richmond District
+ * - richmond-ca — Richmond, East Bay city
+ * Canonical Ocean Beach id is `ocean-beach` only (`ocean-beach-sf` remaps in routing).
  */
-export const LOCATION_BACKEND_REGION_ASSIGNMENTS: Record<
-  string,
-  BayAreaBackendRegionId
-> = {
-  tiburon: "north-bay",
-  sausalito: "north-bay",
-  "mill-valley": "north-bay",
-  "stinson-beach": "north-bay",
-  "marin-headlands": "north-bay",
-  "ocean-beach": "san-francisco",
-  "san-francisco": "san-francisco",
-  presidio: "san-francisco",
-  "golden-gate-park": "san-francisco",
-  berkeley: "east-bay",
-  oakland: "east-bay",
-  "palo-alto": "south-bay",
-  "mountain-view": "south-bay",
-  "san-jose": "south-bay",
-  // Half Moon Bay is a coastal Peninsula town (lon −122.43), not South Bay.
-  // The South Bay camera sits east of it, so as `south-bay` it could never
-  // render in its own region view; the Peninsula owns the coastal belt.
-  "half-moon-bay": "peninsula",
-  "daly-city": "peninsula",
-  pacifica: "peninsula",
-};
-
 export function resolveBackendRegionId(
   location: LocationWithRegion,
 ): BayAreaBackendRegionId | null {
   const apiRegion = location.region?.trim().toLowerCase();
   if (apiRegion && isBayAreaBackendRegionId(apiRegion)) {
     return apiRegion;
-  }
-
-  const fallbackRegion = LOCATION_BACKEND_REGION_ASSIGNMENTS[location.id];
-  if (fallbackRegion && isBayAreaBackendRegionId(fallbackRegion)) {
-    return fallbackRegion;
   }
 
   return null;
@@ -95,6 +69,7 @@ export function getProductRegionIdForLocation(
   locationOrId: string | LocationWithRegion,
 ): BayAreaVisibleProductRegionId | null {
   if (typeof locationOrId === "string") {
+    // String-only ids cannot resolve a region without backend metadata.
     return resolveProductRegionId({ id: locationOrId });
   }
 
@@ -119,14 +94,10 @@ export type LocationWithOptionalCoordinates = LocationWithRegion & {
 
 /**
  * Canonical product-region membership test. A location belongs to `regionId`
- * when its resolved product region matches. When the location has no resolvable
- * region (backend omitted `region` and it is not in the fallback assignment
- * table) we fall back to the canonical region geometry so a valid coordinate
- * still appears in the geographically correct region instead of vanishing.
- *
- * This mirrors the universal app's `locationMatchesProductRegion` so web and
- * native share one membership rule and no future backend location silently
- * disappears from region views (audit RC-2 / RC-7).
+ * when its resolved product region (from backend `location.region`) matches.
+ * When the location has no resolvable region, fall back to canonical region
+ * geometry so a valid coordinate still appears in the geographically correct
+ * region instead of vanishing (audit RC-2 / RC-7).
  */
 export function locationMatchesProductRegion<
   T extends LocationWithOptionalCoordinates,

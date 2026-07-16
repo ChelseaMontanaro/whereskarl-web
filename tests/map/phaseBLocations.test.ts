@@ -9,6 +9,7 @@ import { isMapMarkerVisible } from "@/lib/map/markers";
 import {
   filterLocationsByProductRegion,
   getProductRegionIdForLocation,
+  locationMatchesProductRegion,
   resolveBackendRegionId,
   resolveProductRegionId,
 } from "@/lib/map/regions";
@@ -125,13 +126,24 @@ describe("Phase B location integration", () => {
     expect(resolveProductRegionId(pacifica)).toBe("peninsula");
   });
 
-  it("falls back to catalog assignments when region is omitted", () => {
+  it("does not invent a region when backend omits region", () => {
     const withoutRegion = { ...marinHeadlands };
     delete withoutRegion.region;
 
-    expect(getProductRegionIdForLocation(withoutRegion)).toBe("north-bay");
-    expect(getProductRegionIdForLocation({ id: "daly-city" })).toBe("peninsula");
-    expect(getProductRegionIdForLocation({ id: "pacifica" })).toBe("peninsula");
+    expect(getProductRegionIdForLocation(withoutRegion)).toBeNull();
+    expect(getProductRegionIdForLocation({ id: "daly-city" })).toBeNull();
+    expect(getProductRegionIdForLocation({ id: "pacifica" })).toBeNull();
+    // Coordinate geometry still places unassigned pins in the right view.
+    expect(
+      locationMatchesProductRegion(
+        {
+          id: "daly-city",
+          latitude: dalyCity.latitude,
+          longitude: dalyCity.longitude,
+        },
+        "peninsula",
+      ),
+    ).toBe(true);
   });
 
   it("includes Marin Headlands for North Bay + Karl Territory markers", () => {
