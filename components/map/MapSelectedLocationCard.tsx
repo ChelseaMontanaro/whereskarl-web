@@ -426,8 +426,9 @@ const ENV_ICON_CLASS = "h-8 w-8";
 const ENV_AQI_ICON_CLASS = "h-[37px] w-[37px]";
 /** Pollen trees matched to AQI / UV visual weight. */
 const ENV_POLLEN_ICON_CLASS = "h-[37px] w-[37px]";
-/** Climate glyphs — slight bump over the default tile icon. */
-const ENV_CLIMATE_ICON_CLASS = "h-[34px] w-[34px]";
+/** Climate glyphs — ~18% larger than the prior 34px for glanceability
+ * (matches AQI / Pollen visual weight; SVG artwork unchanged). */
+const ENV_CLIMATE_ICON_CLASS = "h-[40px] w-[40px]";
 
 /** Marine Layer / Fog Ceiling — ~5% smaller than the default 32px tile icon. */
 const ENV_MARINE_ICON_CLASS = "h-[30px] w-[30px] text-white/95";
