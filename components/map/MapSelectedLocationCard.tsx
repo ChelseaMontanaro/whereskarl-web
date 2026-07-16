@@ -1126,7 +1126,7 @@ function PhonePortraitSelectedCard({
           {
             title: "Climate",
             ariaLabel: climate.available
-              ? `Climate, ${climate.formatted}`
+              ? `Climate, ${climate.formatted}, ${climate.label}`
               : "Climate, Unavailable",
             icon: (
               <span
@@ -1154,6 +1154,10 @@ function PhonePortraitSelectedCard({
             valueText: climate.formatted,
             unavailable: !climate.available,
             climateValue: climate.available,
+            supporting: climate.available ? climate.label : undefined,
+            supportingColor: climate.available
+              ? CLIMATE_ICON_COLOR[climate.value!]
+              : undefined,
             exposeIconA11y: true,
             relaxedIconValueGap: true,
             containerTestId: "climate-slot",

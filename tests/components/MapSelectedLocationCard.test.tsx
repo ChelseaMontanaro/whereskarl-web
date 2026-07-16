@@ -767,7 +767,8 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
       "Excellent",
     );
     expect(screen.getByTestId("climate-value")).toHaveTextContent("Marine");
-    expect(screen.getByLabelText("Climate, Marine")).toBeInTheDocument();
+    expect(screen.getByTestId("climate-supporting")).toHaveTextContent("Coastal");
+    expect(screen.getByLabelText("Climate, Marine, Coastal")).toBeInTheDocument();
     expect(screen.getByLabelText("Marine climate")).toBeInTheDocument();
     expect(env.querySelector(".grid-cols-3")).not.toBeNull();
     expect(env.querySelector(".grid-cols-4")).toBeNull();
@@ -808,13 +809,16 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(screen.getByLabelText("Marine Layer height, Coming Soon")).toBeInTheDocument();
     expect(screen.getByLabelText("Fog Ceiling height, Coming Soon")).toBeInTheDocument();
     expect(screen.queryByLabelText("Karl Health Index, Coming Soon")).not.toBeInTheDocument();
-    expect(screen.getByLabelText("Climate, Transition")).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("Climate, Transition, Mixed"),
+    ).toBeInTheDocument();
 
     // Implemented missing metrics stay Unavailable; placeholders stay Coming Soon.
     expect(screen.getByTestId("air-quality-value")).toHaveTextContent(
       "Unavailable",
     );
     expect(screen.getByTestId("climate-value")).toHaveTextContent("Transition");
+    expect(screen.getByTestId("climate-supporting")).toHaveTextContent("Mixed");
     expect(screen.getByTestId("climate-value")).not.toHaveTextContent(
       "Unavailable",
     );
@@ -1108,14 +1112,34 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
 
   it("renders each approved Climate classification with the matching icon label", () => {
     const cases = [
-      { climate: "Marine" as const, label: "Marine climate" },
-      { climate: "Fog Belt" as const, label: "Fog Belt climate" },
-      { climate: "Transition" as const, label: "Transition climate" },
-      { climate: "Sun Belt" as const, label: "Sun Belt climate" },
-      { climate: "Inland" as const, label: "Inland climate" },
+      {
+        climate: "Marine" as const,
+        iconLabel: "Marine climate",
+        descriptor: "Coastal",
+      },
+      {
+        climate: "Fog Belt" as const,
+        iconLabel: "Fog Belt climate",
+        descriptor: "Foggy",
+      },
+      {
+        climate: "Transition" as const,
+        iconLabel: "Transition climate",
+        descriptor: "Mixed",
+      },
+      {
+        climate: "Sun Belt" as const,
+        iconLabel: "Sun Belt climate",
+        descriptor: "Sunny",
+      },
+      {
+        climate: "Inland" as const,
+        iconLabel: "Inland climate",
+        descriptor: "Dry",
+      },
     ];
 
-    for (const { climate, label } of cases) {
+    for (const { climate, iconLabel, descriptor } of cases) {
       cleanup();
       render(
         <MapSelectedLocationCard
@@ -1124,8 +1148,13 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
         />,
       );
       expect(screen.getByTestId("climate-value")).toHaveTextContent(climate);
-      expect(screen.getByLabelText(`Climate, ${climate}`)).toBeInTheDocument();
-      expect(screen.getByLabelText(label)).toBeInTheDocument();
+      expect(screen.getByTestId("climate-supporting")).toHaveTextContent(
+        descriptor,
+      );
+      expect(
+        screen.getByLabelText(`Climate, ${climate}, ${descriptor}`),
+      ).toBeInTheDocument();
+      expect(screen.getByLabelText(iconLabel)).toBeInTheDocument();
       expect(screen.queryByText("KHI")).not.toBeInTheDocument();
     }
   });

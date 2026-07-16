@@ -22,15 +22,30 @@ export type ClimatePresentation = {
   formatted: string;
   /** Accessible icon label such as "Marine climate". */
   iconLabel: string;
+  /**
+   * Short descriptor beneath the climate name (e.g. "Coastal"), matching
+   * other environmental supporting labels ("Good", "Comfortable", …).
+   */
+  label: string | null;
 };
 
 const CLIMATE_SET = new Set<string>(CLIMATE_VALUES);
+
+/** Canonical one-word descriptors for the Climate environmental tile. */
+export const CLIMATE_DESCRIPTOR: Record<Climate, string> = {
+  Marine: "Coastal",
+  "Fog Belt": "Foggy",
+  Transition: "Mixed",
+  "Sun Belt": "Sunny",
+  Inland: "Dry",
+};
 
 const UNAVAILABLE_CLIMATE: ClimatePresentation = {
   available: false,
   value: null,
   formatted: "Unavailable",
   iconLabel: "Climate unavailable",
+  label: null,
 };
 
 export function isClimate(value: unknown): value is Climate {
@@ -51,6 +66,7 @@ export function presentClimate(climate: unknown): ClimatePresentation {
     value: climate,
     formatted: climate,
     iconLabel: `${climate} climate`,
+    label: CLIMATE_DESCRIPTOR[climate],
   };
 }
 

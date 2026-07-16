@@ -233,7 +233,9 @@ describe("phone environmental metrics 3×2 @ 390px", () => {
     expect(screen.getByTestId("humidity-value")).toHaveTextContent("72%");
     expect(screen.getByTestId("visibility-value")).toHaveTextContent("6 mi");
     expect(screen.getByTestId("climate-value")).toHaveTextContent("Transition");
-    expect(screen.getByLabelText("Climate, Transition")).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("Climate, Transition, Mixed"),
+    ).toBeInTheDocument();
     expect(screen.queryByText("KHI")).not.toBeInTheDocument();
     expect(screen.queryByTestId("karl-health-slot")).not.toBeInTheDocument();
     expect(screen.queryByText("Fog & Marine")).not.toBeInTheDocument();
