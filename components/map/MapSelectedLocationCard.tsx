@@ -346,6 +346,14 @@ const METRIC_SUPPORTING_ROW_CLASS =
 const ENV_METRIC_SUPPORTING_CLASS =
   "mt-2 min-h-[0.95rem] w-full truncate text-center text-[11px] font-semibold leading-none text-white/55";
 
+/**
+ * Visibility compact values ("12.7 mi", 20px) sit 6px shorter than the shared
+ * 26px primary-value rhythm. Extra top spacing restores the supporting-row
+ * baseline without changing Visibility value typography or sibling tiles.
+ */
+const ENV_METRIC_SUPPORTING_AFTER_COMPACT_VALUE_CLASS =
+  "mt-[14px] min-h-[0.95rem] w-full truncate text-center text-[11px] font-semibold leading-none text-white/55";
+
 /** Environmental metric title — centered, mockup-weight presence. */
 const ENV_METRIC_TITLE_CLASS =
   "w-full text-center text-[12px] font-semibold uppercase tracking-[0.06em] text-white/78";
@@ -579,6 +587,8 @@ type EnvironmentalMetricProps = {
    * icon→value gap per approved mockup; top row stays tighter.
    */
   relaxedIconValueGap?: boolean;
+  /** Optional override for the supporting-row class (Visibility compact nudge). */
+  supportingClassName?: string;
   containerTestId?: string;
   testId?: string;
   supportingTestId?: string;
@@ -606,6 +616,7 @@ function EnvironmentalMetricTile({
   climateValue = false,
   exposeIconA11y = false,
   relaxedIconValueGap = false,
+  supportingClassName,
   containerTestId,
   testId,
   supportingTestId,
@@ -654,7 +665,7 @@ function EnvironmentalMetricTile({
         </p>
       </div>
       <p
-        className={ENV_METRIC_SUPPORTING_CLASS}
+        className={supportingClassName ?? ENV_METRIC_SUPPORTING_CLASS}
         style={
           !unavailable && supportingColor ? { color: supportingColor } : undefined
         }
@@ -1118,6 +1129,12 @@ function PhonePortraitSelectedCard({
             valueText: visibility.formatted,
             unavailable: !visibility.available,
             supporting: visibility.available ? visibility.label : undefined,
+            // Compact miles ("12.7 mi") use 20px type; +6px top spacing keeps
+            // the footer on the shared Environmental Metrics baseline.
+            supportingClassName:
+              visibility.available && visibility.formatted.length >= 5
+                ? ENV_METRIC_SUPPORTING_AFTER_COMPACT_VALUE_CLASS
+                : undefined,
             relaxedIconValueGap: true,
             containerTestId: "visibility-slot",
             testId: "visibility-value",
