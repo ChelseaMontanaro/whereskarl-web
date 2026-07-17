@@ -131,6 +131,10 @@ export type LocationWeather = {
   airQuality?: AirQuality;
   uvIndex?: UltravioletIndex;
   pollen?: Pollen;
+  /** Canonical hero CDN URL — same object used by circular presentation. */
+  imageUrl?: string | null;
+  /** Normalized 0–1 crop center from the backend scene catalog. */
+  focalPoint?: { x: number; y: number } | null;
   updatedAt: string;
   karlReason: string;
   primaryDrivers: string[];

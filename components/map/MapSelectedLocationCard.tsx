@@ -50,6 +50,7 @@ import {
   toggleFavoriteLocation,
 } from "@/lib/storage/favorites";
 import { DegradedDataLabel } from "@/components/weather/DegradedDataLabel";
+import { LocationCircularImage } from "@/components/location/LocationCircularImage";
 import type { LocationWeather } from "@/lib/schemas/weather";
 import { isLocationDataDegraded } from "@/lib/weather/dataStatus";
 
@@ -901,26 +902,11 @@ function PhonePortraitSelectedCard({
   const header = (
     <>
       <div className="flex items-start gap-3.5">
-        {/*
-          Location image placeholder. The backend does not yet expose a
-          canonical per-location image URL, so this renders a neutral, premium
-          placeholder occupying the exact circular frame the real image will
-          fill. When the backend provides an image URL, replace the inner
-          caption with `<img src={…} className="h-full w-full object-cover" />`
-          inside this same frame — no structural change and no new image
-          pipeline, mapping, or per-location asset required.
-        */}
-        <span
-          data-testid="location-image-placeholder"
-          className="flex h-16 w-16 shrink-0 flex-col items-center justify-center gap-0.5 overflow-hidden rounded-full border border-white/15 bg-gradient-to-br from-white/[0.18] via-white/[0.06] to-transparent text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
-        >
-          <span className="px-1 text-[0.5625rem] font-semibold leading-[1.05] tracking-tight text-white/70">
-            Location Image
-          </span>
-          <span className="text-[0.5rem] font-medium uppercase leading-[1.05] tracking-[0.08em] text-white/45">
-            Coming Soon
-          </span>
-        </span>
+        <LocationCircularImage
+          imageUrl={location.imageUrl}
+          focalPoint={location.focalPoint}
+          alt={`${location.name} landmark`}
+        />
 
         <div className="min-w-0 flex-1">
           <h2 className="truncate text-[1.375rem] font-semibold leading-tight tracking-tight text-white">

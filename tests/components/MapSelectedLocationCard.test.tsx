@@ -1229,6 +1229,29 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(placeholder.className).toContain("rounded-full");
   });
 
+  it("delegates circular imagery rendering to LocationCircularImage with backend contract fields", () => {
+    const imageUrl =
+      "https://cdn.example.com/assets/hero/san-mateo/day.png";
+    render(
+      <MapSelectedLocationCard
+        location={{
+          ...location,
+          imageUrl,
+          focalPoint: { x: 0.28, y: 0.38 },
+        }}
+        phonePortrait
+      />,
+    );
+
+    const img = screen.getByTestId("location-circular-image-img");
+    expect(img).toHaveAttribute("src", imageUrl);
+    expect(img).toHaveStyle({ objectPosition: "28% 38%" });
+    expect(screen.getByTestId("location-circular-image").className).toContain(
+      "rounded-full",
+    );
+    expect(screen.queryByTestId("location-image-placeholder")).toBeNull();
+  });
+
   it("renders Karl's Read as the primary insight with the smiling fog logo", () => {
     const { container } = render(
       <MapSelectedLocationCard location={location} phonePortrait />,
