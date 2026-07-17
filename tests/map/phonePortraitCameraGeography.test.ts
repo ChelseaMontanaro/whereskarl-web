@@ -21,13 +21,16 @@ const LOCATIONS = {
   sanRafael: { lat: 37.9735, lng: -122.5311 },
   stinsonBeach: { lat: 37.8439, lng: -122.6437 },
   marinHeadlands: { lat: 37.827, lng: -122.499 },
-  berkeley: { lat: 37.8716, lng: -122.2727 },
+  berkeley: { lat: 37.8715, lng: -122.273 },
   oakland: { lat: 37.8044, lng: -122.2712 },
+  alameda: { lat: 37.7651, lng: -122.2416 },
+  hayward: { lat: 37.6688, lng: -122.0808 },
   paloAlto: { lat: 37.4419, lng: -122.143 },
   mountainView: { lat: 37.3861, lng: -122.0839 },
   sanJose: { lat: 37.3382, lng: -121.8863 },
   fosterCity: { lat: 37.5585, lng: -122.271 },
   fremont: { lat: 37.5485, lng: -121.9886 },
+  livermore: { lat: 37.6819, lng: -121.768 },
   dalyCity: { lat: 37.6879, lng: -122.4702 },
   pacifica: { lat: 37.6138, lng: -122.4869 },
   halfMoonBay: { lat: 37.4636, lng: -122.4286 },
@@ -62,17 +65,26 @@ describe("phone-portrait region camera geography", () => {
     expect(east).toBeGreaterThanOrEqual(-122.39);
   });
 
-  it("frames the East Bay shoreline tightly around Berkeley and Oakland", () => {
+  it("frames the East Bay on all five monitored catalog locations", () => {
     const bounds = PHONE_PORTRAIT_EAST_BAY_REGION_BOUNDS;
-    const [[, south], [east]] = bounds;
+    const [[west, south], [east, north]] = bounds;
 
+    // Full Phase 16.2E East Bay catalog must fit without zooming out.
     expect(contains(bounds, LOCATIONS.berkeley)).toBe(true);
     expect(contains(bounds, LOCATIONS.oakland)).toBe(true);
+    expect(contains(bounds, LOCATIONS.alameda)).toBe(true);
+    expect(contains(bounds, LOCATIONS.hayward)).toBe(true);
+    expect(contains(bounds, LOCATIONS.fremont)).toBe(true);
 
-    // Does not sprawl inland to the Tri-Valley or south to Fremont.
-    expect(east).toBeLessThanOrEqual(-122.1);
-    expect(south).toBeGreaterThanOrEqual(37.6);
-    expect(contains(bounds, LOCATIONS.fremont)).toBe(false);
+    // Covers shoreline → South County corridor; does not sprawl into Tri-Valley
+    // or San Jose.
+    expect(west).toBeLessThanOrEqual(-122.3);
+    expect(east).toBeGreaterThanOrEqual(-121.95);
+    expect(south).toBeLessThanOrEqual(37.52);
+    expect(north).toBeLessThanOrEqual(37.92);
+    expect(contains(bounds, LOCATIONS.livermore)).toBe(false);
+    expect(contains(bounds, LOCATIONS.sanJose)).toBe(false);
+    expect(contains(bounds, LOCATIONS.sanFrancisco)).toBe(false);
   });
 
   it("frames the South Bay on the Silicon Valley corridor", () => {

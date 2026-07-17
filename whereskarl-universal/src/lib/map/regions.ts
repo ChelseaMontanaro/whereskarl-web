@@ -79,8 +79,10 @@ export const BAY_AREA_PRODUCT_REGIONS: BayAreaProductRegion[] = [
     id: 'east-bay',
     name: 'East Bay',
     chipLabel: 'East Bay',
+    // Phase 16.2E catalog: Berkeley → Oakland → Alameda plus Hayward and
+    // Fremont. Mirror web product bounds so native stays in sync.
     bounds: [
-      [-122.33, 37.7],
+      [-122.33, 37.52],
       [-121.72, 38.02],
     ],
     viewport: {

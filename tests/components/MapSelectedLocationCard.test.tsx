@@ -494,20 +494,63 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     const metrics = screen.getByTestId("selected-location-metrics");
     const columns = Array.from(metrics.children);
 
+    expect(metrics.className).toContain("items-stretch");
+
     for (const column of columns) {
+      expect(column.className).toContain("self-stretch");
+      expect(column.className).toContain("flex-col");
       const supporting = column.querySelector("[data-testid='clear-skies-quality']")
         ?? column.lastElementChild;
-      // Every supporting label sits a compact 4px (mt-1) below its value and
-      // starts at the same y across weather columns (fixed title + value rows).
-      expect(supporting?.className).toContain("mt-1");
+      // Footer is bottom-anchored (mt-auto) so short and wrapped labels share
+      // one baseline across the four stretched weather columns.
+      expect(supporting?.className).toContain("mt-auto");
       expect(supporting?.className).toContain("min-h-[0.9rem]");
-      expect(supporting?.className).toContain("items-start");
+      expect(supporting?.className).toContain("items-end");
+      expect(supporting?.className).toContain("pt-1");
     }
 
     expect(screen.getByTestId("clear-skies-quality")).toHaveTextContent("Excellent");
     expect(metrics).toHaveTextContent("Clear");
     // Wind's supporting label is the gold arrow + "mph".
     expect(screen.getByTestId("wind-direction")).toHaveTextContent("mph");
+  });
+
+  it("keeps the shared weather-strip footer baseline for Poor and wrapped Fog labels", () => {
+    render(
+      <MapSelectedLocationCard
+        location={{
+          ...location,
+          sunshineScore: 32,
+          fogScore: 97,
+          windDirection: "NNW",
+          windSpeed: 9,
+        }}
+        phonePortrait
+      />,
+    );
+
+    const metrics = screen.getByTestId("selected-location-metrics");
+    expect(metrics.className).toContain("items-stretch");
+
+    const quality = screen.getByTestId("clear-skies-quality");
+    const windFooter = screen.getByTestId("wind-direction");
+    const fogColumn = Array.from(metrics.children)[1];
+    const fogFooter = fogColumn?.lastElementChild;
+
+    expect(quality).toHaveTextContent("Poor");
+    expect(fogFooter).toHaveTextContent("Karl Territory");
+    expect(windFooter).toHaveTextContent("mph");
+
+    for (const footer of [quality, fogFooter, windFooter]) {
+      expect(footer?.className).toContain("mt-auto");
+      expect(footer?.className).toContain("items-end");
+    }
+
+    // Temp keeps the shared footer slot (nbsp) so column height/baseline stay
+    // aligned even without supporting copy.
+    const tempFooter = Array.from(metrics.children)[2]?.lastElementChild;
+    expect(tempFooter?.className).toContain("mt-auto");
+    expect(tempFooter?.textContent).toBe("\u00A0");
   });
 
   it("keeps Clear Sky Score as the first of four weather-strip columns", () => {

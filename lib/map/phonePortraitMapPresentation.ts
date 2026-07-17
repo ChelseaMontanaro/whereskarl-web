@@ -63,22 +63,31 @@ export const PHONE_PORTRAIT_NORTH_BAY_VIEWPORT_PADDING: ViewportPadding = {
 };
 
 /**
- * East Bay tab: the Berkeley → Oakland shoreline corridor. Kept tight around
- * the monitored East Bay locations so fitBounds centers on the shoreline
- * instead of pulling the camera far inland (Livermore/Tri-Valley) and jamming
- * Berkeley/Oakland against the west edge.
+ * East Bay tab: the full monitored East Bay corridor after Phase 16.2E —
+ * Berkeley, Oakland, and Alameda on the shoreline plus Hayward and Fremont
+ * farther south. Earlier Berkeley→Oakland-only bounds clipped Hayward and
+ * Fremont until the user zoomed out.
+ *
+ * Bounds stay west of the Tri-Valley (Livermore) and are slightly looser than
+ * the raw pin AABB so phone-portrait fitBounds (fog rail + bottom tray) keeps
+ * every pin clear of chrome without making Berkeley/Oakland unusably small.
  */
 export const PHONE_PORTRAIT_EAST_BAY_REGION_BOUNDS: MapBounds = [
-  [-122.34, 37.75],
-  [-122.17, 37.91],
+  [-122.32, 37.50],
+  [-121.94, 37.90],
 ];
 
-/** Padding tuned for East Bay fitBounds above the bottom tray and beside the fog rail. */
+/**
+ * Padding tuned for East Bay fitBounds above the bottom tray and beside the
+ * fog rail. Southern pins (Hayward / Fremont) need moderate bottom padding so
+ * they stay above the tray; left padding clears the fog rail for the western
+ * shoreline trio without over-zooming the corridor.
+ */
 export const PHONE_PORTRAIT_EAST_BAY_VIEWPORT_PADDING: ViewportPadding = {
-  top: 128,
-  right: 30,
-  bottom: 232,
-  left: 92,
+  top: 116,
+  right: 34,
+  bottom: 168,
+  left: 88,
 };
 
 /**

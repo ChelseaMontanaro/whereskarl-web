@@ -330,12 +330,14 @@ const METRIC_TITLE_ROW_CLASS =
 const METRIC_VALUE_ROW_CLASS =
   "flex h-11 w-full items-end justify-center leading-none";
 /**
- * Shared supporting-label row for the weather strip. Fog supporting copy
+ * Shared supporting-label row for the weather strip. Pushed to the bottom of
+ * each stretched column (`mt-auto`) so Poor / Karl Territory / mph / empty Temp
+ * share one footer baseline even when Fog wraps. Fog supporting copy
  * ("Clear" … "Karl Territory") fits the 4-column weather budget; long EPA
  * category strings belong on the environmental metrics grid instead.
  */
 const METRIC_SUPPORTING_ROW_CLASS =
-  "mt-1 flex min-h-[0.9rem] items-start justify-center text-balance leading-[1.1] text-[13px] font-normal text-white";
+  "mt-auto flex min-h-[0.9rem] items-end justify-center pt-1 text-balance leading-[1.1] text-[13px] font-normal text-white";
 
 /**
  * Supporting copy for environmental metrics. Single-line compact labels so
@@ -528,7 +530,7 @@ function MetricColumn({
 }) {
   return (
     <div
-      className={`flex min-w-0 ${columnClassName} flex-col items-center text-center ${
+      className={`flex min-w-0 ${columnClassName} flex-col items-center self-stretch text-center ${
         showDivider ? "border-r border-white/10 last:border-r-0" : ""
       }`}
       data-testid={containerTestId}
@@ -546,7 +548,7 @@ function MetricColumn({
       >
         {value}
       </span>
-      {/* Supporting labels share one baseline across weather-strip columns. */}
+      {/* Footer is mt-auto so all four columns share one bottom baseline. */}
       <span
         className={supportingClassName}
         style={supportingColor ? { color: supportingColor } : undefined}

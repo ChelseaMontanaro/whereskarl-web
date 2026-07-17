@@ -144,14 +144,20 @@ describe("Bay Area product regions", () => {
     });
   });
 
-  it("frames East Bay with balanced bounds for core and inland context", () => {
+  it("frames East Bay so all five monitored catalog locations fit immediately", () => {
     const eastBay = findBayAreaProductRegion("east-bay");
     expect(eastBay).toBeDefined();
 
     const [[west, south], [east, north]] = eastBay!.bounds;
 
-    expect(pointInBounds(37.8716, -122.2727, eastBay!.bounds)).toBe(true);
-    expect(pointInBounds(37.8044, -122.2712, eastBay!.bounds)).toBe(true);
+    // Phase 16.2E East Bay catalog
+    expect(pointInBounds(37.8715, -122.273, eastBay!.bounds)).toBe(true); // Berkeley
+    expect(pointInBounds(37.8044, -122.2712, eastBay!.bounds)).toBe(true); // Oakland
+    expect(pointInBounds(37.7651, -122.2416, eastBay!.bounds)).toBe(true); // Alameda
+    expect(pointInBounds(37.6688, -122.0808, eastBay!.bounds)).toBe(true); // Hayward
+    expect(pointInBounds(37.5485, -121.9886, eastBay!.bounds)).toBe(true); // Fremont
+
+    // Inland / north context retained from the prior product frame
     expect(pointInBounds(37.9103, -122.0652, eastBay!.bounds)).toBe(true);
     expect(pointInBounds(37.8858, -122.118, eastBay!.bounds)).toBe(true);
     expect(pointInBounds(37.8771, -122.1797, eastBay!.bounds)).toBe(true);
@@ -163,12 +169,13 @@ describe("Bay Area product regions", () => {
     expect(pointInBounds(37.7749, -122.4194, eastBay!.bounds)).toBe(false);
     expect(pointInBounds(37.8735, -122.4566, eastBay!.bounds)).toBe(false);
     expect(pointInBounds(37.3382, -121.8863, eastBay!.bounds)).toBe(false);
-    expect(pointInBounds(37.6819, -121.768, eastBay!.bounds)).toBe(false);
+    // East of the product east edge (beyond retained inland/Delta context).
+    expect(pointInBounds(37.6819, -121.70, eastBay!.bounds)).toBe(false);
 
-    expect(west).toBeGreaterThanOrEqual(-122.35);
-    expect(east).toBeLessThanOrEqual(-121.7);
-    expect(south).toBeGreaterThanOrEqual(37.68);
-    expect(north).toBeLessThanOrEqual(38.05);
+    expect(west).toBe(-122.33);
+    expect(east).toBe(-121.72);
+    expect(south).toBe(37.52);
+    expect(north).toBe(38.02);
 
     expect(eastBay?.viewport).toEqual({
       padding: 36,

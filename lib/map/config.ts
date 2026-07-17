@@ -146,8 +146,11 @@ export const BAY_AREA_PRODUCT_REGIONS: BayAreaProductRegion[] = [
     id: "east-bay",
     name: "East Bay",
     chipLabel: "East Bay",
+    // Phase 16.2E catalog: Berkeley → Oakland → Alameda plus Hayward and
+    // Fremont. Earlier south edge (37.7) clipped the two southern pins until
+    // the user zoomed out. Keep the inland/north context; only extend south.
     bounds: [
-      [-122.33, 37.7],
+      [-122.33, 37.52],
       [-121.72, 38.02],
     ],
     viewport: {
