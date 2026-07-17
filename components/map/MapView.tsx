@@ -552,12 +552,13 @@ function MobileMapView({ state }: { state: MapViewModel }) {
       <p
         className={
           isPhonePortrait
-            ? // Phone portrait: sit in the extreme bottom-right of the visible
-              // map (above the Selected Location sheet / bottom nav). Collapsed
-              // vs expanded offsets and type treatment live in
-              // phone-portrait-map.web.css so the sheet never overlaps license
-              // attribution. Tablet/desktop keep their existing classes.
-              "karl-map-attrib karl-map-attrib--phone pointer-events-none absolute z-20"
+            ? // Phone portrait: stay anchored in the map canvas bottom-right
+              // (cleared of the bottom nav only). Type treatment lives in
+              // phone-portrait-map.web.css. z-10 keeps the credit under the
+              // map overlay stacking context (z-20) so the Selected Location
+              // sheet covers it in place rather than lifting it. Tablet/desktop
+              // keep their existing classes.
+              "karl-map-attrib karl-map-attrib--phone pointer-events-none absolute z-10"
             : "pointer-events-none absolute bottom-[calc(5rem+env(safe-area-inset-bottom))] right-3 z-20 text-[0.6rem] text-white/25 sm:right-4"
         }
       >
