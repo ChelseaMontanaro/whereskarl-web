@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 import type { FocalPoint } from "@/lib/schemas/weather";
@@ -75,10 +76,15 @@ export function LocationCircularImage({
       className={className}
     >
       {showImage ? (
-        // eslint-disable-next-line @next/next/no-img-element -- canonical CDN hero; circular crop is CSS-only
-        <img
+        <Image
           src={resolvedUrl!}
           alt={alt}
+          width={64}
+          height={64}
+          sizes="64px"
+          priority
+          fetchPriority="high"
+          decoding="async"
           data-testid="location-circular-image-img"
           className="h-full w-full object-cover"
           style={{ objectPosition: objectPositionFromFocalPoint(focalPoint) }}

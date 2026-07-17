@@ -1244,7 +1244,12 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     );
 
     const img = screen.getByTestId("location-circular-image-img");
-    expect(img).toHaveAttribute("src", imageUrl);
+    expect(decodeURIComponent(img.getAttribute("src") ?? "")).toContain(
+      `url=${imageUrl}`,
+    );
+    expect(img).toHaveAttribute("width", "64");
+    expect(img).toHaveAttribute("height", "64");
+    expect(img).toHaveAttribute("sizes", "64px");
     expect(img).toHaveStyle({ objectPosition: "28% 38%" });
     expect(screen.getByTestId("location-circular-image").className).toContain(
       "rounded-full",

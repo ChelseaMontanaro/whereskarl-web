@@ -9,6 +9,20 @@ import {
   LocationCircularImage,
   objectPositionFromFocalPoint,
 } from "@/components/location/LocationCircularImage";
+import nextConfig from "../../next.config";
+
+function expectOptimizedCanonicalSource(
+  img: HTMLElement,
+  imageUrl: string,
+): void {
+  const src = img.getAttribute("src") ?? "";
+  const srcSet = img.getAttribute("srcset") ?? "";
+
+  expect(src).toContain("/_next/image?");
+  expect(decodeURIComponent(src)).toContain(`url=${imageUrl}`);
+  expect(srcSet).toContain("/_next/image?");
+  expect(decodeURIComponent(srcSet)).toContain(`url=${imageUrl}`);
+}
 
 afterEach(() => {
   cleanup();
@@ -39,7 +53,7 @@ describe("LocationCircularImage", () => {
     expect(placeholder.className).toContain("w-16");
   });
 
-  it("renders the canonical hero URL when imagery exists", () => {
+  it("optimizes the canonical hero URL at the fixed circular display size", () => {
     const imageUrl =
       "https://cdn.example.com/assets/hero/redwood-city/day.png";
 
@@ -54,8 +68,13 @@ describe("LocationCircularImage", () => {
     const frame = screen.getByTestId("location-circular-image");
     const img = screen.getByTestId("location-circular-image-img");
 
-    expect(img).toHaveAttribute("src", imageUrl);
+    expectOptimizedCanonicalSource(img, imageUrl);
     expect(img).toHaveAttribute("alt", "Redwood City landmark");
+    expect(img).toHaveAttribute("width", "64");
+    expect(img).toHaveAttribute("height", "64");
+    expect(img).toHaveAttribute("sizes", "64px");
+    expect(img).toHaveAttribute("fetchpriority", "high");
+    expect(img).toHaveAttribute("decoding", "async");
     expect(img.className).toContain("object-cover");
     expect(img).toHaveStyle({ objectPosition: "50% 52%" });
     expect(frame.className).toContain("rounded-full");
@@ -89,5 +108,18 @@ describe("LocationCircularImage", () => {
     expect(source).not.toMatch(/IMAGE_BY_LOCATION|LOCATION_IMAGES|hero\/redwood-city/);
     expect(source).toContain("imageUrl");
     expect(source).toContain("focalPoint");
+  });
+
+  it("keeps Next image optimization enabled for the canonical Blob path", () => {
+    expect(nextConfig.images?.unoptimized).not.toBe(true);
+    expect(nextConfig.images?.remotePatterns).toEqual([
+      {
+        protocol: "https",
+        hostname: "snhitxyrhse7o7xm.public.blob.vercel-storage.com",
+        port: "",
+        pathname: "/hero/**",
+        search: "",
+      },
+    ]);
   });
 });
