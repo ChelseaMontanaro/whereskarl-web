@@ -32,6 +32,7 @@ import {
   type MapMarkerLocation,
 } from "@/lib/map/markers";
 import type { FogIntensity } from "@/lib/map/conditions";
+import { collapsePhonePortraitAttribution } from "@/lib/map/phonePortraitAttribution";
 import {
   getPhonePortraitMarkerPriority,
   PHONE_PORTRAIT_MAP_CENTER,
@@ -224,6 +225,23 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
             new maplibregl.NavigationControl({ showCompass: false }),
             "top-right",
           );
+        }
+
+        if (isPhonePortrait) {
+          // MapLibre expands the compact attribution control once the style's
+          // source credits load (sourcedata/styledata), which can land after
+          // `load`. Watch those events, collapse the initial expansion once,
+          // then detach so a user ⓘ tap can still re-expand the credits.
+          const collapseInitialAttribution = () => {
+            if (collapsePhonePortraitAttribution(containerRef.current)) {
+              map.off("styledata", collapseInitialAttribution);
+              map.off("sourcedata", collapseInitialAttribution);
+            }
+          };
+
+          map.on("styledata", collapseInitialAttribution);
+          map.on("sourcedata", collapseInitialAttribution);
+          collapseInitialAttribution();
         }
 
         map.on("load", () => {

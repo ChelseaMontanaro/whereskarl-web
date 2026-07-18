@@ -136,7 +136,9 @@
  * stacking context at z-20). Never hide attribution (license).
  */
 .karl-map-attrib--phone {
-  right: 5px;
+  /* Clear the collapsed MapLibre ⓘ toggle (24px button + 5px control margin)
+     that shares this corner, plus the original 5px inset. */
+  right: 34px;
   bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px) + 5px);
   margin: 0;
   padding: 0;
