@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 
 import {
-  PHONE_PORTRAIT_ALL_BAY_CAMERA,
+  PHONE_PORTRAIT_ALL_BAY_BOUNDS,
+  PHONE_PORTRAIT_ALL_BAY_VIEWPORT_PADDING,
   PHONE_PORTRAIT_EAST_BAY_REGION_BOUNDS,
   PHONE_PORTRAIT_EAST_BAY_VIEWPORT_PADDING,
   PHONE_PORTRAIT_NORTH_BAY_REGION_BOUNDS,
@@ -135,19 +136,24 @@ describe("fitPhonePortraitRegionViewport", () => {
     }
   });
 
-  it("falls back to the all-Bay camera only when no region is selected", () => {
-    const { map, jumpTo, fitBounds } = createMapSpies();
+  it("frames the all-Bay default on the full catalog bounds when no region is selected", () => {
+    const { map, jumpTo, easeTo, fitBounds } = createMapSpies();
 
     fitPhonePortraitRegionViewport(map, null);
 
-    expect(fitBounds).not.toHaveBeenCalled();
-    expect(jumpTo).toHaveBeenCalledWith({
-      center: [
-        PHONE_PORTRAIT_ALL_BAY_CAMERA.longitude,
-        PHONE_PORTRAIT_ALL_BAY_CAMERA.latitude,
-      ],
-      zoom: PHONE_PORTRAIT_ALL_BAY_CAMERA.zoom,
-    });
+    // Canonical camera system: the all-Bay default frames the supported
+    // catalog's bounding box via the same fitBounds path as every region —
+    // no bespoke center/zoom preset.
+    expect(fitBounds).toHaveBeenCalledTimes(1);
+    expect(fitBounds).toHaveBeenCalledWith(
+      PHONE_PORTRAIT_ALL_BAY_BOUNDS,
+      expect.objectContaining({
+        padding: normalizePadding(PHONE_PORTRAIT_ALL_BAY_VIEWPORT_PADDING),
+        duration: 0,
+      }),
+    );
+    expect(jumpTo).not.toHaveBeenCalled();
+    expect(easeTo).not.toHaveBeenCalled();
   });
 
   it("resets persistent transform padding before every region application", () => {

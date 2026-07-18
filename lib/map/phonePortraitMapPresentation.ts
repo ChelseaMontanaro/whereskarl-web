@@ -42,12 +42,6 @@ export const PHONE_PORTRAIT_MAP_CENTER = {
 /** Tight peninsula span with Marin as a thin top edge only. */
 export const PHONE_PORTRAIT_MAP_INITIAL_ZOOM = 9.42;
 
-export type PhonePortraitCameraPreset = {
-  latitude: number;
-  longitude: number;
-  zoom: number;
-};
-
 /** North Bay tab: Marin peninsula from Novato to the Gate — approved screenshot. */
 export const PHONE_PORTRAIT_NORTH_BAY_REGION_BOUNDS: MapBounds = [
   [-122.658, 37.808],
@@ -138,22 +132,45 @@ export const PHONE_PORTRAIT_PENINSULA_VIEWPORT_PADDING: ViewportPadding = {
   left: 88,
 };
 
-/** Deselected / all-Bay default: wider full Bay Area view. */
-export const PHONE_PORTRAIT_ALL_BAY_CAMERA: PhonePortraitCameraPreset = {
-  latitude: 37.58,
-  longitude: -122.27,
-  zoom: 8,
-};
+/**
+ * Deselected / all-Bay default: the minimum bounding box of the canonical
+ * supported location catalog (backend `/locations`), rounded slightly outward.
+ * Current extremes: Santa Rosa (north + west), Los Gatos (south), Livermore
+ * (east). Framed through the same canonical fitBounds path as the five
+ * regions so every supported marker is on screen when no region is active.
+ *
+ * The frontend deliberately has no location catalog (the backend is the single
+ * source of truth and the runtime list handed to the map is filtered by region
+ * chips / fog intensity), so this stays a fixed canonical constant rather than
+ * a runtime derivation. When the supported catalog expands beyond this box,
+ * widen it to the new catalog AABB — the geography test in
+ * `tests/map/phonePortraitCameraGeography.test.ts` locks it to the full
+ * catalog and will fail if it drifts.
+ */
+export const PHONE_PORTRAIT_ALL_BAY_BOUNDS: MapBounds = [
+  [-122.72, 37.22],
+  [-121.76, 38.45],
+];
 
 /**
- * Deselected / no-region fallback camera. Every visible product region is
- * framed by {@link fitPhonePortraitRegionViewport} via canonical fitBounds
- * (SF / North Bay / East Bay / South Bay / Peninsula), so this helper only
- * supplies the all-Bay camera when no region is active.
+ * Breathing room for the all-Bay fitBounds on a 390×844 portrait viewport.
+ * The side padding is the binding fit dimension: it keeps the west (Santa
+ * Rosa) and east (Livermore) extremes ~44px inside the screen edges.
+ *
+ * Vertically the frame is capped by `BAY_AREA_MAX_BOUNDS`: the catalog spans
+ * nearly the full permitted latitude range, so at the fitted zoom (~7.8) the
+ * viewport covers the entire pan-limit latitude span and MapLibre's constraint
+ * — not this padding — fixes the vertical placement (Santa Rosa ~86px from the
+ * top, Los Gatos ~270px from the bottom). The top/bottom values below document
+ * that intent and keep the requested fit consistent if the pan limits ever
+ * widen.
  */
-export function getPhonePortraitCameraPreset(): PhonePortraitCameraPreset {
-  return PHONE_PORTRAIT_ALL_BAY_CAMERA;
-}
+export const PHONE_PORTRAIT_ALL_BAY_VIEWPORT_PADDING: ViewportPadding = {
+  top: 86,
+  right: 44,
+  bottom: 250,
+  left: 44,
+};
 
 export const PHONE_PORTRAIT_MAP_MAX_ZOOM = 10.6;
 

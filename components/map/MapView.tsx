@@ -319,7 +319,7 @@ function MobileMapView({ state }: { state: MapViewModel }) {
 
   // Region that frames the phone-portrait camera. Camera intent is independent
   // of the canonical selection: when no region is active the camera frames the
-  // full Bay (`null` → PHONE_PORTRAIT_ALL_BAY_CAMERA), even while Best Right Now
+  // full Bay (`null` → PHONE_PORTRAIT_ALL_BAY_BOUNDS), even while Best Right Now
   // is auto-selected into the sheet. Selection never silently swaps the camera
   // to a region (audit RC-3: "All Bay" must not reuse the San Francisco camera).
   const phonePortraitCameraRegionId = mapQuery.activeRegionId;

@@ -2,7 +2,8 @@ import type { Map } from "maplibre-gl";
 
 import { BAY_AREA_LOCATION_ZOOM } from "@/lib/map/config";
 import {
-  getPhonePortraitCameraPreset,
+  PHONE_PORTRAIT_ALL_BAY_BOUNDS,
+  PHONE_PORTRAIT_ALL_BAY_VIEWPORT_PADDING,
   PHONE_PORTRAIT_EAST_BAY_REGION_BOUNDS,
   PHONE_PORTRAIT_EAST_BAY_VIEWPORT_PADDING,
   PHONE_PORTRAIT_MAP_MAX_ZOOM,
@@ -125,17 +126,19 @@ export function fitPhonePortraitRegionViewport(
     return;
   }
 
-  const preset = getPhonePortraitCameraPreset();
-  const camera = {
-    center: [preset.longitude, preset.latitude] as [number, number],
-    zoom: preset.zoom,
-  };
+  // Deselected / all-Bay: frame the full supported catalog bounding box
+  // through the same canonical fitBounds path as the five regions, so the
+  // default camera adapts to the viewport instead of assuming one zoom.
+  const padding = normalizePhonePortraitPadding(
+    PHONE_PORTRAIT_ALL_BAY_VIEWPORT_PADDING,
+  );
 
-  if (duration > 0) {
-    map.easeTo({ ...camera, duration, essential: true });
-  } else {
-    map.jumpTo(camera);
-  }
+  map.fitBounds(PHONE_PORTRAIT_ALL_BAY_BOUNDS, {
+    padding,
+    maxZoom: PHONE_PORTRAIT_MAP_MAX_ZOOM,
+    duration,
+    essential: true,
+  });
 }
 
 /** @deprecated Use fitPhonePortraitRegionViewport with "san-francisco". */
