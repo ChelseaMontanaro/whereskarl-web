@@ -118,6 +118,69 @@ describe("MapPhonePortraitControls", () => {
     expect(input).toHaveValue("Half Moon Bay");
   });
 
+  it("shows a compact empty-state panel on focus without listing locations", () => {
+    render(
+      <MapPhonePortraitControls
+        selectedRegionId={null}
+        onSelectRegion={vi.fn()}
+        isPhonePortrait
+        locations={[
+          { id: "tiburon", name: "Tiburon" },
+          { id: "sausalito", name: "Sausalito" },
+          { id: "santa-rosa", name: "Santa Rosa" },
+        ]}
+        onSelectLocation={vi.fn()}
+        onClearSelectedLocation={vi.fn()}
+      />,
+    );
+
+    const input = screen.getByRole("combobox", { name: "Search locations" });
+    fireEvent.focus(input);
+
+    expect(
+      screen.getByTestId("map-phone-portrait-search-empty"),
+    ).toHaveTextContent("Start typing to search locations");
+    expect(screen.queryByRole("option")).toBeNull();
+    expect(screen.queryByText("Tiburon")).not.toBeInTheDocument();
+    expect(screen.queryByText("Sausalito")).not.toBeInTheDocument();
+  });
+
+  it("reveals ranked results after the first non-whitespace character and restores empty state when cleared", () => {
+    render(
+      <MapPhonePortraitControls
+        selectedRegionId={null}
+        onSelectRegion={vi.fn()}
+        isPhonePortrait
+        locations={[
+          { id: "san-francisco", name: "San Francisco" },
+          { id: "santa-rosa", name: "Santa Rosa" },
+          { id: "sausalito", name: "Sausalito" },
+          { id: "tiburon", name: "Tiburon" },
+        ]}
+        onSelectLocation={vi.fn()}
+        onClearSelectedLocation={vi.fn()}
+      />,
+    );
+
+    const input = screen.getByRole("combobox", { name: "Search locations" });
+    fireEvent.focus(input);
+    expect(screen.getByTestId("map-phone-portrait-search-empty")).toBeInTheDocument();
+
+    fireEvent.change(input, { target: { value: " " } });
+    expect(screen.getByTestId("map-phone-portrait-search-empty")).toBeInTheDocument();
+    expect(screen.queryByRole("option")).toBeNull();
+
+    fireEvent.change(input, { target: { value: "S" } });
+    expect(screen.queryByTestId("map-phone-portrait-search-empty")).toBeNull();
+    expect(
+      screen.getAllByRole("option").map((option) => option.textContent),
+    ).toEqual(["San Francisco", "Santa Rosa", "Sausalito"]);
+
+    fireEvent.change(input, { target: { value: "" } });
+    expect(screen.getByTestId("map-phone-portrait-search-empty")).toBeInTheDocument();
+    expect(screen.queryByRole("option")).toBeNull();
+  });
+
   it("clearing search calls the existing reset handler", () => {
     const onClearSelectedLocation = vi.fn();
 

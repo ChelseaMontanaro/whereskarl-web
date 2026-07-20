@@ -85,10 +85,12 @@ function MapPhonePortraitSearchBar({
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
 
-  const results = useMemo(
-    () => filterCanonicalLocationsBySearch(locations, query),
-    [locations, query],
-  );
+  const results = useMemo(() => {
+    if (query.trim().length === 0) {
+      return [];
+    }
+    return filterCanonicalLocationsBySearch(locations, query);
+  }, [locations, query]);
 
   useEffect(() => {
     setActiveIndex(-1);
@@ -144,8 +146,12 @@ function MapPhonePortraitSearchBar({
     onClearSelectedLocation();
   };
 
+  const hasSearchText = query.trim().length > 0;
+  const hasQuery = query.length > 0;
+  const showOverlay = isOverlayOpen;
+
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (!isOverlayOpen && (event.key === "ArrowDown" || event.key === "ArrowUp")) {
+    if (!showOverlay && (event.key === "ArrowDown" || event.key === "ArrowUp")) {
       setIsOverlayOpen(true);
     }
 
@@ -155,7 +161,7 @@ function MapPhonePortraitSearchBar({
       return;
     }
 
-    if (!isOverlayOpen) {
+    if (!showOverlay || !hasSearchText) {
       return;
     }
 
@@ -187,9 +193,6 @@ function MapPhonePortraitSearchBar({
     }
   };
 
-  const hasQuery = query.length > 0;
-  const showResults = isOverlayOpen;
-
   return (
     <div ref={rootRef} className="relative z-50 mb-1 w-full">
       <div
@@ -204,10 +207,13 @@ function MapPhonePortraitSearchBar({
           placeholder="Search locations..."
           aria-label="Search locations"
           aria-autocomplete="list"
-          aria-controls={listboxId}
-          aria-expanded={showResults}
+          aria-controls={hasSearchText ? listboxId : undefined}
+          aria-expanded={showOverlay}
           aria-activedescendant={
-            showResults && activeIndex >= 0 && results[activeIndex]
+            showOverlay &&
+            hasSearchText &&
+            activeIndex >= 0 &&
+            results[activeIndex]
               ? `${listboxId}-option-${results[activeIndex].id}`
               : undefined
           }
@@ -249,12 +255,36 @@ function MapPhonePortraitSearchBar({
         )}
       </div>
 
-      {showResults ? (
+      {showOverlay ? (
         <div
-          className="absolute left-0 right-0 top-full z-50 mt-1.5 max-h-[min(18rem,calc(100dvh-8.5rem))] overflow-y-auto overscroll-contain rounded-2xl border border-[rgb(150_175_200/0.22)] bg-[rgb(5_13_24/0.94)] py-1 shadow-[0_12px_40px_rgba(0,0,0,0.45)] backdrop-blur-xl"
+          className={`absolute left-0 right-0 top-full z-50 mt-1.5 rounded-2xl border border-[rgb(150_175_200/0.22)] bg-[rgb(5_13_24/0.94)] shadow-[0_12px_40px_rgba(0,0,0,0.45)] backdrop-blur-xl ${
+            hasSearchText
+              ? "max-h-[min(18rem,calc(100dvh-8.5rem))] overflow-y-auto overscroll-contain py-1"
+              : "flex min-h-[3.25rem] items-center justify-center px-3.5 py-3"
+          }`}
           data-testid="map-phone-portrait-search-results"
         >
-          {results.length === 0 ? (
+          {!hasSearchText ? (
+            <p
+              className="flex items-center justify-center gap-2 text-center text-sm font-medium text-white/45"
+              data-testid="map-phone-portrait-search-empty"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className="h-3.5 w-3.5 shrink-0 text-white/40"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.25"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                <circle cx="11" cy="11" r="6.5" />
+                <path d="M16.2 16.2 20 20" />
+              </svg>
+              Start typing to search locations
+            </p>
+          ) : results.length === 0 ? (
             <p className="px-3.5 py-3 text-sm font-medium text-white/55">
               No matching locations
             </p>
