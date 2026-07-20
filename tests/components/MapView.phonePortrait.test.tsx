@@ -73,7 +73,9 @@ describe("MapView phone portrait", () => {
     expect(
       await screen.findByTestId("map-phone-portrait-search-bar"),
     ).toBeInTheDocument();
-    expect(screen.getByText("Search locations...")).toBeInTheDocument();
+    expect(
+      screen.getByRole("combobox", { name: "Search locations" }),
+    ).toBeInTheDocument();
     expect(
       screen.queryByRole("heading", { name: "Karl Around the Bay" }),
     ).not.toBeInTheDocument();
@@ -84,7 +86,8 @@ describe("MapView phone portrait", () => {
     expect(container.querySelector(".grid.grid-cols-2")).toBeNull();
 
     const searchBar = screen.getByTestId("map-phone-portrait-search-bar");
-    const headerContainer = searchBar.parentElement?.parentElement;
+    const headerContainer =
+      searchBar.parentElement?.parentElement?.parentElement;
     expect(headerContainer?.className).toContain("inset-x-3");
     expect(headerContainer?.className).not.toContain("4.75rem");
   });

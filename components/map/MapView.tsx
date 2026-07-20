@@ -331,6 +331,27 @@ function MobileMapView({ state }: { state: MapViewModel }) {
     ? null
     : mapQuery.activeRegionId;
 
+  // Search select: reuse canonical URL selection + the shared location camera
+  // (`focusMapOnLocation` via BayAreaMap.focusLocation). Marker taps stay on
+  // the selection-only path so phone-portrait camera behavior is unchanged.
+  const handleSearchSelectLocation = useCallback(
+    (locationId: string) => {
+      const location = markerLocations.find((item) => item.id === locationId);
+      handleSelectLocation(locationId);
+      if (location) {
+        mapRef.current?.focusLocation(location.longitude, location.latitude);
+      }
+    },
+    [handleSelectLocation, markerLocations],
+  );
+
+  // Search clear: reuse sheet/selection clear, then explicitly restore the
+  // canonical All Bay frame. Ordinary sheet dismiss keeps suppress-only clear.
+  const handleSearchClearSelectedLocation = useCallback(() => {
+    handleClearSelectedLocation();
+    mapRef.current?.fitAllBayView();
+  }, [handleClearSelectedLocation]);
+
   // Selection-driven entry: on a clean map open (no explicit location/region),
   // auto-select the canonical Best Right Now location ONCE so the sheet
   // immediately becomes the selected-location experience. The camera is
@@ -456,6 +477,9 @@ function MobileMapView({ state }: { state: MapViewModel }) {
                 selectedRegionId={mapQuery.activeRegionId}
                 onSelectRegion={handleSelectRegion}
                 isPhonePortrait
+                locations={markerLocations}
+                onSelectLocation={handleSearchSelectLocation}
+                onClearSelectedLocation={handleSearchClearSelectedLocation}
               />
             ) : (
               <>

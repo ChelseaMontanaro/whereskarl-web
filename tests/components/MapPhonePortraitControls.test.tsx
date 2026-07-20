@@ -65,24 +65,79 @@ describe("MapPhonePortraitControls", () => {
     expect(scrollTo).toHaveBeenCalled();
   });
 
-  it("replaces the phone portrait title with a non-interactive search bar", () => {
+  it("replaces the phone portrait title with an interactive canonical search bar", () => {
     render(
       <MapPhonePortraitControls
         selectedRegionId={null}
         onSelectRegion={vi.fn()}
         isPhonePortrait
+        locations={[
+          { id: "tiburon", name: "Tiburon" },
+          { id: "sausalito", name: "Sausalito" },
+        ]}
+        onSelectLocation={vi.fn()}
+        onClearSelectedLocation={vi.fn()}
       />,
     );
 
     const searchBar = screen.getByTestId("map-phone-portrait-search-bar");
     expect(searchBar).toBeInTheDocument();
-    expect(screen.getByText("Search locations...")).toBeInTheDocument();
+    expect(
+      screen.getByRole("combobox", { name: "Search locations" }),
+    ).toBeInTheDocument();
     expect(
       screen.queryByRole("heading", { name: "Karl Around the Bay" }),
     ).not.toBeInTheDocument();
-    expect(searchBar.querySelector("input")).toBeNull();
-    expect(searchBar.querySelector("button")).toBeNull();
-    expect(searchBar.className).toContain("pointer-events-none");
+    expect(searchBar.className).not.toContain("pointer-events-none");
+  });
+
+  it("filters canonical locations and selects by id", () => {
+    const onSelectLocation = vi.fn();
+
+    render(
+      <MapPhonePortraitControls
+        selectedRegionId={null}
+        onSelectRegion={vi.fn()}
+        isPhonePortrait
+        locations={[
+          { id: "half-moon-bay", name: "Half Moon Bay" },
+          { id: "santa-rosa", name: "Santa Rosa" },
+          { id: "sausalito", name: "Sausalito" },
+        ]}
+        onSelectLocation={onSelectLocation}
+        onClearSelectedLocation={vi.fn()}
+      />,
+    );
+
+    const input = screen.getByRole("combobox", { name: "Search locations" });
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: "moon" } });
+
+    fireEvent.click(screen.getByRole("option", { name: "Half Moon Bay" }));
+    expect(onSelectLocation).toHaveBeenCalledWith("half-moon-bay");
+    expect(input).toHaveValue("Half Moon Bay");
+  });
+
+  it("clearing search calls the existing reset handler", () => {
+    const onClearSelectedLocation = vi.fn();
+
+    render(
+      <MapPhonePortraitControls
+        selectedRegionId={null}
+        onSelectRegion={vi.fn()}
+        isPhonePortrait
+        locations={[{ id: "tiburon", name: "Tiburon" }]}
+        onSelectLocation={vi.fn()}
+        onClearSelectedLocation={onClearSelectedLocation}
+      />,
+    );
+
+    const input = screen.getByRole("combobox", { name: "Search locations" });
+    fireEvent.change(input, { target: { value: "Tiburon" } });
+    fireEvent.click(screen.getByRole("button", { name: "Clear search" }));
+
+    expect(onClearSelectedLocation).toHaveBeenCalledTimes(1);
+    expect(input).toHaveValue("");
   });
 
   it("keeps region chip interactions wired", () => {

@@ -63,6 +63,10 @@ import {
 export type BayAreaMapHandle = {
   resetView: () => void;
   locateMe: () => void;
+  /** Canonical selected-location camera (`focusMapOnLocation` / BAY_AREA_LOCATION_ZOOM). */
+  focusLocation: (longitude: number, latitude: number) => void;
+  /** Canonical phone-portrait All Bay frame (`fitPhonePortraitRegionViewport(null)`). */
+  fitAllBayView: () => void;
 };
 
 type BayAreaMapProps = {
@@ -161,6 +165,39 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
       );
     }, [immersiveOverlayProfile, isImmersive]);
 
+    const focusLocation = useCallback(
+      (longitude: number, latitude: number) => {
+        const map = mapRef.current;
+        if (!map) {
+          return;
+        }
+
+        focusMapOnLocation(map, longitude, latitude);
+      },
+      [],
+    );
+
+    const fitAllBayView = useCallback(() => {
+      const map = mapRef.current;
+      if (!map) {
+        return;
+      }
+
+      if (phonePortraitWebRef.current) {
+        fitPhonePortraitRegionViewport(map, null, { duration: 450 });
+        return;
+      }
+
+      const immersiveFit = isImmersive
+        ? getImmersiveDefaultBayAreaFitOptions(immersiveOverlayProfile)
+        : null;
+      fitDefaultBayAreaViewport(
+        map,
+        immersiveFit?.padding,
+        immersiveFit?.maxZoom ?? BAY_AREA_DEFAULT_MAX_ZOOM,
+      );
+    }, [immersiveOverlayProfile, isImmersive]);
+
     const locateMe = useCallback(() => {
       const map = mapRef.current;
       if (!map) {
@@ -190,10 +227,11 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
       );
     }, []);
 
-    useImperativeHandle(ref, () => ({ resetView, locateMe }), [
-      locateMe,
-      resetView,
-    ]);
+    useImperativeHandle(
+      ref,
+      () => ({ resetView, locateMe, focusLocation, fitAllBayView }),
+      [fitAllBayView, focusLocation, locateMe, resetView],
+    );
 
     useEffect(() => {
       let cancelled = false;

@@ -1,53 +1,293 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from "react";
 
 import { BAY_AREA_PRODUCT_REGIONS } from "@/lib/map/config";
+import { filterCanonicalLocationsBySearch } from "@/lib/map/locationSearch";
+
+type SearchableMapLocation = {
+  id: string;
+  name: string;
+};
 
 type MapPhonePortraitControlsProps = {
   selectedRegionId: string | null;
   onSelectRegion: (regionId: string) => void;
   isPhonePortrait?: boolean;
+  /** Canonical map locations already loaded for markers — not a search-only catalog. */
+  locations?: readonly SearchableMapLocation[];
+  onSelectLocation?: (locationId: string) => void;
+  /** Existing clear-selection / All Bay reset handler. */
+  onClearSelectedLocation?: () => void;
 };
 
-/** Phase 16.3C.1 — visual-only Google Maps–style search chrome (not interactive yet). */
-function MapPhonePortraitSearchBar() {
+type MapPhonePortraitSearchBarProps = {
+  locations: readonly SearchableMapLocation[];
+  onSelectLocation: (locationId: string) => void;
+  onClearSelectedLocation: () => void;
+};
+
+function SearchMagnifierIcon() {
   return (
-    <div
-      className="pointer-events-none mb-1 flex w-full select-none items-center gap-2.5 rounded-full border border-[rgb(150_175_200/0.2)] bg-[rgb(5_13_24/0.88)] px-3.5 py-2.5"
-      data-testid="map-phone-portrait-search-bar"
+    <svg
+      viewBox="0 0 24 24"
+      className="h-[1.125rem] w-[1.125rem] shrink-0 text-white/85"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.25"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
     >
-      <svg
-        viewBox="0 0 24 24"
-        className="h-[1.125rem] w-[1.125rem] shrink-0 text-white/85"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.25"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden
+      <circle cx="11" cy="11" r="6.5" />
+      <path d="M16.2 16.2 20 20" />
+    </svg>
+  );
+}
+
+function SearchMicIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-[1.125rem] w-[1.125rem] shrink-0 text-white/85"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.25"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M12 3.5a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0v-5a3 3 0 0 0-3-3Z" />
+      <path d="M7.5 11.5a4.5 4.5 0 0 0 9 0" />
+      <path d="M12 16v3.5" />
+      <path d="M9.5 19.5h5" />
+    </svg>
+  );
+}
+
+/** Phase 16.3C.1b — interactive canonical location search (phone portrait). */
+function MapPhonePortraitSearchBar({
+  locations,
+  onSelectLocation,
+  onClearSelectedLocation,
+}: MapPhonePortraitSearchBarProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const listboxId = useId();
+  const [query, setQuery] = useState("");
+  const [isOverlayOpen, setIsOverlayOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
+
+  const results = useMemo(
+    () => filterCanonicalLocationsBySearch(locations, query),
+    [locations, query],
+  );
+
+  useEffect(() => {
+    setActiveIndex(-1);
+  }, [query]);
+
+  const closeOverlay = () => {
+    setIsOverlayOpen(false);
+    setActiveIndex(-1);
+  };
+
+  const dismissKeyboardAndOverlay = () => {
+    closeOverlay();
+    inputRef.current?.blur();
+  };
+
+  useEffect(() => {
+    if (!isOverlayOpen) {
+      return;
+    }
+
+    const onPointerDown = (event: PointerEvent) => {
+      const root = rootRef.current;
+      if (!root || root.contains(event.target as Node)) {
+        return;
+      }
+      setIsOverlayOpen(false);
+      setActiveIndex(-1);
+      inputRef.current?.blur();
+    };
+
+    // Bind on the next tick so the opening tap cannot immediately dismiss.
+    const timer = window.setTimeout(() => {
+      document.addEventListener("pointerdown", onPointerDown);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timer);
+      document.removeEventListener("pointerdown", onPointerDown);
+    };
+  }, [isOverlayOpen]);
+
+  const handleSelectResult = (location: SearchableMapLocation) => {
+    setQuery(location.name);
+    closeOverlay();
+    inputRef.current?.blur();
+    onSelectLocation(location.id);
+  };
+
+  const handleClear = () => {
+    setQuery("");
+    closeOverlay();
+    inputRef.current?.blur();
+    onClearSelectedLocation();
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (!isOverlayOpen && (event.key === "ArrowDown" || event.key === "ArrowUp")) {
+      setIsOverlayOpen(true);
+    }
+
+    if (event.key === "Escape") {
+      event.preventDefault();
+      dismissKeyboardAndOverlay();
+      return;
+    }
+
+    if (!isOverlayOpen) {
+      return;
+    }
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      if (results.length === 0) {
+        return;
+      }
+      setActiveIndex((current) =>
+        current < results.length - 1 ? current + 1 : 0,
+      );
+      return;
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      if (results.length === 0) {
+        return;
+      }
+      setActiveIndex((current) =>
+        current > 0 ? current - 1 : results.length - 1,
+      );
+      return;
+    }
+
+    if (event.key === "Enter" && activeIndex >= 0 && results[activeIndex]) {
+      event.preventDefault();
+      handleSelectResult(results[activeIndex]);
+    }
+  };
+
+  const hasQuery = query.length > 0;
+  const showResults = isOverlayOpen;
+
+  return (
+    <div ref={rootRef} className="relative z-50 mb-1 w-full">
+      <div
+        className="relative z-50 flex w-full items-center gap-2.5 rounded-full border border-[rgb(150_175_200/0.2)] bg-[rgb(5_13_24/0.88)] px-3.5 py-2.5"
+        data-testid="map-phone-portrait-search-bar"
       >
-        <circle cx="11" cy="11" r="6.5" />
-        <path d="M16.2 16.2 20 20" />
-      </svg>
-      <span className="min-w-0 flex-1 truncate text-[0.9375rem] font-medium leading-5 text-white/45">
-        Search locations...
-      </span>
-      <svg
-        viewBox="0 0 24 24"
-        className="h-[1.125rem] w-[1.125rem] shrink-0 text-white/85"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.25"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden
-      >
-        <path d="M12 3.5a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0v-5a3 3 0 0 0-3-3Z" />
-        <path d="M7.5 11.5a4.5 4.5 0 0 0 9 0" />
-        <path d="M12 16v3.5" />
-        <path d="M9.5 19.5h5" />
-      </svg>
+        <SearchMagnifierIcon />
+        <input
+          ref={inputRef}
+          type="search"
+          value={query}
+          placeholder="Search locations..."
+          aria-label="Search locations"
+          aria-autocomplete="list"
+          aria-controls={listboxId}
+          aria-expanded={showResults}
+          aria-activedescendant={
+            showResults && activeIndex >= 0 && results[activeIndex]
+              ? `${listboxId}-option-${results[activeIndex].id}`
+              : undefined
+          }
+          role="combobox"
+          autoComplete="off"
+          autoCorrect="off"
+          spellCheck={false}
+          enterKeyHint="search"
+          className="min-w-0 flex-1 bg-transparent text-[0.9375rem] font-medium leading-5 text-white outline-none placeholder:text-white/45 [&::-webkit-search-cancel-button]:hidden"
+          onChange={(event) => {
+            setQuery(event.target.value);
+            setIsOverlayOpen(true);
+          }}
+          onFocus={() => setIsOverlayOpen(true)}
+          onClick={() => setIsOverlayOpen(true)}
+          onKeyDown={handleKeyDown}
+        />
+        {hasQuery ? (
+          <button
+            type="button"
+            aria-label="Clear search"
+            className="inline-flex h-[1.125rem] w-[1.125rem] shrink-0 items-center justify-center text-white/85"
+            onClick={handleClear}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              className="h-[1.125rem] w-[1.125rem]"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.25"
+              strokeLinecap="round"
+              aria-hidden
+            >
+              <path d="M6 6l12 12M18 6 6 18" />
+            </svg>
+          </button>
+        ) : (
+          <SearchMicIcon />
+        )}
+      </div>
+
+      {showResults ? (
+        <div
+          className="absolute left-0 right-0 top-full z-50 mt-1.5 max-h-[min(18rem,calc(100dvh-8.5rem))] overflow-y-auto overscroll-contain rounded-2xl border border-[rgb(150_175_200/0.22)] bg-[rgb(5_13_24/0.94)] py-1 shadow-[0_12px_40px_rgba(0,0,0,0.45)] backdrop-blur-xl"
+          data-testid="map-phone-portrait-search-results"
+        >
+          {results.length === 0 ? (
+            <p className="px-3.5 py-3 text-sm font-medium text-white/55">
+              No matching locations
+            </p>
+          ) : (
+            <ul id={listboxId} role="listbox" aria-label="Location search results">
+              {results.map((location, index) => {
+                const isActive = index === activeIndex;
+                return (
+                  <li key={location.id} role="presentation">
+                    <button
+                      type="button"
+                      id={`${listboxId}-option-${location.id}`}
+                      role="option"
+                      aria-selected={isActive}
+                      className={`flex w-full items-center px-3.5 py-2.5 text-left text-[0.9375rem] font-medium leading-5 text-white/90 ${
+                        isActive ? "bg-white/10" : "hover:bg-white/8"
+                      }`}
+                      onMouseDown={(event) => {
+                        // Keep focus handling deterministic before click selection.
+                        event.preventDefault();
+                      }}
+                      onClick={() => handleSelectResult(location)}
+                      onMouseEnter={() => setActiveIndex(index)}
+                    >
+                      {location.name}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -56,6 +296,9 @@ export function MapPhonePortraitControls({
   selectedRegionId,
   onSelectRegion,
   isPhonePortrait = false,
+  locations = [],
+  onSelectLocation,
+  onClearSelectedLocation,
 }: MapPhonePortraitControlsProps) {
   const chipRefs = useRef(new Map<string, HTMLButtonElement>());
   const chipScrollRef = useRef<HTMLDivElement>(null);
@@ -96,7 +339,11 @@ export function MapPhonePortraitControls({
   if (isPhonePortrait) {
     return (
       <div className="flex w-full flex-col items-center gap-1.5" aria-label="Bay Area regions">
-        <MapPhonePortraitSearchBar />
+        <MapPhonePortraitSearchBar
+          locations={locations}
+          onSelectLocation={onSelectLocation ?? (() => {})}
+          onClearSelectedLocation={onClearSelectedLocation ?? (() => {})}
+        />
 
         <div
           ref={chipScrollRef}
