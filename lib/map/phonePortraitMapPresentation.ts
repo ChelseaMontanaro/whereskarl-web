@@ -73,7 +73,7 @@ export const PHONE_PORTRAIT_NORTH_BAY_REGION_BOUNDS: MapBounds = [
  * coverage; the west anchors (Bodega Bay, Point Reyes) sit below the fog
  * rail's row band, so a narrow left inset is safe. Top clears the region
  * chips for Healdsburg; bottom keeps the Gate / Marin Headlands above the
- * tray. With `BAY_AREA_MAX_BOUNDS` north at 38.95°, this fit is unclamped.
+ * tray. With `BAY_AREA_MAX_BOUNDS` north at 39.05°, this fit is unclamped.
  */
 export const PHONE_PORTRAIT_NORTH_BAY_VIEWPORT_PADDING: ViewportPadding = {
   top: 100,
@@ -192,18 +192,25 @@ export const PHONE_PORTRAIT_ALL_BAY_BOUNDS: MapBounds = [
 
 /**
  * Breathing room for the all-Bay fitBounds on a 390×844 portrait viewport.
- * The side padding is the binding fit dimension: it keeps the west (Santa
- * Rosa) and east (Livermore) extremes ~44px inside the screen edges.
- * Top/bottom place Santa Rosa under the region chips and Los Gatos above the
- * tray. The shared pan limits are wide enough that this fit is no longer
- * vertically center-clamped.
+ * Side padding is the binding fit dimension: it keeps Santa Rosa (west) and
+ * Livermore (east) ~80px inside the screen edges so the catalog is centered
+ * with clear margin rather than edge-hugging. Top/bottom place Santa Rosa
+ * under the region chips and Los Gatos above the tray with similar room.
+ * Shared pan limits are wide enough that this fit stays unclamped.
  */
 export const PHONE_PORTRAIT_ALL_BAY_VIEWPORT_PADDING: ViewportPadding = {
-  top: 86,
-  right: 44,
-  bottom: 250,
-  left: 44,
+  top: 112,
+  right: 80,
+  bottom: 260,
+  left: 80,
 };
+
+/**
+ * Most-zoomed-out floor for phone-portrait web. Matches the padded all-Bay
+ * fit (~7.40) so pinch-zoom cannot collapse past the comfortable default
+ * framing into empty water / statewide coverage.
+ */
+export const PHONE_PORTRAIT_MAP_MIN_ZOOM = 7.3;
 
 export const PHONE_PORTRAIT_MAP_MAX_ZOOM = 10.6;
 

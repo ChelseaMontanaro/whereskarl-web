@@ -37,6 +37,7 @@ import {
   getPhonePortraitMarkerPriority,
   PHONE_PORTRAIT_MAP_CENTER,
   PHONE_PORTRAIT_MAP_INITIAL_ZOOM,
+  PHONE_PORTRAIT_MAP_MIN_ZOOM,
 } from "@/lib/map/phonePortraitMapPresentation";
 import {
   createPhonePortraitMapMarkerElement,
@@ -215,7 +216,11 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
           }),
           center: initialCenter as [number, number],
           zoom: isPhonePortrait ? PHONE_PORTRAIT_MAP_INITIAL_ZOOM : 8,
-          minZoom: isImmersive ? BAY_AREA_IMMERSIVE_MIN_ZOOM : undefined,
+          minZoom: isPhonePortrait
+            ? PHONE_PORTRAIT_MAP_MIN_ZOOM
+            : isImmersive
+              ? BAY_AREA_IMMERSIVE_MIN_ZOOM
+              : undefined,
           maxBounds: BAY_AREA_MAX_BOUNDS,
           attributionControl: { compact: true },
         });

@@ -11,6 +11,7 @@ import {
   PHONE_PORTRAIT_EAST_BAY_REGION_BOUNDS,
   PHONE_PORTRAIT_EAST_BAY_VIEWPORT_PADDING,
   PHONE_PORTRAIT_MAP_MAX_ZOOM,
+  PHONE_PORTRAIT_MAP_MIN_ZOOM,
   PHONE_PORTRAIT_NORTH_BAY_REGION_BOUNDS,
   PHONE_PORTRAIT_NORTH_BAY_VIEWPORT_PADDING,
   PHONE_PORTRAIT_PENINSULA_REGION_BOUNDS,
@@ -525,14 +526,15 @@ describe("phone-portrait region cameras vs MapLibre pan limits", () => {
   it("shared pan limits cover the full product footprint including Healdsburg", () => {
     const [[west, south], [east, north]] = BAY_AREA_MAX_BOUNDS;
 
-    // Raised from 38.65 so North Bay can frame Healdsburg / Calistoga without
-    // center-clamping the requested fitBounds. Other edges were already
-    // sufficient for Peninsula / South Bay / East Bay / SF anchors.
-    expect(north).toBeGreaterThanOrEqual(38.95);
-    expect(north).toBeLessThanOrEqual(39.05); // not an arbitrary statewide expand
+    // North clears Healdsburg / Calistoga; south is open enough for the
+    // padded all-Bay zoom-out without center-clamping. Keep the box product-
+    // sized — not an arbitrary statewide expand.
+    expect(north).toBeGreaterThanOrEqual(39.05);
+    expect(north).toBeLessThanOrEqual(39.15);
     expect(west).toBeLessThanOrEqual(-123.05); // Bodega / Point Reyes
     expect(east).toBeGreaterThanOrEqual(-121.62); // Altamont / Brentwood
-    expect(south).toBeLessThanOrEqual(37.09); // Año Nuevo / Morgan Hill
+    expect(south).toBeLessThanOrEqual(36.15); // padded all-Bay headroom
+    expect(south).toBeGreaterThanOrEqual(36.0);
 
     for (const region of [
       PHONE_PORTRAIT_SF_REGION_BOUNDS,
@@ -550,11 +552,12 @@ describe("phone-portrait region cameras vs MapLibre pan limits", () => {
     }
   });
 
-  it("Phase 18.1 all-Bay framing stays on the catalog bounds at the same zoom", () => {
-    // Widening pan limits must not zoom the default camera farther out.
-    expect(allBay.zoom).toBeCloseTo(7.789, 2);
+  it("all-Bay framing keeps catalog extremes inside comfortable padding", () => {
+    // Side padding (~80px) is the binding fit; zoom settles just above the
+    // phone-portrait minZoom floor so pinch-out cannot undo the breathing room.
+    expect(allBay.zoom).toBeCloseTo(7.396, 2);
+    expect(allBay.zoom).toBeGreaterThanOrEqual(PHONE_PORTRAIT_MAP_MIN_ZOOM);
     expect(allBay.viewportFitsPanLimits).toBe(true);
-    // With the raised north limit the requested padding is honored (no clamp).
     expect(Math.abs(allBay.clampShiftYPx)).toBeLessThan(2);
     expect(Math.abs(allBay.clampShiftXPx)).toBeLessThan(2);
 
@@ -563,15 +566,21 @@ describe("phone-portrait region cameras vs MapLibre pan limits", () => {
     const livermore = allBay.toScreen(FULL_CATALOG.livermore);
     const losGatos = allBay.toScreen(FULL_CATALOG.losGatos);
 
-    // Intended unclamped positions under the unchanged all-Bay bounds/padding.
-    expect(santaRosa.x).toBeCloseTo(45.9, 0);
-    expect(santaRosa.y).toBeCloseTo(98.9, 0);
-    expect(stinson.x).toBeCloseTo(67.8, 0);
-    expect(stinson.y).toBeCloseTo(314.9, 0);
-    expect(livermore.x).toBeCloseTo(343.5, 0);
-    expect(livermore.y).toBeCloseTo(401.9, 0);
-    expect(losGatos.x).toBeCloseTo(278.5, 0);
-    expect(losGatos.y).toBeCloseTo(582.4, 0);
+    expect(santaRosa.x).toBeCloseTo(81.4, 0);
+    expect(santaRosa.y).toBeCloseTo(164.4, 0);
+    expect(stinson.x).toBeCloseTo(98.1, 0);
+    expect(stinson.y).toBeCloseTo(328.9, 0);
+    expect(livermore.x).toBeCloseTo(308.1, 0);
+    expect(livermore.y).toBeCloseTo(395.2, 0);
+    expect(losGatos.x).toBeCloseTo(258.6, 0);
+    expect(losGatos.y).toBeCloseTo(532.6, 0);
+
+    // Breathing room: extremes stay well inside the screen / chrome, not
+    // hugging the fog rail, right edge, chips, or bottom tray.
+    expect(santaRosa.x).toBeGreaterThanOrEqual(72);
+    expect(VIEWPORT_W - livermore.x).toBeGreaterThanOrEqual(72);
+    expect(santaRosa.y).toBeGreaterThanOrEqual(CHROME_TOP + 48);
+    expect(CHROME_BOTTOM - losGatos.y).toBeGreaterThanOrEqual(48);
 
     for (const [id, point] of Object.entries({
       santaRosa,

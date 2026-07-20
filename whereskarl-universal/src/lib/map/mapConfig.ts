@@ -43,9 +43,10 @@ export const BAY_AREA_MOBILE_CENTER = {
   longitude: -122.28,
 } as const;
 
+/** Aligned with whereskarl-web `BAY_AREA_MAX_BOUNDS` (padded all-Bay headroom). */
 export const BAY_AREA_MAX_BOUNDS: [[number, number], [number, number]] = [
-  [-123.55, 36.55],
-  [-121.0, 38.65],
+  [-123.55, 36.1],
+  [-121.0, 39.05],
 ];
 
 export const BAY_AREA_DEFAULT_ZOOM = 8;

@@ -43,14 +43,15 @@ export const BAY_AREA_IMMERSIVE_MAX_ZOOM = 8.6;
 /**
  * Shared MapLibre pan limits for the supported Bay Area product geography.
  * Sized to contain every canonical region-chip footprint (including North Bay
- * through Healdsburg / Calistoga) with enough headroom that phone-portrait
- * `fitBounds` is not center-clamped into a distorted frame. West / east /
- * south already clear Peninsula, South Bay, East Bay, and SF anchors; only
- * the north edge was raised (from 38.65) to unlock the full North Bay.
+ * through Healdsburg / Calistoga) and to leave enough headroom that the
+ * phone-portrait all-Bay `fitBounds` (with breathing-room padding) is not
+ * center-clamped into a distorted frame. West / east already clear Peninsula,
+ * South Bay, East Bay, and SF anchors; north clears Healdsburg / Calistoga;
+ * south is open enough for the padded all-Bay zoom-out without clamping.
  */
 export const BAY_AREA_MAX_BOUNDS: [[number, number], [number, number]] = [
-  [-123.55, 36.55],
-  [-121.0, 38.95],
+  [-123.55, 36.1],
+  [-121.0, 39.05],
 ];
 
 export type MapBounds = [[number, number], [number, number]];
