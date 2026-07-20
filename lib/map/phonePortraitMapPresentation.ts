@@ -193,28 +193,28 @@ export const PHONE_PORTRAIT_ALL_BAY_BOUNDS: MapBounds = [
 /**
  * Breathing room for the all-Bay fitBounds on a 390×844 portrait viewport.
  * Side padding is the binding fit dimension: it keeps Santa Rosa (west) and
- * Livermore (east) ~92px inside the screen edges so the catalog is centered
+ * Livermore (east) ~100px inside the screen edges so the catalog is centered
  * with clear margin rather than edge-hugging. Top/bottom place Santa Rosa
  * under the region chips and Los Gatos above the tray with similar room.
  *
- * At this padding the fitted zoom sits just inside the shared pan limits, so
- * MapLibre applies a few pixels of vertical center clamp — acceptable and
- * far smaller than the gained edge margin. Do not widen `BAY_AREA_MAX_BOUNDS`
+ * At this padding the fitted zoom sits just outside the shared pan-limit
+ * span, so MapLibre applies a small vertical center clamp (~12px) — still
+ * much smaller than the edge margin. Do not widen `BAY_AREA_MAX_BOUNDS`
  * further for all-Bay breathing room; keep pan limits product-sized.
  */
 export const PHONE_PORTRAIT_ALL_BAY_VIEWPORT_PADDING: ViewportPadding = {
-  top: 124,
-  right: 92,
-  bottom: 272,
-  left: 92,
+  top: 132,
+  right: 100,
+  bottom: 280,
+  left: 100,
 };
 
 /**
  * Most-zoomed-out floor for phone-portrait web. Matches the padded all-Bay
- * fit (~7.24) so pinch-zoom cannot collapse past the comfortable default
+ * fit (~7.12) so pinch-zoom cannot collapse past the comfortable default
  * framing into empty water / statewide coverage.
  */
-export const PHONE_PORTRAIT_MAP_MIN_ZOOM = 7.2;
+export const PHONE_PORTRAIT_MAP_MIN_ZOOM = 7.1;
 
 export const PHONE_PORTRAIT_MAP_MAX_ZOOM = 10.6;
 

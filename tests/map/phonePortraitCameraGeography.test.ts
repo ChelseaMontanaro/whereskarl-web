@@ -553,36 +553,36 @@ describe("phone-portrait region cameras vs MapLibre pan limits", () => {
   });
 
   it("all-Bay framing keeps catalog extremes inside comfortable padding", () => {
-    // Side padding (~92px) is the binding fit; zoom settles at/above the
+    // Side padding (~100px) is the binding fit; zoom settles at/above the
     // phone-portrait minZoom floor so pinch-out cannot undo the breathing room.
-    // Without widening pan limits further, this zoom sits a few pixels outside
-    // the vertical maxBounds span — MapLibre center-clamps by <8px, which is
-    // acceptable versus the ~12px of added edge margin.
-    expect(allBay.zoom).toBeCloseTo(7.237, 2);
+    // Without widening pan limits further, this zoom sits slightly outside
+    // the vertical maxBounds span — MapLibre center-clamps by ~12px, which is
+    // acceptable versus the ~8px of added edge margin in this polish step.
+    expect(allBay.zoom).toBeCloseTo(7.121, 2);
     expect(allBay.zoom).toBeGreaterThanOrEqual(PHONE_PORTRAIT_MAP_MIN_ZOOM);
     expect(Math.abs(allBay.clampShiftXPx)).toBeLessThan(2);
-    expect(Math.abs(allBay.clampShiftYPx)).toBeLessThan(8);
+    expect(Math.abs(allBay.clampShiftYPx)).toBeLessThan(14);
 
     const santaRosa = allBay.toScreen(FULL_CATALOG.santaRosa);
     const stinson = allBay.toScreen(FULL_CATALOG.stinsonBeach);
     const livermore = allBay.toScreen(FULL_CATALOG.livermore);
     const losGatos = allBay.toScreen(FULL_CATALOG.losGatos);
 
-    expect(santaRosa.x).toBeCloseTo(93.3, 0);
-    expect(santaRosa.y).toBeCloseTo(190.3, 0);
-    expect(stinson.x).toBeCloseTo(108.2, 0);
-    expect(stinson.y).toBeCloseTo(337.6, 0);
-    expect(livermore.x).toBeCloseTo(296.3, 0);
-    expect(livermore.y).toBeCloseTo(397.0, 0);
-    expect(losGatos.x).toBeCloseTo(251.9, 0);
-    expect(losGatos.y).toBeCloseTo(520.1, 0);
+    expect(santaRosa.x).toBeCloseTo(101.2, 0);
+    expect(santaRosa.y).toBeCloseTo(208.3, 0);
+    expect(stinson.x).toBeCloseTo(115.0, 0);
+    expect(stinson.y).toBeCloseTo(344.2, 0);
+    expect(livermore.x).toBeCloseTo(288.4, 0);
+    expect(livermore.y).toBeCloseTo(398.9, 0);
+    expect(losGatos.x).toBeCloseTo(247.5, 0);
+    expect(losGatos.y).toBeCloseTo(512.4, 0);
 
     // Breathing room: extremes stay well inside the screen / chrome, not
     // hugging the fog rail, right edge, chips, or bottom tray.
-    expect(santaRosa.x).toBeGreaterThanOrEqual(88);
-    expect(VIEWPORT_W - livermore.x).toBeGreaterThanOrEqual(88);
-    expect(santaRosa.y).toBeGreaterThanOrEqual(CHROME_TOP + 72);
-    expect(CHROME_BOTTOM - losGatos.y).toBeGreaterThanOrEqual(72);
+    expect(santaRosa.x).toBeGreaterThanOrEqual(96);
+    expect(VIEWPORT_W - livermore.x).toBeGreaterThanOrEqual(96);
+    expect(santaRosa.y).toBeGreaterThanOrEqual(CHROME_TOP + 96);
+    expect(CHROME_BOTTOM - losGatos.y).toBeGreaterThanOrEqual(96);
 
     for (const [id, point] of Object.entries({
       santaRosa,
