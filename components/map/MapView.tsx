@@ -493,7 +493,7 @@ function MobileMapView({ state }: { state: MapViewModel }) {
 
                 Phase 16.3C.1a: keep the pre-search-bar chip→rail gap. The
                 search bar is 1.125rem taller than the old title (42px vs 24px),
-                so the rail top is 6rem + 1.125rem. Layers stays at 6rem. */}
+                so the rail top is 6rem + 1.125rem. */}
             <div className="pointer-events-none absolute left-3 top-[calc(7.125rem+env(safe-area-inset-top))] flex flex-col">
               <div className="pointer-events-auto flex flex-col items-start gap-2">
                 <MapPhonePortraitFogRail
@@ -504,8 +504,10 @@ function MobileMapView({ state }: { state: MapViewModel }) {
             </div>
 
             {/* Map Layers — global map control, top-right below the region
-                chips, deliberately separate from the Fog Intensity rail. */}
-            <div className="pointer-events-auto absolute right-3 top-[calc(6rem+env(safe-area-inset-top))] flex flex-col items-end">
+                chips, deliberately separate from the Fog Intensity rail.
+                Phase 16.3C.1a: same 7.125rem top as the fog rail so the
+                chip→Layers gap matches the pre-search-bar layout. */}
+            <div className="pointer-events-auto absolute right-3 top-[calc(7.125rem+env(safe-area-inset-top))] flex flex-col items-end">
               <MapPhonePortraitLayersControl
                 mapStyle={mapStyle}
                 fogLayerEnabled={fogLayerEnabled}

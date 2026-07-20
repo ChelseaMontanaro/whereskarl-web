@@ -134,15 +134,15 @@ describe("MapView phone-portrait Map Layers placement", () => {
     expect(group?.className).not.toContain("left-3");
     expect(group?.contains(rail)).toBe(false);
 
-    // Phase 16.3C.1a — rail sits below the taller search-bar chrome; Layers
-    // keeps the pre-search-bar top offset.
+    // Phase 16.3C.1a — rail and Layers share the post-search-bar top offset
+    // so both keep the pre-search-bar gap below the region chips.
     const railGroup = rail.closest("div.absolute");
     expect(railGroup?.className).toContain("left-3");
     expect(railGroup?.className).toContain(
       "top-[calc(7.125rem+env(safe-area-inset-top))]",
     );
     expect(group?.className).toContain(
-      "top-[calc(6rem+env(safe-area-inset-top))]",
+      "top-[calc(7.125rem+env(safe-area-inset-top))]",
     );
   });
 
