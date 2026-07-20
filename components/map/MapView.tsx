@@ -489,8 +489,12 @@ function MobileMapView({ state }: { state: MapViewModel }) {
                 Selected Location sheet on the bottom. Rail dimensions, styling,
                 icons, and filtering are unchanged — only its position moved
                 higher now that the Selected Location is a bottom sheet. Stays
-                mounted while the Map Layers sheet is open. */}
-            <div className="pointer-events-none absolute left-3 top-[calc(6rem+env(safe-area-inset-top))] flex flex-col">
+                mounted while the Map Layers sheet is open.
+
+                Phase 16.3C.1a: keep the pre-search-bar chip→rail gap. The
+                search bar is 1.125rem taller than the old title (42px vs 24px),
+                so the rail top is 6rem + 1.125rem. Layers stays at 6rem. */}
+            <div className="pointer-events-none absolute left-3 top-[calc(7.125rem+env(safe-area-inset-top))] flex flex-col">
               <div className="pointer-events-auto flex flex-col items-start gap-2">
                 <MapPhonePortraitFogRail
                   activeIntensity={intensityFilter}
