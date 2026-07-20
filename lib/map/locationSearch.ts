@@ -8,9 +8,10 @@
  * Match priority (deterministic):
  * 1. exact display-name match
  * 2. display name starts with query
- * 3. display name contains query
- * 4. alias starts with query (when canonical aliases exist on the object)
- * 5. alias contains query
+ * 3. any word within the display name starts with query
+ * 4. display name contains query
+ * 5. alias starts with query (when canonical aliases exist on the object)
+ * 6. alias contains query
  * Within each rank: alphabetical by display name.
  */
 
@@ -25,25 +26,32 @@ function compareDisplayName(left: string, right: string): number {
   return left.localeCompare(right, undefined, { sensitivity: "base" });
 }
 
+function anyWordStartsWith(name: string, normalizedQuery: string): boolean {
+  return name
+    .split(/[\s\-_/]+/)
+    .filter(Boolean)
+    .some((word) => word.toLowerCase().startsWith(normalizedQuery));
+}
+
 function bestAliasRank(
   aliases: readonly string[] | undefined,
   normalizedQuery: string,
-): 4 | 5 | null {
+): 5 | 6 | null {
   if (!aliases || aliases.length === 0) {
     return null;
   }
 
-  let best: 4 | 5 | null = null;
+  let best: 5 | 6 | null = null;
   for (const alias of aliases) {
     const normalizedAlias = alias.trim().toLowerCase();
     if (!normalizedAlias) {
       continue;
     }
     if (normalizedAlias.startsWith(normalizedQuery)) {
-      return 4;
+      return 5;
     }
     if (normalizedAlias.includes(normalizedQuery) && best === null) {
-      best = 5;
+      best = 6;
     }
   }
   return best;
@@ -52,7 +60,7 @@ function bestAliasRank(
 function matchRank(
   location: CanonicalSearchableLocation,
   normalizedQuery: string,
-): 1 | 2 | 3 | 4 | 5 | null {
+): 1 | 2 | 3 | 4 | 5 | 6 | null {
   const name = location.name.trim().toLowerCase();
   if (!name) {
     return bestAliasRank(location.aliases, normalizedQuery);
@@ -64,8 +72,11 @@ function matchRank(
   if (name.startsWith(normalizedQuery)) {
     return 2;
   }
-  if (name.includes(normalizedQuery)) {
+  if (anyWordStartsWith(name, normalizedQuery)) {
     return 3;
+  }
+  if (name.includes(normalizedQuery)) {
+    return 4;
   }
 
   return bestAliasRank(location.aliases, normalizedQuery);

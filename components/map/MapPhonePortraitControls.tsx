@@ -257,7 +257,7 @@ function MapPhonePortraitSearchBar({
 
       {showOverlay ? (
         <div
-          className={`absolute left-0 right-0 top-full z-50 mt-1.5 rounded-2xl border border-[rgb(150_175_200/0.22)] bg-[rgb(5_13_24/0.94)] shadow-[0_12px_40px_rgba(0,0,0,0.45)] backdrop-blur-xl ${
+          className={`absolute left-0 right-0 top-full z-50 mt-1 rounded-2xl border border-[rgb(150_175_200/0.22)] bg-[rgb(5_13_24/0.94)] shadow-[0_12px_40px_rgba(0,0,0,0.45)] backdrop-blur-xl ${
             hasSearchText
               ? "max-h-[min(18rem,calc(100dvh-8.5rem))] overflow-y-auto overscroll-contain py-1"
               : "flex min-h-[3.25rem] items-center justify-center px-3.5 py-3"

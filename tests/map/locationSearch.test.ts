@@ -44,7 +44,7 @@ describe("filterCanonicalLocationsBySearch", () => {
     ).toEqual(["half-moon-bay"]);
   });
 
-  it("ranks exact, prefix, then contains matches before alphabetical ties", () => {
+  it("ranks exact, name prefix, word prefix, then contains matches", () => {
     const locations: CanonicalSearchableLocation[] = [
       { id: "bay", name: "Bay" },
       { id: "half-moon-bay", name: "Half Moon Bay" },
@@ -55,6 +55,42 @@ describe("filterCanonicalLocationsBySearch", () => {
     expect(
       filterCanonicalLocationsBySearch(locations, "bay").map((item) => item.id),
     ).toEqual(["bay", "bayview", "half-moon-bay"]);
+  });
+
+  it("prefers display-name prefix over mid-word contains matches", () => {
+    const locations: CanonicalSearchableLocation[] = [
+      { id: "cupertino", name: "Cupertino" },
+      { id: "stinson-beach", name: "Stinson Beach" },
+      { id: "tiburon", name: "Tiburon" },
+    ];
+
+    expect(
+      filterCanonicalLocationsBySearch(locations, "Ti").map((item) => item.name),
+    ).toEqual(["Tiburon", "Cupertino", "Stinson Beach"]);
+  });
+
+  it("prefers name prefix over later word-prefix matches", () => {
+    const locations: CanonicalSearchableLocation[] = [
+      { id: "half-moon-bay", name: "Half Moon Bay" },
+      { id: "montara", name: "Montara" },
+    ];
+
+    expect(
+      filterCanonicalLocationsBySearch(locations, "Mon").map((item) => item.name),
+    ).toEqual(["Montara"]);
+
+    expect(
+      filterCanonicalLocationsBySearch(locations, "Mo").map((item) => item.name),
+    ).toEqual(["Montara", "Half Moon Bay"]);
+  });
+
+  it("matches when any word in the display name starts with the query", () => {
+    expect(
+      filterCanonicalLocationsBySearch(
+        [{ id: "golden-gate-park", name: "Golden Gate Park" }],
+        "Gate",
+      ).map((item) => item.id),
+    ).toEqual(["golden-gate-park"]);
   });
 
   it("uses canonical aliases only when already present on the location", () => {
