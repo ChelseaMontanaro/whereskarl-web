@@ -71,16 +71,20 @@ describe("MapView phone portrait", () => {
     const { container } = renderMap();
 
     expect(
-      await screen.findByRole("heading", { name: "Karl Around the Bay" }),
+      await screen.findByTestId("map-phone-portrait-search-bar"),
     ).toBeInTheDocument();
+    expect(screen.getByText("Search locations...")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Karl Around the Bay" }),
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("heading", { name: "Bay Area conditions" }),
     ).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "SF" })).toBeInTheDocument();
     expect(container.querySelector(".grid.grid-cols-2")).toBeNull();
 
-    const header = screen.getByRole("heading", { name: "Karl Around the Bay" });
-    const headerContainer = header.parentElement?.parentElement;
+    const searchBar = screen.getByTestId("map-phone-portrait-search-bar");
+    const headerContainer = searchBar.parentElement?.parentElement;
     expect(headerContainer?.className).toContain("inset-x-3");
     expect(headerContainer?.className).not.toContain("4.75rem");
   });

@@ -65,6 +65,26 @@ describe("MapPhonePortraitControls", () => {
     expect(scrollTo).toHaveBeenCalled();
   });
 
+  it("replaces the phone portrait title with a non-interactive search bar", () => {
+    render(
+      <MapPhonePortraitControls
+        selectedRegionId={null}
+        onSelectRegion={vi.fn()}
+        isPhonePortrait
+      />,
+    );
+
+    const searchBar = screen.getByTestId("map-phone-portrait-search-bar");
+    expect(searchBar).toBeInTheDocument();
+    expect(screen.getByText("Search locations...")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Karl Around the Bay" }),
+    ).not.toBeInTheDocument();
+    expect(searchBar.querySelector("input")).toBeNull();
+    expect(searchBar.querySelector("button")).toBeNull();
+    expect(searchBar.className).toContain("pointer-events-none");
+  });
+
   it("keeps region chip interactions wired", () => {
     const onSelectRegion = vi.fn();
 

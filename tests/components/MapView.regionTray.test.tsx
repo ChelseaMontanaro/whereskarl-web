@@ -253,7 +253,7 @@ describe("MapView region tray behavior", () => {
       renderMap();
 
       expect(
-        await screen.findByRole("heading", { name: "Karl Around the Bay" }),
+        await screen.findByTestId("map-phone-portrait-search-bar"),
       ).toBeInTheDocument();
       expect(
         replaceMock.mock.calls.some(([href]) =>

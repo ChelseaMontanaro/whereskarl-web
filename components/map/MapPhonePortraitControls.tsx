@@ -10,6 +10,48 @@ type MapPhonePortraitControlsProps = {
   isPhonePortrait?: boolean;
 };
 
+/** Phase 16.3C.1 — visual-only Google Maps–style search chrome (not interactive yet). */
+function MapPhonePortraitSearchBar() {
+  return (
+    <div
+      className="pointer-events-none mb-1 flex w-full select-none items-center gap-2.5 rounded-full border border-[rgb(150_175_200/0.2)] bg-[rgb(5_13_24/0.88)] px-3.5 py-2.5"
+      data-testid="map-phone-portrait-search-bar"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        className="h-[1.125rem] w-[1.125rem] shrink-0 text-white/85"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden
+      >
+        <circle cx="11" cy="11" r="6.5" />
+        <path d="M16.2 16.2 20 20" />
+      </svg>
+      <span className="min-w-0 flex-1 truncate text-[0.9375rem] font-medium leading-5 text-white/45">
+        Search locations...
+      </span>
+      <svg
+        viewBox="0 0 24 24"
+        className="h-[1.125rem] w-[1.125rem] shrink-0 text-white/85"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden
+      >
+        <path d="M12 3.5a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0v-5a3 3 0 0 0-3-3Z" />
+        <path d="M7.5 11.5a4.5 4.5 0 0 0 9 0" />
+        <path d="M12 16v3.5" />
+        <path d="M9.5 19.5h5" />
+      </svg>
+    </div>
+  );
+}
+
 export function MapPhonePortraitControls({
   selectedRegionId,
   onSelectRegion,
@@ -54,9 +96,7 @@ export function MapPhonePortraitControls({
   if (isPhonePortrait) {
     return (
       <div className="flex w-full flex-col items-center gap-1.5" aria-label="Bay Area regions">
-        <h1 className="mb-1 text-center font-serif text-[1.1875rem] font-semibold leading-6 tracking-wide text-karl-gold">
-          Karl Around the Bay
-        </h1>
+        <MapPhonePortraitSearchBar />
 
         <div
           ref={chipScrollRef}
