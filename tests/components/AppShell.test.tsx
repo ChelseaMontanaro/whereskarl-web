@@ -150,20 +150,14 @@ describe("AppShell", () => {
     expect(screen.queryByLabelText("Developer status")).not.toBeInTheDocument();
   });
 
-  it("trims phone portrait Map scroll chrome the same way so fixed bottom nav stays visible", () => {
+  it("keeps phone portrait Map on the full-viewport shell so top and bottom fixed controls stay visible", () => {
     usePhonePortraitMock.mockReturnValue(true);
     renderShell("/map");
 
     const main = screen.getByText("Placeholder content").closest("main");
-    expect(main?.className).toContain(
-      "pb-[calc(4.25rem+env(safe-area-inset-bottom,0.5rem))]",
-    );
-    expect(main?.className).not.toContain("pb-24");
-    expect(main?.className).not.toContain("flex-1");
-    expect(screen.getByText("Placeholder content").closest("div.min-h-screen")).toBeNull();
-    expect(screen.queryByLabelText("Conditions status")).not.toBeInTheDocument();
-    expect(screen.queryByRole("navigation", { name: "Legal and support" })).not.toBeInTheDocument();
-    expect(screen.queryByLabelText("Developer status")).not.toBeInTheDocument();
+    expect(main?.className).toContain("pb-24");
+    expect(main?.className).toContain("flex-1");
+    expect(screen.getByText("Placeholder content").closest("div.min-h-screen")).toBeTruthy();
 
     const bottomNav = screen.getAllByRole("navigation", { name: "Primary" })[1];
     expect(bottomNav.className).toContain("bottom-0");

@@ -20,11 +20,9 @@ function BottomNav() {
       className="fixed inset-x-0 bottom-0 z-20 border-t border-white/12 bg-black/40 backdrop-blur-lg shadow-[0_-10px_32px_rgba(0,0,0,0.28)] lg:hidden"
     >
       {/*
-        Keep nav content above the home-indicator / browser bottom chrome.
-        `viewport-fit=cover` makes env(safe-area-inset-bottom) non-zero; the
-        0.5rem floor preserves the pre-cover minimum gap on devices without a
-        home indicator. Padding lives on the inner row so the glass bar still
-        paints edge-to-edge while icons/labels stay fully visible.
+        Canonical bottom safe-area: keep icons/labels above the home indicator
+        while the glass bar still paints to the physical bottom. Uses env()
+        with a 0px fallback and a 0.5rem minimum floor — no device offsets.
       */}
       <div className="mx-auto flex max-w-[430px] items-stretch justify-around px-2 pb-[max(env(safe-area-inset-bottom,0px),0.5rem)] pt-2">
         <PrimaryNavList layout="bottom" />
@@ -48,18 +46,16 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const isPhonePortrait = usePhonePortrait();
   /**
-   * Phone-portrait Home and Map are full-bleed immersive surfaces. Extra
-   * in-flow chrome (`min-h-screen` / `pb-24` / footers) makes the document
-   * taller than the visual viewport; with `viewport-fit=cover`, that pushes
-   * `position:fixed; bottom:0` nav under the browser chrome. Trim to nav
-   * clearance only — same pattern Home already used.
+   * Immersive shell trim is Home-only. Extending it to `/map` (commit 17ae4a3)
+   * removed `min-h-screen` from the map document and regressed the fixed top
+   * search controls under Safari chrome. Phone `/map` keeps the known-good
+   * full-viewport shell; bottom nav relies on env(safe-area-inset-bottom).
    */
-  const isPhonePortraitImmersive =
-    isPhonePortrait && (pathname === "/" || pathname === "/map");
-  const mainBottomClass = isPhonePortraitImmersive
+  const isPhonePortraitHome = pathname === "/" && isPhonePortrait;
+  const mainBottomClass = isPhonePortraitHome
     ? "pb-[calc(4.25rem+env(safe-area-inset-bottom,0.5rem))]"
     : "max-lg:pb-24 lg:pb-0";
-  const shellClassName = isPhonePortraitImmersive
+  const shellClassName = isPhonePortraitHome
     ? "bg-karl-navy"
     : "min-h-screen bg-karl-navy";
 
@@ -68,18 +64,12 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className={shellClassName}>
         <DesktopTopNav />
         <div className="flex flex-col">
-          <main
-            className={
-              isPhonePortraitImmersive
-                ? mainBottomClass
-                : `flex-1 ${mainBottomClass}`
-            }
-          >
+          <main className={isPhonePortraitHome ? mainBottomClass : `flex-1 ${mainBottomClass}`}>
             {children}
           </main>
-          {isPhonePortraitImmersive ? null : <ConditionsFooter />}
-          {isPhonePortraitImmersive ? null : <MobileSecondaryLinks />}
-          {isPhonePortraitImmersive ? null : <DevStatusFooter />}
+          {isPhonePortraitHome ? null : <ConditionsFooter />}
+          {isPhonePortraitHome ? null : <MobileSecondaryLinks />}
+          {isPhonePortraitHome ? null : <DevStatusFooter />}
           <BottomNav />
         </div>
       </div>
