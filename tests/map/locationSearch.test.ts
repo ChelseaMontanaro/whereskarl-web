@@ -7,12 +7,18 @@ import {
 
 const CATALOG: CanonicalSearchableLocation[] = [
   { id: "san-francisco", name: "San Francisco" },
+  { id: "san-jose", name: "San Jose" },
   { id: "san-rafael", name: "San Rafael" },
   { id: "san-ramon", name: "San Ramon" },
+  { id: "santa-clara", name: "Santa Clara" },
   { id: "santa-rosa", name: "Santa Rosa" },
+  { id: "saratoga", name: "Saratoga" },
   { id: "sausalito", name: "Sausalito" },
   { id: "half-moon-bay", name: "Half Moon Bay" },
   { id: "tiburon", name: "Tiburon" },
+  { id: "cupertino", name: "Cupertino" },
+  { id: "stinson-beach", name: "Stinson Beach" },
+  { id: "treasure-island", name: "Treasure Island" },
 ];
 
 describe("filterCanonicalLocationsBySearch", () => {
@@ -24,90 +30,69 @@ describe("filterCanonicalLocationsBySearch", () => {
     }
   });
 
-  it("matches case-insensitively with partial display names", () => {
+  it("matches case-insensitively on display-name prefixes only", () => {
     expect(
       filterCanonicalLocationsBySearch(CATALOG, "sa").map((item) => item.name),
     ).toEqual([
       "San Francisco",
+      "San Jose",
       "San Rafael",
       "San Ramon",
+      "Santa Clara",
       "Santa Rosa",
+      "Saratoga",
       "Sausalito",
     ]);
 
     expect(
-      filterCanonicalLocationsBySearch(CATALOG, "ROSA").map((item) => item.id),
-    ).toEqual(["santa-rosa"]);
+      filterCanonicalLocationsBySearch(CATALOG, "TI").map((item) => item.name),
+    ).toEqual(["Tiburon"]);
 
     expect(
-      filterCanonicalLocationsBySearch(CATALOG, "moon").map((item) => item.id),
-    ).toEqual(["half-moon-bay"]);
+      filterCanonicalLocationsBySearch(CATALOG, "  Sa  ").map((item) => item.id),
+    ).toEqual([
+      "san-francisco",
+      "san-jose",
+      "san-rafael",
+      "san-ramon",
+      "santa-clara",
+      "santa-rosa",
+      "saratoga",
+      "sausalito",
+    ]);
   });
 
-  it("ranks exact, name prefix, word prefix, then contains matches", () => {
-    const locations: CanonicalSearchableLocation[] = [
-      { id: "bay", name: "Bay" },
-      { id: "half-moon-bay", name: "Half Moon Bay" },
-      { id: "bayview", name: "Bayview" },
-      { id: "embarcadero", name: "Embarcadero" },
-    ];
+  it("does not return contains or later-word matches", () => {
+    expect(
+      filterCanonicalLocationsBySearch(
+        [
+          { id: "tiburon", name: "Tiburon" },
+          { id: "cupertino", name: "Cupertino" },
+          { id: "stinson-beach", name: "Stinson Beach" },
+        ],
+        "Ti",
+      ).map((item) => item.name),
+    ).toEqual(["Tiburon"]);
 
     expect(
-      filterCanonicalLocationsBySearch(locations, "bay").map((item) => item.id),
-    ).toEqual(["bay", "bayview", "half-moon-bay"]);
-  });
+      filterCanonicalLocationsBySearch(CATALOG, "Moon").map((item) => item.id),
+    ).toEqual([]);
 
-  it("prefers display-name prefix over mid-word contains matches", () => {
-    const locations: CanonicalSearchableLocation[] = [
-      { id: "cupertino", name: "Cupertino" },
-      { id: "stinson-beach", name: "Stinson Beach" },
-      { id: "tiburon", name: "Tiburon" },
-    ];
-
-    expect(
-      filterCanonicalLocationsBySearch(locations, "Ti").map((item) => item.name),
-    ).toEqual(["Tiburon", "Cupertino", "Stinson Beach"]);
-  });
-
-  it("prefers name prefix over later word-prefix matches", () => {
-    const locations: CanonicalSearchableLocation[] = [
-      { id: "half-moon-bay", name: "Half Moon Bay" },
-      { id: "montara", name: "Montara" },
-    ];
-
-    expect(
-      filterCanonicalLocationsBySearch(locations, "Mon").map((item) => item.name),
-    ).toEqual(["Montara"]);
-
-    expect(
-      filterCanonicalLocationsBySearch(locations, "Mo").map((item) => item.name),
-    ).toEqual(["Montara", "Half Moon Bay"]);
-  });
-
-  it("matches when any word in the display name starts with the query", () => {
     expect(
       filterCanonicalLocationsBySearch(
         [{ id: "golden-gate-park", name: "Golden Gate Park" }],
         "Gate",
-      ).map((item) => item.id),
-    ).toEqual(["golden-gate-park"]);
+      ),
+    ).toEqual([]);
   });
 
-  it("uses canonical aliases only when already present on the location", () => {
-    const locations: CanonicalSearchableLocation[] = [
-      { id: "san-francisco", name: "San Francisco", aliases: ["SF", "City"] },
-      { id: "sausalito", name: "Sausalito" },
-    ];
-
+  it("returns prefix matches for a single letter alphabetically", () => {
     expect(
-      filterCanonicalLocationsBySearch(locations, "sf").map((item) => item.id),
-    ).toEqual(["san-francisco"]);
+      filterCanonicalLocationsBySearch(CATALOG, "T").map((item) => item.name),
+    ).toEqual(["Tiburon", "Treasure Island"]);
+  });
 
-    expect(
-      filterCanonicalLocationsBySearch(locations, "city").map((item) => item.id),
-    ).toEqual(["san-francisco"]);
-
-    // Without aliases on the object, display-name-only search must not invent matches.
+  it("does not invent alias matches when aliases are absent from the catalog", () => {
     expect(
       filterCanonicalLocationsBySearch(
         [{ id: "san-francisco", name: "San Francisco" }],
@@ -116,32 +101,12 @@ describe("filterCanonicalLocationsBySearch", () => {
     ).toEqual([]);
   });
 
-  it("ranks alias prefix ahead of alias contains", () => {
-    const locations: CanonicalSearchableLocation[] = [
-      { id: "a", name: "Alpha", aliases: ["north gate"] },
-      { id: "b", name: "Beta", aliases: ["gate"] },
-    ];
-
-    expect(
-      filterCanonicalLocationsBySearch(locations, "gate").map((item) => item.id),
-    ).toEqual(["b", "a"]);
-  });
-
   it("returns an empty list when nothing matches", () => {
     expect(filterCanonicalLocationsBySearch(CATALOG, "xyzzy")).toEqual([]);
   });
 
-  it("returns the full catalog alphabetically for an empty query", () => {
-    expect(
-      filterCanonicalLocationsBySearch(CATALOG, "  ").map((item) => item.name),
-    ).toEqual([
-      "Half Moon Bay",
-      "San Francisco",
-      "San Rafael",
-      "San Ramon",
-      "Santa Rosa",
-      "Sausalito",
-      "Tiburon",
-    ]);
+  it("returns an empty list for an empty or whitespace-only query", () => {
+    expect(filterCanonicalLocationsBySearch(CATALOG, "")).toEqual([]);
+    expect(filterCanonicalLocationsBySearch(CATALOG, "  ")).toEqual([]);
   });
 });

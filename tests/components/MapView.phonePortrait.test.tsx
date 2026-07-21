@@ -89,6 +89,9 @@ describe("MapView phone portrait", () => {
     const headerContainer =
       searchBar.parentElement?.parentElement?.parentElement;
     expect(headerContainer?.className).toContain("inset-x-3");
+    expect(headerContainer?.className).toContain(
+      "top-[calc(1.375rem+env(safe-area-inset-top))]",
+    );
     expect(headerContainer?.className).not.toContain("4.75rem");
   });
 });

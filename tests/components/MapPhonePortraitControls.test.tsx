@@ -91,7 +91,7 @@ describe("MapPhonePortraitControls", () => {
     expect(searchBar.className).not.toContain("pointer-events-none");
   });
 
-  it("filters canonical locations and selects by id", () => {
+  it("filters canonical locations by display-name prefix and selects by id", () => {
     const onSelectLocation = vi.fn();
 
     render(
@@ -111,7 +111,7 @@ describe("MapPhonePortraitControls", () => {
 
     const input = screen.getByRole("combobox", { name: "Search locations" });
     fireEvent.focus(input);
-    fireEvent.change(input, { target: { value: "moon" } });
+    fireEvent.change(input, { target: { value: "Half" } });
 
     fireEvent.click(screen.getByRole("option", { name: "Half Moon Bay" }));
     expect(onSelectLocation).toHaveBeenCalledWith("half-moon-bay");
@@ -145,7 +145,7 @@ describe("MapPhonePortraitControls", () => {
     expect(screen.queryByText("Sausalito")).not.toBeInTheDocument();
   });
 
-  it("reveals ranked results after the first non-whitespace character and restores empty state when cleared", () => {
+  it("reveals prefix results after the first non-whitespace character and restores empty state when cleared", () => {
     render(
       <MapPhonePortraitControls
         selectedRegionId={null}
@@ -156,6 +156,7 @@ describe("MapPhonePortraitControls", () => {
           { id: "santa-rosa", name: "Santa Rosa" },
           { id: "sausalito", name: "Sausalito" },
           { id: "tiburon", name: "Tiburon" },
+          { id: "cupertino", name: "Cupertino" },
         ]}
         onSelectLocation={vi.fn()}
         onClearSelectedLocation={vi.fn()}
@@ -175,6 +176,12 @@ describe("MapPhonePortraitControls", () => {
     expect(
       screen.getAllByRole("option").map((option) => option.textContent),
     ).toEqual(["San Francisco", "Santa Rosa", "Sausalito"]);
+
+    fireEvent.change(input, { target: { value: "Ti" } });
+    expect(
+      screen.getAllByRole("option").map((option) => option.textContent),
+    ).toEqual(["Tiburon"]);
+    expect(screen.queryByText("Cupertino")).not.toBeInTheDocument();
 
     fireEvent.change(input, { target: { value: "" } });
     expect(screen.getByTestId("map-phone-portrait-search-empty")).toBeInTheDocument();

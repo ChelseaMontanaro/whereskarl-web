@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import { AppShell } from "@/components/layout/AppShell";
@@ -20,6 +20,18 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = rootMetadata;
+
+/**
+ * `viewport-fit=cover` activates `env(safe-area-inset-*)` used by the
+ * phone-portrait map header, fog rail, Layers control, and bottom nav.
+ * Without it those insets resolve to 0 and the search bar sits under mobile
+ * browser chrome.
+ */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 export default function RootLayout({
   children,

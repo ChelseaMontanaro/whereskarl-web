@@ -118,6 +118,8 @@ const catalogLocations = {
     createLocation("sausalito", "Sausalito", "north-bay", 68),
     createLocation("half-moon-bay", "Half Moon Bay", "peninsula", 77),
     createLocation("tiburon", "Tiburon", "north-bay", 82),
+    createLocation("cupertino", "Cupertino", "south-bay", 84),
+    createLocation("stinson-beach", "Stinson Beach", "north-bay", 60),
     createLocation("palo-alto", "Palo Alto", "south-bay", 88),
   ],
 };
@@ -226,7 +228,7 @@ describe("MapView phone-portrait canonical location search (16.3C.1b)", () => {
 
     const searchInput = screen.getByRole("combobox", { name: "Search locations" });
     fireEvent.focus(searchInput);
-    fireEvent.change(searchInput, { target: { value: "rosa" } });
+    fireEvent.change(searchInput, { target: { value: "Santa" } });
 
     expect(
       await screen.findByRole("option", { name: "Santa Rosa" }),
@@ -270,7 +272,7 @@ describe("MapView phone-portrait canonical location search (16.3C.1b)", () => {
 
     const searchInput = screen.getByRole("combobox", { name: "Search locations" });
     fireEvent.focus(searchInput);
-    fireEvent.change(searchInput, { target: { value: "rosa" } });
+    fireEvent.change(searchInput, { target: { value: "Santa" } });
 
     replaceMock.mockClear();
     focusLocationMock.mockClear();
@@ -418,6 +420,12 @@ describe("MapView phone-portrait canonical location search (16.3C.1b)", () => {
     expect(searchBar.className).not.toContain("pointer-events-none");
     expect(screen.getByRole("button", { name: "SF" })).toBeInTheDocument();
 
+    const headerContainer =
+      searchBar.parentElement?.parentElement?.parentElement;
+    expect(headerContainer?.className).toContain(
+      "top-[calc(1.375rem+env(safe-area-inset-top))]",
+    );
+
     const rail = screen.getByLabelText("Fog intensity filter");
     const layers = screen.getByRole("button", { name: "Open map layers" });
     const railGroup = rail.closest("div.absolute");
@@ -429,6 +437,23 @@ describe("MapView phone-portrait canonical location search (16.3C.1b)", () => {
     expect(layersGroup?.className).toContain(
       "top-[calc(7.125rem+env(safe-area-inset-top))]",
     );
+  });
+
+  it("uses prefix-only matching so Ti returns Tiburon and not contains matches", async () => {
+    renderMap();
+
+    const searchInput = await screen.findByRole("combobox", {
+      name: "Search locations",
+    });
+    fireEvent.focus(searchInput);
+    fireEvent.change(searchInput, { target: { value: "Ti" } });
+
+    const results = await screen.findByTestId("map-phone-portrait-search-results");
+    expect(
+      within(results).getAllByRole("option").map((option) => option.textContent),
+    ).toEqual(["Tiburon"]);
+    expect(within(results).queryByText("Cupertino")).toBeNull();
+    expect(within(results).queryByText("Stinson Beach")).toBeNull();
   });
 
   it("does not render the interactive search chrome on desktop", async () => {
