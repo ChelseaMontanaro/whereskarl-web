@@ -729,14 +729,14 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
     return (
       <div
         className={`relative w-full ${
-          isFullBleed ? "h-full min-h-screen" : "h-full min-h-[360px]"
+          isFullBleed ? "h-full min-h-full" : "h-full min-h-[360px]"
         } ${isPhonePortraitWeb ? "karl-map-phone-portrait-host" : ""}`}
       >
         <div
           ref={containerRef}
           data-testid="bay-area-map"
           className={`karl-map-canvas w-full ${
-            isFullBleed ? "h-full min-h-screen" : "h-full min-h-[360px]"
+            isFullBleed ? "h-full min-h-full" : "h-full min-h-[360px]"
           }`}
         />
         {isPhonePortraitWeb ? (

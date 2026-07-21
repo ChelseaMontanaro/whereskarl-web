@@ -74,7 +74,7 @@ describe("AppShell", () => {
     }
   });
 
-  it("uses glass styling and safe-area padding on the mobile bottom nav", () => {
+  it("uses glass styling and canonical bottom safe-area padding on the mobile bottom nav", () => {
     renderShell("/");
 
     const bottomNav = screen.getAllByRole("navigation", { name: "Primary" })[1];
@@ -82,7 +82,11 @@ describe("AppShell", () => {
 
     expect(bottomNav.className).toContain("bg-black/40");
     expect(bottomNav.className).toContain("backdrop-blur-lg");
-    expect(navInner.className).toContain("safe-area-inset-bottom");
+    expect(bottomNav.className).toContain("fixed");
+    expect(bottomNav.className).toContain("bottom-0");
+    expect(navInner.className).toContain(
+      "pb-[max(env(safe-area-inset-bottom,0px),0.5rem)]",
+    );
   });
 
   it("renders the desktop top navigation with primary links and Find Clear Skies", () => {
@@ -144,5 +148,40 @@ describe("AppShell", () => {
     expect(screen.queryByLabelText("Conditions status")).not.toBeInTheDocument();
     expect(screen.queryByRole("navigation", { name: "Legal and support" })).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Developer status")).not.toBeInTheDocument();
+  });
+
+  it("trims phone portrait Map scroll chrome the same way so fixed bottom nav stays visible", () => {
+    usePhonePortraitMock.mockReturnValue(true);
+    renderShell("/map");
+
+    const main = screen.getByText("Placeholder content").closest("main");
+    expect(main?.className).toContain(
+      "pb-[calc(4.25rem+env(safe-area-inset-bottom,0.5rem))]",
+    );
+    expect(main?.className).not.toContain("pb-24");
+    expect(main?.className).not.toContain("flex-1");
+    expect(screen.getByText("Placeholder content").closest("div.min-h-screen")).toBeNull();
+    expect(screen.queryByLabelText("Conditions status")).not.toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "Legal and support" })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Developer status")).not.toBeInTheDocument();
+
+    const bottomNav = screen.getAllByRole("navigation", { name: "Primary" })[1];
+    expect(bottomNav.className).toContain("bottom-0");
+    expect(bottomNav.firstElementChild?.className).toContain(
+      "pb-[max(env(safe-area-inset-bottom,0px),0.5rem)]",
+    );
+  });
+
+  it("keeps tablet/desktop map chrome with in-flow footers and min-h-screen shell", () => {
+    usePhonePortraitMock.mockReturnValue(false);
+    renderShell("/map");
+
+    const main = screen.getByText("Placeholder content").closest("main");
+    expect(main?.className).toContain("pb-24");
+    expect(main?.className).toContain("flex-1");
+    expect(screen.getByText("Placeholder content").closest("div.min-h-screen")).toBeTruthy();
+    expect(screen.getByLabelText("Conditions status")).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "Legal and support" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Developer status")).toBeInTheDocument();
   });
 });
