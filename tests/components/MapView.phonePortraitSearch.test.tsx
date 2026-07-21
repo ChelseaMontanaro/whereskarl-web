@@ -418,6 +418,7 @@ describe("MapView phone-portrait canonical location search (16.3C.1b)", () => {
     const searchBar = await screen.findByTestId("map-phone-portrait-search-bar");
     expect(searchBar.className).toContain("rounded-full");
     expect(searchBar.className).not.toContain("pointer-events-none");
+    expect(searchBar.parentElement?.className).toContain("mx-1");
     expect(screen.getByRole("button", { name: "SF" })).toBeInTheDocument();
 
     const headerContainer =
@@ -425,6 +426,7 @@ describe("MapView phone-portrait canonical location search (16.3C.1b)", () => {
     expect(headerContainer?.className).toContain(
       "top-[calc(1.375rem+env(safe-area-inset-top))]",
     );
+    expect(headerContainer?.className).toContain("inset-x-3");
 
     const rail = screen.getByLabelText("Fog intensity filter");
     const layers = screen.getByRole("button", { name: "Open map layers" });

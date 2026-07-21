@@ -194,7 +194,10 @@ function MapPhonePortraitSearchBar({
   };
 
   return (
-    <div ref={rootRef} className="relative z-50 mb-1 w-full">
+    // Horizontal inset: parent header is inset-x-3 (12px). Extra mx-1 restores
+    // the approved ~16px (inset-x-4) side margin after viewport-fit=cover
+    // full-bleed, without shifting region chips.
+    <div ref={rootRef} className="relative z-50 mx-1 mb-1">
       <div
         className="relative z-50 flex w-full items-center gap-2.5 rounded-full border border-[rgb(150_175_200/0.2)] bg-[rgb(5_13_24/0.88)] px-3.5 py-2.5"
         data-testid="map-phone-portrait-search-bar"

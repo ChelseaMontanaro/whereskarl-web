@@ -82,6 +82,7 @@ describe("MapPhonePortraitControls", () => {
 
     const searchBar = screen.getByTestId("map-phone-portrait-search-bar");
     expect(searchBar).toBeInTheDocument();
+    expect(searchBar.parentElement?.className).toContain("mx-1");
     expect(
       screen.getByRole("combobox", { name: "Search locations" }),
     ).toBeInTheDocument();
