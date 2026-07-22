@@ -117,6 +117,43 @@ describe("MapPhonePortraitControls", () => {
     fireEvent.click(screen.getByRole("option", { name: "Half Moon Bay" }));
     expect(onSelectLocation).toHaveBeenCalledWith("half-moon-bay");
     expect(input).toHaveValue("Half Moon Bay");
+    // Overlay close is synchronous — no rAF/timer flush required.
+    expect(
+      screen.queryByTestId("map-phone-portrait-search-results"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("closes the search overlay synchronously before invoking selection", () => {
+    const onSelectLocation = vi.fn(() => {
+      expect(
+        screen.queryByTestId("map-phone-portrait-search-results"),
+      ).not.toBeInTheDocument();
+    });
+
+    render(
+      <MapPhonePortraitControls
+        selectedRegionId={null}
+        onSelectRegion={vi.fn()}
+        isPhonePortrait
+        locations={[{ id: "napa", name: "Napa" }]}
+        onSelectLocation={onSelectLocation}
+        onClearSelectedLocation={vi.fn()}
+      />,
+    );
+
+    const input = screen.getByRole("combobox", { name: "Search locations" });
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: "Nap" } });
+    expect(
+      screen.getByTestId("map-phone-portrait-search-results"),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("option", { name: "Napa" }));
+
+    expect(onSelectLocation).toHaveBeenCalledTimes(1);
+    expect(
+      screen.queryByTestId("map-phone-portrait-search-results"),
+    ).not.toBeInTheDocument();
   });
 
   it("shows a compact empty-state panel on focus without listing locations", () => {
@@ -208,6 +245,126 @@ describe("MapPhonePortraitControls", () => {
     fireEvent.click(screen.getByRole("button", { name: "Clear search" }));
 
     expect(onClearSelectedLocation).toHaveBeenCalledTimes(1);
+    expect(input).toHaveValue("");
+  });
+
+  it("selecting a result blurs the input and restores chrome before selection", () => {
+    const scrollTo = vi.fn();
+    window.scrollTo = scrollTo;
+    Object.defineProperty(window, "innerHeight", {
+      configurable: true,
+      value: 844,
+    });
+    Object.defineProperty(window, "visualViewport", {
+      configurable: true,
+      value: {
+        height: 844,
+        offsetTop: 96,
+        offsetLeft: 0,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      },
+    });
+
+    const onSelectLocation = vi.fn(() => {
+      // Chrome restore (including stale-offset clear) runs before selection.
+      expect(scrollTo).toHaveBeenCalled();
+      expect(document.activeElement).not.toBe(
+        screen.getByRole("combobox", { name: "Search locations" }),
+      );
+    });
+
+    render(
+      <MapPhonePortraitControls
+        selectedRegionId={null}
+        onSelectRegion={vi.fn()}
+        isPhonePortrait
+        locations={[{ id: "napa", name: "Napa" }]}
+        onSelectLocation={onSelectLocation}
+        onClearSelectedLocation={vi.fn()}
+      />,
+    );
+
+    const input = screen.getByRole("combobox", {
+      name: "Search locations",
+    }) as HTMLInputElement;
+    input.focus();
+    fireEvent.change(input, { target: { value: "Nap" } });
+
+    fireEvent.click(screen.getByRole("option", { name: "Napa" }));
+
+    expect(onSelectLocation).toHaveBeenCalledWith("napa");
+    expect(document.activeElement).not.toBe(input);
+    expect(scrollTo).toHaveBeenCalledWith(0, 96);
+    expect(scrollTo).toHaveBeenCalledWith(0, 0);
+  });
+
+  it("blurring the search field invokes chrome restore without selecting", () => {
+    const onSelectLocation = vi.fn();
+
+    render(
+      <MapPhonePortraitControls
+        selectedRegionId={null}
+        onSelectRegion={vi.fn()}
+        isPhonePortrait
+        locations={[{ id: "napa", name: "Napa" }]}
+        onSelectLocation={onSelectLocation}
+        onClearSelectedLocation={vi.fn()}
+      />,
+    );
+
+    const input = screen.getByRole("combobox", {
+      name: "Search locations",
+    }) as HTMLInputElement;
+    input.focus();
+    fireEvent.focus(input);
+    fireEvent.blur(input);
+
+    // Settled viewport: restore is a no-op scroll, but selection must not fire.
+    expect(onSelectLocation).not.toHaveBeenCalled();
+    expect(document.activeElement).not.toBe(input);
+  });
+
+  it("clearing search blurs the input and calls the reset handler", () => {
+    const onClearSelectedLocation = vi.fn();
+    const scrollTo = vi.fn();
+    window.scrollTo = scrollTo;
+    Object.defineProperty(window, "innerHeight", {
+      configurable: true,
+      value: 844,
+    });
+    Object.defineProperty(window, "visualViewport", {
+      configurable: true,
+      value: {
+        height: 844,
+        offsetTop: 64,
+        offsetLeft: 0,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      },
+    });
+
+    render(
+      <MapPhonePortraitControls
+        selectedRegionId={null}
+        onSelectRegion={vi.fn()}
+        isPhonePortrait
+        locations={[{ id: "napa", name: "Napa" }]}
+        onSelectLocation={vi.fn()}
+        onClearSelectedLocation={onClearSelectedLocation}
+      />,
+    );
+
+    const input = screen.getByRole("combobox", {
+      name: "Search locations",
+    }) as HTMLInputElement;
+    input.focus();
+    fireEvent.change(input, { target: { value: "Napa" } });
+    fireEvent.click(screen.getByRole("button", { name: "Clear search" }));
+
+    expect(document.activeElement).not.toBe(input);
+    expect(onClearSelectedLocation).toHaveBeenCalledTimes(1);
+    expect(scrollTo).toHaveBeenCalledWith(0, 64);
     expect(input).toHaveValue("");
   });
 

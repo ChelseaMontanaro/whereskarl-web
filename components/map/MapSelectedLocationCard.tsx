@@ -883,6 +883,18 @@ function PhonePortraitSelectedCard({
     : "Unavailable";
 
   const { isFavorite, handleToggleFavorite } = useFavoriteToggle(location.id);
+  // After mount (including location remount via key), briefly ignore surface
+  // taps so a search-result click that dismisses the overlay cannot fall
+  // through and expand this sheet. Grab-handle expand remains available.
+  const [surfaceExpandArmed, setSurfaceExpandArmed] = useState(false);
+
+  useEffect(() => {
+    setSurfaceExpandArmed(false);
+    const timer = window.setTimeout(() => {
+      setSurfaceExpandArmed(true);
+    }, 400);
+    return () => window.clearTimeout(timer);
+  }, [location.id]);
 
   useEffect(() => {
     if (!onClose) {
@@ -997,9 +1009,11 @@ function PhonePortraitSelectedCard({
 
   return (
     <BottomSheet
+      key={location.id}
       ariaLabel={`Selected location: ${location.name}`}
       header={header}
-      expandOnSurfaceTap
+      defaultExpanded={false}
+      expandOnSurfaceTap={surfaceExpandArmed}
     >
       {/* Expanded intelligence — identical ordering/styling below Core Weather. */}
       <EnvironmentalMetricsSection

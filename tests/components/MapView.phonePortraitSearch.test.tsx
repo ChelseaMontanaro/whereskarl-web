@@ -295,6 +295,67 @@ describe("MapView phone-portrait canonical location search (16.3C.1b)", () => {
     expect(
       await screen.findByLabelText("Selected location: Santa Rosa"),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Expand details" }),
+    ).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("search and marker selection share the same collapsed canonical sheet presentation", async () => {
+    const { rerenderMap } = renderMap();
+
+    await waitFor(() => {
+      expect(replaceMock).toHaveBeenCalledWith("/map?location=palo-alto", {
+        scroll: false,
+      });
+    });
+    useSearchParamsMock.mockReturnValue(
+      new URLSearchParams("location=palo-alto"),
+    );
+    rerenderMap();
+    await screen.findByLabelText("Selected location: Palo Alto");
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Close selected location" }),
+    );
+    useSearchParamsMock.mockReturnValue(new URLSearchParams());
+    rerenderMap();
+    await waitFor(() =>
+      expect(screen.queryByLabelText(/Selected location:/)).not.toBeInTheDocument(),
+    );
+
+    const searchInput = screen.getByRole("combobox", { name: "Search locations" });
+    fireEvent.focus(searchInput);
+    fireEvent.change(searchInput, { target: { value: "Tiburon" } });
+    fireEvent.click(await screen.findByRole("option", { name: "Tiburon" }));
+
+    useSearchParamsMock.mockReturnValue(new URLSearchParams("location=tiburon"));
+    rerenderMap();
+    const searchSheet = await screen.findByLabelText("Selected location: Tiburon");
+    expect(
+      screen.getByRole("button", { name: "Expand details" }),
+    ).toHaveAttribute("aria-expanded", "false");
+    expect(searchSheet.className).toContain(
+      "bottom-[calc(4.75rem+env(safe-area-inset-bottom))]",
+    );
+    const searchSheetClassName = searchSheet.className;
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Close selected location" }),
+    );
+    useSearchParamsMock.mockReturnValue(new URLSearchParams());
+    rerenderMap();
+    await waitFor(() =>
+      expect(screen.queryByLabelText(/Selected location:/)).not.toBeInTheDocument(),
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "mock-marker-tiburon" }));
+    useSearchParamsMock.mockReturnValue(new URLSearchParams("location=tiburon"));
+    rerenderMap();
+    const markerSheet = await screen.findByLabelText("Selected location: Tiburon");
+    expect(
+      screen.getByRole("button", { name: "Expand details" }),
+    ).toHaveAttribute("aria-expanded", "false");
+    expect(markerSheet.className).toBe(searchSheetClassName);
   });
 
   it("clearing search clears selection and explicitly restores the All Bay camera", async () => {

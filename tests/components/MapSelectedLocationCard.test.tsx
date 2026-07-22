@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within, act } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { MapSelectedLocationCard } from "@/components/map/MapSelectedLocationCard";
@@ -1426,11 +1426,17 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
   });
 
   it("expands the collapsed sheet when the header identity area is tapped", () => {
+    vi.useFakeTimers();
     render(<MapSelectedLocationCard location={location} phonePortrait />);
 
     expect(
       screen.getByRole("button", { name: "Expand details" }),
     ).toHaveAttribute("aria-expanded", "false");
+
+    // Surface expand is armed after mount so search click-through cannot expand.
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
 
     // Tapping the (non-interactive) location name expands the sheet.
     fireEvent.click(screen.getByRole("heading", { name: "Tiburon" }));
@@ -1438,16 +1444,68 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(
       screen.getByRole("button", { name: "Collapse details" }),
     ).toHaveAttribute("aria-expanded", "true");
+    vi.useRealTimers();
   });
 
   it("expands the collapsed sheet when the metrics row is tapped", () => {
+    vi.useFakeTimers();
     render(<MapSelectedLocationCard location={location} phonePortrait />);
 
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
     fireEvent.click(screen.getByTestId("selected-location-metrics"));
 
     expect(
       screen.getByRole("button", { name: "Collapse details" }),
     ).toHaveAttribute("aria-expanded", "true");
+    vi.useRealTimers();
+  });
+
+  it("ignores surface taps briefly after mount so search click-through cannot expand", () => {
+    vi.useFakeTimers();
+    render(<MapSelectedLocationCard location={location} phonePortrait />);
+
+    fireEvent.click(screen.getByRole("heading", { name: "Tiburon" }));
+
+    expect(
+      screen.getByRole("button", { name: "Expand details" }),
+    ).toHaveAttribute("aria-expanded", "false");
+
+    // Grab handle still expands during the arming window.
+    fireEvent.click(screen.getByRole("button", { name: "Expand details" }));
+    expect(
+      screen.getByRole("button", { name: "Collapse details" }),
+    ).toHaveAttribute("aria-expanded", "true");
+    vi.useRealTimers();
+  });
+
+  it("remounts collapsed when the location id changes", () => {
+    vi.useFakeTimers();
+    const { rerender } = render(
+      <MapSelectedLocationCard location={location} phonePortrait />,
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+    fireEvent.click(screen.getByRole("heading", { name: "Tiburon" }));
+    expect(
+      screen.getByRole("button", { name: "Collapse details" }),
+    ).toHaveAttribute("aria-expanded", "true");
+
+    rerender(
+      <MapSelectedLocationCard
+        location={{ ...location, id: "napa", name: "Napa" }}
+        phonePortrait
+      />,
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Expand details" }),
+    ).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByRole("heading", { name: "Napa" })).toBeInTheDocument();
+    vi.useRealTimers();
   });
 
   it("does not expand the sheet when the favorite control is tapped", () => {

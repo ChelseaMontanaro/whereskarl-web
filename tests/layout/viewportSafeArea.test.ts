@@ -70,6 +70,7 @@ describe("root viewport safe-area activation", () => {
       join(process.cwd(), "components/map/MapPhonePortraitControls.tsx"),
       "utf8",
     );
+    const mapPage = readFileSync(join(process.cwd(), "app/map/page.tsx"), "utf8");
 
     expect(mapView).toContain(
       "top-[calc(1.375rem+env(safe-area-inset-top))]",
@@ -81,5 +82,8 @@ describe("root viewport safe-area activation", () => {
     expect(mapView).toContain(
       "top-[calc(7.125rem+env(safe-area-inset-top))]",
     );
+    expect(mapView).toContain("restorePhoneMapChrome()");
+    expect(mapView).toContain("key={selectedLocation.id}");
+    expect(mapPage).toContain("data-karl-phone-map-root");
   });
 });

@@ -35,6 +35,10 @@ import {
 import { resolveMapLocationFocus } from "@/lib/map/locationSelection";
 import { isMapMarkerVisible, type MapMarkerLocation } from "@/lib/map/markers";
 import {
+  restorePhoneMapChrome,
+  subscribePhoneMapChromeViewportRecovery,
+} from "@/lib/map/restorePhoneMapChrome";
+import {
   buildMapHref,
   buildMapRegionHref,
   resolveMapQueryState,
@@ -239,6 +243,7 @@ function useMapViewState(): MapViewModel {
     // clears. Selection itself stays canonical — we only drop the URL param.
     sheetDismissedRef.current = true;
     suppressViewportUpdateRef.current = true;
+    restorePhoneMapChrome();
     router.replace("/map", { scroll: false });
   }, [router]);
 
@@ -331,12 +336,14 @@ function MobileMapView({ state }: { state: MapViewModel }) {
     ? null
     : mapQuery.activeRegionId;
 
-  // Search select: reuse canonical URL selection + the shared location camera
-  // (`focusMapOnLocation` via BayAreaMap.focusLocation). Marker taps stay on
-  // the selection-only path so phone-portrait camera behavior is unchanged.
+  // Search select: chrome is restored synchronously in the search bar before
+  // this runs. Re-assert restore here, then canonical URL selection + fly-to.
+  // Shared keyed MapSelectedLocationCard mounts from `selectedLocation` — no
+  // search-specific sheet sizing.
   const handleSearchSelectLocation = useCallback(
     (locationId: string) => {
       const location = markerLocations.find((item) => item.id === locationId);
+      restorePhoneMapChrome();
       handleSelectLocation(locationId);
       if (location) {
         mapRef.current?.focusLocation(location.longitude, location.latitude);
@@ -345,12 +352,39 @@ function MobileMapView({ state }: { state: MapViewModel }) {
     [handleSelectLocation, markerLocations],
   );
 
-  // Search clear: reuse sheet/selection clear, then explicitly restore the
-  // canonical All Bay frame. Ordinary sheet dismiss keeps suppress-only clear.
+  // Search clear: chrome restore already ran in the search bar; re-assert, then
+  // clear selection and restore the canonical All Bay frame.
   const handleSearchClearSelectedLocation = useCallback(() => {
+    restorePhoneMapChrome();
     handleClearSelectedLocation();
     mapRef.current?.fitAllBayView();
   }, [handleClearSelectedLocation]);
+
+  // Recover fixed bottom chrome after keyboard dismissal. AppShell always
+  // mounts BottomNav; this clears a stale visualViewport.offsetTop that iOS
+  // Safari can leave on the overflow-hidden /map host (scrollY stays 0).
+  useEffect(() => {
+    if (!isPhonePortrait) {
+      return;
+    }
+
+    const previousScrollRestoration =
+      typeof window !== "undefined" && "scrollRestoration" in history
+        ? history.scrollRestoration
+        : null;
+    if (previousScrollRestoration !== null) {
+      history.scrollRestoration = "manual";
+    }
+    restorePhoneMapChrome();
+
+    const unsubscribe = subscribePhoneMapChromeViewportRecovery();
+    return () => {
+      unsubscribe();
+      if (previousScrollRestoration !== null) {
+        history.scrollRestoration = previousScrollRestoration;
+      }
+    };
+  }, [isPhonePortrait]);
 
   // Selection-driven entry: on a clean map open (no explicit location/region),
   // auto-select the canonical Best Right Now location ONCE so the sheet
@@ -549,6 +583,7 @@ function MobileMapView({ state }: { state: MapViewModel }) {
           // navigation), so it renders outside the absolute bottom container.
           selectedLocation ? (
             <MapSelectedLocationCard
+              key={selectedLocation.id}
               location={selectedLocation}
               phonePortrait
               onClose={handleClearSelectedLocation}

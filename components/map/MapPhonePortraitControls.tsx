@@ -11,6 +11,7 @@ import {
 
 import { BAY_AREA_PRODUCT_REGIONS } from "@/lib/map/config";
 import { filterCanonicalLocationsBySearch } from "@/lib/map/locationSearch";
+import { restorePhoneMapChrome } from "@/lib/map/restorePhoneMapChrome";
 
 type SearchableMapLocation = {
   id: string;
@@ -104,6 +105,7 @@ function MapPhonePortraitSearchBar({
   const dismissKeyboardAndOverlay = () => {
     closeOverlay();
     inputRef.current?.blur();
+    restorePhoneMapChrome();
   };
 
   useEffect(() => {
@@ -119,6 +121,7 @@ function MapPhonePortraitSearchBar({
       setIsOverlayOpen(false);
       setActiveIndex(-1);
       inputRef.current?.blur();
+      restorePhoneMapChrome();
     };
 
     // Bind on the next tick so the opening tap cannot immediately dismiss.
@@ -133,16 +136,23 @@ function MapPhonePortraitSearchBar({
   }, [isOverlayOpen]);
 
   const handleSelectResult = (location: SearchableMapLocation) => {
+    // Deterministic sync sequence (ghost expansion blocked by sheet key-remount
+    // + surface-arm — not by deferring overlay close):
+    // 1) close overlay  2–3) blur / dismiss keyboard  4–5) restore chrome
+    // 6–8) canonical select + fly-to + shared sheet (via MapView)
     setQuery(location.name);
     closeOverlay();
     inputRef.current?.blur();
+    restorePhoneMapChrome();
     onSelectLocation(location.id);
   };
 
   const handleClear = () => {
+    // Sync clear: text → overlay → blur → chrome → canonical reset / All Bay.
     setQuery("");
     closeOverlay();
     inputRef.current?.blur();
+    restorePhoneMapChrome();
     onClearSelectedLocation();
   };
 
@@ -232,6 +242,11 @@ function MapPhonePortraitSearchBar({
           }}
           onFocus={() => setIsOverlayOpen(true)}
           onClick={() => setIsOverlayOpen(true)}
+          onBlur={() => {
+            // Keyboard Done / focus loss must not leave a compressed visual
+            // viewport latching the bottom nav off-screen.
+            restorePhoneMapChrome();
+          }}
           onKeyDown={handleKeyDown}
         />
         {hasQuery ? (

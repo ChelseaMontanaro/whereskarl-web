@@ -22,7 +22,7 @@ function MapLoadingFallback() {
 
 export default function MapPage() {
   return (
-    <div className="h-screen overflow-hidden">
+    <div className="h-screen overflow-hidden" data-karl-phone-map-root>
       <Suspense fallback={<MapLoadingFallback />}>
         <MapView />
       </Suspense>
