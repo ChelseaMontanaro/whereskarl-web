@@ -37,14 +37,20 @@ describe("root viewport safe-area activation", () => {
     expect(source).not.toContain("paddingBottom: 34");
   });
 
-  it("keeps immersive shell trim Home-only so phone /map retains full-viewport height", () => {
+  it("keeps phone /map on min-h-screen while suppressing in-flow footers that clip fixed chrome", () => {
     const source = readFileSync(
       join(process.cwd(), "components/layout/AppShell.tsx"),
       "utf8",
     );
 
+    // Home still owns the no-min-h-screen immersive shell.
     expect(source).toContain('pathname === "/" && isPhonePortrait');
-    expect(source).not.toContain('pathname === "/" || pathname === "/map"');
+    // Phone map suppresses footers without re-applying the 17ae4a3 shell trim.
+    expect(source).toContain('pathname === "/map" && isPhonePortrait');
+    expect(source).toContain("hideInFlowChrome");
+    expect(source).not.toContain(
+      'isPhonePortrait && (pathname === "/" || pathname === "/map")',
+    );
   });
 
   it("keeps full-bleed map hosts on min-h-screen for the known-good phone viewport model", () => {

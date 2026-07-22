@@ -46,30 +46,39 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const isPhonePortrait = usePhonePortrait();
   /**
-   * Immersive shell trim is Home-only. Extending it to `/map` (commit 17ae4a3)
-   * removed `min-h-screen` from the map document and regressed the fixed top
-   * search controls under Safari chrome. Phone `/map` keeps the known-good
-   * full-viewport shell; bottom nav relies on env(safe-area-inset-bottom).
+   * Phone Home: immersive trim (no min-h-screen / footers).
+   *
+   * Phone Map: keep `min-h-screen` so fixed top search stays correctly placed
+   * under Safari chrome (regressions from 17ae4a3), but suppress the in-flow
+   * footers and `pb-24`. Those extras sit below the `h-screen` map host and
+   * make the document taller than the viewport, which clips `fixed bottom-0`
+   * nav and can shift the shared selected-location sheet — surviving refresh
+   * because it is structural, not keyboard state.
    */
   const isPhonePortraitHome = pathname === "/" && isPhonePortrait;
+  const isPhonePortraitMap = pathname === "/map" && isPhonePortrait;
+  const hideInFlowChrome = isPhonePortraitHome || isPhonePortraitMap;
   const mainBottomClass = isPhonePortraitHome
     ? "pb-[calc(4.25rem+env(safe-area-inset-bottom,0.5rem))]"
-    : "max-lg:pb-24 lg:pb-0";
+    : isPhonePortraitMap
+      ? ""
+      : "max-lg:pb-24 lg:pb-0";
   const shellClassName = isPhonePortraitHome
     ? "bg-karl-navy"
     : "min-h-screen bg-karl-navy";
+  const mainClassName = isPhonePortraitHome
+    ? mainBottomClass
+    : ["flex-1", mainBottomClass].filter(Boolean).join(" ");
 
   return (
     <ClearSkiesNavProvider>
       <div className={shellClassName}>
         <DesktopTopNav />
         <div className="flex flex-col">
-          <main className={isPhonePortraitHome ? mainBottomClass : `flex-1 ${mainBottomClass}`}>
-            {children}
-          </main>
-          {isPhonePortraitHome ? null : <ConditionsFooter />}
-          {isPhonePortraitHome ? null : <MobileSecondaryLinks />}
-          {isPhonePortraitHome ? null : <DevStatusFooter />}
+          <main className={mainClassName}>{children}</main>
+          {hideInFlowChrome ? null : <ConditionsFooter />}
+          {hideInFlowChrome ? null : <MobileSecondaryLinks />}
+          {hideInFlowChrome ? null : <DevStatusFooter />}
           <BottomNav />
         </div>
       </div>

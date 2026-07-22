@@ -150,17 +150,25 @@ describe("AppShell", () => {
     expect(screen.queryByLabelText("Developer status")).not.toBeInTheDocument();
   });
 
-  it("keeps phone portrait Map on the full-viewport shell so top and bottom fixed controls stay visible", () => {
+  it("keeps phone portrait Map on min-h-screen without in-flow footers that grow the document", () => {
     usePhonePortraitMock.mockReturnValue(true);
     renderShell("/map");
 
     const main = screen.getByText("Placeholder content").closest("main");
-    expect(main?.className).toContain("pb-24");
+    // Keep full-viewport shell height (top search). Do not add pb-24 / footers
+    // that make the document taller than the viewport and clip fixed chrome.
     expect(main?.className).toContain("flex-1");
+    expect(main?.className).not.toContain("pb-24");
     expect(screen.getByText("Placeholder content").closest("div.min-h-screen")).toBeTruthy();
+    expect(screen.queryByLabelText("Conditions status")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("navigation", { name: "Legal and support" }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Developer status")).not.toBeInTheDocument();
 
     const bottomNav = screen.getAllByRole("navigation", { name: "Primary" })[1];
     expect(bottomNav.className).toContain("bottom-0");
+    expect(bottomNav.className).toContain("inset-x-0");
     expect(bottomNav.firstElementChild?.className).toContain(
       "pb-[max(env(safe-area-inset-bottom,0px),0.5rem)]",
     );
