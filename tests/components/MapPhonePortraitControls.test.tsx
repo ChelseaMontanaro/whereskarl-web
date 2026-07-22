@@ -92,7 +92,7 @@ describe("MapPhonePortraitControls", () => {
     expect(searchBar.className).not.toContain("pointer-events-none");
   });
 
-  it("keeps the search input at 16px to prevent iOS WebKit focus auto-zoom", () => {
+  it("locks the search input to a 16px font-size contract against iOS WebKit auto-zoom", () => {
     render(
       <MapPhonePortraitControls
         selectedRegionId={null}
@@ -104,10 +104,23 @@ describe("MapPhonePortraitControls", () => {
       />,
     );
 
-    const input = screen.getByRole("combobox", { name: "Search locations" });
-    expect(input.className).toContain("text-[16px]");
+    const input = screen.getByRole("combobox", {
+      name: "Search locations",
+    }) as HTMLInputElement;
+
+    // Absolute 16px Tailwind token — the compiled CSS computes to 16px and
+    // sits at the iOS auto-zoom threshold. Rem/sm/xs tokens can fall below it.
+    const arbitraryFontTokens = [
+      ...input.className.matchAll(/\btext-\[([^\]]+)\]/g),
+    ].map((match) => match[1]);
+    expect(arbitraryFontTokens).toEqual(["16px"]);
+    expect(input.className.split(/\s+/)).toContain("text-[16px]");
+    expect(input.className).not.toMatch(/\btext-(xs|sm)\b/);
     expect(input.className).not.toContain("text-[0.9375rem]");
-    expect(input.className).not.toContain("text-sm");
+    expect(input.className).not.toContain("text-[15px]");
+    expect(input.className).not.toContain("text-[14px]");
+    // No inline override that could shrink below the class contract.
+    expect(input.style.fontSize).toBe("");
   });
 
   it("filters canonical locations by display-name prefix and selects by id", () => {

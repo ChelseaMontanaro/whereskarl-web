@@ -235,8 +235,14 @@ function MapPhonePortraitSearchBar({
           autoCorrect="off"
           spellCheck={false}
           enterKeyHint="search"
-          // 16px minimum: iOS WebKit auto-zooms focused inputs below 16px,
-          // which shifts fixed BottomNav / selected-location chrome off-frame.
+          // Platform compatibility — keep this input at >=16px (text-[16px]).
+          // iOS WebKit auto-zooms focused form controls below 16px; Safari and
+          // Chrome on iOS both use WebKit. That auto-zoom changes the visual
+          // viewport so fixed-position UI (BottomNav, shared selected-location
+          // BottomSheet) can appear shifted or clipped. This is browser
+          // behavior, not an AppShell or BottomSheet bug. The 16px floor is an
+          // intentional requirement — polish via container, padding, icons, or
+          // line-height; do not shrink the actual input font below 16px.
           className="min-w-0 flex-1 bg-transparent text-[16px] font-medium leading-5 text-white outline-none placeholder:text-white/45 [&::-webkit-search-cancel-button]:hidden"
           onChange={(event) => {
             setQuery(event.target.value);

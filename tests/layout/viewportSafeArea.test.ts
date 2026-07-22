@@ -16,7 +16,7 @@ describe("root viewport safe-area activation", () => {
     expect(source).not.toContain("userScalable");
   });
 
-  it("keeps the phone portrait search input at >=16px to avoid iOS focus auto-zoom", () => {
+  it("documents and locks phone portrait search input at 16px against iOS WebKit auto-zoom", () => {
     const source = readFileSync(
       join(process.cwd(), "components/map/MapPhonePortraitControls.tsx"),
       "utf8",
@@ -25,9 +25,28 @@ describe("root viewport safe-area activation", () => {
     const inputBlock = source.match(
       /type="search"[\s\S]*?className="([^"]+)"/,
     );
-    expect(inputBlock?.[1]).toContain("text-[16px]");
-    expect(inputBlock?.[1]).not.toContain("text-[0.9375rem]");
-    expect(inputBlock?.[1]).not.toContain("text-sm");
+    const className = inputBlock?.[1] ?? "";
+    const arbitraryFontTokens = [
+      ...className.matchAll(/\btext-\[([^\]]+)\]/g),
+    ].map((match) => match[1]);
+
+    expect(arbitraryFontTokens).toEqual(["16px"]);
+    expect(className.split(/\s+/)).toContain("text-[16px]");
+    expect(className).not.toMatch(/\btext-(xs|sm)\b/);
+    expect(className).not.toContain("text-[0.9375rem]");
+
+    // Architectural comment must stay with the input so the 16px floor is not
+    // treated as a magic number during future UI polish.
+    expect(source).toContain(
+      "iOS WebKit auto-zooms focused form controls below 16px",
+    );
+    expect(source).toContain("Chrome on iOS both use WebKit");
+    expect(source).toContain("That auto-zoom changes the visual");
+    expect(source).toContain("viewport so fixed-position UI");
+    expect(source).toContain("not an AppShell or BottomSheet bug");
+    expect(source).toContain(
+      "do not shrink the actual input font below 16px",
+    );
   });
 
   it("keeps the approved phone-portrait search header top locked to safe-area", () => {
