@@ -235,7 +235,9 @@ function MapPhonePortraitSearchBar({
           autoCorrect="off"
           spellCheck={false}
           enterKeyHint="search"
-          className="min-w-0 flex-1 bg-transparent text-[0.9375rem] font-medium leading-5 text-white outline-none placeholder:text-white/45 [&::-webkit-search-cancel-button]:hidden"
+          // 16px minimum: iOS WebKit auto-zooms focused inputs below 16px,
+          // which shifts fixed BottomNav / selected-location chrome off-frame.
+          className="min-w-0 flex-1 bg-transparent text-[16px] font-medium leading-5 text-white outline-none placeholder:text-white/45 [&::-webkit-search-cancel-button]:hidden"
           onChange={(event) => {
             setQuery(event.target.value);
             setIsOverlayOpen(true);

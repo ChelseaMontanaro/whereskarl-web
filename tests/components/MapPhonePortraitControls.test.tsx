@@ -92,6 +92,24 @@ describe("MapPhonePortraitControls", () => {
     expect(searchBar.className).not.toContain("pointer-events-none");
   });
 
+  it("keeps the search input at 16px to prevent iOS WebKit focus auto-zoom", () => {
+    render(
+      <MapPhonePortraitControls
+        selectedRegionId={null}
+        onSelectRegion={vi.fn()}
+        isPhonePortrait
+        locations={[{ id: "tiburon", name: "Tiburon" }]}
+        onSelectLocation={vi.fn()}
+        onClearSelectedLocation={vi.fn()}
+      />,
+    );
+
+    const input = screen.getByRole("combobox", { name: "Search locations" });
+    expect(input.className).toContain("text-[16px]");
+    expect(input.className).not.toContain("text-[0.9375rem]");
+    expect(input.className).not.toContain("text-sm");
+  });
+
   it("filters canonical locations by display-name prefix and selects by id", () => {
     const onSelectLocation = vi.fn();
 

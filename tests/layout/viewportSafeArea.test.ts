@@ -11,6 +11,23 @@ describe("root viewport safe-area activation", () => {
 
     expect(source).toContain("viewportFit: \"cover\"");
     expect(source).toContain("export const viewport");
+    // Do not disable user zoom as an iOS input auto-zoom workaround.
+    expect(source).not.toContain("maximumScale");
+    expect(source).not.toContain("userScalable");
+  });
+
+  it("keeps the phone portrait search input at >=16px to avoid iOS focus auto-zoom", () => {
+    const source = readFileSync(
+      join(process.cwd(), "components/map/MapPhonePortraitControls.tsx"),
+      "utf8",
+    );
+
+    const inputBlock = source.match(
+      /type="search"[\s\S]*?className="([^"]+)"/,
+    );
+    expect(inputBlock?.[1]).toContain("text-[16px]");
+    expect(inputBlock?.[1]).not.toContain("text-[0.9375rem]");
+    expect(inputBlock?.[1]).not.toContain("text-sm");
   });
 
   it("keeps the approved phone-portrait search header top locked to safe-area", () => {
