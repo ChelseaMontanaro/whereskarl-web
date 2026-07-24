@@ -10,13 +10,13 @@ import {
 } from "react";
 
 import { BAY_AREA_PRODUCT_REGIONS } from "@/lib/map/config";
-import { filterCanonicalLocationsBySearch } from "@/lib/map/locationSearch";
+import {
+  filterCanonicalLocationsBySearch,
+  type CanonicalSearchableLocation,
+} from "@/lib/map/locationSearch";
 import { restorePhoneMapChrome } from "@/lib/map/restorePhoneMapChrome";
 
-type SearchableMapLocation = {
-  id: string;
-  name: string;
-};
+type SearchableMapLocation = CanonicalSearchableLocation;
 
 type MapPhonePortraitControlsProps = {
   selectedRegionId: string | null;

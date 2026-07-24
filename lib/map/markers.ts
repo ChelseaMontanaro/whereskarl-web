@@ -10,6 +10,7 @@ import { getMarkerIconMarkup } from "@/lib/map/markerIcons";
 import { locationMatchesProductRegion } from "@/lib/map/regions";
 import { isNighttime } from "@/lib/home/weatherDisplay";
 import type { DataStatus } from "@/lib/schemas/shared";
+import type { LocationSearch } from "@/lib/schemas/weather";
 import { degradedMarkerAriaSuffix } from "@/lib/weather/dataStatus";
 import type { BayAreaVisibleProductRegionId } from "@/lib/map/config";
 
@@ -23,6 +24,8 @@ export type MapMarkerLocation = {
   status?: string | null;
   region?: string | null;
   dataStatus?: DataStatus;
+  /** Catalog search metadata — preserved for phone search; unused by markers. */
+  search?: LocationSearch;
 };
 
 export function mapMarkerAriaLabel(

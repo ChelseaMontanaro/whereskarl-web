@@ -65,6 +65,34 @@ describe("MapPhonePortraitControls", () => {
     expect(scrollTo).toHaveBeenCalled();
   });
 
+  it("matches catalog search.aliases when present on the shared location projection", () => {
+    render(
+      <MapPhonePortraitControls
+        selectedRegionId={null}
+        onSelectRegion={vi.fn()}
+        isPhonePortrait
+        locations={[
+          {
+            id: "mount-tamalpais",
+            name: "Mount Tamalpais",
+            search: { aliases: ["mt tam", "mount tam", "tamalpais"] },
+          },
+          { id: "tiburon", name: "Tiburon", search: { aliases: [] } },
+        ]}
+        onSelectLocation={vi.fn()}
+        onClearSelectedLocation={vi.fn()}
+      />,
+    );
+
+    const searchInput = screen.getByRole("combobox", { name: "Search locations" });
+    fireEvent.focus(searchInput);
+    fireEvent.change(searchInput, { target: { value: "Mt" } });
+
+    expect(
+      screen.getByRole("option", { name: "Mount Tamalpais" }),
+    ).toBeInTheDocument();
+  });
+
   it("replaces the phone portrait title with an interactive canonical search bar", () => {
     render(
       <MapPhonePortraitControls

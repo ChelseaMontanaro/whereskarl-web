@@ -121,6 +121,13 @@ const catalogLocations = {
     createLocation("cupertino", "Cupertino", "south-bay", 84),
     createLocation("stinson-beach", "Stinson Beach", "north-bay", 60),
     createLocation("palo-alto", "Palo Alto", "south-bay", 88),
+    {
+      ...createLocation("mount-tamalpais", "Mount Tamalpais", "north-bay", 58, {
+        latitude: 37.9235,
+        longitude: -122.5965,
+      }),
+      search: { aliases: ["mt tam", "mount tam", "tamalpais"] },
+    },
   ],
 };
 
@@ -232,6 +239,20 @@ describe("MapView phone-portrait canonical location search (16.3C.1b)", () => {
 
     expect(
       await screen.findByRole("option", { name: "Santa Rosa" }),
+    ).toBeInTheDocument();
+  });
+
+  it("preserves catalog search.aliases through marker projection for phone search", async () => {
+    renderMap();
+
+    const searchInput = await screen.findByRole("combobox", {
+      name: "Search locations",
+    });
+    fireEvent.focus(searchInput);
+    fireEvent.change(searchInput, { target: { value: "Mt" } });
+
+    expect(
+      await screen.findByRole("option", { name: "Mount Tamalpais" }),
     ).toBeInTheDocument();
   });
 

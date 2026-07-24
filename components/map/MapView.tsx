@@ -220,6 +220,9 @@ function useMapViewState(): MapViewModel {
         status: location.status,
         region: location.region,
         dataStatus: location.dataStatus,
+        // Keep catalog search.aliases on the shared projection so phone search
+        // can resolve aliases without a second catalog or frontend alias map.
+        search: location.search,
       })),
     [locations],
   );
