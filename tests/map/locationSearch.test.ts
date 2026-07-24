@@ -99,6 +99,88 @@ describe("filterCanonicalLocationsBySearch", () => {
         "sf",
       ),
     ).toEqual([]);
+
+    expect(
+      filterCanonicalLocationsBySearch(
+        [
+          {
+            id: "mount-tamalpais",
+            name: "Mount Tamalpais",
+            search: { aliases: [] },
+          },
+        ],
+        "mt tam",
+      ),
+    ).toEqual([]);
+  });
+
+  it("matches catalog search aliases by prefix", () => {
+    const withAliases: CanonicalSearchableLocation[] = [
+      {
+        id: "mount-tamalpais",
+        name: "Mount Tamalpais",
+        search: { aliases: ["mt tam", "mount tam", "tamalpais"] },
+      },
+      {
+        id: "baker-beach",
+        name: "Baker Beach",
+        search: { aliases: ["baker", "baker beach sf"] },
+      },
+      { id: "tiburon", name: "Tiburon", search: { aliases: [] } },
+    ];
+
+    expect(
+      filterCanonicalLocationsBySearch(withAliases, "mt tam").map(
+        (item) => item.id,
+      ),
+    ).toEqual(["mount-tamalpais"]);
+
+    expect(
+      filterCanonicalLocationsBySearch(withAliases, "mt").map((item) => item.id),
+    ).toEqual(["mount-tamalpais"]);
+
+    expect(
+      filterCanonicalLocationsBySearch(withAliases, "tam").map(
+        (item) => item.id,
+      ),
+    ).toEqual(["mount-tamalpais"]);
+
+    expect(
+      filterCanonicalLocationsBySearch(withAliases, "baker").map(
+        (item) => item.id,
+      ),
+    ).toEqual(["baker-beach"]);
+  });
+
+  it("does not match later-word fragments inside aliases", () => {
+    expect(
+      filterCanonicalLocationsBySearch(
+        [
+          {
+            id: "lands-end",
+            name: "Lands End",
+            search: { aliases: ["lands end", "sutro baths", "sutro"] },
+          },
+        ],
+        "baths",
+      ),
+    ).toEqual([]);
+  });
+
+  it("dedupes when both name and alias match", () => {
+    const results = filterCanonicalLocationsBySearch(
+      [
+        {
+          id: "baker-beach",
+          name: "Baker Beach",
+          search: { aliases: ["baker", "baker beach sf"] },
+        },
+      ],
+      "baker",
+    );
+
+    expect(results).toHaveLength(1);
+    expect(results[0]?.id).toBe("baker-beach");
   });
 
   it("returns an empty list when nothing matches", () => {

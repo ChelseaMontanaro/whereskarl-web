@@ -16,6 +16,14 @@ export const backendRegionIdSchema = z.enum(BAY_AREA_BACKEND_REGION_IDS);
 export const climateSchema = z.enum(CLIMATE_VALUES);
 
 /**
+ * Canonical search metadata from the location catalog.
+ * Always emitted by /locations as { aliases: string[] } (may be empty).
+ */
+export const locationSearchSchema = z.object({
+  aliases: z.array(z.string()),
+});
+
+/**
  * Normalized crop center for canonical hero / circular presentation.
  * Coordinates are 0–1 fractions of the image width/height.
  */
@@ -189,6 +197,9 @@ export const locationWeatherSchema = z
     // Canonical Climate metadata (Marine / Fog Belt / …). Optional for older
     // payloads; invalid strings are stripped so the tile can render Unavailable.
     climate: climateSchema.optional().catch(undefined),
+    // Canonical search aliases from the location catalog. Optional for older
+    // payloads; when absent, clients prefix-match display name only.
+    search: locationSearchSchema.optional(),
     // Canonical location hero — same CDN object + focalPoint as homepage hero.
     // Circular presentation reuses these fields; optional for older payloads.
     imageUrl: z.string().nullable().optional(),
@@ -209,6 +220,7 @@ export const locationsResponseSchema = z.object({
 export type LocationWeather = z.infer<typeof locationWeatherSchema>;
 export type LocationsResponse = z.infer<typeof locationsResponseSchema>;
 export type Climate = z.infer<typeof climateSchema>;
+export type LocationSearch = z.infer<typeof locationSearchSchema>;
 export type FocalPoint = z.infer<typeof focalPointSchema>;
 export type AirQuality = z.infer<typeof airQualitySchema>;
 export type AirQualityCategory = z.infer<typeof airQualityCategorySchema>;

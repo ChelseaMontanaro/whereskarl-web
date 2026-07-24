@@ -5,27 +5,50 @@
  * markers use). Does not fetch, clone into a parallel catalog, or invent
  * search-only metadata.
  *
- * Matching is case-insensitive prefix-only on the canonical display name
- * (trimmed). Results are alphabetical. Contains / later-word / fuzzy matches
- * are intentionally excluded.
+ * Matching is case-insensitive prefix-only on the canonical display name and
+ * on catalog `search.aliases` (trimmed). Results are alphabetical. Contains /
+ * later-word / fuzzy matches are intentionally excluded.
  */
 
 export type CanonicalSearchableLocation = {
   id: string;
   name: string;
   /**
-   * Reserved for future canonical catalog aliases. Not used by prefix search
-   * until aliases exist as catalog metadata (no ad hoc alias tables).
+   * Catalog search metadata from /locations. Aliases are only matched when
+   * present on the object — no ad hoc frontend alias tables.
    */
-  aliases?: readonly string[];
+  search?: {
+    aliases?: readonly string[];
+  };
 };
 
 function compareDisplayName(left: string, right: string): number {
   return left.localeCompare(right, undefined, { sensitivity: "base" });
 }
 
+function matchesPrefix(value: string, normalizedQuery: string): boolean {
+  return value.trim().toLowerCase().startsWith(normalizedQuery);
+}
+
+function locationMatchesSearchQuery(
+  location: CanonicalSearchableLocation,
+  normalizedQuery: string,
+): boolean {
+  if (matchesPrefix(location.name, normalizedQuery)) {
+    return true;
+  }
+
+  const aliases = location.search?.aliases;
+
+  if (!aliases) {
+    return false;
+  }
+
+  return aliases.some((alias) => matchesPrefix(alias, normalizedQuery));
+}
+
 /**
- * Filters canonical locations by display-name prefix.
+ * Filters canonical locations by display-name or catalog-alias prefix.
  * Empty / whitespace-only query returns an empty list — the UI owns the
  * focused empty-state panel and must not list the full catalog on focus.
  * Returned items are references into the input array.
@@ -40,8 +63,6 @@ export function filterCanonicalLocationsBySearch<
   }
 
   return locations
-    .filter((location) =>
-      location.name.trim().toLowerCase().startsWith(normalizedQuery),
-    )
+    .filter((location) => locationMatchesSearchQuery(location, normalizedQuery))
     .sort((left, right) => compareDisplayName(left.name, right.name));
 }
