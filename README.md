@@ -10,6 +10,8 @@ Public web product for [whereskarl.live](https://whereskarl.live), built alongsi
 
 ## Local setup
 
+The Next.js web app lives at `apps/web`. Install from the repository root (npm workspaces).
+
 1. Install dependencies:
 
    ```bash
@@ -19,10 +21,10 @@ Public web product for [whereskarl.live](https://whereskarl.live), built alongsi
 2. Create local environment variables:
 
    ```bash
-   cp .env.example .env.local
+   cp apps/web/.env.example apps/web/.env.local
    ```
 
-3. Set `NEXT_PUBLIC_API_URL` in `.env.local` to your local backend base URL (no trailing slash), for example:
+3. Set `NEXT_PUBLIC_API_URL` in `apps/web/.env.local` to your local backend base URL (no trailing slash), for example:
 
    ```bash
    NEXT_PUBLIC_API_URL=http://localhost:3000
@@ -31,7 +33,7 @@ Public web product for [whereskarl.live](https://whereskarl.live), built alongsi
    If the backend already uses port 3000, run Next.js on another port:
 
    ```bash
-   npm run dev -- --port 3001
+   npm run dev:web -- --port 3001
    ```
 
 4. Start the backend (in the backend repo):
@@ -43,7 +45,7 @@ Public web product for [whereskarl.live](https://whereskarl.live), built alongsi
 5. Start the web app:
 
    ```bash
-   npm run dev
+   npm run dev:web
    ```
 
 6. Open the app in your browser at the port shown in the terminal.
@@ -56,18 +58,20 @@ Public variables only. Do not commit `.env.local`.
 | --- | --- | --- | --- |
 | `NEXT_PUBLIC_API_URL` | Local backend URL, e.g. `http://localhost:3000` | Preview/staging API URL | `https://api.whereskarl.live` |
 
-See `.env.example` for the variable contract. Production and preview hosts must set `NEXT_PUBLIC_API_URL` explicitly. The app does not fall back to localhost or mock data in production builds.
+See `apps/web/.env.example` (and the root `.env.example` overview) for the variable contract. Production and preview hosts must set `NEXT_PUBLIC_API_URL` explicitly. The app does not fall back to localhost or mock data in production builds.
 
 ## Scripts
 
+Run from the repository root:
+
 | Command | Purpose |
 | --- | --- |
-| `npm run dev` | Start Next.js dev server |
-| `npm run build` | Production build |
-| `npm run start` | Run production server locally |
-| `npm run lint` | ESLint |
-| `npm run typecheck` | TypeScript check |
-| `npm test` | Vitest unit tests |
+| `npm run dev:web` | Start Next.js dev server (`apps/web`) |
+| `npm run build:web` | Production build |
+| `npm run start:web` | Run production server locally |
+| `npm run lint` | ESLint for the web app |
+| `npm run typecheck` | TypeScript check for the web app |
+| `npm test` | Vitest unit tests for the web app |
 
 ## Deploying to Vercel
 
@@ -75,18 +79,16 @@ See `.env.example` for the variable contract. Production and preview hosts must 
 2. Set project environment variables:
    - **Production:** `NEXT_PUBLIC_API_URL=https://api.whereskarl.live`
    - **Preview:** point at your preview/staging API host if different
-3. Use the default build settings:
-   - Build command: `npm run build`
-   - Output: Next.js default
+3. Current production deploy settings remain unchanged for this migration checkpoint. A later phase will set Root Directory to `apps/web` and workspace-aware install/build commands after local validation.
 4. Deploy. Vercel production builds fail if `NEXT_PUBLIC_API_URL` is missing.
 
-Before going live, run locally:
+Before going live, run locally from the repository root:
 
 ```bash
 npm test
 npm run lint
 npm run typecheck
-npm run build
+npm run build:web
 ```
 
 ## Connecting `whereskarl.live`
@@ -149,15 +151,18 @@ Canonical **Climate** (Marine / Fog Belt / Transition / Sun Belt / Inland) is ba
 ## Project structure
 
 ```text
-app/                 Next.js App Router pages and layout
-components/          Shared UI and providers
-lib/
-  api/               Typed API client functions
-  env/               Public environment contract
-  site/              SEO metadata and sitemap routes
-  constants/         App config and design tokens
-  schemas/           Zod schemas and inferred TypeScript types
-tests/
-  fixtures/          Representative backend response JSON
-  env/               Environment configuration tests
+apps/web/
+  app/                 Next.js App Router pages and layout
+  components/          Shared UI and providers
+  lib/
+    api/               Typed API client functions
+    env/               Public environment contract
+    site/              SEO metadata and sitemap routes
+    constants/         App config and design tokens
+    schemas/           Zod schemas and inferred TypeScript types
+  tests/
+    fixtures/          Representative backend response JSON
+    env/               Environment configuration tests
+packages/              Shared packages (scaffolded; extraction in later phases)
+whereskarl-universal/  Expo app (moves to apps/universal in a later phase)
 ```
