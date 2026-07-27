@@ -18,7 +18,7 @@ import { MapFogLegend } from "@/components/map/MapFogLegend";
 import { MapSelectedLocationCard } from "@/components/map/MapSelectedLocationCard";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { getBestSunshine, getCurrent, getLocations } from "@/lib/api/weather";
-import { WEATHER_STALE_TIME_MS } from "@/lib/constants/config";
+import { WEATHER_STALE_TIME_MS } from "@whereskarl/config";
 import { bestRightNowLocationItems } from "@/lib/home/weatherDisplay";
 import { useMinWidth } from "@/lib/hooks/useMinWidth";
 import { usePhonePortrait } from "@/lib/hooks/usePhonePortrait";

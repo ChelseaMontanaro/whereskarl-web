@@ -19,7 +19,7 @@ import { getBestSunshine, getCurrent, getLocations } from "@/lib/api/weather";
 import {
   INTELLIGENCE_STALE_TIME_MS,
   WEATHER_STALE_TIME_MS,
-} from "@/lib/constants/config";
+} from "@whereskarl/config";
 import { resolveConditionsPresentation } from "@/lib/home/conditionsStatus";
 import { resolveHeroPresentation } from "@/lib/home/heroPresentation";
 import {

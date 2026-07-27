@@ -1,5 +1,4 @@
-/** Documented production backend URL — set via EXPO_PUBLIC_API_URL in deploy hosts. */
-export const PRODUCTION_API_BASE_URL = 'https://api.whereskarl.live';
+/** Expo / Universal env adapters — platform-specific; do not move into @whereskarl/config. */
 
 export const PUBLIC_ENV_VARS = {
   apiUrl: 'EXPO_PUBLIC_API_URL',

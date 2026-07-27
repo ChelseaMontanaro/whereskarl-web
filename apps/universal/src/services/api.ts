@@ -2,11 +2,12 @@
  * API client — same paths and contract as whereskarl-web/lib/api.
  */
 
+import { PRODUCTION_API_BASE_URL } from '@whereskarl/config';
+
 import {
   getApiBaseUrl,
   isApiBaseUrlConfigured,
   PUBLIC_ENV_VARS,
-  PRODUCTION_API_BASE_URL,
   resolveApiBaseUrl,
 } from '@/constants/config';
 import type {

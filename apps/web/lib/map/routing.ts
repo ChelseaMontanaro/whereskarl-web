@@ -1,13 +1,15 @@
 import {
+  MAP_LOCATION_ALIAS_QUERY_PARAM,
+  MAP_LOCATION_QUERY_PARAM,
+  MAP_REGION_QUERY_PARAM,
+} from "@whereskarl/config";
+
+import {
   findBayAreaProductRegion,
   isBayAreaProductRegionId,
   normalizeVisibleMapRegionId,
   type BayAreaProductRegion,
 } from "@/lib/map/config";
-
-export const MAP_LOCATION_QUERY_PARAM = "location";
-export const MAP_LOCATION_ALIAS_QUERY_PARAM = "selected";
-export const MAP_REGION_QUERY_PARAM = "region";
 
 type SearchParamRecord = Record<string, string | string[] | undefined>;
 

@@ -3,10 +3,11 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { buildApiUrl } from "@/lib/api/client";
+import { PRODUCTION_API_BASE_URL } from "@whereskarl/config";
+
 import {
   getApiBaseUrl,
   isApiBaseUrlConfigured,
-  PRODUCTION_API_BASE_URL,
   PUBLIC_ENV_VARS,
   resolveApiBaseUrl,
   setRuntimeApiBaseUrl,

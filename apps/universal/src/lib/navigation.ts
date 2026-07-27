@@ -1,3 +1,5 @@
+import { MAP_LOCATION_ALIAS_QUERY_PARAM } from '@whereskarl/config';
+
 export type PrimaryNavItem = {
   href: '/' | '/map' | '/favorites' | '/settings';
   label: string;
@@ -35,7 +37,7 @@ export function isPrimaryNavActive(
 
 export function buildMapHref(locationId: string | null): string {
   if (locationId?.trim()) {
-    return `/map?selected=${encodeURIComponent(locationId.trim())}`;
+    return `/map?${MAP_LOCATION_ALIAS_QUERY_PARAM}=${encodeURIComponent(locationId.trim())}`;
   }
 
   return '/map';

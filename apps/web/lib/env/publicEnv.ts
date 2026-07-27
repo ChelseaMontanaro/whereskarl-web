@@ -16,9 +16,6 @@ export const PUBLIC_ENV_VARS = {
   apiUrl: "NEXT_PUBLIC_API_URL",
 } as const;
 
-/** Documented production backend URL — set via `NEXT_PUBLIC_API_URL` in deploy hosts. */
-export const PRODUCTION_API_BASE_URL = "https://api.whereskarl.live";
-
 const API_URL_DATA_ATTRIBUTE = "apiBaseUrl";
 
 let runtimeApiBaseUrl: string | null = null;

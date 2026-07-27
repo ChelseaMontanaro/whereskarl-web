@@ -3,7 +3,7 @@
 import { QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
 
-import { WEATHER_STALE_TIME_MS } from "@/lib/constants/config";
+import { WEATHER_STALE_TIME_MS } from "@whereskarl/config";
 
 export function QueryProvider({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
