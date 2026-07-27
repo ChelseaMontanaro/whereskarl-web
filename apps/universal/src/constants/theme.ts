@@ -1,27 +1,19 @@
 /**
- * Where's Karl visual identity — aligned with iOS HomeView.swift and whereskarl-web tokens.
+ * Where's Karl visual identity — aligned with iOS HomeView.swift and shared design tokens.
  */
 
 import { Platform } from 'react-native';
 
-export const designTokens = {
-  navy: { r: 3, g: 11, b: 20 },
-  navySoft: { r: 7, g: 22, b: 35 },
-  navyGlass: { r: 9, g: 27, b: 42 },
-  gold: { r: 242, g: 163, b: 38 },
-  goldDeep: { r: 148, g: 92, b: 20 },
-} as const;
+import { designTokens, rgbToken } from '@whereskarl/design';
 
-function rgb({ r, g, b }: { r: number; g: number; b: number }): string {
-  return `rgb(${r}, ${g}, ${b})`;
-}
+export { designTokens };
 
 export const Colors = {
-  navy: rgb(designTokens.navy),
-  navySoft: rgb(designTokens.navySoft),
-  navyGlass: rgb(designTokens.navyGlass),
-  gold: rgb(designTokens.gold),
-  goldDeep: rgb(designTokens.goldDeep),
+  navy: rgbToken(designTokens.navy, 'css-comma'),
+  navySoft: rgbToken(designTokens.navySoft, 'css-comma'),
+  navyGlass: rgbToken(designTokens.navyGlass, 'css-comma'),
+  gold: rgbToken(designTokens.gold, 'css-comma'),
+  goldDeep: rgbToken(designTokens.goldDeep, 'css-comma'),
   textPrimary: 'rgba(255, 255, 255, 0.96)',
   textSecondary: 'rgba(255, 255, 255, 0.8)',
   textMuted: 'rgba(255, 255, 255, 0.48)',

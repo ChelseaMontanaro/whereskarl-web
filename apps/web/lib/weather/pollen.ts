@@ -13,6 +13,8 @@
  * surface-specific pollen models.
  */
 
+import { POLLEN_COLOR_BY_TOKEN } from "@whereskarl/design";
+
 import type { Pollen, PollenCategory } from "@/lib/schemas/weather";
 
 export type { Pollen, PollenCategory };
@@ -30,16 +32,9 @@ export type PollenColorToken =
  * Single platform color registry keyed by backend `colorToken`.
  * Every surface that colors pollen should use this map (or the same tokens on
  * native) — never ad-hoc category→hex maps.
+ * Hex values are owned by `@whereskarl/design`.
  */
-export const POLLEN_COLOR_BY_TOKEN: Record<PollenColorToken, string | null> = {
-  "pollen.none": "#22E36B",
-  "pollen.very-low": "#84CC16",
-  "pollen.low": "#F5A623",
-  "pollen.moderate": "#F97316",
-  "pollen.high": "#FF5A5F",
-  "pollen.very-high": "#A855F7",
-  "pollen.unavailable": null,
-};
+export { POLLEN_COLOR_BY_TOKEN };
 
 export type PollenPresentation = {
   available: boolean;

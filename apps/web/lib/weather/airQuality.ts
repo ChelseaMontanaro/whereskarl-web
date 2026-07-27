@@ -6,6 +6,8 @@
  * `colorToken` onto platform colors — it does not re-derive U.S. AQI bands.
  */
 
+import { AIR_QUALITY_COLOR_BY_TOKEN } from "@whereskarl/design";
+
 import type { AirQuality, AirQualityCategory } from "@/lib/schemas/weather";
 
 export type { AirQuality, AirQualityCategory };
@@ -23,16 +25,9 @@ export type AirQualityColorToken =
  * Single platform color registry keyed by backend `colorToken`.
  * Future Map / Home / Favorites / Widgets / Notifications consumers should use
  * this map (or the same tokens on native) — never ad-hoc category→hex maps.
+ * Hex values are owned by `@whereskarl/design`.
  */
-export const AIR_QUALITY_COLOR_BY_TOKEN: Record<AirQualityColorToken, string | null> = {
-  "aqi.good": "#22E36B",
-  "aqi.moderate": "#F5A623",
-  "aqi.unhealthy-sensitive": "#F97316",
-  "aqi.unhealthy": "#FF5A5F",
-  "aqi.very-unhealthy": "#A855F7",
-  "aqi.hazardous": "#7F1D1D",
-  "aqi.unavailable": null,
-};
+export { AIR_QUALITY_COLOR_BY_TOKEN };
 
 /** @deprecated Prefer AIR_QUALITY_COLOR_BY_TOKEN keyed by backend colorToken. */
 export const AIR_QUALITY_COLORS: Record<AirQualityCategory, string> = {

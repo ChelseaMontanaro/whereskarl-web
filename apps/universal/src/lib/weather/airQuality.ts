@@ -4,6 +4,8 @@
  * owned by the backend; this module only maps colorToken → platform color.
  */
 
+import { AIR_QUALITY_COLOR_BY_TOKEN } from '@whereskarl/design';
+
 import type { AirQuality, AirQualityCategory } from '@/types/weather';
 
 export type { AirQuality, AirQualityCategory };
@@ -17,15 +19,8 @@ export type AirQualityColorToken =
   | 'aqi.hazardous'
   | 'aqi.unavailable';
 
-export const AIR_QUALITY_COLOR_BY_TOKEN: Record<AirQualityColorToken, string | null> = {
-  'aqi.good': '#22E36B',
-  'aqi.moderate': '#F5A623',
-  'aqi.unhealthy-sensitive': '#F97316',
-  'aqi.unhealthy': '#FF5A5F',
-  'aqi.very-unhealthy': '#A855F7',
-  'aqi.hazardous': '#7F1D1D',
-  'aqi.unavailable': null,
-};
+/** Hex values are owned by `@whereskarl/design`. */
+export { AIR_QUALITY_COLOR_BY_TOKEN };
 
 export type AirQualityPresentation = {
   available: boolean;

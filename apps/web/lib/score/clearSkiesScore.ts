@@ -11,7 +11,11 @@
  *   75–100 → green  (clear)
  *   50–74  → orange (moderate)
  *    0–49  → red    (poor)
+ *
+ * Hex palette values live in `@whereskarl/design`; thresholds and labels stay here.
  */
+
+import { CLEAR_SKIES_SCORE_COLORS } from "@whereskarl/design";
 
 export type ClearSkiesScoreBand = "clear" | "moderate" | "poor";
 
@@ -21,11 +25,7 @@ export const CLEAR_SKIES_SCORE_GREEN_THRESHOLD = 75;
 export const CLEAR_SKIES_SCORE_ORANGE_THRESHOLD = 50;
 
 /** Canonical band colors. Shared with the AQI palette intentionally. */
-export const CLEAR_SKIES_SCORE_COLORS: Record<ClearSkiesScoreBand, string> = {
-  clear: "#22E36B",
-  moderate: "#F5A623",
-  poor: "#FF5A5F",
-};
+export { CLEAR_SKIES_SCORE_COLORS };
 
 /**
  * Canonical Clear Sky Score quality labels (product spec):

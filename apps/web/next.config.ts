@@ -16,6 +16,7 @@ const nextConfig: NextConfig = {
   },
   poweredByHeader: false,
   reactStrictMode: true,
+  transpilePackages: ["@whereskarl/design"],
 };
 
 if (process.env.VERCEL_ENV === "production" && !process.env[PUBLIC_ENV_VARS.apiUrl]) {

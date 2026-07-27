@@ -9,6 +9,8 @@
  * Health surfaces should reuse these helpers without a second UV model.
  */
 
+import { UV_INDEX_COLOR_BY_TOKEN } from '@whereskarl/design';
+
 import type {
   UltravioletIndex,
   UltravioletIndexCategory,
@@ -24,17 +26,8 @@ export type UltravioletIndexColorToken =
   | 'uv.extreme'
   | 'uv.unavailable';
 
-export const UV_INDEX_COLOR_BY_TOKEN: Record<
-  UltravioletIndexColorToken,
-  string | null
-> = {
-  'uv.low': '#22E36B',
-  'uv.moderate': '#F5A623',
-  'uv.high': '#F97316',
-  'uv.very-high': '#FF5A5F',
-  'uv.extreme': '#A855F7',
-  'uv.unavailable': null,
-};
+/** Hex values are owned by `@whereskarl/design`. */
+export { UV_INDEX_COLOR_BY_TOKEN };
 
 export type UltravioletIndexPresentation = {
   available: boolean;

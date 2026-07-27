@@ -9,6 +9,8 @@
  * surfaces should reuse these helpers without a second pollen model.
  */
 
+import { POLLEN_COLOR_BY_TOKEN } from '@whereskarl/design';
+
 import type { Pollen, PollenCategory } from '@/types/weather';
 
 export type { Pollen, PollenCategory };
@@ -22,15 +24,8 @@ export type PollenColorToken =
   | 'pollen.very-high'
   | 'pollen.unavailable';
 
-export const POLLEN_COLOR_BY_TOKEN: Record<PollenColorToken, string | null> = {
-  'pollen.none': '#22E36B',
-  'pollen.very-low': '#84CC16',
-  'pollen.low': '#F5A623',
-  'pollen.moderate': '#F97316',
-  'pollen.high': '#FF5A5F',
-  'pollen.very-high': '#A855F7',
-  'pollen.unavailable': null,
-};
+/** Hex values are owned by `@whereskarl/design`. */
+export { POLLEN_COLOR_BY_TOKEN };
 
 export type PollenPresentation = {
   available: boolean;
