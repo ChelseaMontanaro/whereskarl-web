@@ -1,0 +1,23 @@
+{
+  "name": "@whereskarl/schemas",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Zod contracts and inferred types mirroring backend API responses",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}

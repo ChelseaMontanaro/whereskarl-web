@@ -1,0 +1,23 @@
+{
+  "name": "@whereskarl/search",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Client-side location catalog search and matching rules",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@whereskarl/schemas": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}
