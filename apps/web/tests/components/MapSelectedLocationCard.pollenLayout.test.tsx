@@ -10,7 +10,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { MapSelectedLocationCard } from "@/components/map/MapSelectedLocationCard";
-import type { LocationWeather } from "@/lib/schemas/weather";
+import type { LocationWeather } from "@whereskarl/schemas";
 
 const base: LocationWeather = {
   id: "tiburon",

@@ -1,4 +1,4 @@
-import type { DataStatus } from "@/lib/schemas/shared";
+import type { DataStatus } from "@whereskarl/schemas";
 
 export function isLocationDataDegraded(
   dataStatus?: DataStatus | null,

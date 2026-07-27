@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   locationWeatherSchema,
   ultravioletIndexSchema,
-} from "@/lib/schemas/weather";
+} from "@whereskarl/schemas";
 
 const baseLocation = {
   id: "tiburon",

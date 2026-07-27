@@ -13,8 +13,8 @@ import {
   resolveKarlStatusPhrase,
   sunshineResultTitle,
 } from "@/lib/home/weatherDisplay";
-import { karlIntelligenceResponseSchema } from "@/lib/schemas/intelligence";
-import type { BestSunshineResponse, CurrentResponse } from "@/lib/schemas/weather";
+import { karlIntelligenceResponseSchema } from "@whereskarl/schemas";
+import type { BestSunshineResponse, CurrentResponse } from "@whereskarl/schemas";
 
 const FIXTURES_DIR = join(process.cwd(), "tests/fixtures");
 

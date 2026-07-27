@@ -1,10 +1,10 @@
 import { apiFetch } from "@/lib/api/client";
-import { parseApiResponse } from "@/lib/schemas/parse";
+import { parseApiResponse } from "@whereskarl/schemas";
 import {
   karlIntelligenceResponseSchema,
   type GetKarlIntelligenceOptions,
   type KarlIntelligenceResponse,
-} from "@/lib/schemas/intelligence";
+} from "@whereskarl/schemas";
 
 export async function getKarlIntelligence(
   options?: GetKarlIntelligenceOptions,

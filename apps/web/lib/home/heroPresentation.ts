@@ -2,7 +2,7 @@ import {
   normalizedHeroTimeOfDay,
   resolveHeroImageUrls,
 } from "@/lib/home/heroAssets";
-import type { KarlHeroImageryMetadata } from "@/lib/schemas/intelligence";
+import type { KarlHeroImageryMetadata } from "@whereskarl/schemas";
 
 export type HeroPresentation = {
   stabilityKey: string;

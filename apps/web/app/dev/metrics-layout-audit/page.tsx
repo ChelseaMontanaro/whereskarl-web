@@ -14,7 +14,7 @@
 import { useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { MapSelectedLocationCard } from "@/components/map/MapSelectedLocationCard";
-import type { AirQuality, LocationWeather } from "@/lib/schemas/weather";
+import type { AirQuality, LocationWeather } from "@whereskarl/schemas";
 
 const baseLocation: LocationWeather = {
   id: "tiburon",

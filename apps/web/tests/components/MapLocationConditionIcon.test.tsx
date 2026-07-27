@@ -4,7 +4,7 @@ import { cleanup, render } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { MapLocationConditionIcon } from "@/components/map/MapLocationConditionIcon";
-import type { LocationWeather } from "@/lib/schemas/weather";
+import type { LocationWeather } from "@whereskarl/schemas";
 
 const clearLocation: LocationWeather = {
   id: "mountain-view",

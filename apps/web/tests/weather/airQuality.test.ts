@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { AirQuality } from "@/lib/schemas/weather";
+import type { AirQuality } from "@whereskarl/schemas";
 import {
   AIR_QUALITY_COLOR_BY_TOKEN,
   formatAirQualityCompact,

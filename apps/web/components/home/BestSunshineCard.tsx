@@ -22,7 +22,7 @@ import {
   sunshineResultTitle,
 } from "@/lib/home/weatherDisplay";
 import { buildMapHref } from "@/lib/map/routing";
-import type { BestSunshineResponse } from "@/lib/schemas/weather";
+import type { BestSunshineResponse } from "@whereskarl/schemas";
 
 type BestSunshineCardProps = {
   recommendation: BestSunshineResponse | null;

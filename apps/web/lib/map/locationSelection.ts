@@ -1,4 +1,4 @@
-import type { LocationWeather } from "@/lib/schemas/weather";
+import type { LocationWeather } from "@whereskarl/schemas";
 
 export type MapLocationFocus = {
   selectedLocation: LocationWeather | null;

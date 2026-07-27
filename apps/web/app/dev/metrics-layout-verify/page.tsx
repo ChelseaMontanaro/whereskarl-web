@@ -14,7 +14,7 @@ import type {
   LocationWeather,
   Pollen,
   UltravioletIndex,
-} from "@/lib/schemas/weather";
+} from "@whereskarl/schemas";
 
 const base: LocationWeather = {
   id: "tiburon",

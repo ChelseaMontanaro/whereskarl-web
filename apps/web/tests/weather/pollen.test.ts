@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { Pollen } from "@/lib/schemas/weather";
+import type { Pollen } from "@whereskarl/schemas";
 import {
   POLLEN_COLOR_BY_TOKEN,
   formatPollenCompact,

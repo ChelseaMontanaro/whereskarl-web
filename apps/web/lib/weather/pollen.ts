@@ -15,7 +15,7 @@
 
 import { POLLEN_COLOR_BY_TOKEN } from "@whereskarl/design";
 
-import type { Pollen, PollenCategory } from "@/lib/schemas/weather";
+import type { Pollen, PollenCategory } from "@whereskarl/schemas";
 
 export type { Pollen, PollenCategory };
 

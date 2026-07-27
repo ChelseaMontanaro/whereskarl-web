@@ -1,18 +1,40 @@
 import { z } from "zod";
 
-import { BAY_AREA_BACKEND_REGION_IDS } from "@/lib/map/config";
 import {
   apiDateTimeSchema,
   apiSourceSchema,
   confidenceFieldsSchema,
   dataStatusSchema,
   weatherPredictionSchema,
-} from "@/lib/schemas/shared";
-import { CLIMATE_VALUES } from "@/lib/weather/climate";
+} from "./shared";
+
+/**
+ * Backend `/locations` region values — owned here as the client contract enum.
+ * Product-region catalog / chip membership remains application-local until
+ * `@whereskarl/domain` extraction.
+ */
+export const BAY_AREA_BACKEND_REGION_IDS = [
+  "san-francisco",
+  "north-bay",
+  "east-bay",
+  "south-bay",
+  "peninsula",
+] as const;
 
 export const backendRegionIdSchema = z.enum(BAY_AREA_BACKEND_REGION_IDS);
 
-/** Canonical Climate classifications from backend location metadata. */
+/**
+ * Canonical Climate classifications from backend location metadata.
+ * Presentation descriptors stay in app/domain layers.
+ */
+export const CLIMATE_VALUES = [
+  "Marine",
+  "Fog Belt",
+  "Transition",
+  "Sun Belt",
+  "Inland",
+] as const;
+
 export const climateSchema = z.enum(CLIMATE_VALUES);
 
 /**

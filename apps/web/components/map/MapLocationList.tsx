@@ -5,7 +5,7 @@ import {
   filterLocationsByProductRegion,
   getProductRegionNameForLocation,
 } from "@/lib/map/regions";
-import type { LocationWeather } from "@/lib/schemas/weather";
+import type { LocationWeather } from "@whereskarl/schemas";
 
 type MapLocationListProps = {
   locations: LocationWeather[];

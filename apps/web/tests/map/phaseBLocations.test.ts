@@ -16,8 +16,8 @@ import {
 import {
   locationWeatherSchema,
   locationsResponseSchema,
-} from "@/lib/schemas/weather";
-import type { LocationWeather } from "@/lib/schemas/weather";
+} from "@whereskarl/schemas";
+import type { LocationWeather } from "@whereskarl/schemas";
 
 const confidenceFields = {
   confidenceScore: 0,

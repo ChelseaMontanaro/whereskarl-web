@@ -9,7 +9,7 @@ import {
   shouldShowDesktopBestRightNowTray,
   toggleIntensityFilter,
 } from "@/lib/map/intensityFilter";
-import type { LocationWeather } from "@/lib/schemas/weather";
+import type { LocationWeather } from "@whereskarl/schemas";
 
 const baseLocation = {
   latitude: 37.8735,

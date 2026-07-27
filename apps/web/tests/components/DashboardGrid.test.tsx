@@ -20,8 +20,8 @@ import {
 import { clearestSpotGaugeAriaLabel } from "@/lib/home/clearestSpotGauge";
 import { fogCoverageSliderFillWidth } from "@/lib/home/fogCoverageIndicator";
 import { METRIC_DETAILS } from "@/lib/home/metricDetails";
-import { karlIntelligenceResponseSchema } from "@/lib/schemas/intelligence";
-import type { BestSunshineResponse, CurrentResponse } from "@/lib/schemas/weather";
+import { karlIntelligenceResponseSchema } from "@whereskarl/schemas";
+import type { BestSunshineResponse, CurrentResponse } from "@whereskarl/schemas";
 
 const currentFixture: CurrentResponse = {
   id: "bay-area-current",

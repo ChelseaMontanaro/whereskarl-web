@@ -1,4 +1,4 @@
-import type { KarlHeroImageryMetadata } from "@/lib/schemas/intelligence";
+import type { KarlHeroImageryMetadata } from "@whereskarl/schemas";
 
 /** Shared CDN host for hero imagery referenced by backend imageKey paths. */
 export const HERO_CDN_BASE =

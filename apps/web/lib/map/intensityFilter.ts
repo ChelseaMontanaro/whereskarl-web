@@ -12,7 +12,7 @@ import {
 } from "@/lib/home/weatherDisplay";
 import type { MapMarkerLocation } from "@/lib/map/markers";
 import { filterLocationsByProductRegion } from "@/lib/map/regions";
-import type { LocationWeather } from "@/lib/schemas/weather";
+import type { LocationWeather } from "@whereskarl/schemas";
 import { isLocationDataDegraded } from "@/lib/weather/dataStatus";
 import type { BayAreaProductRegionId } from "@/lib/map/config";
 

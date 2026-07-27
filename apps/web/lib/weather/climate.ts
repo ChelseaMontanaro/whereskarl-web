@@ -2,18 +2,13 @@
  * Canonical Climate presentation for the phone Map environmental sheet.
  *
  * Climate is stable location metadata from the backend catalog — not a live
- * weather metric. Allowed public values match the backend exactly.
+ * weather metric. Allowed public values match the backend exactly (owned by
+ * `@whereskarl/schemas`).
  */
 
-export const CLIMATE_VALUES = [
-  "Marine",
-  "Fog Belt",
-  "Transition",
-  "Sun Belt",
-  "Inland",
-] as const;
+import { CLIMATE_VALUES, type Climate } from "@whereskarl/schemas";
 
-export type Climate = (typeof CLIMATE_VALUES)[number];
+export type { Climate };
 
 export type ClimatePresentation = {
   available: boolean;

@@ -11,7 +11,7 @@
  * invent health thresholds or truncate mid-word in the UI.
  */
 
-import type { AirQualityCategory } from "@/lib/schemas/weather";
+import type { AirQualityCategory } from "@whereskarl/schemas";
 import type { AirQualityPresentation } from "@/lib/weather/airQuality";
 
 /** Deliberate AQI tile labels keyed by backend category. */

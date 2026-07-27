@@ -8,7 +8,7 @@ import {
   resolveHeroPresentation,
   selectHeroImageSource,
 } from "@/lib/home/heroPresentation";
-import { karlIntelligenceResponseSchema } from "@/lib/schemas/intelligence";
+import { karlIntelligenceResponseSchema } from "@whereskarl/schemas";
 
 const FIXTURES_DIR = join(process.cwd(), "tests/fixtures");
 

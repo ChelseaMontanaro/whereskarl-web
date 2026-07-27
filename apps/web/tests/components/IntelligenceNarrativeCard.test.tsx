@@ -6,7 +6,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { IntelligenceNarrativeCard } from "@/components/home/IntelligenceNarrativeCard";
-import type { KarlIntelligenceResponse } from "@/lib/schemas/intelligence";
+import type { KarlIntelligenceResponse } from "@whereskarl/schemas";
 
 const FIXTURES_DIR = join(process.cwd(), "tests/fixtures");
 

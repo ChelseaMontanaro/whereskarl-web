@@ -5,7 +5,7 @@ import {
   resolveHeroImageUrls,
   resolveLocalFallbackImageUrl,
 } from "@/lib/home/heroAssets";
-import { karlIntelligenceResponseSchema } from "@/lib/schemas/intelligence";
+import { karlIntelligenceResponseSchema } from "@whereskarl/schemas";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 

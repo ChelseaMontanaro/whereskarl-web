@@ -45,7 +45,7 @@ import {
 } from "@/lib/map/routing";
 import type { KarlMapStyleId } from "@/lib/map/styles";
 import { filterLocationsByProductRegion } from "@/lib/map/regions";
-import type { LocationWeather } from "@/lib/schemas/weather";
+import type { LocationWeather } from "@whereskarl/schemas";
 
 function initialMapStyle(): KarlMapStyleId {
   if (typeof window === "undefined") {

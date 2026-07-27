@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { apiSourceSchema } from "@/lib/schemas/shared";
+import { apiSourceSchema } from "./shared";
 
 export const karlLocationFogSummarySchema = z.object({
   locationId: z.string(),

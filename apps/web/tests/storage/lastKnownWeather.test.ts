@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { karlIntelligenceResponseSchema } from "@/lib/schemas/intelligence";
+import { karlIntelligenceResponseSchema } from "@whereskarl/schemas";
 import {
   lastKnownIntelligenceForHydration,
   loadLastKnownWeather,

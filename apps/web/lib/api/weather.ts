@@ -1,5 +1,5 @@
 import { apiFetch } from "@/lib/api/client";
-import { parseApiResponse } from "@/lib/schemas/parse";
+import { parseApiResponse } from "@whereskarl/schemas";
 import {
   bestSunshineResponseSchema,
   currentResponseSchema,
@@ -8,7 +8,7 @@ import {
   type CurrentResponse,
   type GetBestSunshineOptions,
   type LocationsResponse,
-} from "@/lib/schemas/weather";
+} from "@whereskarl/schemas";
 
 export async function getCurrent(): Promise<CurrentResponse> {
   const data = await apiFetch<unknown>("/current");

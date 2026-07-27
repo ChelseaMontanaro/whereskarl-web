@@ -51,7 +51,7 @@ import {
 } from "@/lib/storage/favorites";
 import { DegradedDataLabel } from "@/components/weather/DegradedDataLabel";
 import { LocationCircularImage } from "@/components/location/LocationCircularImage";
-import type { LocationWeather } from "@/lib/schemas/weather";
+import type { LocationWeather } from "@whereskarl/schemas";
 import { isLocationDataDegraded } from "@/lib/weather/dataStatus";
 
 type MapSelectedLocationCardProps = {

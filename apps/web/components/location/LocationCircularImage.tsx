@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
-import type { FocalPoint } from "@/lib/schemas/weather";
+import type { FocalPoint } from "@whereskarl/schemas";
 
 /** Exact circular frame used by Selected Location (and future Favorites / search). */
 export const LOCATION_CIRCULAR_IMAGE_FRAME_CLASSNAME =

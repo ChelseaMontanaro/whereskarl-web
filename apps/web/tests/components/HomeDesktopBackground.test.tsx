@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import { HomeDesktopBackground } from "@/components/home/HomeDesktopBackground";
 import { resolveHeroPresentation } from "@/lib/home/heroPresentation";
-import { karlIntelligenceResponseSchema } from "@/lib/schemas/intelligence";
+import { karlIntelligenceResponseSchema } from "@whereskarl/schemas";
 
 describe("HomeDesktopBackground", () => {
   afterEach(() => {

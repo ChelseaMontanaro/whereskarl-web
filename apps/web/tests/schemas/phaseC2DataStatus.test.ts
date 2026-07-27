@@ -2,12 +2,12 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { parseApiResponse } from "@/lib/schemas/parse";
+import { parseApiResponse } from "@whereskarl/schemas";
 import { isMapMarkerVisible } from "@/lib/map/markers";
 import {
   locationWeatherSchema,
   locationsResponseSchema,
-} from "@/lib/schemas/weather";
+} from "@whereskarl/schemas";
 
 const FIXTURES_DIR = join(process.cwd(), "tests/fixtures");
 

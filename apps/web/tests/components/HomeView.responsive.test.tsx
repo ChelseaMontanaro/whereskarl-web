@@ -11,7 +11,7 @@ import { HomeView } from "@/components/home/HomeView";
 import { ConditionsStatusProvider } from "@/components/providers/ConditionsStatusProvider";
 import * as intelligenceApi from "@/lib/api/intelligence";
 import * as weatherApi from "@/lib/api/weather";
-import type { LocationsResponse } from "@/lib/schemas/weather";
+import type { LocationsResponse } from "@whereskarl/schemas";
 
 const useMinWidthMock = vi.hoisted(() => vi.fn(() => false));
 

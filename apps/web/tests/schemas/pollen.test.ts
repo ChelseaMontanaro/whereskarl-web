@@ -4,7 +4,7 @@ import {
   locationWeatherSchema,
   pollenSchema,
   type Pollen,
-} from "@/lib/schemas/weather";
+} from "@whereskarl/schemas";
 
 const baseLocation = {
   id: "tiburon",

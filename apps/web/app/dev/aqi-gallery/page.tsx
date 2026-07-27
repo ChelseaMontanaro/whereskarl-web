@@ -6,7 +6,7 @@
  */
 
 import { MapSelectedLocationCard } from "@/components/map/MapSelectedLocationCard";
-import type { AirQuality, LocationWeather } from "@/lib/schemas/weather";
+import type { AirQuality, LocationWeather } from "@whereskarl/schemas";
 import {
   formatAirQualityCompact,
   presentAirQuality,

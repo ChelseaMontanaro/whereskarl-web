@@ -33,8 +33,8 @@ import {
 } from "@/lib/home/metricDetails";
 import { resolveKarlStatusPhrase } from "@/lib/home/weatherDisplay";
 import { buildMapHref } from "@/lib/map/routing";
-import type { KarlIntelligenceResponse } from "@/lib/schemas/intelligence";
-import type { BestSunshineResponse, CurrentResponse } from "@/lib/schemas/weather";
+import type { KarlIntelligenceResponse } from "@whereskarl/schemas";
+import type { BestSunshineResponse, CurrentResponse } from "@whereskarl/schemas";
 
 type DashboardGridProps = {
   current: CurrentResponse | null;

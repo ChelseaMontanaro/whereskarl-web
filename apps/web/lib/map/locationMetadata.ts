@@ -1,5 +1,5 @@
 import { resolveFogScore } from "@/lib/map/conditions";
-import type { LocationWeather } from "@/lib/schemas/weather";
+import type { LocationWeather } from "@whereskarl/schemas";
 
 export function formatFogPercent(location: LocationWeather): string | null {
   const fogScore = resolveFogScore(location);

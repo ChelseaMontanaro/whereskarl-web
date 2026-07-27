@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 
+import { CLIMATE_VALUES } from "@whereskarl/schemas";
+
 import {
   CLIMATE_DESCRIPTOR,
   CLIMATE_ICON_COLOR,
-  CLIMATE_VALUES,
   isClimate,
   presentClimate,
 } from "@/lib/weather/climate";

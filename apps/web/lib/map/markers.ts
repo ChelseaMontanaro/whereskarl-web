@@ -9,8 +9,8 @@ import { isBayAreaProductRegionId } from "@/lib/map/config";
 import { getMarkerIconMarkup } from "@/lib/map/markerIcons";
 import { locationMatchesProductRegion } from "@/lib/map/regions";
 import { isNighttime } from "@/lib/home/weatherDisplay";
-import type { DataStatus } from "@/lib/schemas/shared";
-import type { LocationSearch } from "@/lib/schemas/weather";
+import type { DataStatus } from "@whereskarl/schemas";
+import type { LocationSearch } from "@whereskarl/schemas";
 import { degradedMarkerAriaSuffix } from "@/lib/weather/dataStatus";
 import type { BayAreaVisibleProductRegionId } from "@/lib/map/config";
 

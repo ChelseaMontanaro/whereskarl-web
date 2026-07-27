@@ -2,13 +2,13 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { healthResponseSchema } from "@/lib/schemas/health";
-import { karlIntelligenceResponseSchema } from "@/lib/schemas/intelligence";
+import { healthResponseSchema } from "@whereskarl/schemas";
+import { karlIntelligenceResponseSchema } from "@whereskarl/schemas";
 import {
   bestSunshineResponseSchema,
   currentResponseSchema,
   locationsResponseSchema,
-} from "@/lib/schemas/weather";
+} from "@whereskarl/schemas";
 
 const FIXTURES_DIR = join(process.cwd(), "tests/fixtures");
 

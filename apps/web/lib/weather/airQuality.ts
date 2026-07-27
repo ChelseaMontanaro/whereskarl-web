@@ -8,7 +8,7 @@
 
 import { AIR_QUALITY_COLOR_BY_TOKEN } from "@whereskarl/design";
 
-import type { AirQuality, AirQualityCategory } from "@/lib/schemas/weather";
+import type { AirQuality, AirQualityCategory } from "@whereskarl/schemas";
 
 export type { AirQuality, AirQualityCategory };
 

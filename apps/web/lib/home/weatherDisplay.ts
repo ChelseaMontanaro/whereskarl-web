@@ -1,10 +1,10 @@
-import type { KarlIntelligenceResponse } from "@/lib/schemas/intelligence";
+import type { KarlIntelligenceResponse } from "@whereskarl/schemas";
 import type {
   BestSunshineResponse,
   CurrentResponse,
   LocationWeather,
-} from "@/lib/schemas/weather";
-import type { WeatherPrediction } from "@/lib/schemas/shared";
+} from "@whereskarl/schemas";
+import type { WeatherPrediction } from "@whereskarl/schemas";
 import { formatNextHourTimeCopy } from "@/lib/home/timeFormat";
 import { isLocationDataDegraded } from "@/lib/weather/dataStatus";
 import {

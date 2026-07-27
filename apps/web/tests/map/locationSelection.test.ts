@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { resolveMapLocationFocus } from "@/lib/map/locationSelection";
-import { locationsResponseSchema } from "@/lib/schemas/weather";
+import { locationsResponseSchema } from "@whereskarl/schemas";
 
 const FIXTURES_DIR = join(process.cwd(), "tests/fixtures");
 

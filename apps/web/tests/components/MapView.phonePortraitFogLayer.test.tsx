@@ -13,7 +13,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { MapView } from "@/components/map/MapView";
 import * as weatherApi from "@/lib/api/weather";
-import type { LocationWeather, LocationsResponse } from "@/lib/schemas/weather";
+import type { LocationWeather, LocationsResponse } from "@whereskarl/schemas";
 
 const useSearchParamsMock = vi.fn();
 const usePhonePortraitMock = vi.fn(() => true);

@@ -11,7 +11,7 @@ import {
   createMapMarkerElement,
   isMapMarkerVisible,
 } from "@/lib/map/markers";
-import type { LocationWeather } from "@/lib/schemas/weather";
+import type { LocationWeather } from "@whereskarl/schemas";
 
 const baseLocation = {
   latitude: 37.8735,

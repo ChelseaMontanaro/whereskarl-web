@@ -19,7 +19,7 @@ import { UV_INDEX_COLOR_BY_TOKEN } from "@whereskarl/design";
 import type {
   UltravioletIndex,
   UltravioletIndexCategory,
-} from "@/lib/schemas/weather";
+} from "@whereskarl/schemas";
 
 export type { UltravioletIndex, UltravioletIndexCategory };
 

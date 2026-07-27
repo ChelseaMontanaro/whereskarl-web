@@ -21,7 +21,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MapView } from "@/components/map/MapView";
 import * as weatherApi from "@/lib/api/weather";
 import type { BayAreaBackendRegionId } from "@/lib/map/config";
-import type { LocationWeather } from "@/lib/schemas/weather";
+import type { LocationWeather } from "@whereskarl/schemas";
 
 const FIXTURES_DIR = join(process.cwd(), "tests/fixtures");
 

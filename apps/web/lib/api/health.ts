@@ -2,7 +2,7 @@ import { apiFetch } from "@/lib/api/client";
 import {
   healthResponseSchema,
   type HealthResponse,
-} from "@/lib/schemas/health";
+} from "@whereskarl/schemas";
 
 export async function getHealth(): Promise<HealthResponse> {
   const data = await apiFetch<unknown>("/health");

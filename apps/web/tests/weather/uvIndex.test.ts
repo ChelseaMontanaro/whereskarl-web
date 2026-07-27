@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { UltravioletIndex } from "@/lib/schemas/weather";
+import type { UltravioletIndex } from "@whereskarl/schemas";
 import {
   UV_INDEX_COLOR_BY_TOKEN,
   formatUvIndexCompact,

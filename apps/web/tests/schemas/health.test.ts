@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { healthResponseSchema } from "@/lib/schemas/health";
+import { healthResponseSchema } from "@whereskarl/schemas";
 
 describe("healthResponseSchema", () => {
   it("validates the backend health fixture", () => {

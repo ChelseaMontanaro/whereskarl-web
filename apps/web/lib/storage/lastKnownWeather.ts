@@ -1,10 +1,10 @@
 import { STORAGE_KEYS } from "@/lib/constants/config";
-import type { KarlIntelligenceResponse } from "@/lib/schemas/intelligence";
+import type { KarlIntelligenceResponse } from "@whereskarl/schemas";
 import type {
   BestSunshineResponse,
   CurrentResponse,
   LocationsResponse,
-} from "@/lib/schemas/weather";
+} from "@whereskarl/schemas";
 
 export type LastKnownWeather = {
   current: CurrentResponse;

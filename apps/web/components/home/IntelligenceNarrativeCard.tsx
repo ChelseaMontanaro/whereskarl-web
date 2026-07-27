@@ -15,7 +15,7 @@ import {
 import { GlassCard } from "@/components/ui/GlassCard";
 import { buildMapHref } from "@/lib/map/routing";
 import type { KarlReadPresentation } from "@/lib/home/weatherDisplay";
-import type { KarlIntelligenceResponse } from "@/lib/schemas/intelligence";
+import type { KarlIntelligenceResponse } from "@whereskarl/schemas";
 
 type IntelligenceNarrativeCardProps = {
   intelligence: KarlIntelligenceResponse | null;
