@@ -8,10 +8,12 @@
   ],
   "scripts": {
     "dev:web": "npm run dev -w @whereskarl/web",
+    "dev:universal": "npm run start -w whereskarl-universal",
     "build:web": "npm run build -w @whereskarl/web",
     "start:web": "npm run start -w @whereskarl/web",
     "lint": "npm run lint -w @whereskarl/web",
     "typecheck": "npm run typecheck -w @whereskarl/web",
+    "typecheck:universal": "npm run typecheck -w whereskarl-universal",
     "test": "npm run test -w @whereskarl/web"
   }
 }

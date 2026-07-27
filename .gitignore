@@ -50,5 +50,5 @@ next-env.d.ts
 # Local design/verification screenshots (not production assets)
 .audit-screenshots/
 
-# Expo / Universal local artifacts (app still at whereskarl-universal until later phase)
+# Expo / Universal local artifacts
 .expo/

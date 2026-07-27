@@ -32,13 +32,19 @@ To test the web app on a phone over your local network:
 
 ## Get started
 
-1. Install dependencies
+1. Install dependencies from the **repository root** (npm workspaces):
 
    ```bash
    npm install
    ```
 
-2. Start the app
+2. Start the app from the repository root:
+
+   ```bash
+   npm run dev:universal
+   ```
+
+   Or from this directory:
 
    ```bash
    npx expo start

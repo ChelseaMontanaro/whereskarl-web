@@ -67,10 +67,12 @@ Run from the repository root:
 | Command | Purpose |
 | --- | --- |
 | `npm run dev:web` | Start Next.js dev server (`apps/web`) |
+| `npm run dev:universal` | Start Expo dev server (`apps/universal`) |
 | `npm run build:web` | Production build |
 | `npm run start:web` | Run production server locally |
 | `npm run lint` | ESLint for the web app |
 | `npm run typecheck` | TypeScript check for the web app |
+| `npm run typecheck:universal` | TypeScript check for the Expo app |
 | `npm test` | Vitest unit tests for the web app |
 
 ## Deploying to Vercel
@@ -163,6 +165,6 @@ apps/web/
   tests/
     fixtures/          Representative backend response JSON
     env/               Environment configuration tests
+apps/universal/        Expo Universal app (iOS / Android / RN Web)
 packages/              Shared packages (scaffolded; extraction in later phases)
-whereskarl-universal/  Expo app (moves to apps/universal in a later phase)
 ```
