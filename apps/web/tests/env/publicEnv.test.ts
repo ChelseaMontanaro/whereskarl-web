@@ -2,7 +2,7 @@
 
 import { describe, expect, it, vi } from "vitest";
 
-import { buildApiUrl } from "@/lib/api/client";
+import { buildApiUrl } from "@whereskarl/api-client";
 import { PRODUCTION_API_BASE_URL } from "@whereskarl/config";
 
 import {
@@ -32,7 +32,9 @@ describe("public environment config", () => {
     setRuntimeApiBaseUrl(null);
 
     expect(getApiBaseUrl()).toBe("https://api.whereskarl.live");
-    expect(buildApiUrl("/current")).toBe("https://api.whereskarl.live/current");
+    expect(buildApiUrl(getApiBaseUrl(), "/current")).toBe(
+      "https://api.whereskarl.live/current",
+    );
   });
 
   it("reads the API base URL from the server-injected DOM attribute", () => {

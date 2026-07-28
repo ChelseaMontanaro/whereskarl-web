@@ -8,7 +8,7 @@ import { createElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { MapView, initialMapStyle } from "@/components/map/MapView";
-import * as weatherApi from "@/lib/api/weather";
+import * as weatherApi from "@whereskarl/api-client";
 
 const FIXTURES_DIR = join(process.cwd(), "tests/fixtures");
 const useSearchParamsMock = vi.fn();

@@ -19,7 +19,7 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { MapView } from "@/components/map/MapView";
-import * as weatherApi from "@/lib/api/weather";
+import * as weatherApi from "@whereskarl/api-client";
 import type { BayAreaBackendRegionId } from "@/lib/map/config";
 import type { LocationWeather } from "@whereskarl/schemas";
 

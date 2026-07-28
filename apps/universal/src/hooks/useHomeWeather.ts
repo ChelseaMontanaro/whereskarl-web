@@ -1,12 +1,19 @@
 import { useEffect, useState } from 'react';
 
-import { isApiBaseUrlConfigured } from '@/constants/config';
-import { getBestSunshine, getCurrent, getLocations } from '@/services/api';
+import {
+  getBestSunshine,
+  getCurrent,
+  getLocations,
+} from '@whereskarl/api-client';
+
+import { getApiBaseUrl, isApiBaseUrlConfigured } from '@/constants/config';
 import type {
   BestSunshineResponse,
   CurrentResponse,
   LocationWeather,
 } from '@/types/weather';
+
+const apiConfig = { getBaseUrl: getApiBaseUrl };
 
 export type HomeWeatherState = {
   isLoading: boolean;
@@ -43,9 +50,9 @@ export function useHomeWeather(): HomeWeatherState {
 
       const [currentResult, locationsResult, bestSunshineResult] =
         await Promise.allSettled([
-          getCurrent(),
-          getLocations(),
-          getBestSunshine(),
+          getCurrent(apiConfig),
+          getLocations(apiConfig),
+          getBestSunshine(apiConfig),
         ]);
 
       if (cancelled) {

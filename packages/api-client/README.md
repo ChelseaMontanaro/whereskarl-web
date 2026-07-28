@@ -2,4 +2,5 @@
 
 HTTP transport and endpoint functions for Where's Karl backend APIs.
 
-Scaffold only — logic extraction comes in a later migration phase.
+Apps resolve the API base URL from environment and inject it via `createApiClient`
+or per-call `ApiClientConfig`. This package does not read `process.env`.

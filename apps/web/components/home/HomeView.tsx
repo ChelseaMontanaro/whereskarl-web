@@ -14,12 +14,17 @@ import {
   useClearSkiesNav,
 } from "@/components/providers/ClearSkiesNavProvider";
 import { useConditionsStatus } from "@/components/providers/ConditionsStatusProvider";
-import { getKarlIntelligence } from "@/lib/api/intelligence";
-import { getBestSunshine, getCurrent, getLocations } from "@/lib/api/weather";
+import {
+  getBestSunshine,
+  getCurrent,
+  getKarlIntelligence,
+  getLocations,
+} from "@whereskarl/api-client";
 import {
   INTELLIGENCE_STALE_TIME_MS,
   WEATHER_STALE_TIME_MS,
 } from "@whereskarl/config";
+import { getApiBaseUrl } from "@/lib/constants/config";
 import { resolveConditionsPresentation } from "@/lib/home/conditionsStatus";
 import { resolveHeroPresentation } from "@/lib/home/heroPresentation";
 import {
@@ -42,6 +47,8 @@ import {
 } from "@/lib/storage/lastKnownWeather";
 import { useMinWidth } from "@/lib/hooks/useMinWidth";
 
+const apiConfig = { getBaseUrl: getApiBaseUrl };
+
 export function HomeView() {
   const isDesktopHome = useMinWidth(1024);
   const { setPresentation } = useConditionsStatus();
@@ -56,7 +63,7 @@ export function HomeView() {
 
   const currentQuery = useQuery({
     queryKey: ["current"],
-    queryFn: getCurrent,
+    queryFn: () => getCurrent(apiConfig),
     staleTime: WEATHER_STALE_TIME_MS,
     placeholderData: initialLastKnown?.current,
     refetchOnMount: "always",
@@ -65,7 +72,7 @@ export function HomeView() {
 
   const locationsQuery = useQuery({
     queryKey: ["locations"],
-    queryFn: getLocations,
+    queryFn: () => getLocations(apiConfig),
     staleTime: WEATHER_STALE_TIME_MS,
     placeholderData: initialLastKnown?.locations,
     refetchOnMount: "always",
@@ -73,7 +80,7 @@ export function HomeView() {
 
   const bestSunshineQuery = useQuery({
     queryKey: ["best-sunshine"],
-    queryFn: () => getBestSunshine(),
+    queryFn: () => getBestSunshine(apiConfig),
     staleTime: WEATHER_STALE_TIME_MS,
     placeholderData: initialLastKnown?.bestSunshine,
     refetchOnMount: "always",
@@ -99,6 +106,7 @@ export function HomeView() {
     queryKey: ["karl-intelligence", focusLocationId],
     queryFn: () =>
       getKarlIntelligence(
+        apiConfig,
         focusLocationId ? { locationId: focusLocationId } : undefined,
       ),
     staleTime: INTELLIGENCE_STALE_TIME_MS,

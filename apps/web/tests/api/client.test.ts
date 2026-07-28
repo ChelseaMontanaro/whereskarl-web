@@ -2,11 +2,14 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { buildApiPath, buildApiUrl } from "@/lib/api/client";
-import { getKarlIntelligence } from "@/lib/api/intelligence";
-import { getBestSunshine } from "@/lib/api/weather";
+import {
+  buildApiPath,
+  createApiClient,
+  getBestSunshine,
+  getKarlIntelligence,
+} from "@whereskarl/api-client";
 
-describe("buildApiPath", () => {
+describe("buildApiPath (web consumer)", () => {
   it("builds /best-sunshine without query params", () => {
     expect(buildApiPath("/best-sunshine")).toBe("/best-sunshine");
   });
@@ -28,21 +31,8 @@ describe("buildApiPath", () => {
   });
 });
 
-describe("buildApiUrl", () => {
+describe("weather and intelligence API clients (web consumer)", () => {
   beforeEach(() => {
-    vi.stubEnv("NEXT_PUBLIC_API_URL", "http://localhost:3000");
-  });
-
-  it("prefixes the configured API base URL", () => {
-    expect(buildApiUrl("/karl-intelligence")).toBe(
-      "http://localhost:3000/karl-intelligence",
-    );
-  });
-});
-
-describe("weather and intelligence API clients", () => {
-  beforeEach(() => {
-    vi.stubEnv("NEXT_PUBLIC_API_URL", "http://localhost:3000");
     vi.restoreAllMocks();
   });
 
@@ -51,9 +41,11 @@ describe("weather and intelligence API clients", () => {
       ok: true,
       json: async () => readFixture("best-sunshine.json"),
     });
-    vi.stubGlobal("fetch", fetchMock);
 
-    await getBestSunshine();
+    await getBestSunshine({
+      baseUrl: "http://localhost:3000",
+      fetchImpl: fetchMock,
+    });
 
     expect(fetchMock).toHaveBeenCalledWith(
       "http://localhost:3000/best-sunshine",
@@ -70,9 +62,11 @@ describe("weather and intelligence API clients", () => {
       ok: true,
       json: async () => readFixture("best-sunshine-lookahead.json"),
     });
-    vi.stubGlobal("fetch", fetchMock);
 
-    await getBestSunshine({ lookahead: 60 });
+    await getBestSunshine(
+      { baseUrl: "http://localhost:3000", fetchImpl: fetchMock },
+      { lookahead: 60 },
+    );
 
     expect(fetchMock).toHaveBeenCalledWith(
       "http://localhost:3000/best-sunshine?lookahead=60",
@@ -85,9 +79,11 @@ describe("weather and intelligence API clients", () => {
       ok: true,
       json: async () => readFixture("karl-intelligence.json"),
     });
-    vi.stubGlobal("fetch", fetchMock);
 
-    await getKarlIntelligence();
+    await getKarlIntelligence({
+      baseUrl: "http://localhost:3000",
+      fetchImpl: fetchMock,
+    });
 
     expect(fetchMock).toHaveBeenCalledWith(
       "http://localhost:3000/karl-intelligence",
@@ -100,13 +96,24 @@ describe("weather and intelligence API clients", () => {
       ok: true,
       json: async () => readFixture("karl-intelligence-mill-valley.json"),
     });
-    vi.stubGlobal("fetch", fetchMock);
 
-    await getKarlIntelligence({ locationId: "mill-valley" });
+    await getKarlIntelligence(
+      { baseUrl: "http://localhost:3000", fetchImpl: fetchMock },
+      { locationId: "mill-valley" },
+    );
 
     expect(fetchMock).toHaveBeenCalledWith(
       "http://localhost:3000/karl-intelligence?locationId=mill-valley",
       expect.any(Object),
+    );
+  });
+
+  it("createApiClient prefixes the configured API base URL", () => {
+    const api = createApiClient({
+      getBaseUrl: () => "http://localhost:3000",
+    });
+    expect(api.buildApiUrl("/karl-intelligence")).toBe(
+      "http://localhost:3000/karl-intelligence",
     );
   });
 });

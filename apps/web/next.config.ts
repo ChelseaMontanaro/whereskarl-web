@@ -16,7 +16,12 @@ const nextConfig: NextConfig = {
   },
   poweredByHeader: false,
   reactStrictMode: true,
-  transpilePackages: ["@whereskarl/design", "@whereskarl/config", "@whereskarl/schemas"],
+  transpilePackages: [
+    "@whereskarl/api-client",
+    "@whereskarl/design",
+    "@whereskarl/config",
+    "@whereskarl/schemas",
+  ],
 };
 
 if (process.env.VERCEL_ENV === "production" && !process.env[PUBLIC_ENV_VARS.apiUrl]) {

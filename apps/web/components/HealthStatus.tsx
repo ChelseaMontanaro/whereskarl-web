@@ -2,9 +2,11 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { getHealth } from "@/lib/api/health";
-import { ApiError } from "@/lib/api/client";
+import { ApiError, getHealth } from "@whereskarl/api-client";
 import { GlassCard } from "@/components/ui/GlassCard";
+import { getApiBaseUrl } from "@/lib/constants/config";
+
+const apiConfig = { getBaseUrl: getApiBaseUrl };
 
 function formatTimestamp(timestamp: string): string {
   return new Date(timestamp).toLocaleString("en-US", {
@@ -21,7 +23,7 @@ type HealthStatusProps = {
 export function HealthStatus({ compact = false }: HealthStatusProps) {
   const { data, error, isLoading, isError, isSuccess } = useQuery({
     queryKey: ["health"],
-    queryFn: getHealth,
+    queryFn: () => getHealth(apiConfig),
     retry: 1,
   });
 

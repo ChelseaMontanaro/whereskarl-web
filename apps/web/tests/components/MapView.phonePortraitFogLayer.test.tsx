@@ -12,7 +12,7 @@ import { createElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { MapView } from "@/components/map/MapView";
-import * as weatherApi from "@/lib/api/weather";
+import * as weatherApi from "@whereskarl/api-client";
 import type { LocationWeather, LocationsResponse } from "@whereskarl/schemas";
 
 const useSearchParamsMock = vi.fn();

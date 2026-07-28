@@ -17,8 +17,13 @@ import { MapPhonePortraitLayersControl } from "@/components/map/MapLayerControls
 import { MapFogLegend } from "@/components/map/MapFogLegend";
 import { MapSelectedLocationCard } from "@/components/map/MapSelectedLocationCard";
 import { GlassCard } from "@/components/ui/GlassCard";
-import { getBestSunshine, getCurrent, getLocations } from "@/lib/api/weather";
+import {
+  getBestSunshine,
+  getCurrent,
+  getLocations,
+} from "@whereskarl/api-client";
 import { WEATHER_STALE_TIME_MS } from "@whereskarl/config";
+import { getApiBaseUrl } from "@/lib/constants/config";
 import { bestRightNowLocationItems } from "@/lib/home/weatherDisplay";
 import { useMinWidth } from "@/lib/hooks/useMinWidth";
 import { usePhonePortrait } from "@/lib/hooks/usePhonePortrait";
@@ -46,6 +51,8 @@ import {
 import type { KarlMapStyleId } from "@/lib/map/styles";
 import { filterLocationsByProductRegion } from "@/lib/map/regions";
 import type { LocationWeather } from "@whereskarl/schemas";
+
+const apiConfig = { getBaseUrl: getApiBaseUrl };
 
 function initialMapStyle(): KarlMapStyleId {
   if (typeof window === "undefined") {
@@ -159,20 +166,20 @@ function useMapViewState(): MapViewModel {
 
   const locationsQuery = useQuery({
     queryKey: ["locations"],
-    queryFn: getLocations,
+    queryFn: () => getLocations(apiConfig),
     staleTime: WEATHER_STALE_TIME_MS,
   });
 
   const currentQuery = useQuery({
     queryKey: ["current"],
-    queryFn: getCurrent,
+    queryFn: () => getCurrent(apiConfig),
     staleTime: WEATHER_STALE_TIME_MS,
   });
 
   // Canonical Best Right Now recommendation, shared with the Home page.
   const bestSunshineQuery = useQuery({
     queryKey: ["best-sunshine"],
-    queryFn: () => getBestSunshine(),
+    queryFn: () => getBestSunshine(apiConfig),
     staleTime: WEATHER_STALE_TIME_MS,
   });
 

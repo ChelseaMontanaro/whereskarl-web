@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { isApiBaseUrlConfigured } from '@/constants/config';
-import { getLocations } from '@/services/api';
+import { getLocations } from '@whereskarl/api-client';
+
+import { getApiBaseUrl, isApiBaseUrlConfigured } from '@/constants/config';
 import type { LocationWeather } from '@/types/weather';
+
+const apiConfig = { getBaseUrl: getApiBaseUrl };
 
 export type LocationsState = {
   isLoading: boolean;
@@ -44,7 +47,7 @@ export function useLocations(): LocationsState {
     }));
 
     try {
-      const response = await getLocations();
+      const response = await getLocations(apiConfig);
       setState({
         isLoading: false,
         isRefreshing: false,
