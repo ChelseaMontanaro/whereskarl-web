@@ -9,7 +9,7 @@ import {
   formatUvIndexCompact,
   presentUvIndex,
 } from '@whereskarl/domain';
-import type { LocationWeather } from '@/types/weather';
+import type { LocationWeather } from '@whereskarl/schemas';
 
 export function formatFogPercent(location: LocationWeather): string | null {
   const fogScore = resolveFogScore(location);

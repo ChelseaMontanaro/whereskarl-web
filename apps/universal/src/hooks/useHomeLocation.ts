@@ -5,7 +5,7 @@ import {
   setHomeLocationId as persistHomeLocationId,
   subscribeHomeLocationChanges,
 } from '@/lib/storage/homeLocation';
-import type { LocationWeather } from '@/types/weather';
+import type { LocationWeather } from '@whereskarl/schemas';
 
 export type HomeLocationState = {
   homeLocationId: string | null;

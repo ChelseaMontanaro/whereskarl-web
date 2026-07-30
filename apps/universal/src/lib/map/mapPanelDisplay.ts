@@ -1,4 +1,4 @@
-import type { LocationWeather } from '@/types/weather';
+import type { LocationWeather } from '@whereskarl/schemas';
 
 function trimmedNonEmpty(value: string | null | undefined): string | null {
   if (!value) {

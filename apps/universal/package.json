@@ -9,6 +9,7 @@
     "@whereskarl/config": "*",
     "@whereskarl/design": "*",
     "@whereskarl/domain": "*",
+    "@whereskarl/schemas": "*",
     "@whereskarl/search": "*",
     "expo": "~57.0.4",
     "expo-constants": "~57.0.3",

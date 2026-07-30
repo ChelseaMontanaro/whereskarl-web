@@ -7,7 +7,7 @@ import type {
   BestSunshineResponse,
   CurrentResponse,
   LocationWeather,
-} from '@/types/weather';
+} from '@whereskarl/schemas';
 
 const MOVEMENT_PHRASES = [
   'advancing into',

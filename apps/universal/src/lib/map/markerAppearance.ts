@@ -9,7 +9,7 @@ import {
 } from '@whereskarl/domain';
 
 import { Colors } from '@/constants/theme';
-import type { LocationWeather } from '@/types/weather';
+import type { LocationWeather } from '@whereskarl/schemas';
 
 /** Clear/sun glyph — matches SelectedLocationPreview and daytime markers. */
 export const CLEAR_SUN_COLOR = Colors.gold;

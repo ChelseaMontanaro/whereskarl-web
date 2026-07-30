@@ -6,7 +6,7 @@ import {
   getLocationConditionHeadline,
   getLocationHeroSummary,
 } from '@/lib/location/detailDisplay';
-import type { LocationWeather } from '@/types/weather';
+import type { LocationWeather } from '@whereskarl/schemas';
 
 type LocationConditionsHeroProps = {
   location: Pick<

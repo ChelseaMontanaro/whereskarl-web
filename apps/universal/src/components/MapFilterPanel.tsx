@@ -14,7 +14,7 @@ import {
   BAY_AREA_PRODUCT_REGIONS,
   type BayAreaVisibleProductRegionId,
 } from '@/lib/map/regions';
-import type { LocationWeather } from '@/types/weather';
+import type { LocationWeather } from '@whereskarl/schemas';
 
 const CONDITION_OPTIONS: Array<{
   id: FogIntensity;

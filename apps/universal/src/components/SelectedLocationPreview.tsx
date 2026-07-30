@@ -13,7 +13,7 @@ import {
   resolveLocationFogIntensity,
 } from '@whereskarl/domain';
 import { getSelectedLocationSubtitle } from '@/lib/map/mapPanelDisplay';
-import type { LocationWeather } from '@/types/weather';
+import type { LocationWeather } from '@whereskarl/schemas';
 
 type SelectedLocationPreviewProps = {
   location: LocationWeather | null;

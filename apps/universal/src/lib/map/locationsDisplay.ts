@@ -16,7 +16,7 @@ import {
 } from '@whereskarl/domain';
 import { filterCanonicalLocationsBySearch } from '@whereskarl/search';
 
-import type { LocationWeather } from '@/types/weather';
+import type { LocationWeather } from '@whereskarl/schemas';
 import {
   filterLocationsByProductRegion,
   type BayAreaVisibleProductRegionId,

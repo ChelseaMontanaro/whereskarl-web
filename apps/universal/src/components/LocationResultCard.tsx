@@ -9,7 +9,7 @@ import {
 import {
   getCloudSummary,
 } from '@/lib/map/locationsDisplay';
-import type { LocationWeather } from '@/types/weather';
+import type { LocationWeather } from '@whereskarl/schemas';
 
 type LocationResultCardProps = {
   location: LocationWeather;

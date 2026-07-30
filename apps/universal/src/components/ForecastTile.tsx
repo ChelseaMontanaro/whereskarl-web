@@ -1,7 +1,15 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Colors, Radius, Spacing } from '@/constants/theme';
-import type { ForecastHour } from '@/types/weather';
+
+/** App-local forecast tile model — not a backend contract type. */
+export type ForecastHour = {
+  hour: string;
+  temperature: number;
+  sunshineScore: number;
+  iconName: string;
+  status: string;
+};
 
 type ForecastTileProps = {
   forecast: ForecastHour;

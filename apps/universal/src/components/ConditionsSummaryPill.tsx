@@ -6,7 +6,7 @@ import {
   resolveLocationFogIntensity,
   type FogIntensity,
 } from '@whereskarl/domain';
-import type { LocationWeather } from '@/types/weather';
+import type { LocationWeather } from '@whereskarl/schemas';
 
 type ConditionsSummaryPillProps = {
   location: Pick<

@@ -5,6 +5,7 @@ import type {
   LocationWeather,
 } from "@whereskarl/schemas";
 import type { WeatherPrediction } from "@whereskarl/schemas";
+import { normalizeLocationId } from "@whereskarl/search";
 import { formatNextHourTimeCopy } from "@/lib/home/timeFormat";
 import { isLocationDataDegraded } from "@whereskarl/domain";
 import {
@@ -62,11 +63,6 @@ export function resolveKarlStatusPhrase(input: {
   }
 
   return currentStatus;
-}
-
-function normalizeLocationId(locationId: string | null | undefined): string | null {
-  const normalized = locationId?.trim().toLowerCase() ?? "";
-  return normalized.length > 0 ? normalized : null;
 }
 
 export function bestRightNowLocationItems(

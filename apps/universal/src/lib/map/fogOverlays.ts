@@ -6,7 +6,7 @@ import {
 import {
   getLocationFogOverlayStyle,
 } from '@/lib/map/locationsDisplay';
-import type { LocationWeather } from '@/types/weather';
+import type { LocationWeather } from '@whereskarl/schemas';
 
 type LocationConditionInput = Pick<
   LocationWeather,

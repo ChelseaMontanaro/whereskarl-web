@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { getLocations } from '@whereskarl/api-client';
 
 import { getApiBaseUrl, isApiBaseUrlConfigured } from '@/constants/config';
-import type { LocationWeather } from '@/types/weather';
+import type { LocationWeather } from '@whereskarl/schemas';
 
 const apiConfig = { getBaseUrl: getApiBaseUrl };
 

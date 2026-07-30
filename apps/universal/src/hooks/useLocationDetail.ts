@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
 import { useLocations } from '@/hooks/useLocations';
-import type { LocationWeather } from '@/types/weather';
+import type { LocationWeather } from '@whereskarl/schemas';
 
 export type LocationDetailState = {
   locationId: string | null;

@@ -18,10 +18,7 @@ import {
 } from "./index";
 
 const BASE_URL = "http://localhost:3000";
-const fixturesDir = join(
-  dirname(fileURLToPath(import.meta.url)),
-  "../../../apps/web/tests/fixtures",
-);
+const fixturesDir = join(dirname(fileURLToPath(import.meta.url)), "fixtures");
 
 function readFixture(filename: string): unknown {
   return JSON.parse(readFileSync(join(fixturesDir, filename), "utf8"));

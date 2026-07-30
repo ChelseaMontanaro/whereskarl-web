@@ -11,7 +11,7 @@ import {
   BAY_AREA_PRODUCT_REGIONS,
   type BayAreaVisibleProductRegionId,
 } from '@/lib/map/regions';
-import type { LocationWeather } from '@/types/weather';
+import type { LocationWeather } from '@whereskarl/schemas';
 
 type MapConditionsPanelProps = {
   locations: LocationWeather[];

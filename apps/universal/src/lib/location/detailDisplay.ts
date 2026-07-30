@@ -23,8 +23,8 @@ import {
 } from '@whereskarl/domain';
 import { presentHumidity } from '@whereskarl/domain';
 import { presentVisibility } from '@whereskarl/domain';
-import type { WeatherPrediction } from '@/types/shared';
-import type { LocationWeather } from '@/types/weather';
+import type { WeatherPrediction } from '@whereskarl/schemas';
+import type { LocationWeather } from '@whereskarl/schemas';
 
 function trimmedNonEmpty(value: string | null | undefined): string | null {
   if (!value) {

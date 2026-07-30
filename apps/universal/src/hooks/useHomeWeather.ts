@@ -11,7 +11,7 @@ import type {
   BestSunshineResponse,
   CurrentResponse,
   LocationWeather,
-} from '@/types/weather';
+} from '@whereskarl/schemas';
 
 const apiConfig = { getBaseUrl: getApiBaseUrl };
 
