@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   filterCanonicalLocationsBySearch,
   type CanonicalSearchableLocation,
-} from "@whereskarl/search";
+} from "./locationSearch";
 
 const CATALOG: CanonicalSearchableLocation[] = [
   { id: "san-francisco", name: "San Francisco" },

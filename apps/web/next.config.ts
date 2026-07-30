@@ -21,6 +21,7 @@ const nextConfig: NextConfig = {
     "@whereskarl/design",
     "@whereskarl/config",
     "@whereskarl/schemas",
+    "@whereskarl/search",
   ],
 };
 

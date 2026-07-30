@@ -1,5 +1,6 @@
 # `@whereskarl/search`
 
-Client-side location catalog search and matching rules.
+Client-side location catalog search and identity matching rules.
 
-Scaffold only — logic extraction comes in a later migration phase.
+Operates on the already-loaded catalog. Aliases come from backend
+`search.aliases` only. Does not fetch, own UI, or invent catalog metadata.

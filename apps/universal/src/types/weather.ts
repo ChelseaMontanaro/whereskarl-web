@@ -135,6 +135,13 @@ export type LocationWeather = {
   imageUrl?: string | null;
   /** Normalized 0–1 crop center from the backend scene catalog. */
   focalPoint?: { x: number; y: number } | null;
+  /**
+   * Catalog search metadata from /locations (aliases only; no frontend tables).
+   * Present when the payload was validated via @whereskarl/schemas.
+   */
+  search?: {
+    aliases: string[];
+  };
   updatedAt: string;
   karlReason: string;
   primaryDrivers: string[];

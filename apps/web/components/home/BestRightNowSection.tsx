@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { normalizeLocationId } from "@whereskarl/search";
+
 import { MoonIcon, SunshineIcon } from "@/components/home/ConditionIcons";
 import {
   CardLabel,
@@ -12,7 +14,7 @@ import {
 import { GlassCard } from "@/components/ui/GlassCard";
 import { DegradedDataLabel } from "@/components/weather/DegradedDataLabel";
 import type { BestRightNowItem } from "@/lib/home/weatherDisplay";
-import { buildMapHref, normalizeLocationId } from "@/lib/map/routing";
+import { buildMapHref } from "@/lib/map/routing";
 
 type BestRightNowSectionProps = {
   items: BestRightNowItem[];

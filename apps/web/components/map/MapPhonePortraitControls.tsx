@@ -13,7 +13,7 @@ import { BAY_AREA_PRODUCT_REGIONS } from "@/lib/map/config";
 import {
   filterCanonicalLocationsBySearch,
   type CanonicalSearchableLocation,
-} from "@/lib/map/locationSearch";
+} from "@whereskarl/search";
 import { restorePhoneMapChrome } from "@/lib/map/restorePhoneMapChrome";
 
 type SearchableMapLocation = CanonicalSearchableLocation;

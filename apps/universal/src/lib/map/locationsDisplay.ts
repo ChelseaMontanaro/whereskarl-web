@@ -2,6 +2,8 @@
  * Map list/search presentation — aligned with whereskarl-web/lib/map/conditions.ts.
  */
 
+import { filterCanonicalLocationsBySearch } from '@whereskarl/search';
+
 import type { LocationWeather } from '@/types/weather';
 import {
   filterLocationsByProductRegion,
@@ -227,26 +229,6 @@ export function formatConfidenceLabel(
   return trimmed;
 }
 
-export function filterLocationsBySearch(
-  locations: LocationWeather[],
-  query: string,
-): LocationWeather[] {
-  const normalizedQuery = query.trim().toLowerCase();
-  if (!normalizedQuery) {
-    return locations;
-  }
-
-  return locations.filter((location) => {
-    const name = location.name.toLowerCase();
-    const region = location.region?.toLowerCase() ?? '';
-    return (
-      name.includes(normalizedQuery) ||
-      region.includes(normalizedQuery) ||
-      location.id.toLowerCase().includes(normalizedQuery)
-    );
-  });
-}
-
 /**
  * Returns a single location when the query is an exact or strong match.
  * Used to auto-select/focus while typing in map search.
@@ -281,7 +263,7 @@ export function findStrongSearchMatch(
     return prefixMatches[0];
   }
 
-  const searchMatches = filterLocationsBySearch(locations, query);
+  const searchMatches = filterCanonicalLocationsBySearch(locations, query);
   if (searchMatches.length === 1) {
     return searchMatches[0];
   }
@@ -335,7 +317,9 @@ export function prepareLocationResults(
     filterMode: LocationFilterMode;
   },
 ): LocationWeather[] {
-  const searched = filterLocationsBySearch(locations, options.query);
+  const searched = options.query.trim()
+    ? filterCanonicalLocationsBySearch(locations, options.query)
+    : locations;
   const filtered = filterLocationsByMode(searched, options.filterMode);
   return sortLocations(filtered, options.sortMode);
 }
@@ -348,7 +332,9 @@ export function prepareMapLocationResults(
     conditionFilter: FogIntensity | null;
   },
 ): LocationWeather[] {
-  const searched = filterLocationsBySearch(locations, options.query);
+  const searched = options.query.trim()
+    ? filterCanonicalLocationsBySearch(locations, options.query)
+    : locations;
   const regionFiltered = filterLocationsByProductRegion(
     searched,
     options.regionId,
