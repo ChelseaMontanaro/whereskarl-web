@@ -4,7 +4,7 @@
  */
 
 import { KARL_LOGO_SRC } from "@/lib/brand/karlLogo";
-import type { FogIntensity } from "@/lib/map/conditions";
+import type { FogIntensity } from "@whereskarl/domain";
 import {
   resolvePhonePortraitIsNighttime,
   type PhonePortraitPresentationOptions,

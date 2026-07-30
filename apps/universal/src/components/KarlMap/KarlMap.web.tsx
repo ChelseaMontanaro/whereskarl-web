@@ -12,7 +12,9 @@ import { KarlMapOverlayState } from '@/components/KarlMap/KarlMapOverlayState';
 import type { KarlMapHandle, KarlMapProps } from '@/components/KarlMap/KarlMap.types';
 import { Colors } from '@/constants/theme';
 import { syncFogOverlayLayer } from '@/lib/map/fogOverlays';
-import { locationMatchesFogIntensityFilter } from '@/lib/map/locationsDisplay';
+import {
+  locationMatchesFogIntensityFilter,
+} from '@whereskarl/domain';
 import {
   CLEAR_SUN_COLOR,
   getMarkerAccessibilityLabel,

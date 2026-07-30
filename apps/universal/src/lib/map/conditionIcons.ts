@@ -3,7 +3,7 @@
  */
 
 import { CLEAR_SUN_COLOR, CLEAR_MOON_COLOR } from '@/lib/map/markerAppearance';
-import type { FogIntensity } from '@/lib/map/locationsDisplay';
+import type { FogIntensity } from '@whereskarl/domain';
 
 export type ConditionIconOptions = {
   isNighttime?: boolean;

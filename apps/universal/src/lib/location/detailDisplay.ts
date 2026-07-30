@@ -4,23 +4,25 @@
 
 import {
   formatConfidenceLabel,
-  getCloudSummary,
   getLocationConditionLabel,
+} from '@whereskarl/domain';
+import {
+  getCloudSummary,
 } from '@/lib/map/locationsDisplay';
 import {
   formatAirQualityCompact,
   presentAirQuality,
-} from '@/lib/weather/airQuality';
+} from '@whereskarl/domain';
 import {
   formatPollenCompact,
   presentPollen,
-} from '@/lib/weather/pollen';
+} from '@whereskarl/domain';
 import {
   formatUvIndexCompact,
   presentUvIndex,
-} from '@/lib/weather/uvIndex';
-import { presentHumidity } from '@/lib/weather/humidity';
-import { presentVisibility } from '@/lib/weather/visibility';
+} from '@whereskarl/domain';
+import { presentHumidity } from '@whereskarl/domain';
+import { presentVisibility } from '@whereskarl/domain';
 import type { WeatherPrediction } from '@/types/shared';
 import type { LocationWeather } from '@/types/weather';
 

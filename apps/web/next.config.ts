@@ -20,6 +20,7 @@ const nextConfig: NextConfig = {
     "@whereskarl/api-client",
     "@whereskarl/design",
     "@whereskarl/config",
+    "@whereskarl/domain",
     "@whereskarl/schemas",
     "@whereskarl/search",
   ],

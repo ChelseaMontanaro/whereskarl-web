@@ -4,7 +4,7 @@ import {
   locationMatchesFogIntensityFilter,
   resolveMarkerDisplayIntensity,
   type FogIntensity,
-} from "@/lib/map/conditions";
+} from "@whereskarl/domain";
 import {
   getPhonePortraitMarkerIconMarkup,
 } from "@/lib/map/phonePortraitConditionIcons";

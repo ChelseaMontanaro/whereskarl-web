@@ -1,5 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 
+import { presentClearSkiesScore } from '@whereskarl/domain';
+
 import { Colors, Radius, Spacing } from '@/constants/theme';
 
 type ClearSkiesScoreProps = {
@@ -7,29 +9,26 @@ type ClearSkiesScoreProps = {
   isLoading?: boolean;
 };
 
-function clampPercent(value: number): number {
-  return Math.min(100, Math.max(0, Math.round(value)));
-}
-
 export function ClearSkiesScore({
   sunshineScore,
   isLoading = false,
 }: ClearSkiesScoreProps) {
-  const percent = clampPercent(sunshineScore);
+  const { score: percent, color, qualityLabel } =
+    presentClearSkiesScore(sunshineScore);
 
   return (
     <View
       style={[styles.container, isLoading && styles.loading]}
       accessibilityRole="progressbar"
-      accessibilityLabel={`Clear skies score ${percent} percent`}
+      accessibilityLabel={`Clear skies score ${percent} percent, ${qualityLabel}`}
       accessibilityValue={{ min: 0, max: 100, now: percent }}>
       <View style={styles.header}>
         <Text style={styles.title}>Clear Skies Score</Text>
-        <Text style={styles.value}>{percent}%</Text>
+        <Text style={[styles.value, { color }]}>{percent}%</Text>
       </View>
 
       <View style={styles.track}>
-        <View style={[styles.fill, { width: `${percent}%` }]} />
+        <View style={[styles.fill, { width: `${percent}%`, backgroundColor: color }]} />
       </View>
 
       <View style={styles.labels}>

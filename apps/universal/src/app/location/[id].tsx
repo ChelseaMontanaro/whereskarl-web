@@ -24,7 +24,9 @@ import {
   getLocationForecastPreviewItems,
   getLocationMetrics,
 } from '@/lib/location/detailDisplay';
-import { getCloudSummary } from '@/lib/map/locationsDisplay';
+import {
+  getCloudSummary,
+} from '@/lib/map/locationsDisplay';
 
 const PLACEHOLDER_LOCATION = {
   name: 'Bay Area location',

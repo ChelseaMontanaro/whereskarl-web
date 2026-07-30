@@ -5,7 +5,7 @@ import {
   UV_INDEX_COLOR_BY_TOKEN,
   formatUvIndexCompact,
   presentUvIndex,
-} from "@/lib/weather/uvIndex";
+} from "@whereskarl/domain";
 
 function uvIndexFixture(
   overrides: Partial<UltravioletIndex> &

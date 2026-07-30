@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { MapFogLegend } from "@/components/map/MapFogLegend";
 import { toggleIntensityFilter } from "@/lib/map/intensityFilter";
-import type { FogIntensity } from "@/lib/map/conditions";
+import type { FogIntensity } from "@whereskarl/domain";
 
 function ToggleableFogLegend() {
   const [activeIntensity, setActiveIntensity] = useState<FogIntensity | null>(

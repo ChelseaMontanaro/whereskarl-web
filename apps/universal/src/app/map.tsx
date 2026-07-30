@@ -27,11 +27,13 @@ import { useLocations } from '@/hooks/useLocations';
 import { usePhonePortrait } from '@/hooks/usePhonePortrait';
 import { useIsNighttime } from '@/hooks/useIsNighttime';
 import {
+  type FogIntensity,
+} from '@whereskarl/domain';
+import {
   findStrongSearchMatch,
   prepareLocationResults,
   prepareMapLocationResults,
   toggleConditionFilter,
-  type FogIntensity,
   type LocationFilterMode,
   type LocationSortMode,
 } from '@/lib/map/locationsDisplay';

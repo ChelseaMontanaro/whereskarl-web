@@ -1,7 +1,7 @@
 import {
   DEGRADED_BEST_RIGHT_NOW_LABEL,
   DEGRADED_LOCATION_STATUS_LABEL,
-} from "@/lib/weather/dataStatus";
+} from "@whereskarl/domain";
 
 type DegradedDataLabelProps = {
   variant?: "location" | "bestRightNow";

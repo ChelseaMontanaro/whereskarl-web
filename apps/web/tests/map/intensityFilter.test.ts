@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { FogIntensity } from "@/lib/map/conditions";
+import type { FogIntensity } from "@whereskarl/domain";
 import {
   boundsForIntensityLocations,
   intensityFilterTrayItems,

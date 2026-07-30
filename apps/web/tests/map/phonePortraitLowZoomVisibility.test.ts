@@ -2,7 +2,7 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { getProductRegionIdForLocation } from "@/lib/map/regions";
+import { getProductRegionIdForLocation } from "@whereskarl/domain";
 import type { MapMarkerLocation } from "@/lib/map/markers";
 import {
   getPhonePortraitMarkerPriority,

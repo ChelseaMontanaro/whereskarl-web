@@ -5,7 +5,7 @@ import { Colors } from '@/constants/theme';
 import {
   getFogIntensityLabel,
   type FogIntensity,
-} from '@/lib/map/locationsDisplay';
+} from '@whereskarl/domain';
 import { getPhonePortraitConditionIconDataUri } from '@/lib/map/phonePortraitConditionIcons';
 
 const RAIL_INTENSITIES: FogIntensity[] = [

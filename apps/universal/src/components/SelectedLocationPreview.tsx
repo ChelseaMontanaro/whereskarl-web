@@ -9,7 +9,9 @@ import { Colors, Fonts, Radius, Spacing } from '@/constants/theme';
 import { LiquidGlassTokens } from '@/constants/liquidGlass';
 import { useIsNighttime } from '@/hooks/useIsNighttime';
 import { locationWeatherMetadataItems } from '@/lib/map/locationMetadata';
-import { resolveLocationFogIntensity } from '@/lib/map/locationsDisplay';
+import {
+  resolveLocationFogIntensity,
+} from '@whereskarl/domain';
 import { getSelectedLocationSubtitle } from '@/lib/map/mapPanelDisplay';
 import type { LocationWeather } from '@/types/weather';
 

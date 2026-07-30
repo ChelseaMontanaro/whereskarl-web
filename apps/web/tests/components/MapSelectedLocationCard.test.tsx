@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MapSelectedLocationCard } from "@/components/map/MapSelectedLocationCard";
 import { STORAGE_KEYS } from "@/lib/constants/config";
 import type { LocationWeather } from "@whereskarl/schemas";
-import { DEGRADED_LOCATION_STATUS_LABEL } from "@/lib/weather/dataStatus";
+import { DEGRADED_LOCATION_STATUS_LABEL } from "@whereskarl/domain";
 
 const location: LocationWeather = {
   id: "tiburon",

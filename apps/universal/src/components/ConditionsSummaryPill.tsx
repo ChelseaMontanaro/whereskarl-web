@@ -5,7 +5,7 @@ import {
   getLocationConditionLabel,
   resolveLocationFogIntensity,
   type FogIntensity,
-} from '@/lib/map/locationsDisplay';
+} from '@whereskarl/domain';
 import type { LocationWeather } from '@/types/weather';
 
 type ConditionsSummaryPillProps = {

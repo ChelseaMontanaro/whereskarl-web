@@ -1,4 +1,4 @@
-import type { FogIntensity } from '@/lib/map/locationsDisplay';
+import type { FogIntensity } from '@whereskarl/domain';
 import type { KarlMapMarkerLocation } from '@/lib/map/markerAppearance';
 import type { BayAreaVisibleProductRegionId } from '@/lib/map/regions';
 import type { KarlMapStyleId } from '@/lib/map/styles';

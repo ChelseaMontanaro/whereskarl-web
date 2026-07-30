@@ -4,14 +4,14 @@ import {
   resolveMarkerDisplayIntensity,
   type FogIntensity,
   type LocationConditionInput,
-} from "@/lib/map/conditions";
+} from "@whereskarl/domain";
 import { isBayAreaProductRegionId } from "@/lib/map/config";
 import { getMarkerIconMarkup } from "@/lib/map/markerIcons";
-import { locationMatchesProductRegion } from "@/lib/map/regions";
+import { locationMatchesProductRegion } from "@whereskarl/domain";
 import { isNighttime } from "@/lib/home/weatherDisplay";
 import type { DataStatus } from "@whereskarl/schemas";
 import type { LocationSearch } from "@whereskarl/schemas";
-import { degradedMarkerAriaSuffix } from "@/lib/weather/dataStatus";
+import { degradedMarkerAriaSuffix } from "@whereskarl/domain";
 import type { BayAreaVisibleProductRegionId } from "@/lib/map/config";
 
 export type MapMarkerLocation = {

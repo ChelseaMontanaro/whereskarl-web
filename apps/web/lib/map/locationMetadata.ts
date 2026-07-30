@@ -1,4 +1,4 @@
-import { resolveFogScore } from "@/lib/map/conditions";
+import { resolveFogScore } from "@whereskarl/domain";
 import type { LocationWeather } from "@whereskarl/schemas";
 
 export function formatFogPercent(location: LocationWeather): string | null {

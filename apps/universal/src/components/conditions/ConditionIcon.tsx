@@ -1,7 +1,7 @@
 import { Image, StyleSheet, View } from 'react-native';
 
 import { getConditionIconDataUri } from '@/lib/map/conditionIcons';
-import type { FogIntensity } from '@/lib/map/locationsDisplay';
+import type { FogIntensity } from '@whereskarl/domain';
 
 type ConditionIconProps = {
   intensity: FogIntensity;

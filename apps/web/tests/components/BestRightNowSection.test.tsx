@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { BestRightNowSection } from "@/components/home/BestRightNowSection";
 import type { BestRightNowItem } from "@/lib/home/weatherDisplay";
 import { buildMapHref } from "@/lib/map/routing";
-import { DEGRADED_BEST_RIGHT_NOW_LABEL } from "@/lib/weather/dataStatus";
+import { DEGRADED_BEST_RIGHT_NOW_LABEL } from "@whereskarl/domain";
 
 const items: BestRightNowItem[] = [
   {

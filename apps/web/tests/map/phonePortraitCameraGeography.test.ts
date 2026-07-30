@@ -21,7 +21,7 @@ import {
   PHONE_PORTRAIT_SOUTH_BAY_REGION_BOUNDS,
   PHONE_PORTRAIT_SOUTH_BAY_VIEWPORT_PADDING,
 } from "@/lib/map/phonePortraitMapPresentation";
-import { isLocationWithinProductRegionBounds } from "@/lib/map/regions";
+import { isLocationWithinProductRegionBounds } from "@whereskarl/domain";
 
 const LOCATIONS = {
   sanFrancisco: { lat: 37.7749, lng: -122.4194 },

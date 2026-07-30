@@ -12,7 +12,9 @@ import { KarlMapMarkerView } from '@/components/KarlMap/KarlMapMarkerView';
 import { KarlMapOverlayState } from '@/components/KarlMap/KarlMapOverlayState';
 import type { KarlMapHandle, KarlMapProps } from '@/components/KarlMap/KarlMap.types';
 import { Colors } from '@/constants/theme';
-import { locationMatchesFogIntensityFilter } from '@/lib/map/locationsDisplay';
+import {
+  locationMatchesFogIntensityFilter,
+} from '@whereskarl/domain';
 import { getMarkerAccessibilityLabel } from '@/lib/map/markerAppearance';
 import {
   boundsToRegion,

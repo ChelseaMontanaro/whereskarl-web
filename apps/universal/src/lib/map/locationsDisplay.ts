@@ -1,7 +1,19 @@
 /**
- * Map list/search presentation — aligned with whereskarl-web/lib/map/conditions.ts.
+ * Map list/search presentation orchestration.
+ * Fog intensity classification/labels and confidence formatting live in
+ * `@whereskarl/domain`. Overlay geometry stays app-local.
  */
 
+import {
+  CLEAR_SKIES_SCORE_THRESHOLD,
+  getFogIntensity,
+  getLocationConditionLabel,
+  locationMatchesFogIntensityFilter,
+  locationQualifiesAsClearIntensity,
+  resolveFogScore,
+  type FogIntensity,
+  type LocationConditionInput,
+} from '@whereskarl/domain';
 import { filterCanonicalLocationsBySearch } from '@whereskarl/search';
 
 import type { LocationWeather } from '@/types/weather';
@@ -10,138 +22,15 @@ import {
   type BayAreaVisibleProductRegionId,
 } from '@/lib/map/regions';
 
-export const CLEAR_SKIES_SCORE_THRESHOLD = 50;
-
 export type LocationSortMode = 'brightest' | 'name' | 'temperature';
 
 export type LocationFilterMode = 'all' | 'brightest';
-
-export type FogIntensity = 'clear' | 'lightFog' | 'foggy' | 'karlTerritory';
-
-type LocationConditionInput = Pick<
-  LocationWeather,
-  'fogScore' | 'sunshineScore' | 'status'
->;
-
-function clampScore(value: number): number {
-  return Math.max(0, Math.min(100, Math.round(value)));
-}
-
-export function resolveFogScore(location: LocationConditionInput): number | null {
-  if (
-    typeof location.fogScore === 'number' &&
-    Number.isFinite(location.fogScore)
-  ) {
-    return clampScore(location.fogScore);
-  }
-
-  if (
-    typeof location.sunshineScore === 'number' &&
-    Number.isFinite(location.sunshineScore)
-  ) {
-    return clampScore(100 - location.sunshineScore);
-  }
-
-  return null;
-}
-
-function getFogIntensity(fogScore: number | null): FogIntensity {
-  if (fogScore === null) {
-    return 'clear';
-  }
-
-  if (fogScore < 25) {
-    return 'clear';
-  }
-
-  if (fogScore < 50) {
-    return 'lightFog';
-  }
-
-  if (fogScore < 75) {
-    return 'foggy';
-  }
-
-  return 'karlTerritory';
-}
-
-function locationQualifiesAsClearIntensity(
-  location: LocationConditionInput,
-): boolean {
-  const fogScore = resolveFogScore(location);
-
-  if (fogScore !== null && fogScore < 25) {
-    return true;
-  }
-
-  if (
-    typeof location.sunshineScore === 'number' &&
-    Number.isFinite(location.sunshineScore) &&
-    location.sunshineScore >= 70
-  ) {
-    return true;
-  }
-
-  return false;
-}
-
-export function resolveLocationFogIntensity(
-  location: LocationConditionInput,
-): FogIntensity {
-  if (locationQualifiesAsClearIntensity(location)) {
-    return 'clear';
-  }
-
-  return getFogIntensity(resolveFogScore(location));
-}
-
-/** Raw fogScore bands only — use for filter matching. */
-export function resolveRawLocationFogIntensity(
-  location: LocationConditionInput,
-): FogIntensity {
-  return getFogIntensity(resolveFogScore(location));
-}
-
-/**
- * Canonical condition filter matching for map markers and overlays.
- * Clear uses clear-sky qualification; Light Fog excludes strong clear-sky locations.
- */
-export function locationMatchesFogIntensityFilter(
-  location: LocationConditionInput,
-  intensity: FogIntensity,
-): boolean {
-  if (intensity === 'clear') {
-    return locationQualifiesAsClearIntensity(location);
-  }
-
-  if (intensity === 'lightFog') {
-    return (
-      resolveRawLocationFogIntensity(location) === 'lightFog' &&
-      !locationQualifiesAsClearIntensity(location)
-    );
-  }
-
-  return resolveRawLocationFogIntensity(location) === intensity;
-}
 
 export function toggleConditionFilter(
   current: FogIntensity | null,
   next: FogIntensity,
 ): FogIntensity | null {
   return current === next ? null : next;
-}
-
-export function getFogIntensityLabel(intensity: FogIntensity): string {
-  switch (intensity) {
-    case 'clear':
-      return 'Clear';
-    case 'lightFog':
-      return 'Light Fog';
-    case 'foggy':
-      return 'Foggy';
-    case 'karlTerritory':
-      return 'Karl Territory';
-  }
 }
 
 export type FogOverlayStyle = {
@@ -197,16 +86,6 @@ export function getLocationFogOverlayStyle(
   }
 }
 
-export function getLocationConditionLabel(location: LocationConditionInput): string {
-  const fogScore = resolveFogScore(location);
-
-  if (fogScore !== null) {
-    return getFogIntensityLabel(resolveLocationFogIntensity(location));
-  }
-
-  return location.status?.trim() || 'Conditions unavailable';
-}
-
 export function getCloudSummary(location: LocationWeather): string {
   const conditionLabel = getLocationConditionLabel(location);
   const status = location.status?.trim();
@@ -216,17 +95,6 @@ export function getCloudSummary(location: LocationWeather): string {
   }
 
   return status || conditionLabel;
-}
-
-export function formatConfidenceLabel(
-  label: string | null | undefined,
-): string | null {
-  const trimmed = label?.trim();
-  if (!trimmed || trimmed.toLowerCase() === 'unavailable') {
-    return null;
-  }
-
-  return trimmed;
 }
 
 /**

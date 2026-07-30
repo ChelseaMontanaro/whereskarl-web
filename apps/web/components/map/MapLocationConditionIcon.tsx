@@ -14,7 +14,7 @@ import {
 import { isNighttime } from "@/lib/home/weatherDisplay";
 import { KARL_LOGO_SRC } from "@/lib/brand/karlLogo";
 import { getMarkerFogIntensity } from "@/lib/map/markers";
-import type { LocationConditionInput } from "@/lib/map/conditions";
+import type { LocationConditionInput } from "@whereskarl/domain";
 
 type MapLocationConditionIconProps = {
   location: LocationConditionInput;

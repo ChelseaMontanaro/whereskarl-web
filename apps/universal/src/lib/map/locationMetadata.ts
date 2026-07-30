@@ -1,12 +1,14 @@
-import { resolveFogScore } from '@/lib/map/locationsDisplay';
+import {
+  resolveFogScore,
+} from '@whereskarl/domain';
 import {
   formatAirQualityCompact,
   presentAirQuality,
-} from '@/lib/weather/airQuality';
+} from '@whereskarl/domain';
 import {
   formatUvIndexCompact,
   presentUvIndex,
-} from '@/lib/weather/uvIndex';
+} from '@whereskarl/domain';
 import type { LocationWeather } from '@/types/weather';
 
 export function formatFogPercent(location: LocationWeather): string | null {

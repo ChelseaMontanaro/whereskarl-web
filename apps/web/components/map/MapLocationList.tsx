@@ -1,10 +1,10 @@
 import { GlassCard } from "@/components/ui/GlassCard";
-import { getLocationConditionLabel } from "@/lib/map/conditions";
+import { getLocationConditionLabel } from "@whereskarl/domain";
 import { findBayAreaProductRegion, type BayAreaProductRegion } from "@/lib/map/config";
 import {
   filterLocationsByProductRegion,
   getProductRegionNameForLocation,
-} from "@/lib/map/regions";
+} from "@whereskarl/domain";
 import type { LocationWeather } from "@whereskarl/schemas";
 
 type MapLocationListProps = {

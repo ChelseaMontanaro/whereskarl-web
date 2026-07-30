@@ -1,6 +1,16 @@
 /**
- * Bay Area product regions — aligned with whereskarl-web/lib/map/regions.ts.
+ * Bay Area product regions — membership from `@whereskarl/domain`;
+ * camera/viewport padding remains app-owned.
  */
+
+import {
+  BAY_AREA_PRODUCT_REGIONS as PRODUCT_REGION_CATALOG,
+  findBayAreaProductRegion as findCatalogRegion,
+  type BayAreaProductRegion as CatalogProductRegion,
+  type BayAreaVisibleProductRegionId,
+  type LocationWithCoordinates as DomainLocationWithCoordinates,
+  type MapBounds,
+} from '@whereskarl/domain';
 
 import {
   BAY_AREA_DESKTOP_VIEWPORT_PADDING,
@@ -10,7 +20,7 @@ import {
   type MapViewportPadding,
 } from '@/lib/map/mapConfig';
 
-export type MapBounds = [[number, number], [number, number]];
+export type { MapBounds, BayAreaVisibleProductRegionId, LocationWithRegion, BayAreaBackendRegionId } from '@whereskarl/domain';
 
 export type BayAreaProductRegionViewport = {
   padding?: MapViewportPadding;
@@ -18,142 +28,74 @@ export type BayAreaProductRegionViewport = {
   maxZoom?: number;
 };
 
-export const BAY_AREA_VISIBLE_PRODUCT_REGION_IDS = [
-  'san-francisco',
-  'north-bay',
-  'east-bay',
-  'south-bay',
-] as const;
-
-export const BAY_AREA_BACKEND_REGION_IDS = [
-  ...BAY_AREA_VISIBLE_PRODUCT_REGION_IDS,
-  'peninsula',
-] as const;
-
-export type BayAreaVisibleProductRegionId =
-  (typeof BAY_AREA_VISIBLE_PRODUCT_REGION_IDS)[number];
-
-export type BayAreaBackendRegionId =
-  (typeof BAY_AREA_BACKEND_REGION_IDS)[number];
-
-export type BayAreaProductRegion = {
-  id: BayAreaVisibleProductRegionId;
-  name: string;
-  chipLabel: string;
-  bounds: MapBounds;
+export type BayAreaProductRegion = CatalogProductRegion & {
   viewport?: BayAreaProductRegionViewport;
 };
 
-export const BAY_AREA_PRODUCT_REGIONS: BayAreaProductRegion[] = [
-  {
-    id: 'san-francisco',
-    name: 'San Francisco',
-    chipLabel: 'SF',
-    // Desktop framing. Phone-portrait web overrides this in KarlMap.web via
-    // the approved PHONE_PORTRAIT_SF_CENTRAL_BAY_BOUNDS composition.
-    bounds: [
-      [-122.68, 37.8],
-      [-122.2, 38.12],
-    ],
-    viewport: {
-      padding: 36,
-      phonePortraitPadding: PHONE_PORTRAIT_MAP_VIEWPORT_PADDING,
-      maxZoom: 11.9,
-    },
-  },
-  {
-    id: 'north-bay',
-    name: 'North Bay',
-    chipLabel: 'North Bay',
-    bounds: [
-      [-122.65, 37.795],
-      [-122.43, 38.02],
-    ],
-    viewport: {
-      padding: 36,
-      phonePortraitPadding: BAY_AREA_PHONE_PORTRAIT_REGION_VIEWPORT_PADDING,
-      maxZoom: 11.3,
-    },
-  },
-  {
-    id: 'east-bay',
-    name: 'East Bay',
-    chipLabel: 'East Bay',
-    // Phase 16.2E catalog: Berkeley → Oakland → Alameda plus Hayward and
-    // Fremont. Mirror web product bounds so native stays in sync.
-    bounds: [
-      [-122.33, 37.52],
-      [-121.72, 38.02],
-    ],
-    viewport: {
-      padding: 36,
-      phonePortraitPadding: BAY_AREA_PHONE_PORTRAIT_REGION_VIEWPORT_PADDING,
-      maxZoom: 10.5,
-    },
-  },
-  {
-    id: 'south-bay',
-    name: 'South Bay',
-    chipLabel: 'South Bay',
-    bounds: [
-      [-122.5, 37.08],
-      [-121.7, 37.58],
-    ],
-    viewport: {
-      padding: 36,
-      phonePortraitPadding: BAY_AREA_PHONE_PORTRAIT_REGION_VIEWPORT_PADDING,
-      maxZoom: 11,
-    },
-  },
-];
+export type LocationWithCoordinates = DomainLocationWithCoordinates;
 
-const BACKEND_TO_VISIBLE_REGION: Record<
-  BayAreaBackendRegionId,
-  BayAreaVisibleProductRegionId
+export {
+  BAY_AREA_BACKEND_REGION_IDS,
+  BAY_AREA_VISIBLE_PRODUCT_REGION_IDS,
+  filterLocationsByProductRegion,
+  isBayAreaBackendRegionId,
+  isBayAreaProductRegionId,
+  isLocationWithinProductRegionBounds,
+  locationMatchesProductRegion,
+  normalizeVisibleMapRegionId,
+  resolveBackendRegionId,
+  resolveProductRegionId,
+} from '@whereskarl/domain';
+
+const REGION_VIEWPORTS: Record<
+  BayAreaVisibleProductRegionId,
+  BayAreaProductRegionViewport
 > = {
-  'san-francisco': 'san-francisco',
-  'north-bay': 'north-bay',
-  'east-bay': 'east-bay',
-  'south-bay': 'south-bay',
-  peninsula: 'san-francisco',
+  'san-francisco': {
+    padding: 36,
+    phonePortraitPadding: PHONE_PORTRAIT_MAP_VIEWPORT_PADDING,
+    maxZoom: 11.9,
+  },
+  'north-bay': {
+    padding: 36,
+    phonePortraitPadding: BAY_AREA_PHONE_PORTRAIT_REGION_VIEWPORT_PADDING,
+    maxZoom: 11.3,
+  },
+  'east-bay': {
+    padding: 36,
+    phonePortraitPadding: BAY_AREA_PHONE_PORTRAIT_REGION_VIEWPORT_PADDING,
+    maxZoom: 10.5,
+  },
+  'south-bay': {
+    padding: 36,
+    phonePortraitPadding: BAY_AREA_PHONE_PORTRAIT_REGION_VIEWPORT_PADDING,
+    maxZoom: 11,
+  },
+  peninsula: {
+    padding: 36,
+    phonePortraitPadding: BAY_AREA_PHONE_PORTRAIT_REGION_VIEWPORT_PADDING,
+    maxZoom: 9.8,
+  },
 };
 
-/**
- * Phase 16.2A: backend `/locations.region` is the single source of truth.
- * Do not maintain a parallel frontend catalog→region map.
- *
- * Reserved future location IDs (not in catalog; do not invent bare aliases):
- * - richmond-district — San Francisco Richmond District
- * - richmond-ca — Richmond, East Bay city
- * Canonical Ocean Beach id is `ocean-beach` only (`ocean-beach-sf` remaps in routing).
- */
-
-export type LocationWithRegion = {
-  id: string;
-  region?: string | null;
-};
-
-export type LocationWithCoordinates = LocationWithRegion & {
-  latitude?: number;
-  longitude?: number;
-};
+export const BAY_AREA_PRODUCT_REGIONS: BayAreaProductRegion[] =
+  PRODUCT_REGION_CATALOG.map((region) => ({
+    ...region,
+    viewport: REGION_VIEWPORTS[region.id],
+  }));
 
 export function findBayAreaProductRegion(
   regionId: string | null | undefined,
 ): BayAreaProductRegion | null {
-  if (!regionId) {
+  const region = findCatalogRegion(regionId);
+  if (!region) {
     return null;
   }
 
-  const visibleRegionId = normalizeVisibleMapRegionId(regionId);
-  if (!visibleRegionId) {
-    return null;
-  }
-
-  return (
-    BAY_AREA_PRODUCT_REGIONS.find((region) => region.id === visibleRegionId) ??
-    null
-  );
+  return {
+    ...region,
+    viewport: REGION_VIEWPORTS[region.id],
+  };
 }
 
 export function resolveRegionViewportFitOptions(
@@ -177,113 +119,6 @@ export function resolveRegionViewportFitOptions(
     padding: viewport?.padding ?? BAY_AREA_DESKTOP_VIEWPORT_PADDING,
     maxZoom: viewport?.maxZoom ?? 11,
   };
-}
-
-export function isLocationWithinProductRegionBounds(
-  latitude: number,
-  longitude: number,
-  bounds: MapBounds,
-): boolean {
-  const [[west, south], [east, north]] = bounds;
-
-  return (
-    longitude >= west &&
-    longitude <= east &&
-    latitude >= south &&
-    latitude <= north
-  );
-}
-
-export function locationMatchesProductRegion<T extends LocationWithCoordinates>(
-  location: T,
-  regionId: BayAreaVisibleProductRegionId,
-): boolean {
-  const resolvedRegionId = resolveProductRegionId(location);
-  if (resolvedRegionId === regionId) {
-    return true;
-  }
-
-  if (resolvedRegionId !== null) {
-    return false;
-  }
-
-  const region = findBayAreaProductRegion(regionId);
-  if (
-    !region ||
-    typeof location.latitude !== 'number' ||
-    typeof location.longitude !== 'number'
-  ) {
-    return false;
-  }
-
-  return isLocationWithinProductRegionBounds(
-    location.latitude,
-    location.longitude,
-    region.bounds,
-  );
-}
-
-export function isBayAreaBackendRegionId(
-  regionId: string,
-): regionId is BayAreaBackendRegionId {
-  return BAY_AREA_BACKEND_REGION_IDS.includes(regionId as BayAreaBackendRegionId);
-}
-
-export function isBayAreaProductRegionId(
-  regionId: string,
-): regionId is BayAreaVisibleProductRegionId {
-  return BAY_AREA_VISIBLE_PRODUCT_REGION_IDS.includes(
-    regionId as BayAreaVisibleProductRegionId,
-  );
-}
-
-export function normalizeVisibleMapRegionId(
-  regionId: string,
-): BayAreaVisibleProductRegionId | null {
-  const normalized = regionId.trim().toLowerCase();
-
-  if (isBayAreaBackendRegionId(normalized)) {
-    return BACKEND_TO_VISIBLE_REGION[normalized];
-  }
-
-  return null;
-}
-
-export function resolveBackendRegionId(
-  location: LocationWithRegion,
-): BayAreaBackendRegionId | null {
-  const apiRegion = location.region?.trim().toLowerCase();
-  if (apiRegion && isBayAreaBackendRegionId(apiRegion)) {
-    return apiRegion;
-  }
-
-  return null;
-}
-
-export function resolveProductRegionId(
-  location: LocationWithRegion,
-): BayAreaVisibleProductRegionId | null {
-  const backendRegionId = resolveBackendRegionId(location);
-  if (!backendRegionId) {
-    return null;
-  }
-
-  return normalizeVisibleMapRegionId(backendRegionId);
-}
-
-export function filterLocationsByProductRegion<
-  T extends LocationWithCoordinates,
->(
-  locations: T[],
-  regionId: BayAreaVisibleProductRegionId | null,
-): T[] {
-  if (!regionId) {
-    return locations;
-  }
-
-  return locations.filter((location) =>
-    locationMatchesProductRegion(location, regionId),
-  );
 }
 
 export function toggleRegionFilter(

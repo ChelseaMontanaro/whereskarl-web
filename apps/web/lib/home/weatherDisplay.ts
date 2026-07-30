@@ -6,13 +6,13 @@ import type {
 } from "@whereskarl/schemas";
 import type { WeatherPrediction } from "@whereskarl/schemas";
 import { formatNextHourTimeCopy } from "@/lib/home/timeFormat";
-import { isLocationDataDegraded } from "@/lib/weather/dataStatus";
+import { isLocationDataDegraded } from "@whereskarl/domain";
 import {
   getBestRightNowScoreLabel,
   locationQualifiesAsClearIntensity,
   resolveRawLocationFogIntensity,
   type LocationConditionInput,
-} from "@/lib/map/conditions";
+} from "@whereskarl/domain";
 import { locationWeatherMetadataItems } from "@/lib/map/locationMetadata";
 
 export type BestRightNowItem = {

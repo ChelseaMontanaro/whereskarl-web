@@ -2,7 +2,7 @@ import { desktopGlassCardClass } from "@/components/home/desktopGlass";
 import {
   getFogIntensityLabel,
   type FogIntensity,
-} from "@/lib/map/conditions";
+} from "@whereskarl/domain";
 
 const LEGEND_ITEMS: Array<{
   intensity: FogIntensity;

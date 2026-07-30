@@ -1,3 +1,22 @@
+import {
+  BAY_AREA_PRODUCT_REGIONS as PRODUCT_REGION_CATALOG,
+  findBayAreaProductRegion as findCatalogRegion,
+  type BayAreaProductRegion as CatalogProductRegion,
+  type BayAreaVisibleProductRegionId,
+} from "@whereskarl/domain";
+
+export {
+  BAY_AREA_BACKEND_REGION_IDS,
+  BAY_AREA_VISIBLE_PRODUCT_REGION_IDS,
+  isBayAreaBackendRegionId,
+  isBayAreaProductRegionId,
+  normalizeVisibleMapRegionId,
+  type BayAreaBackendRegionId,
+  type BayAreaProductRegionId,
+  type BayAreaVisibleProductRegionId,
+  type MapBounds,
+} from "@whereskarl/domain";
+
 export const BAY_AREA_MAP_STYLE =
   "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
 
@@ -54,8 +73,6 @@ export const BAY_AREA_MAX_BOUNDS: [[number, number], [number, number]] = [
   [-121.0, 39.05],
 ];
 
-export type MapBounds = [[number, number], [number, number]];
-
 export type ViewportPadding =
   | number
   | {
@@ -72,203 +89,88 @@ export type BayAreaProductRegionViewport = {
   maxZoom?: number;
 };
 
-/** Region chips and map framing — SF, North Bay, East Bay, South Bay, Peninsula. */
-export const BAY_AREA_VISIBLE_PRODUCT_REGION_IDS = [
-  "san-francisco",
-  "north-bay",
-  "east-bay",
-  "south-bay",
-  "peninsula",
-] as const;
-
-/**
- * Backend `/locations` region values. Every backend region is also a visible
- * product region on web (Peninsula included), so this is the same canonical set
- * as {@link BAY_AREA_VISIBLE_PRODUCT_REGION_IDS} — no duplicate `peninsula`
- * entry. Kept as a distinct export so the schema and region resolver read from a
- * clearly-named "backend" list even if the two sets diverge again later.
- */
-export const BAY_AREA_BACKEND_REGION_IDS = [
-  ...BAY_AREA_VISIBLE_PRODUCT_REGION_IDS,
-] as const;
-
-export type BayAreaVisibleProductRegionId =
-  (typeof BAY_AREA_VISIBLE_PRODUCT_REGION_IDS)[number];
-
-export type BayAreaBackendRegionId = (typeof BAY_AREA_BACKEND_REGION_IDS)[number];
-
-/** Visible product region id used by chips, routing, and UI filtering. */
-export type BayAreaProductRegionId = BayAreaVisibleProductRegionId;
-
-export type BayAreaProductRegion = {
-  id: BayAreaVisibleProductRegionId;
-  name: string;
-  /** Short label shown on region chips (e.g. "SF" for San Francisco). */
-  chipLabel: string;
-  bounds: MapBounds;
+/** Map-framed product region: domain catalog + app-owned camera viewport. */
+export type BayAreaProductRegion = CatalogProductRegion & {
   viewport?: BayAreaProductRegionViewport;
 };
 
-export const BAY_AREA_PRODUCT_REGIONS: BayAreaProductRegion[] = [
-  {
-    id: "san-francisco",
-    name: "San Francisco",
-    chipLabel: "SF",
-    bounds: [
-      [-122.54, 37.615],
-      [-122.26, 37.84],
-    ],
-    viewport: {
-      padding: 36,
-      immersivePadding: immersiveViewportPadding,
-      desktopPadding: {
-        top: 80,
-        right: 80,
-        bottom: 128,
-        left: 360,
-      },
-      maxZoom: 10.6,
-    },
-  },
-  {
-    id: "north-bay",
-    name: "North Bay",
-    chipLabel: "North Bay",
-    bounds: [
-      [-122.65, 37.795],
-      [-122.43, 38.02],
-    ],
-    viewport: {
-      padding: 36,
-      immersivePadding: immersiveViewportPadding,
-      desktopPadding: {
-        top: 80,
-        right: 80,
-        bottom: 128,
-        left: 360,
-      },
-      maxZoom: 11.3,
-    },
-  },
-  {
-    id: "east-bay",
-    name: "East Bay",
-    chipLabel: "East Bay",
-    // Phase 16.2E catalog: Berkeley → Oakland → Alameda plus Hayward and
-    // Fremont. Earlier south edge (37.7) clipped the two southern pins until
-    // the user zoomed out. Keep the inland/north context; only extend south.
-    bounds: [
-      [-122.33, 37.52],
-      [-121.72, 38.02],
-    ],
-    viewport: {
-      padding: 36,
-      immersivePadding: immersiveViewportPadding,
-      desktopPadding: {
-        top: 80,
-        right: 80,
-        bottom: 128,
-        left: 360,
-      },
-      maxZoom: 10.5,
-    },
-  },
-  {
-    id: "south-bay",
-    name: "South Bay",
-    chipLabel: "South Bay",
-    bounds: [
-      [-122.5, 37.08],
-      [-121.7, 37.58],
-    ],
-    viewport: {
-      padding: 36,
-      immersivePadding: immersiveViewportPadding,
-      desktopPadding: {
-        top: 80,
-        right: 80,
-        bottom: 128,
-        left: 280,
-      },
-      maxZoom: 11,
-    },
-  },
-  {
-    id: "peninsula",
-    name: "Peninsula",
-    chipLabel: "Peninsula",
-    // Phase 16.2A / 16.2D-1 catalog: Daly City → Pacifica → Half Moon Bay
-    // (coast) and San Mateo → Redwood City → Palo Alto (bay corridor).
-    bounds: [
-      [-122.55, 37.28],
-      [-121.95, 37.74],
-    ],
-    viewport: {
-      padding: 36,
-      immersivePadding: immersiveViewportPadding,
-      desktopPadding: {
-        top: 80,
-        right: 80,
-        bottom: 128,
-        left: 360,
-      },
-      maxZoom: 9.8,
-    },
-  },
-];
-
-/** Maps backend-only regions into the visible coastal fog belt grouping. */
-const BACKEND_TO_VISIBLE_REGION: Record<
-  BayAreaBackendRegionId,
-  BayAreaVisibleProductRegionId
+const REGION_VIEWPORTS: Record<
+  BayAreaVisibleProductRegionId,
+  BayAreaProductRegionViewport
 > = {
-  "san-francisco": "san-francisco",
-  "north-bay": "north-bay",
-  "east-bay": "east-bay",
-  "south-bay": "south-bay",
-  peninsula: "peninsula",
+  "san-francisco": {
+    padding: 36,
+    immersivePadding: immersiveViewportPadding,
+    desktopPadding: {
+      top: 80,
+      right: 80,
+      bottom: 128,
+      left: 360,
+    },
+    maxZoom: 10.6,
+  },
+  "north-bay": {
+    padding: 36,
+    immersivePadding: immersiveViewportPadding,
+    desktopPadding: {
+      top: 80,
+      right: 80,
+      bottom: 128,
+      left: 360,
+    },
+    maxZoom: 11.3,
+  },
+  "east-bay": {
+    padding: 36,
+    immersivePadding: immersiveViewportPadding,
+    desktopPadding: {
+      top: 80,
+      right: 80,
+      bottom: 128,
+      left: 360,
+    },
+    maxZoom: 10.5,
+  },
+  "south-bay": {
+    padding: 36,
+    immersivePadding: immersiveViewportPadding,
+    desktopPadding: {
+      top: 80,
+      right: 80,
+      bottom: 128,
+      left: 280,
+    },
+    maxZoom: 11,
+  },
+  peninsula: {
+    padding: 36,
+    immersivePadding: immersiveViewportPadding,
+    desktopPadding: {
+      top: 80,
+      right: 80,
+      bottom: 128,
+      left: 360,
+    },
+    maxZoom: 9.8,
+  },
 };
+
+export const BAY_AREA_PRODUCT_REGIONS: BayAreaProductRegion[] =
+  PRODUCT_REGION_CATALOG.map((region) => ({
+    ...region,
+    viewport: REGION_VIEWPORTS[region.id],
+  }));
 
 export function findBayAreaProductRegion(
   regionId: string | null | undefined,
 ): BayAreaProductRegion | null {
-  if (!regionId) {
+  const region = findCatalogRegion(regionId);
+  if (!region) {
     return null;
   }
 
-  const visibleRegionId = normalizeVisibleMapRegionId(regionId);
-  if (!visibleRegionId) {
-    return null;
-  }
-
-  return (
-    BAY_AREA_PRODUCT_REGIONS.find((region) => region.id === visibleRegionId) ??
-    null
-  );
-}
-
-export function isBayAreaBackendRegionId(
-  regionId: string,
-): regionId is BayAreaBackendRegionId {
-  return BAY_AREA_BACKEND_REGION_IDS.includes(regionId as BayAreaBackendRegionId);
-}
-
-export function isBayAreaProductRegionId(
-  regionId: string,
-): regionId is BayAreaVisibleProductRegionId {
-  return BAY_AREA_VISIBLE_PRODUCT_REGION_IDS.includes(
-    regionId as BayAreaVisibleProductRegionId,
-  );
-}
-
-export function normalizeVisibleMapRegionId(
-  regionId: string,
-): BayAreaVisibleProductRegionId | null {
-  const normalized = regionId.trim().toLowerCase();
-
-  if (isBayAreaBackendRegionId(normalized)) {
-    return BACKEND_TO_VISIBLE_REGION[normalized];
-  }
-
-  return null;
+  return {
+    ...region,
+    viewport: REGION_VIEWPORTS[region.id],
+  };
 }

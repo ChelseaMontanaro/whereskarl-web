@@ -2,11 +2,13 @@
  * Map marker presentation — aligned with whereskarl-web marker intensity classes.
  */
 
-import { Colors } from '@/constants/theme';
 import {
+  clearSkiesScoreColor,
   resolveLocationFogIntensity,
   type FogIntensity,
-} from '@/lib/map/locationsDisplay';
+} from '@whereskarl/domain';
+
+import { Colors } from '@/constants/theme';
 import type { LocationWeather } from '@/types/weather';
 
 /** Clear/sun glyph — matches SelectedLocationPreview and daytime markers. */
@@ -75,19 +77,7 @@ export function getMarkerVisualState(
 }
 
 export function getScoreBadgeColor(sunshineScore: number): string {
-  if (sunshineScore >= 70) {
-    return Colors.gold;
-  }
-
-  if (sunshineScore >= 45) {
-    return '#E8C547';
-  }
-
-  if (sunshineScore >= 30) {
-    return '#F0A060';
-  }
-
-  return '#E86A6A';
+  return clearSkiesScoreColor(sunshineScore);
 }
 
 export function getMarkerAccessibilityLabel(

@@ -5,8 +5,8 @@ import {
   insightGlassCardClass,
   mobileInsightGlassHighlightClass,
 } from "@/components/home/desktopGlass";
-import type { FogIntensity } from "@/lib/map/conditions";
-import { getFogIntensityLabel } from "@/lib/map/conditions";
+import type { FogIntensity } from "@whereskarl/domain";
+import { getFogIntensityLabel } from "@whereskarl/domain";
 import { getPhonePortraitFogRailConditionIconDataUri } from "@/lib/map/phonePortraitConditionIcons";
 import { useIsNighttime } from "@/lib/hooks/useIsNighttime";
 

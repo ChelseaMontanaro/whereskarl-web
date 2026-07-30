@@ -4,7 +4,7 @@ import {
   formatHumidityPercent,
   humidityCategoryFromValue,
   presentHumidity,
-} from "@/lib/weather/humidity";
+} from "@whereskarl/domain";
 
 describe("presentHumidity", () => {
   it("formats whole-percent humidity from a finite number", () => {

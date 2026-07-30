@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   getBestRightNowScoreLabel,
   locationMatchesFogIntensityFilter,
-} from "@/lib/map/conditions";
+} from "@whereskarl/domain";
 import { intensityFilterTrayItems } from "@/lib/map/intensityFilter";
 import {
   createMapMarkerElement,

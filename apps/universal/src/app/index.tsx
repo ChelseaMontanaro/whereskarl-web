@@ -16,7 +16,9 @@ import {
   heroHeadline,
   heroSubheadline,
 } from '@/lib/home/weatherDisplay';
-import { getCloudSummary } from '@/lib/map/locationsDisplay';
+import {
+  getCloudSummary,
+} from '@/lib/map/locationsDisplay';
 import { useClearSkiesNav } from '@/providers/ClearSkiesNavProvider';
 
 const PLACEHOLDER = {

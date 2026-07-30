@@ -1,6 +1,6 @@
 "use client";
 
-import type { FogIntensity } from "@/lib/map/conditions";
+import type { FogIntensity } from "@whereskarl/domain";
 import { getPhonePortraitConditionIconDataUri } from "@/lib/map/phonePortraitConditionIcons";
 import { useIsNighttime } from "@/lib/hooks/useIsNighttime";
 

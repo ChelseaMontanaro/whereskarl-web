@@ -6,7 +6,7 @@ import {
   getProductRegionNameForLocation,
   locationMatchesProductRegion,
   resolveBackendRegionId,
-} from "@/lib/map/regions";
+} from "@whereskarl/domain";
 
 describe("map regions", () => {
   it("maps monitored locations from backend region to visible product regions", () => {

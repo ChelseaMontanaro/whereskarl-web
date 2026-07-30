@@ -9,7 +9,7 @@ import { useIsNighttime } from '@/hooks/useIsNighttime';
 import {
   getFogIntensityLabel,
   type FogIntensity,
-} from '@/lib/map/locationsDisplay';
+} from '@whereskarl/domain';
 
 const LEGEND_ITEMS: Array<{
   intensity: FogIntensity;

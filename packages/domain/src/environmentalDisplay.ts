@@ -12,7 +12,7 @@
  */
 
 import type { AirQualityCategory } from "@whereskarl/schemas";
-import type { AirQualityPresentation } from "@/lib/weather/airQuality";
+import type { AirQualityPresentation } from "./airQuality";
 
 /** Deliberate AQI tile labels keyed by backend category. */
 export const AQI_COMPACT_TILE_LABEL_BY_CATEGORY: Record<

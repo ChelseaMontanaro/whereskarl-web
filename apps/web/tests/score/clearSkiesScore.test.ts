@@ -7,7 +7,7 @@ import {
   clearSkiesScoreQualityLabel,
   presentClearSkiesScore,
   resolveClearSkiesScoreBand,
-} from "@/lib/score/clearSkiesScore";
+} from "@whereskarl/domain";
 
 describe("clearSkiesScore presentation", () => {
   it("bands scores using canonical thresholds", () => {

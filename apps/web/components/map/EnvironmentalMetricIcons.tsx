@@ -4,7 +4,7 @@
  * premium glyph language (~32px). Color via currentColor.
  */
 
-import type { Climate } from "@/lib/weather/climate";
+import type { Climate } from "@whereskarl/domain";
 
 type IconProps = {
   className?: string;

@@ -7,7 +7,7 @@ import {
   CLIMATE_ICON_COLOR,
   isClimate,
   presentClimate,
-} from "@/lib/weather/climate";
+} from "@whereskarl/domain";
 
 describe("presentClimate", () => {
   it("presents every approved Climate value with its canonical descriptor", () => {

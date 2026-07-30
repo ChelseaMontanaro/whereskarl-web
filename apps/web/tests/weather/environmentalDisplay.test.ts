@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
   airQualityAccessibleLabel,
   compactAirQualityTileLabel,
-} from "@/lib/weather/environmentalDisplay";
-import type { AirQualityPresentation } from "@/lib/weather/airQuality";
+} from "@whereskarl/domain";
+import type { AirQualityPresentation } from "@whereskarl/domain";
 
 function presentation(
   overrides: Partial<AirQualityPresentation>,

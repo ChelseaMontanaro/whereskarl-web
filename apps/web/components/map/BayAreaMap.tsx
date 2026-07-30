@@ -31,7 +31,7 @@ import {
   shouldShowFoggyFilterMarkerLabel,
   type MapMarkerLocation,
 } from "@/lib/map/markers";
-import type { FogIntensity } from "@/lib/map/conditions";
+import type { FogIntensity } from "@whereskarl/domain";
 import { collapsePhonePortraitAttribution } from "@/lib/map/phonePortraitAttribution";
 import {
   getPhonePortraitMarkerPriority,
@@ -45,7 +45,7 @@ import {
   updatePhonePortraitMarkerLabelOffsets,
   type PhonePortraitDeclutterEntry,
 } from "@/lib/map/phonePortraitMarkers";
-import { getProductRegionIdForLocation } from "@/lib/map/regions";
+import { getProductRegionIdForLocation } from "@whereskarl/domain";
 import {
   fitPhonePortraitRegionViewport,
   locatePhonePortraitMap,

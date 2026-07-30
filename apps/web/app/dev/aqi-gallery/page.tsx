@@ -10,7 +10,7 @@ import type { AirQuality, LocationWeather } from "@whereskarl/schemas";
 import {
   formatAirQualityCompact,
   presentAirQuality,
-} from "@/lib/weather/airQuality";
+} from "@whereskarl/domain";
 
 const baseLocation: LocationWeather = {
   id: "tiburon",

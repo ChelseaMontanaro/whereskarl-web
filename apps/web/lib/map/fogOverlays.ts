@@ -1,10 +1,10 @@
 import {
-  getLocationFogOverlayStyle,
   locationMatchesFogIntensityFilter,
   resolveLocationFogIntensity,
   type FogIntensity,
   type LocationConditionInput,
-} from "@/lib/map/conditions";
+} from "@whereskarl/domain";
+import { getLocationFogOverlayStyle } from "@/lib/map/fogOverlayStyle";
 
 export const FOG_OVERLAY_SOURCE_ID = "karl-fog-overlays";
 export const FOG_OVERLAY_LAYER_ID = "karl-fog-overlays-fill";

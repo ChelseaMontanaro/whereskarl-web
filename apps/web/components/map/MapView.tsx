@@ -27,7 +27,7 @@ import { getApiBaseUrl } from "@/lib/constants/config";
 import { bestRightNowLocationItems } from "@/lib/home/weatherDisplay";
 import { useMinWidth } from "@/lib/hooks/useMinWidth";
 import { usePhonePortrait } from "@/lib/hooks/usePhonePortrait";
-import type { FogIntensity } from "@/lib/map/conditions";
+import type { FogIntensity } from "@whereskarl/domain";
 import {
   findBayAreaProductRegion,
   isBayAreaProductRegionId,
@@ -49,7 +49,7 @@ import {
   resolveMapQueryState,
 } from "@/lib/map/routing";
 import type { KarlMapStyleId } from "@/lib/map/styles";
-import { filterLocationsByProductRegion } from "@/lib/map/regions";
+import { filterLocationsByProductRegion } from "@whereskarl/domain";
 import type { LocationWeather } from "@whereskarl/schemas";
 
 const apiConfig = { getBaseUrl: getApiBaseUrl };

@@ -10,7 +10,7 @@
  * the browser (icons rendered as dark discs). Solid fills only.
  */
 
-import type { FogIntensity } from '@/lib/map/locationsDisplay';
+import type { FogIntensity } from '@whereskarl/domain';
 
 /** Icy-blue crescent moon with a soft blue-white cloud — approved Clear. */
 const MOON_CLOUD_DETAILED_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" aria-hidden="true" fill="none">

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   locationMatchesFogIntensityFilter,
   resolveLocationFogIntensity,
-} from "@/lib/map/conditions";
+} from "@whereskarl/domain";
 import { intensityFilterTrayItems } from "@/lib/map/intensityFilter";
 import { isMapMarkerVisible } from "@/lib/map/markers";
 import {
@@ -12,7 +12,7 @@ import {
   locationMatchesProductRegion,
   resolveBackendRegionId,
   resolveProductRegionId,
-} from "@/lib/map/regions";
+} from "@whereskarl/domain";
 import {
   locationWeatherSchema,
   locationsResponseSchema,

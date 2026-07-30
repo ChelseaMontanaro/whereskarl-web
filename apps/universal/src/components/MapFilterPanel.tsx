@@ -9,7 +9,7 @@ import {
 import {
   getFogIntensityLabel,
   type FogIntensity,
-} from '@/lib/map/locationsDisplay';
+} from '@whereskarl/domain';
 import {
   BAY_AREA_PRODUCT_REGIONS,
   type BayAreaVisibleProductRegionId,

@@ -5,6 +5,8 @@ import { HomeLocationBadge } from '@/components/HomeLocationBadge';
 import { Colors, Fonts, Radius, Spacing } from '@/constants/theme';
 import {
   formatConfidenceLabel,
+} from '@whereskarl/domain';
+import {
   getCloudSummary,
 } from '@/lib/map/locationsDisplay';
 import type { LocationWeather } from '@/types/weather';

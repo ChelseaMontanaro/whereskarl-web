@@ -5,7 +5,7 @@ import {
   POLLEN_COLOR_BY_TOKEN,
   formatPollenCompact,
   presentPollen,
-} from "@/lib/weather/pollen";
+} from "@whereskarl/domain";
 
 function pollenFixture(
   overrides: Partial<Pollen> &

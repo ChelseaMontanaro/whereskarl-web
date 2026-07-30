@@ -10,7 +10,7 @@ import {
   FOG_VISUAL_RADIUS_MULTIPLIER,
   haversineDistanceMeters,
 } from "@/lib/map/fogOverlays";
-import { getLocationFogOverlayStyle } from "@/lib/map/conditions";
+import { getLocationFogOverlayStyle } from "@/lib/map/fogOverlayStyle";
 
 const tiburon = {
   id: "tiburon",

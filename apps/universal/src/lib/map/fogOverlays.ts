@@ -1,8 +1,10 @@
 import {
-  getLocationFogOverlayStyle,
   locationMatchesFogIntensityFilter,
   resolveLocationFogIntensity,
   type FogIntensity,
+} from '@whereskarl/domain';
+import {
+  getLocationFogOverlayStyle,
 } from '@/lib/map/locationsDisplay';
 import type { LocationWeather } from '@/types/weather';
 

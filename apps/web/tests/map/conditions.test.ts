@@ -4,16 +4,18 @@ import {
   getBestRightNowScoreLabel,
   getFogIntensity,
   getFogIntensityLabel,
-  getFogOverlayStyle,
   getLocationConditionLabel,
-  getLocationFogOverlayStyle,
   locationMatchesFogIntensityFilter,
   locationQualifiesAsClearIntensity,
   resolveFogScore,
   resolveLocationFogIntensity,
   resolveMarkerDisplayIntensity,
   resolveRawLocationFogIntensity,
-} from "@/lib/map/conditions";
+} from "@whereskarl/domain";
+import {
+  getFogOverlayStyle,
+  getLocationFogOverlayStyle,
+} from "@/lib/map/fogOverlayStyle";
 
 describe("map conditions", () => {
   it("derives fog intensity from backend fogScore", () => {

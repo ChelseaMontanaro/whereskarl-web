@@ -5,7 +5,7 @@ import {
   AIR_QUALITY_COLOR_BY_TOKEN,
   formatAirQualityCompact,
   presentAirQuality,
-} from "@/lib/weather/airQuality";
+} from "@whereskarl/domain";
 
 function airQualityFixture(
   overrides: Partial<AirQuality> &

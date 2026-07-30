@@ -4,7 +4,7 @@ import {
   formatVisibilityMiles,
   presentVisibility,
   visibilityCategoryFromValue,
-} from "@/lib/weather/visibility";
+} from "@whereskarl/domain";
 
 describe("presentVisibility", () => {
   it("formats whole miles without a trailing decimal", () => {
