@@ -1,6 +1,6 @@
-# Where's Karl? Web
+# Where's Karl? Client Monorepo
 
-Public web product for [whereskarl.live](https://whereskarl.live), built alongside the iOS app. The shared Where's Karl backend is the source of truth for weather, Karl intelligence, best-sunshine results, and future CDN hero imagery metadata.
+Public Web product for [whereskarl.live](https://whereskarl.live), plus the Expo Universal app, sharing platform-neutral packages. The shared Where's Karl backend is the source of truth for weather, Karl intelligence, best-sunshine results, and related contracts.
 
 ## Requirements
 
@@ -10,7 +10,7 @@ Public web product for [whereskarl.live](https://whereskarl.live), built alongsi
 
 ## Local setup
 
-The Next.js web app lives at `apps/web`. Install from the repository root (npm workspaces).
+Install from the **repository root** (npm workspaces). The Next.js app lives at `apps/web`; Expo at `apps/universal`.
 
 1. Install dependencies:
 
@@ -18,7 +18,7 @@ The Next.js web app lives at `apps/web`. Install from the repository root (npm w
    npm install
    ```
 
-2. Create local environment variables:
+2. Create local environment variables for Web:
 
    ```bash
    cp apps/web/.env.example apps/web/.env.local
@@ -42,13 +42,17 @@ The Next.js web app lives at `apps/web`. Install from the repository root (npm w
    npm run dev
    ```
 
-5. Start the web app:
+5. Start Web:
 
    ```bash
    npm run dev:web
    ```
 
-6. Open the app in your browser at the port shown in the terminal.
+6. Start Universal (optional):
+
+   ```bash
+   npm run dev:universal
+   ```
 
 ## Environment variables
 
@@ -58,7 +62,7 @@ Public variables only. Do not commit `.env.local`.
 | --- | --- | --- | --- |
 | `NEXT_PUBLIC_API_URL` | Local backend URL, e.g. `http://localhost:3000` | Preview/staging API URL | `https://api.whereskarl.live` |
 
-See `apps/web/.env.example` (and the root `.env.example` overview) for the variable contract. Production and preview hosts must set `NEXT_PUBLIC_API_URL` explicitly. The app does not fall back to localhost or mock data in production builds.
+Universal uses `EXPO_PUBLIC_API_URL` (see `apps/universal/.env.example`). Environment resolution stays in applications; shared packages never read env vars.
 
 ## Scripts
 
@@ -66,47 +70,44 @@ Run from the repository root:
 
 | Command | Purpose |
 | --- | --- |
-| `npm run dev:web` | Start Next.js dev server (`apps/web`) |
-| `npm run dev:universal` | Start Expo dev server (`apps/universal`) |
-| `npm run build:web` | Production build |
-| `npm run start:web` | Run production server locally |
-| `npm run lint` | ESLint for the web app |
-| `npm run typecheck` | TypeScript check for the web app |
-| `npm run typecheck:universal` | TypeScript check for the Expo app |
-| `npm test` | Vitest unit tests for the web app |
+| `npm run dev:web` | Start Next.js (`apps/web`) |
+| `npm run dev:universal` | Start Expo (`apps/universal`) |
+| `npm run build` | Web production build |
+| `npm run start:web` | Run Web production server locally |
+| `npm run lint` | ESLint for Web + shared packages |
+| `npm run typecheck` | TypeScript check (workspaces with `typecheck`) |
+| `npm run typecheck:universal` | TypeScript check for Universal |
+| `npm test` | Vitest across workspaces with tests |
+| `npm run validate` | lint → typecheck → test → build:web |
 
-## Deploying to Vercel
+`validate` reports known Web typecheck baseline failures honestly (does not mask them). See [`docs/architecture/deployment-and-validation.md`](docs/architecture/deployment-and-validation.md).
 
-1. Import this repository into Vercel as a Next.js project.
-2. Set project environment variables:
-   - **Production:** `NEXT_PUBLIC_API_URL=https://api.whereskarl.live`
-   - **Preview:** point at your preview/staging API host if different
-3. Current production deploy settings remain unchanged for this migration checkpoint. A later phase will set Root Directory to `apps/web` and workspace-aware install/build commands after local validation.
-4. Deploy. Vercel production builds fail if `NEXT_PUBLIC_API_URL` is missing.
+## Deploying to Vercel (Web)
 
-Before going live, run locally from the repository root:
+Verified dashboard settings (no committed `vercel.json`):
 
-```bash
-npm test
-npm run lint
-npm run typecheck
-npm run build:web
-```
+- Framework: Next.js
+- Root Directory: `apps/web`
+- Build Command: `npm run build`
+- Include files outside root directory: enabled
 
-## Connecting `whereskarl.live`
+Set `NEXT_PUBLIC_API_URL` for Production and Preview in the Vercel project. Production builds fail if it is missing.
 
-These steps are manual and depend on your DNS/Vercel setup:
+Full runbook: [`docs/architecture/deployment-and-validation.md`](docs/architecture/deployment-and-validation.md).
 
-1. Add `whereskarl.live` (and optionally `www.whereskarl.live`) as custom domains in the Vercel project.
-2. Create the DNS records Vercel provides at your domain registrar.
-3. Wait for DNS propagation and Vercel domain verification.
-4. Confirm production environment variables are set on the production deployment target.
+## Architecture
 
-Do not assume the domain is connected until verification succeeds in Vercel.
+Start here:
+
+- [`docs/architecture/system-architecture.md`](docs/architecture/system-architecture.md) — structure, ownership, data flow, where new code belongs
+- [`docs/architecture/client-monorepo-architecture.md`](docs/architecture/client-monorepo-architecture.md) — long-form specification + ADRs
+- [`docs/migrations/client-monorepo-completion.md`](docs/migrations/client-monorepo-completion.md) — migration closeout
+
+Shared packages: `@whereskarl/design`, `config`, `schemas`, `api-client`, `search`, `domain`.
 
 ## Supported API contracts
 
-All weather and intelligence data comes from the shared backend. The web client validates responses with Zod and does not reshape payloads beyond parsing.
+Clients call the backend through `@whereskarl/api-client` and validate with `@whereskarl/schemas`.
 
 | Endpoint | Client function |
 | --- | --- |
@@ -123,16 +124,20 @@ All weather and intelligence data comes from the shared backend. The web client 
 - Site: `https://whereskarl.live`
 - API: `https://api.whereskarl.live`
 
-Metadata, sitemap, robots, and canonical URLs use `https://whereskarl.live`. Map styles load from public HTTPS tile/style hosts (CARTO, Esri) in the browser.
+## Project structure
 
-## Architecture notes
-
-- Weather, intelligence, and hero-image URLs come from the shared backend only.
-- The web app does not call Open-Meteo directly and does not implement a separate scoring model.
-- Product regions remain: San Francisco, North Bay, East Bay, South Bay.
-- Browser-local persistence uses:
-  - `wheresKarl.web.favoriteLocationIDs`
-  - `wheresKarl.web.lastKnownWeather`
+```text
+apps/web/              Next.js Web app
+apps/universal/        Expo Universal app
+packages/design/       Design tokens
+packages/config/       Shared non-secret constants
+packages/schemas/      Zod API contracts
+packages/api-client/   HTTP transport
+packages/search/       Catalog search
+packages/domain/       Shared presentation rules
+docs/architecture/     Permanent architecture docs
+docs/migrations/       Migration history
+```
 
 ## Product roadmap (follow-ups)
 
@@ -149,22 +154,3 @@ Required before shipping live UI:
 5. **Validate against observed Bay Area conditions** before replacing Coming Soon placeholders on phone Selected Location (and later native/universal).
 
 Canonical **Climate** (Marine / Fog Belt / Transition / Sun Belt / Inland) is backend-owned location metadata shown on the phone Map environmental sheet in place of the former KHI placeholder. It is not derived from the live forecast.
-
-## Project structure
-
-```text
-apps/web/
-  app/                 Next.js App Router pages and layout
-  components/          Shared UI and providers
-  lib/
-    api/               Typed API client functions
-    env/               Public environment contract
-    site/              SEO metadata and sitemap routes
-    constants/         App config and design tokens
-    schemas/           Zod schemas and inferred TypeScript types
-  tests/
-    fixtures/          Representative backend response JSON
-    env/               Environment configuration tests
-apps/universal/        Expo Universal app (iOS / Android / RN Web)
-packages/              Shared packages (scaffolded; extraction in later phases)
-```

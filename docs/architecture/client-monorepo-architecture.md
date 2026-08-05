@@ -1,12 +1,14 @@
 # Where’s Karl Client Monorepo Architecture Specification
 
-**Version:** 1.0  
-**Status:** Architecture RFC (Design Only)  
-**Spec ID:** WK-CLIENT-ARCH-1.0  
-**Scope:** Client applications monorepo (Web + Universal)  
-**Out of scope:** Backend repository, Native Swift iOS repository, migration execution  
+**Version:** 1.0
+**Status:** Approved and implemented (client monorepo migration complete through Phase 15; Phase 16 documentation)
+**Spec ID:** WK-CLIENT-ARCH-1.0
+**Scope:** Client applications monorepo (Web + Universal)
+**Out of scope:** Backend repository, Native Swift iOS repository
 
-This document is the canonical long-term architecture for Where’s Karl client software. Future implementation must conform to it. It is not an implementation plan and does not authorize code changes.
+This document is the **normative long-form architecture** and Architecture Decision Log for Where’s Karl TypeScript clients. For day-to-day contributor guidance, start with [`system-architecture.md`](./system-architecture.md). For deploy/validate operations, see [`deployment-and-validation.md`](./deployment-and-validation.md). Migration closeout: [`../migrations/client-monorepo-completion.md`](../migrations/client-monorepo-completion.md).
+
+Do not casually reverse §19 ADRs or the dependency rules in §11. Amending this specification still requires an ADR and a version bump.
 
 ---
 
@@ -812,23 +814,23 @@ Allowed only when Package Acceptance Criteria (§16.0) are fully satisfied.
 
 # 18. Migration Readiness Checklist
 
-Implementation may begin only when **all** criteria are true:
+**Historical note:** This checklist gated authorization to implement. The client monorepo migration on `migration/client-monorepo` completed technically at `f364882` (Phase 15) with documentation closeout in Phase 16. Items below are retained for audit; see [`../migrations/client-monorepo-completion.md`](../migrations/client-monorepo-completion.md).
 
-- [ ] This specification (v1.0+) is accepted by product/engineering owners  
-- [ ] Package list in §4 is approved (including explicit non-packages)  
-- [ ] Dependency matrix in §11 is accepted  
-- [ ] Env var naming and api-client injection model in §9–§10 are accepted  
-- [ ] Search semantics (empty query, prefix/alias rules) are product-approved as the single client standard  
-- [ ] Map query param canonical writer/reader behavior is product-approved  
-- [ ] Vercel Root Directory / install expectations for workspaces are acknowledged by whoever owns deploy config  
-- [ ] Expo Metro monorepo resolution approach is acknowledged as mandatory for Universal  
-- [ ] Decision recorded: Turborepo deferred unless/until §14 trigger conditions  
-- [ ] Decision recorded: no `packages/ui` / `analytics` / `content` in first implementation  
-- [ ] Native Swift and backend remaining separate is reconfirmed  
-- [ ] Backend ownership of intelligence and canonical scoring (clients present only) is reconfirmed  
-- [ ] Success definition agreed: both apps consume shared schemas/domain/search with no parallel type modules remaining  
+- [x] This specification (v1.0+) is accepted by product/engineering owners
+- [x] Package list in §4 is approved (including explicit non-packages)
+- [x] Dependency matrix in §11 is accepted
+- [x] Env var naming and api-client injection model in §9–§10 are accepted
+- [x] Search semantics (empty query, prefix/alias rules) are product-approved as the single client standard
+- [x] Map query param canonical writer/reader behavior is product-approved
+- [x] Vercel Root Directory / install expectations for workspaces are acknowledged by whoever owns deploy config
+- [x] Expo Metro monorepo resolution approach is acknowledged as mandatory for Universal
+- [x] Decision recorded: Turborepo deferred unless/until §14 trigger conditions
+- [x] Decision recorded: no `packages/ui` / `analytics` / `content` in first implementation
+- [x] Native Swift and backend remaining separate is reconfirmed
+- [x] Backend ownership of intelligence and canonical scoring (clients present only) is reconfirmed
+- [x] Success definition agreed: both apps consume shared schemas/domain/search with no parallel type modules remaining
 
-This checklist gates **authorization to implement**. It does not define the implementation sequence.
+This checklist historically gated **authorization to implement**. It is retained as an audit record.
 
 ---
 
@@ -961,8 +963,9 @@ Future contributors should extend **apps**, **backend capabilities**, and **exis
 | Field | Value |
 |-------|-------|
 | Spec ID | WK-CLIENT-ARCH-1.0 |
-| Type | Architecture RFC / long-term specification |
-| Implementation authorized by this document alone? | **No** — requires §18 checklist completion |
+| Type | Approved long-term architecture specification + ADR log |
+| Practical companion | [`system-architecture.md`](./system-architecture.md) |
+| Implementation status | Implemented on `migration/client-monorepo` (technical closeout `f364882`) |
 | Supersedes | Informal nested `whereskarl-universal/` layout as target architecture |
 
 **End of specification.**

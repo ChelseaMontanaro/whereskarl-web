@@ -1,19 +1,23 @@
 # Where’s Karl — Client Monorepo Migration Execution Plan v1.3
 
-**Status:** Final draft canonical migration plan (planning only)  
-**Basis:** `docs/architecture/client-monorepo-architecture.md` (WK-CLIENT-ARCH-1.0) + repository audit on `main` @ `0752da5`  
-**Repo:** `ChelseaMontanaro/whereskarl-web` (do **not** rename as part of this migration)  
-**Audit date:** 2026-07-24  
-**Working tree at audit:** clean; branch `main` up to date with `origin/main`  
-**Changelog vs v1.2:** Architecture Change Gate approval-before-spec-update; “currently approved reference implementation” wording  
+**Status:** Historical — migration executed on `migration/client-monorepo`; technical closeout `f364882`; documentation closeout Phase 16
+**Completion record:** [`client-monorepo-completion.md`](./client-monorepo-completion.md)
+**Permanent architecture guide:** [`../architecture/system-architecture.md`](../architecture/system-architecture.md)
+**Basis:** `docs/architecture/client-monorepo-architecture.md` (WK-CLIENT-ARCH-1.0) + repository audit on `main` @ `0752da5`
+**Repo:** `ChelseaMontanaro/whereskarl-web` (do **not** rename as part of this migration)
+**Audit date:** 2026-07-24
+**Working tree at audit:** clean; branch `main` up to date with `origin/main`
+**Changelog vs v1.2:** Architecture Change Gate approval-before-spec-update; “currently approved reference implementation” wording
 
-Architectural principles, package responsibilities, dependency matrix, and forbidden packages are defined only in [`docs/architecture/client-monorepo-architecture.md`](docs/architecture/client-monorepo-architecture.md). This plan executes that specification; it does not re-own those rules.
+This document is **preserved as migration history**. Do not treat its “current state” inventory or unchecked Definition of Done boxes as live repository status. Live architecture and operations live in the permanent docs linked above.
+
+Architectural principles, package responsibilities, dependency matrix, and forbidden packages are defined only in [`docs/architecture/client-monorepo-architecture.md`](../architecture/client-monorepo-architecture.md). This plan executed that specification; it does not re-own those rules.
 
 ---
 
 # Architecture Authority
 
-- The approved architecture specification ([`docs/architecture/client-monorepo-architecture.md`](docs/architecture/client-monorepo-architecture.md)) is the **canonical architectural authority**.
+- The approved architecture specification ([`client-monorepo-architecture.md`](../architecture/client-monorepo-architecture.md)) is the **canonical architectural authority**.
 - This migration plan exists **solely to implement** that architecture.
 - If a conflict is discovered between this migration plan and the architecture specification, **implementation must pause**.
 - The migration plan must **never silently override or redefine** architectural decisions.
