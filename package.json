@@ -9,11 +9,13 @@
   "scripts": {
     "dev:web": "npm run dev -w @whereskarl/web",
     "dev:universal": "npm run start -w whereskarl-universal",
+    "build": "npm run build:web",
     "build:web": "npm run build -w @whereskarl/web",
     "start:web": "npm run start -w @whereskarl/web",
-    "lint": "npm run lint -w @whereskarl/web",
-    "typecheck": "npm run typecheck -w @whereskarl/web",
+    "lint": "npm run lint -w @whereskarl/web -w @whereskarl/design -w @whereskarl/config -w @whereskarl/schemas -w @whereskarl/api-client -w @whereskarl/search -w @whereskarl/domain",
+    "typecheck": "npm run typecheck --workspaces --if-present",
     "typecheck:universal": "npm run typecheck -w whereskarl-universal",
-    "test": "npm run test -w @whereskarl/web"
+    "test": "npm run test --workspaces --if-present",
+    "validate": "npm run lint && npm run typecheck && npm run test && npm run build:web"
   }
 }
