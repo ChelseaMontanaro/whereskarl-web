@@ -12,7 +12,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { KarlMap } from '@/components/KarlMap';
 import type { KarlMapHandle } from '@/components/KarlMap/KarlMap.types';
 import { LocationResultsList } from '@/components/LocationResultsList';
-import { LocationSearchBar } from '@/components/LocationSearchBar';
+import {
+  LocationSearchBar,
+  LocationSearchIconButton,
+} from '@/components/LocationSearchBar';
 import { MapBestRightNowTray } from '@/components/MapBestRightNowTray';
 import { MapConditionsPanel } from '@/components/map/MapConditionsPanel';
 import { MapFogLegend } from '@/components/map/MapFogLegend';
@@ -20,6 +23,10 @@ import { MapLayerControls } from '@/components/map/MapLayerControls';
 import { MapPhonePortraitControls } from '@/components/map/MapPhonePortraitControls';
 import { MapPhonePortraitFogRail } from '@/components/map/MapPhonePortraitFogRail';
 import { MapPhonePortraitFloatingControls } from '@/components/map/MapPhonePortraitFloatingControls';
+import {
+  MapViewModeToggle,
+  type MapScreenViewMode,
+} from '@/components/MapViewModeToggle';
 import { SelectedLocationPreview } from '@/components/SelectedLocationPreview';
 import { Colors, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useHomeLocation } from '@/hooks/useHomeLocation';
@@ -41,6 +48,10 @@ import {
   mapLayoutModeForProfile,
   resolveMapScreenLayoutProfile,
 } from '@/lib/map/mapLayout';
+import {
+  parseMapSelectedLocationId,
+  parseMapViewMode,
+} from '@/lib/map/mapRouteParams';
 import { getBestRightNowMapItems } from '@/lib/map/mapPanelDisplay';
 import { filterLocationsForPhonePortraitSfComposition } from '@/lib/map/phonePortraitMapPresentation';
 import {
@@ -50,17 +61,11 @@ import {
 import type { KarlMapStyleId } from '@/lib/map/styles';
 import { useClearSkiesNav } from '@/providers/ClearSkiesNavProvider';
 
-function parseSelectedLocationId(
-  value: string | string[] | undefined,
-): string | null {
-  const raw = Array.isArray(value) ? value[0] : value;
-  return raw?.trim() ? raw : null;
-}
-
 export default function MapScreen() {
   const params = useLocalSearchParams<{
     view?: string;
     selected?: string;
+    location?: string;
   }>();
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -84,7 +89,7 @@ export default function MapScreen() {
   const isPhone = layoutProfile === 'phone';
   const isPhonePortraitWeb = isPhone && Platform.OS === 'web';
 
-  const showListMode = params.view === 'list';
+  const showListMode = parseMapViewMode(params.view) === 'list';
 
   const [searchQuery, setSearchQuery] = useState('');
   const [sortMode, setSortMode] = useState<LocationSortMode>('brightest');
@@ -99,7 +104,7 @@ export default function MapScreen() {
     null,
   );
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
-    () => parseSelectedLocationId(params.selected),
+    () => parseMapSelectedLocationId(params),
   );
   const [mapStyle, setMapStyle] = useState<KarlMapStyleId>('hybrid');
   const [fogLayerEnabled, setFogLayerEnabled] = useState(true);
@@ -107,13 +112,19 @@ export default function MapScreen() {
 
   const routeSyncSource = useRef<'local' | 'external'>('external');
 
-  const syncMapRoute = useCallback((selectedLocationId: string | null) => {
-    routeSyncSource.current = 'local';
-    router.setParams({
-      selected: selectedLocationId ?? '',
-      view: showListMode ? 'list' : 'map',
-    });
-  }, [showListMode]);
+  const syncMapRoute = useCallback(
+    (
+      nextSelectedLocationId: string | null,
+      viewMode: MapScreenViewMode = showListMode ? 'list' : 'map',
+    ) => {
+      routeSyncSource.current = 'local';
+      router.setParams({
+        selected: nextSelectedLocationId ?? '',
+        view: viewMode,
+      });
+    },
+    [showListMode],
+  );
 
   useEffect(() => {
     if (routeSyncSource.current === 'local') {
@@ -121,10 +132,10 @@ export default function MapScreen() {
       return;
     }
 
-    if (params.selected !== undefined) {
-      setSelectedLocationId(parseSelectedLocationId(params.selected));
+    if (params.selected !== undefined || params.location !== undefined) {
+      setSelectedLocationId(parseMapSelectedLocationId(params));
     }
-  }, [params.selected]);
+  }, [params.location, params.selected]);
 
   const markerLocations = useMemo(() => {
     // Phone-portrait web SF tab keeps the approved Marin/central Bay
@@ -206,6 +217,7 @@ export default function MapScreen() {
 
   function handleClearSelection() {
     setSelectedLocationId(null);
+    setSearchQuery('');
     syncMapRoute(null);
   }
 
@@ -220,7 +232,18 @@ export default function MapScreen() {
       return;
     }
 
-    handleSelectLocation(locationId);
+    setSearchQuery('');
+    setSelectedLocationId(locationId);
+    // Selection from search list focuses the map with that canonical id.
+    syncMapRoute(locationId, 'map');
+  }
+
+  function handleViewModeChange(mode: MapScreenViewMode) {
+    syncMapRoute(selectedLocationId, mode);
+  }
+
+  function handleOpenSearch() {
+    syncMapRoute(selectedLocationId, 'list');
   }
 
   function handleSelectRegion(regionId: BayAreaVisibleProductRegionId) {
@@ -308,7 +331,14 @@ export default function MapScreen() {
         <View style={styles.vignette} />
         <View style={[styles.listContent, { paddingTop: insets.top + Spacing.md }]}>
           <View style={styles.listHeader}>
-            <Text style={styles.listTitle}>Find Brightest Spot</Text>
+            <View style={styles.listHeaderRow}>
+              <Text style={styles.listTitle}>Find Brightest Spot</Text>
+              <MapViewModeToggle
+                mode="list"
+                onModeChange={handleViewModeChange}
+                compact
+              />
+            </View>
             <Text style={styles.listSubtitle}>
               Search live locations and compare clear skies, temperature, and fog
               conditions.
@@ -381,6 +411,9 @@ export default function MapScreen() {
                 { top: desktopHeaderOffset + insets.top },
               ]}
               pointerEvents="box-none">
+              <View style={styles.searchEntryRow}>
+                <LocationSearchIconButton onPress={handleOpenSearch} />
+              </View>
               <MapConditionsPanel
                 locations={locations}
                 isLoading={isLoading}
@@ -476,6 +509,7 @@ export default function MapScreen() {
                   { top: insets.top + (isPhonePortraitWeb ? 120 : 132) },
                 ]}
                 pointerEvents="box-none">
+                <LocationSearchIconButton onPress={handleOpenSearch} />
                 <MapPhonePortraitFloatingControls
                   onOpenLayers={() => setIsLayersPanelOpen(true)}
                   onLocateMe={() => mapRef.current?.locateMe()}
@@ -521,6 +555,9 @@ export default function MapScreen() {
                   { top: insets.top + Spacing.md },
                 ]}
                 pointerEvents="box-none">
+                <View style={styles.searchEntryRow}>
+                  <LocationSearchIconButton onPress={handleOpenSearch} />
+                </View>
                 <MapConditionsPanel
                   locations={locations}
                   isLoading={isLoading}
@@ -647,6 +684,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: Spacing.sm,
     alignItems: 'flex-end',
+    gap: 8,
   },
   phoneBottom: {
     position: 'absolute',
@@ -683,7 +721,14 @@ const styles = StyleSheet.create({
   listHeader: {
     gap: Spacing.xs,
   },
+  listHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: Spacing.sm,
+  },
   listTitle: {
+    flex: 1,
     fontSize: 24,
     fontWeight: '600',
     color: Colors.textPrimary,
@@ -692,5 +737,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     color: Colors.textSecondary,
+  },
+  searchEntryRow: {
+    alignSelf: 'flex-start',
+    marginBottom: Spacing.sm,
   },
 });

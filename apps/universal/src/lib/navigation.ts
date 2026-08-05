@@ -1,4 +1,5 @@
 import { MAP_LOCATION_ALIAS_QUERY_PARAM } from '@whereskarl/config';
+import { normalizeLocationId } from '@whereskarl/search';
 
 export type PrimaryNavItem = {
   href: '/' | '/map' | '/favorites' | '/settings';
@@ -35,10 +36,26 @@ export function isPrimaryNavActive(
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function buildMapHref(locationId: string | null): string {
-  if (locationId?.trim()) {
-    return `/map?${MAP_LOCATION_ALIAS_QUERY_PARAM}=${encodeURIComponent(locationId.trim())}`;
+export function buildMapHref(
+  locationId: string | null,
+  options?: { view?: 'list' | 'map' },
+): string {
+  const params = new URLSearchParams();
+  const view = options?.view;
+  if (view === 'list' || view === 'map') {
+    params.set('view', view);
   }
 
-  return '/map';
+  const canonicalId = normalizeLocationId(locationId);
+  if (canonicalId) {
+    params.set(MAP_LOCATION_ALIAS_QUERY_PARAM, canonicalId);
+  }
+
+  const query = params.toString();
+  return query ? `/map?${query}` : '/map';
+}
+
+/** Opens Universal map search (list mode) with optional preselected location. */
+export function buildMapSearchHref(locationId: string | null = null): string {
+  return buildMapHref(locationId, { view: 'list' });
 }

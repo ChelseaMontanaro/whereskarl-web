@@ -27,7 +27,8 @@ import {
 import {
   getCloudSummary,
 } from '@/lib/map/locationsDisplay';
-
+import { buildMapHref, buildMapSearchHref } from '@/lib/navigation';
+import { normalizeLocationId } from '@whereskarl/search';
 const PLACEHOLDER_LOCATION = {
   name: 'Bay Area location',
   region: 'Bay Area',
@@ -96,17 +97,16 @@ export default function LocationDetailScreen() {
   }
 
   function handleViewOnMapPress() {
-    if (!locationId) {
+    const canonicalId = normalizeLocationId(locationId);
+    if (!canonicalId) {
       return;
     }
 
-    router.push({
-      pathname: '/map',
-      params: {
-        view: 'map',
-        selected: locationId,
-      },
-    });
+    router.push(buildMapHref(canonicalId, { view: 'map' }) as '/map');
+  }
+
+  function handleBackToSearch() {
+    router.push(buildMapSearchHref(normalizeLocationId(locationId)) as '/map');
   }
 
   return (
@@ -150,7 +150,7 @@ export default function LocationDetailScreen() {
               </Text>
               <Pressable
                 accessibilityRole="button"
-                onPress={() => router.back()}
+                onPress={handleBackToSearch}
                 style={({ pressed }) => [
                   styles.secondaryButton,
                   pressed && styles.buttonPressed,
