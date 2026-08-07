@@ -122,7 +122,7 @@ describe("root viewport safe-area activation", () => {
     );
     expect(searchControls).toContain("mx-1");
     expect(mapView).toContain(
-      "top-[calc(7.125rem+env(safe-area-inset-top))]",
+      "top-[calc(7.75rem+env(safe-area-inset-top))]",
     );
     expect(mapView).toContain("restorePhoneMapChrome()");
     expect(mapView).toContain("key={selectedLocation.id}");

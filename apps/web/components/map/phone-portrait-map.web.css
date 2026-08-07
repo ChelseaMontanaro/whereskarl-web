@@ -134,6 +134,10 @@
  * Do NOT lift attribution when a Selected Location sheet opens — the sheet
  * covers the credit in place (phone attrib uses z-10 under the map overlay
  * stacking context at z-20). Never hide attribution (license).
+ *
+ * Bottom clearance (4.75rem) must stay in sync with
+ * PHONE_MAP_BOTTOM_NAV_CLEARANCE_REM in lib/map/mapChrome.ts and the
+ * BottomSheet / Map Layers sheet bottom offsets.
  */
 .karl-map-attrib--phone {
   /* Clear the collapsed MapLibre ⓘ toggle (24px button + 5px control margin)

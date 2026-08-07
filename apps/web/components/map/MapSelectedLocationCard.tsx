@@ -246,7 +246,7 @@ function FavoriteButton({
           : `Add ${location.name} to favorites`
       }
       className={`flex shrink-0 items-center justify-center rounded-full transition-colors motion-reduce:transition-none ${
-        size === "sm" ? "h-5 w-5" : "h-6 w-6"
+        size === "sm" ? "h-8 w-8" : "h-10 w-10"
       } ${
         isFavorite
           ? "text-karl-gold"
@@ -933,7 +933,7 @@ function PhonePortraitSelectedCard({
           </p>
         </div>
 
-        <div className="flex shrink-0 items-center gap-1">
+        <div className="flex shrink-0 items-center gap-0.5">
           <FavoriteButton
             location={location}
             isFavorite={isFavorite}
@@ -944,7 +944,7 @@ function PhonePortraitSelectedCard({
               type="button"
               onClick={onClose}
               aria-label="Close selected location"
-              className="flex h-6 w-6 items-center justify-center rounded-full border border-white/12 bg-white/[0.05] text-sm leading-none text-white/60 transition-colors hover:border-white/25 hover:text-white motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karl-gold/50"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/12 bg-white/[0.05] text-base leading-none text-white/60 transition-colors hover:border-white/25 hover:text-white motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karl-gold/50"
             >
               ×
             </button>
@@ -1279,13 +1279,13 @@ function DesktopSelectedCard({
           type="button"
           onClick={onClose}
           aria-label="Close selected location"
-          className="absolute right-2.5 top-2.5 flex h-5 w-5 items-center justify-center rounded-full text-sm leading-none text-white/45 transition-colors hover:bg-white/[0.06] hover:text-white/75 motion-reduce:transition-none"
+          className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full text-base leading-none text-white/45 transition-colors hover:bg-white/[0.06] hover:text-white/75 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karl-gold/50"
         >
           ×
         </button>
       ) : null}
 
-      <div className="flex w-full items-center gap-3 pr-5">
+      <div className="flex w-full items-center gap-3 pr-7">
         <MapLocationConditionIcon location={location} />
 
         <div className="min-w-0 flex-1">
@@ -1297,6 +1297,7 @@ function DesktopSelectedCard({
               location={location}
               isFavorite={isFavorite}
               onToggle={handleToggleFavorite}
+              size="sm"
             />
           </div>
           <p className="mt-0.5 line-clamp-2 text-[0.75rem] leading-snug text-white/72">

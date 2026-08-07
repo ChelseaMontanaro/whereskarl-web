@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { desktopGlassCardClass } from "@/components/home/desktopGlass";
+import { PHONE_MAP_SHEET_BOTTOM_CLASS } from "@/lib/map/mapChrome";
 import {
   KARL_MAP_STYLE_OPTIONS,
   type KarlMapStyleId,
@@ -509,7 +510,7 @@ export function MapPhonePortraitLayersControl({
             role="dialog"
             aria-modal="true"
             aria-label="Map Layers"
-            className="fixed inset-x-3 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-40 mx-auto max-h-[calc(100dvh-12rem-env(safe-area-inset-top)-env(safe-area-inset-bottom))] max-w-[26rem] overflow-y-auto overscroll-contain rounded-3xl border border-white/12 bg-black/70 p-4 shadow-[0_-8px_40px_rgba(0,0,0,0.45)] backdrop-blur-xl"
+            className={`fixed inset-x-3 ${PHONE_MAP_SHEET_BOTTOM_CLASS} z-40 mx-auto max-h-[calc(100dvh-12rem-env(safe-area-inset-top)-env(safe-area-inset-bottom))] max-w-[26rem] overflow-y-auto overscroll-contain rounded-3xl border border-white/12 bg-black/70 p-4 shadow-[0_-8px_40px_rgba(0,0,0,0.45)] backdrop-blur-xl`}
           >
             <div className="flex items-start justify-between gap-3">
               <div className="space-y-0.5">

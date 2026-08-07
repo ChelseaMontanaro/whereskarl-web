@@ -11,6 +11,11 @@ import {
 
 import { BAY_AREA_PRODUCT_REGIONS } from "@/lib/map/config";
 import {
+  MAP_REGION_CHIP_BASE_CLASS,
+  MAP_REGION_CHIP_PHONE_IDLE_CLASS,
+  MAP_REGION_CHIP_PHONE_SELECTED_CLASS,
+} from "@/lib/map/mapChrome";
+import {
   filterCanonicalLocationsBySearch,
   type CanonicalSearchableLocation,
 } from "@whereskarl/search";
@@ -49,26 +54,6 @@ function SearchMagnifierIcon() {
     >
       <circle cx="11" cy="11" r="6.5" />
       <path d="M16.2 16.2 20 20" />
-    </svg>
-  );
-}
-
-function SearchMicIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className="h-[1.125rem] w-[1.125rem] shrink-0 text-white/85"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.25"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <path d="M12 3.5a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0v-5a3 3 0 0 0-3-3Z" />
-      <path d="M7.5 11.5a4.5 4.5 0 0 0 9 0" />
-      <path d="M12 16v3.5" />
-      <path d="M9.5 19.5h5" />
     </svg>
   );
 }
@@ -261,7 +246,7 @@ function MapPhonePortraitSearchBar({
           <button
             type="button"
             aria-label="Clear search"
-            className="inline-flex h-[1.125rem] w-[1.125rem] shrink-0 items-center justify-center text-white/85"
+            className="-mr-1.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white/85 transition-colors hover:bg-white/10 hover:text-white motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karl-gold/50"
             onClick={handleClear}
           >
             <svg
@@ -276,9 +261,7 @@ function MapPhonePortraitSearchBar({
               <path d="M6 6l12 12M18 6 6 18" />
             </svg>
           </button>
-        ) : (
-          <SearchMicIcon />
-        )}
+        ) : null}
       </div>
 
       {showOverlay ? (
@@ -405,7 +388,7 @@ export function MapPhonePortraitControls({
           ref={chipScrollRef}
           className="relative w-full overflow-x-auto scroll-px-1 pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
-          <div className="flex w-max min-w-full items-center justify-center gap-1">
+          <div className="flex w-max min-w-full items-center justify-center gap-1.5 px-0.5">
             {BAY_AREA_PRODUCT_REGIONS.map((region) => {
               const isSelected = selectedRegionId === region.id;
 
@@ -422,10 +405,10 @@ export function MapPhonePortraitControls({
                   type="button"
                   aria-pressed={isSelected}
                   onClick={() => onSelectRegion(region.id)}
-                  className={`inline-flex min-w-[2.75rem] shrink-0 items-center justify-center whitespace-nowrap rounded-full border px-2 py-2 text-center text-xs font-bold leading-[0.875rem] transition-opacity motion-reduce:transition-none ${
+                  className={`${MAP_REGION_CHIP_BASE_CLASS} ${
                     isSelected
-                      ? "border-karl-gold/45 bg-karl-gold text-karl-navy"
-                      : "border-[rgb(150_175_200/0.2)] bg-[rgb(5_13_24/0.78)] text-white/78 hover:opacity-90"
+                      ? MAP_REGION_CHIP_PHONE_SELECTED_CLASS
+                      : MAP_REGION_CHIP_PHONE_IDLE_CLASS
                   }`}
                 >
                   {region.chipLabel}
@@ -449,7 +432,7 @@ export function MapPhonePortraitControls({
         </h1>
       </div>
 
-      <div aria-label="Bay Area regions" className="flex flex-wrap gap-1">
+      <div aria-label="Bay Area regions" className="flex flex-wrap gap-1.5">
         {BAY_AREA_PRODUCT_REGIONS.map((region) => {
           const isSelected = selectedRegionId === region.id;
 
@@ -459,10 +442,10 @@ export function MapPhonePortraitControls({
               type="button"
               aria-pressed={isSelected}
               onClick={() => onSelectRegion(region.id)}
-              className={`rounded-full border px-2 py-0.5 text-[0.62rem] font-semibold transition-colors motion-reduce:transition-none ${
+              className={`${MAP_REGION_CHIP_BASE_CLASS} ${
                 isSelected
-                  ? "border-karl-gold/40 bg-karl-gold/14 text-karl-gold"
-                  : "border-white/10 bg-black/28 text-white/65 backdrop-blur-sm hover:border-white/18 hover:text-white/85"
+                  ? MAP_REGION_CHIP_PHONE_SELECTED_CLASS
+                  : MAP_REGION_CHIP_PHONE_IDLE_CLASS
               }`}
             >
               {region.chipLabel}

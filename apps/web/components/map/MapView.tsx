@@ -33,6 +33,10 @@ import {
   isBayAreaProductRegionId,
 } from "@/lib/map/config";
 import {
+  PHONE_MAP_SHEET_BOTTOM_CLASS,
+  TABLET_MAP_BOTTOM_STACK_CLASS,
+} from "@/lib/map/mapChrome";
+import {
   mapBestRightNowTrayItems,
   shouldShowDesktopBestRightNowTray,
   toggleIntensityFilter,
@@ -513,7 +517,7 @@ function MobileMapView({ state }: { state: MapViewModel }) {
             className={`pointer-events-auto absolute flex flex-col transition-opacity motion-reduce:transition-none ${
               isPhonePortrait
                 ? "inset-x-3 top-[calc(1.375rem+env(safe-area-inset-top))] gap-0"
-                : "left-3 top-3 max-w-[min(100%,13.5rem)] gap-1.5 sm:left-4 sm:top-4 sm:max-w-xs md:top-[4.5rem] md:max-w-xs"
+                : "left-3 top-3 max-w-[min(100%,20rem)] gap-2 sm:left-4 sm:top-4 sm:max-w-xs md:top-[4.5rem]"
             } opacity-100`}
           >
             {isPhonePortrait ? (
@@ -561,8 +565,10 @@ function MobileMapView({ state }: { state: MapViewModel }) {
 
                 Phase 16.3C.1a: keep the pre-search-bar chip→rail gap. The
                 search bar is 1.125rem taller than the old title (42px vs 24px),
-                so the rail top is 6rem + 1.125rem. */}
-            <div className="pointer-events-none absolute left-3 top-[calc(7.125rem+env(safe-area-inset-top))] flex flex-col">
+                so the rail top was 6rem + 1.125rem. Phase 18: region chips use
+                a 40px (2.5rem) touch floor (+0.625rem), so rail/Layers sit at
+                7.75rem. */}
+            <div className="pointer-events-none absolute left-3 top-[calc(7.75rem+env(safe-area-inset-top))] flex flex-col">
               <div className="pointer-events-auto flex flex-col items-start gap-2">
                 <MapPhonePortraitFogRail
                   activeIntensity={intensityFilter}
@@ -573,9 +579,9 @@ function MobileMapView({ state }: { state: MapViewModel }) {
 
             {/* Map Layers — global map control, top-right below the region
                 chips, deliberately separate from the Fog Intensity rail.
-                Phase 16.3C.1a: same 7.125rem top as the fog rail so the
-                chip→Layers gap matches the pre-search-bar layout. */}
-            <div className="pointer-events-auto absolute right-3 top-[calc(7.125rem+env(safe-area-inset-top))] flex flex-col items-end">
+                Phase 16.3C.1a / 18: same top as the fog rail so the
+                chip→Layers gap stays aligned. */}
+            <div className="pointer-events-auto absolute right-3 top-[calc(7.75rem+env(safe-area-inset-top))] flex flex-col items-end">
               <MapPhonePortraitLayersControl
                 mapStyle={mapStyle}
                 fogLayerEnabled={fogLayerEnabled}
@@ -599,12 +605,12 @@ function MobileMapView({ state }: { state: MapViewModel }) {
               onClose={handleClearSelectedLocation}
             />
           ) : locationsQuery.isLoading ? (
-            <div className="pointer-events-auto fixed inset-x-3 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-40 mx-auto max-w-[26rem] rounded-t-[1.75rem] rounded-b-3xl border border-white/12 bg-black/70 px-4 py-3 shadow-[0_-8px_40px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+            <div className={`pointer-events-auto fixed inset-x-3 ${PHONE_MAP_SHEET_BOTTOM_CLASS} z-40 mx-auto max-w-[26rem] rounded-t-[1.75rem] rounded-b-3xl border border-white/12 bg-black/70 px-4 py-3 shadow-[0_-8px_40px_rgba(0,0,0,0.45)] backdrop-blur-xl`}>
               <p className="text-xs text-white/55">Finding the clearest spot…</p>
             </div>
           ) : null
         ) : (
-          <div className="pointer-events-auto absolute inset-x-3 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] flex flex-col items-stretch gap-2.5 sm:inset-x-4 md:bottom-[calc(5.25rem+env(safe-area-inset-bottom))]">
+          <div className={`pointer-events-auto absolute inset-x-3 ${TABLET_MAP_BOTTOM_STACK_CLASS} flex flex-col items-stretch gap-2.5 sm:inset-x-4`}>
             {shouldShowDesktopBestRightNowTray(intensityFilter) ? (
               <MapBestRightNowTray
                 items={bestRightNowItems}
@@ -682,7 +688,7 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
       />
 
       <div className="pointer-events-none absolute inset-0 z-20">
-        <div className="pointer-events-auto absolute left-6 top-[5.5rem] flex max-w-xs flex-col gap-2">
+        <div className="pointer-events-auto absolute left-6 top-[5.5rem] flex w-full max-w-sm flex-col gap-2.5">
           <MapConditionsPanel
             isLoading={currentQuery.isLoading && !currentQuery.data}
             selectedRegionId={
@@ -702,9 +708,9 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
           />
         </div>
 
-        <div className="pointer-events-auto absolute inset-x-6 bottom-6 flex items-end justify-between gap-6">
+        <div className="pointer-events-auto absolute inset-x-6 bottom-6 flex items-end justify-between gap-5">
           {shouldShowDesktopBestRightNowTray(intensityFilter) ? (
-            <div className="max-w-xl shrink-0">
+            <div className="min-w-0 max-w-xl shrink">
               <MapBestRightNowTray
                 items={bestRightNowItems}
                 selectedLocationId={selectedLocation?.id ?? null}
@@ -712,10 +718,12 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
                 isLoading={locationsQuery.isLoading}
               />
             </div>
-          ) : null}
+          ) : (
+            <div className="min-w-0 flex-1" />
+          )}
 
           {selectedLocation ? (
-            <div className="shrink-0">
+            <div className="ml-auto min-w-0 max-w-[28rem] shrink-0">
               <MapSelectedLocationCard
                 location={selectedLocation}
                 onClose={handleClearSelectedLocation}

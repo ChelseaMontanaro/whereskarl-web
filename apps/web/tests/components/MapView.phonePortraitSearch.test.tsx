@@ -516,10 +516,10 @@ describe("MapView phone-portrait canonical location search (16.3C.1b)", () => {
     const layersGroup = layers.closest("div.absolute");
 
     expect(railGroup?.className).toContain(
-      "top-[calc(7.125rem+env(safe-area-inset-top))]",
+      "top-[calc(7.75rem+env(safe-area-inset-top))]",
     );
     expect(layersGroup?.className).toContain(
-      "top-[calc(7.125rem+env(safe-area-inset-top))]",
+      "top-[calc(7.75rem+env(safe-area-inset-top))]",
     );
   });
 

@@ -69,7 +69,7 @@ export function MapBestRightNowTray({
                     {item.locationName}
                   </span>
                   {item.score != null ? (
-                    <span className="mt-1 text-xs font-light font-semibold text-karl-gold">
+                    <span className="mt-1 text-xs font-semibold text-karl-gold">
                       {item.scoreLabel ?? `${item.score} clear`}
                     </span>
                   ) : null}

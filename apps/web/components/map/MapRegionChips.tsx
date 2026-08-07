@@ -2,6 +2,11 @@ import {
   BAY_AREA_PRODUCT_REGIONS,
   type BayAreaProductRegion,
 } from "@/lib/map/config";
+import {
+  MAP_REGION_CHIP_BASE_CLASS,
+  MAP_REGION_CHIP_PANEL_IDLE_CLASS,
+  MAP_REGION_CHIP_PANEL_SELECTED_CLASS,
+} from "@/lib/map/mapChrome";
 
 type MapRegionChipsProps = {
   selectedRegionId: string | null;
@@ -15,7 +20,7 @@ export function MapRegionChips({
   return (
     <div
       aria-label="Bay Area regions"
-      className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="flex gap-1.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
       {BAY_AREA_PRODUCT_REGIONS.map((region) => (
         <RegionChip
@@ -43,15 +48,13 @@ function RegionChip({
       type="button"
       onClick={onSelect}
       aria-pressed={isSelected}
-      className={`shrink-0 rounded-full border px-3 py-2 text-left transition-colors motion-reduce:transition-none ${
+      className={`${MAP_REGION_CHIP_BASE_CLASS} ${
         isSelected
-          ? "border-karl-gold/40 bg-karl-gold/14 text-karl-gold"
-          : "border-white/10 bg-karl-navy-glass/70 text-white/75 hover:border-white/20 hover:text-white"
+          ? MAP_REGION_CHIP_PANEL_SELECTED_CLASS
+          : MAP_REGION_CHIP_PANEL_IDLE_CLASS
       }`}
     >
-      <span className="block text-[0.625rem] font-bold uppercase tracking-[0.12em]">
-        {region.name}
-      </span>
+      {region.chipLabel}
     </button>
   );
 }

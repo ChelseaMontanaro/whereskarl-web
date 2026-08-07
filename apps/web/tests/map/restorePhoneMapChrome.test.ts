@@ -301,9 +301,7 @@ describe("phone portrait search sheet presentation (source locks)", () => {
     expect(search).not.toMatch(
       /handleSelectResult[\s\S]*setTimeout\([\s\S]*closeOverlay/,
     );
-    expect(bottomSheet).toContain(
-      "bottom-[calc(4.75rem+env(safe-area-inset-bottom))]",
-    );
+    expect(bottomSheet).toContain("PHONE_MAP_SHEET_BOTTOM_CLASS");
     expect(bottomSheet).toContain("max-h-[62dvh]");
   });
 

@@ -139,10 +139,10 @@ describe("MapView phone-portrait Map Layers placement", () => {
     const railGroup = rail.closest("div.absolute");
     expect(railGroup?.className).toContain("left-3");
     expect(railGroup?.className).toContain(
-      "top-[calc(7.125rem+env(safe-area-inset-top))]",
+      "top-[calc(7.75rem+env(safe-area-inset-top))]",
     );
     expect(group?.className).toContain(
-      "top-[calc(7.125rem+env(safe-area-inset-top))]",
+      "top-[calc(7.75rem+env(safe-area-inset-top))]",
     );
   });
 
@@ -194,7 +194,7 @@ describe("MapView phone-portrait Map Layers placement", () => {
     // offset that respects the safe area — never rendered under the nav.
     expect(sheet.className).toContain("fixed");
     expect(sheet.className).toContain("inset-x-3");
-    expect(sheet.className).toContain("bottom-[calc(5.5rem+env(safe-area-inset-bottom))]");
+    expect(sheet.className).toContain("bottom-[calc(4.75rem+env(safe-area-inset-bottom))]");
     expect(sheet.className).toContain("overflow-y-auto");
   });
 
