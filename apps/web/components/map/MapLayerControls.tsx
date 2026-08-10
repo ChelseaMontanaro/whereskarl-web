@@ -3,7 +3,17 @@
 import { useEffect, useState } from "react";
 
 import { desktopGlassCardClass } from "@/components/home/desktopGlass";
-import { PHONE_MAP_SHEET_BOTTOM_CLASS } from "@/lib/map/mapChrome";
+import {
+  MapChromeCloseButton,
+  MapChromeScrim,
+} from "@/components/map/MapChromePrimitives";
+import {
+  DESKTOP_MAP_LAYERS_CLASS,
+  PHONE_MAP_CONTROL_BUTTON_CLASS,
+  PHONE_MAP_LAYERS_SHEET_CLASS,
+  TABLET_MAP_LAYERS_CLASS,
+} from "@/lib/map/mapChrome";
+import { useEscapeToDismiss } from "@/lib/hooks/useEscapeToDismiss";
 import {
   KARL_MAP_STYLE_OPTIONS,
   type KarlMapStyleId,
@@ -208,74 +218,13 @@ function LayerPanelContent({
   );
 }
 
-function DesktopMapLayerControls({
-  mapStyle,
-  fogLayerEnabled,
-  onMapStyleChange,
-  onFogLayerChange,
-  onZoomIn,
-  onZoomOut,
-}: Omit<MapLayerControlsProps, "layout">) {
-  const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false);
-
-  return (
-    <div className="absolute right-5 top-[5.5rem] z-10 flex w-[min(100%,17rem)] flex-col items-end gap-2">
-      <div
-        className={`${desktopGlassCardClass} flex flex-col items-center p-1`}
-        aria-label="Map zoom controls"
-      >
-        <ZoomButton label="Zoom in" onClick={onZoomIn} />
-        <div className="my-0.5 h-px w-6 bg-white/10" aria-hidden="true" />
-        <ZoomButton label="Zoom out" onClick={onZoomOut} />
-      </div>
-
-      {isDesktopCollapsed ? (
-        <button
-          type="button"
-          aria-expanded={false}
-          aria-controls="map-layer-panel-desktop"
-          onClick={() => setIsDesktopCollapsed(false)}
-          className={`${desktopGlassCardClass} flex items-center gap-2 px-3 py-2 text-xs font-semibold text-white/80 transition-colors hover:text-karl-gold motion-reduce:transition-none`}
-        >
-          <LayersIcon />
-          Layers
-        </button>
-      ) : (
-        <div
-          id="map-layer-panel-desktop"
-          className={`${desktopGlassCardClass} w-full p-3 shadow-xl`}
-        >
-          <div className="flex items-start justify-between gap-3">
-            <div className="space-y-1">
-              <p className="text-sm font-semibold text-white">Map Layers</p>
-              <p className="text-xs text-white/55">Customize the Karl map</p>
-            </div>
-            <button
-              type="button"
-              aria-label="Collapse layers panel"
-              onClick={() => setIsDesktopCollapsed(true)}
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/12 bg-white/[0.04] text-sm text-white/65 transition-colors hover:border-white/20 hover:text-white motion-reduce:transition-none"
-            >
-              ×
-            </button>
-          </div>
-          <LayerPanelContent
-            mapStyle={mapStyle}
-            fogLayerEnabled={fogLayerEnabled}
-            onMapStyleChange={onMapStyleChange}
-            onFogLayerChange={onFogLayerChange}
-            vertical
-          />
-        </div>
-      )}
-    </div>
-  );
-}
-
-// Tablet immersive controls only. The phone-portrait Fog Layer trigger is the
-// canonical `MapPhonePortraitLayersControl` below, positioned by MapView inside
-// the shared phone-portrait control group above the Fog Intensity rail.
-function ImmersiveMapLayerControls({
+/**
+ * Shared collapsible Layers + zoom chrome for desktop and tablet immersive.
+ * Placement tokens differ by form factor; panel contents stay identical.
+ * Phone uses `MapPhonePortraitLayersControl` (sheet UX is intentional).
+ */
+function CollapsibleMapLayerChrome({
+  placement,
   mapStyle,
   fogLayerEnabled,
   onMapStyleChange,
@@ -283,42 +232,64 @@ function ImmersiveMapLayerControls({
   onZoomIn,
   onZoomOut,
   onImmersivePanelOpenChange,
-}: Omit<MapLayerControlsProps, "layout">) {
-  const [isLayersCollapsed, setIsLayersCollapsed] = useState(false);
+}: Omit<MapLayerControlsProps, "layout"> & {
+  placement: "desktop" | "immersive";
+}) {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const isImmersive = placement === "immersive";
+  const panelId =
+    placement === "desktop"
+      ? "map-layer-panel-desktop"
+      : "map-layer-panel-immersive";
 
   useEffect(() => {
-    onImmersivePanelOpenChange?.(!isLayersCollapsed);
-  }, [isLayersCollapsed, onImmersivePanelOpenChange]);
-
-  const openLayersPanel = () => setIsLayersCollapsed(false);
-  const closeLayersPanel = () => setIsLayersCollapsed(true);
+    if (!isImmersive) {
+      return;
+    }
+    onImmersivePanelOpenChange?.(!isCollapsed);
+  }, [isCollapsed, isImmersive, onImmersivePanelOpenChange]);
 
   return (
-    <div className="absolute right-3 top-3 z-20 flex w-[min(17rem,calc(100%-0.75rem))] max-w-full flex-col items-stretch gap-1.5 sm:top-4 sm:gap-2 md:top-[4.5rem]">
+    <div
+      className={
+        placement === "desktop"
+          ? DESKTOP_MAP_LAYERS_CLASS
+          : TABLET_MAP_LAYERS_CLASS
+      }
+    >
       <div
-        className={`${desktopGlassCardClass} flex flex-col items-center p-0.5 sm:p-1`}
+        className={`${desktopGlassCardClass} flex flex-col items-center ${
+          isImmersive ? "p-0.5 sm:p-1" : "p-1"
+        }`}
         aria-label="Map zoom controls"
       >
         <ZoomButton label="Zoom in" onClick={onZoomIn} />
-        <div className="my-0.5 h-px w-5 bg-white/10 sm:w-6" aria-hidden="true" />
+        <div
+          className={`my-0.5 h-px bg-white/10 ${
+            isImmersive ? "w-5 sm:w-6" : "w-6"
+          }`}
+          aria-hidden="true"
+        />
         <ZoomButton label="Zoom out" onClick={onZoomOut} />
       </div>
 
-      {isLayersCollapsed ? (
+      {isCollapsed ? (
         <button
           type="button"
           aria-expanded={false}
-          aria-controls="map-layer-panel-immersive"
-          aria-label="Open map layers"
-          onClick={openLayersPanel}
-          className={`${desktopGlassCardClass} flex items-center gap-2 px-2.5 py-2 text-xs font-semibold text-white/80 transition-colors hover:text-karl-gold motion-reduce:transition-none sm:px-3`}
+          aria-controls={panelId}
+          aria-label={isImmersive ? "Open map layers" : undefined}
+          onClick={() => setIsCollapsed(false)}
+          className={`${desktopGlassCardClass} flex items-center gap-2 text-xs font-semibold text-white/80 transition-colors hover:text-karl-gold motion-reduce:transition-none ${
+            isImmersive ? "px-2.5 py-2 sm:px-3" : "px-3 py-2"
+          }`}
         >
-          <LayersIcon className="h-4 w-4" />
-          <span>Layers</span>
+          <LayersIcon className={isImmersive ? "h-4 w-4" : undefined} />
+          {isImmersive ? <span>Layers</span> : "Layers"}
         </button>
       ) : (
         <div
-          id="map-layer-panel-immersive"
+          id={panelId}
           className={`${desktopGlassCardClass} w-full p-3 shadow-xl`}
         >
           <div className="flex items-start justify-between gap-3">
@@ -326,14 +297,11 @@ function ImmersiveMapLayerControls({
               <p className="text-sm font-semibold text-white">Map Layers</p>
               <p className="text-xs text-white/55">Customize the Karl map</p>
             </div>
-            <button
-              type="button"
-              aria-label="Collapse layers panel"
-              onClick={closeLayersPanel}
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/12 bg-white/[0.04] text-sm text-white/65 transition-colors hover:border-white/20 hover:text-white motion-reduce:transition-none"
-            >
-              ×
-            </button>
+            <MapChromeCloseButton
+              label="Collapse layers panel"
+              onClick={() => setIsCollapsed(true)}
+              size="compact"
+            />
           </div>
           <LayerPanelContent
             mapStyle={mapStyle}
@@ -354,10 +322,6 @@ type MapPhonePortraitLayersControlProps = Pick<
 > & {
   onOpenChange?: (isOpen: boolean) => void;
 };
-
-/** Compact circular glass treatment shared by phone-portrait map controls. */
-const PHONE_MAP_CONTROL_BUTTON_CLASS =
-  "flex h-11 w-11 items-center justify-center rounded-full border border-white/12 bg-black/40 shadow-[0_4px_20px_rgba(0,0,0,0.24)] backdrop-blur-md transition-colors hover:border-karl-gold/30 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karl-gold/50";
 
 /**
  * Touch-tuned phone-portrait Map Layers sheet body. Consumes the canonical
@@ -465,20 +429,7 @@ export function MapPhonePortraitLayersControl({
     onOpenChange?.(isOpen);
   }, [isOpen, onOpenChange]);
 
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setIsOpen(false);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen]);
+  useEscapeToDismiss(isOpen, () => setIsOpen(false));
 
   return (
     <>
@@ -498,11 +449,9 @@ export function MapPhonePortraitLayersControl({
 
       {isOpen ? (
         <>
-          <button
-            type="button"
-            aria-label="Dismiss map layers"
-            className="fixed inset-0 z-30 bg-black/55 backdrop-blur-[1px] motion-reduce:transition-none"
-            onClick={() => setIsOpen(false)}
+          <MapChromeScrim
+            label="Dismiss map layers"
+            onDismiss={() => setIsOpen(false)}
           />
 
           <div
@@ -510,21 +459,18 @@ export function MapPhonePortraitLayersControl({
             role="dialog"
             aria-modal="true"
             aria-label="Map Layers"
-            className={`fixed inset-x-3 ${PHONE_MAP_SHEET_BOTTOM_CLASS} z-40 mx-auto max-h-[calc(100dvh-12rem-env(safe-area-inset-top)-env(safe-area-inset-bottom))] max-w-[26rem] overflow-y-auto overscroll-contain rounded-3xl border border-white/12 bg-black/70 p-4 shadow-[0_-8px_40px_rgba(0,0,0,0.45)] backdrop-blur-xl`}
+            className={PHONE_MAP_LAYERS_SHEET_CLASS}
           >
             <div className="flex items-start justify-between gap-3">
               <div className="space-y-0.5">
                 <p className="text-base font-semibold text-white">Map Layers</p>
                 <p className="text-xs text-white/55">Customize the Karl map</p>
               </div>
-              <button
-                type="button"
-                aria-label="Close map layers"
+              <MapChromeCloseButton
+                label="Close map layers"
                 onClick={() => setIsOpen(false)}
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/12 bg-white/[0.06] text-base text-white/70 transition-colors hover:border-white/25 hover:text-white motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karl-gold/50"
-              >
-                ×
-              </button>
+                size="panel"
+              />
             </div>
 
             <PhoneLayersSheetBody
@@ -554,7 +500,8 @@ export function MapLayerControls({
 
   if (layout === "desktop") {
     return (
-      <DesktopMapLayerControls
+      <CollapsibleMapLayerChrome
+        placement="desktop"
         mapStyle={mapStyle}
         fogLayerEnabled={fogLayerEnabled}
         onMapStyleChange={onMapStyleChange}
@@ -567,7 +514,8 @@ export function MapLayerControls({
 
   if (layout === "immersive") {
     return (
-      <ImmersiveMapLayerControls
+      <CollapsibleMapLayerChrome
+        placement="immersive"
         mapStyle={mapStyle}
         fogLayerEnabled={fogLayerEnabled}
         onMapStyleChange={onMapStyleChange}

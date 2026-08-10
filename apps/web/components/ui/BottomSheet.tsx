@@ -11,7 +11,7 @@ import {
   type ReactNode,
 } from "react";
 
-import { PHONE_MAP_SHEET_BOTTOM_CLASS } from "@/lib/map/mapChrome";
+import { PHONE_MAP_SHEET_CONTAINER_CLASS } from "@/lib/map/mapChrome";
 
 /**
  * Canonical map bottom sheet.
@@ -72,8 +72,7 @@ export type BottomSheetProps = {
   bodyClassName?: string;
 };
 
-const SHEET_CONTAINER_CLASS =
-  `pointer-events-auto fixed inset-x-3 ${PHONE_MAP_SHEET_BOTTOM_CLASS} z-40 mx-auto flex max-w-[26rem] flex-col overflow-hidden rounded-t-[1.75rem] rounded-b-3xl border border-white/12 bg-black/70 shadow-[0_-8px_40px_rgba(0,0,0,0.45)] backdrop-blur-xl`;
+const SHEET_CONTAINER_CLASS = `${PHONE_MAP_SHEET_CONTAINER_CLASS} flex flex-col overflow-hidden`;
 
 export function BottomSheet({
   ariaLabel,

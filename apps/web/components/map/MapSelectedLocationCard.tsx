@@ -3,9 +3,11 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 
 import { KarlLogo } from "@/components/brand/KarlLogo";
+import { MapChromeCloseButton } from "@/components/map/MapChromePrimitives";
 import { MapLocationConditionIcon } from "@/components/map/MapLocationConditionIcon";
 import { BottomSheet } from "@/components/ui/BottomSheet";
 import { desktopGlassCardClass } from "@/components/home/desktopGlass";
+import { useEscapeToDismiss } from "@/lib/hooks/useEscapeToDismiss";
 import {
   getFogIntensity,
   getFogIntensityLabel,
@@ -896,20 +898,7 @@ function PhonePortraitSelectedCard({
     return () => window.clearTimeout(timer);
   }, [location.id]);
 
-  useEffect(() => {
-    if (!onClose) {
-      return;
-    }
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
+  useEscapeToDismiss(Boolean(onClose), onClose);
 
   const header = (
     <>
@@ -940,14 +929,11 @@ function PhonePortraitSelectedCard({
             onToggle={handleToggleFavorite}
           />
           {showCloseButton && onClose ? (
-            <button
-              type="button"
+            <MapChromeCloseButton
+              label="Close selected location"
               onClick={onClose}
-              aria-label="Close selected location"
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/12 bg-white/[0.05] text-base leading-none text-white/60 transition-colors hover:border-white/25 hover:text-white motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karl-gold/50"
-            >
-              ×
-            </button>
+              size="sheet"
+            />
           ) : null}
         </div>
       </div>
@@ -1254,20 +1240,7 @@ function DesktopSelectedCard({
 
   const { isFavorite, handleToggleFavorite } = useFavoriteToggle(location.id);
 
-  useEffect(() => {
-    if (!onClose) {
-      return;
-    }
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
+  useEscapeToDismiss(Boolean(onClose), onClose);
 
   return (
     <article
@@ -1275,14 +1248,11 @@ function DesktopSelectedCard({
       aria-label={`Selected location: ${location.name}`}
     >
       {showCloseButton && onClose ? (
-        <button
-          type="button"
+        <MapChromeCloseButton
+          label="Close selected location"
           onClick={onClose}
-          aria-label="Close selected location"
-          className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full text-base leading-none text-white/45 transition-colors hover:bg-white/[0.06] hover:text-white/75 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-karl-gold/50"
-        >
-          ×
-        </button>
+          size="ghost"
+        />
       ) : null}
 
       <div className="flex w-full items-center gap-3 pr-7">

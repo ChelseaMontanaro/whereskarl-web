@@ -1,10 +1,5 @@
 import { desktopGlassCardClass } from "@/components/home/desktopGlass";
-import { BAY_AREA_PRODUCT_REGIONS } from "@/lib/map/config";
-import {
-  MAP_REGION_CHIP_BASE_CLASS,
-  MAP_REGION_CHIP_PANEL_IDLE_CLASS,
-  MAP_REGION_CHIP_PANEL_SELECTED_CLASS,
-} from "@/lib/map/mapChrome";
+import { MapRegionChips } from "@/components/map/MapRegionChips";
 
 const MAP_CONDITIONS_SUBTITLE =
   "Explore live fog & clear skies around the Bay.";
@@ -48,30 +43,13 @@ export function MapConditionsPanel({
       </p>
 
       {onSelectRegion ? (
-        <div
-          aria-label="Bay Area regions"
+        <MapRegionChips
+          selectedRegionId={selectedRegionId}
+          onSelectRegion={onSelectRegion}
+          variant="panel"
+          layout="wrap"
           className={`flex flex-wrap gap-1.5 ${compact ? "mt-2" : "mt-3"}`}
-        >
-          {BAY_AREA_PRODUCT_REGIONS.map((region) => {
-            const isSelected = selectedRegionId === region.id;
-
-            return (
-              <button
-                key={region.id}
-                type="button"
-                aria-pressed={isSelected}
-                onClick={() => onSelectRegion(region.id)}
-                className={`${MAP_REGION_CHIP_BASE_CLASS} ${
-                  isSelected
-                    ? MAP_REGION_CHIP_PANEL_SELECTED_CLASS
-                    : MAP_REGION_CHIP_PANEL_IDLE_CLASS
-                }`}
-              >
-                {region.chipLabel}
-              </button>
-            );
-          })}
-        </div>
+        />
       ) : null}
     </div>
   );

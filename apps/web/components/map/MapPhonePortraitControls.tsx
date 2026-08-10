@@ -9,12 +9,8 @@ import {
   type KeyboardEvent,
 } from "react";
 
+import { MapRegionChip, MapRegionChips } from "@/components/map/MapRegionChips";
 import { BAY_AREA_PRODUCT_REGIONS } from "@/lib/map/config";
-import {
-  MAP_REGION_CHIP_BASE_CLASS,
-  MAP_REGION_CHIP_PHONE_IDLE_CLASS,
-  MAP_REGION_CHIP_PHONE_SELECTED_CLASS,
-} from "@/lib/map/mapChrome";
 import {
   filterCanonicalLocationsBySearch,
   type CanonicalSearchableLocation,
@@ -389,32 +385,22 @@ export function MapPhonePortraitControls({
           className="relative w-full overflow-x-auto scroll-px-1 pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           <div className="flex w-max min-w-full items-center justify-center gap-1.5 px-0.5">
-            {BAY_AREA_PRODUCT_REGIONS.map((region) => {
-              const isSelected = selectedRegionId === region.id;
-
-              return (
-                <button
-                  key={region.id}
-                  ref={(node) => {
-                    if (node) {
-                      chipRefs.current.set(region.id, node);
-                    } else {
-                      chipRefs.current.delete(region.id);
-                    }
-                  }}
-                  type="button"
-                  aria-pressed={isSelected}
-                  onClick={() => onSelectRegion(region.id)}
-                  className={`${MAP_REGION_CHIP_BASE_CLASS} ${
-                    isSelected
-                      ? MAP_REGION_CHIP_PHONE_SELECTED_CLASS
-                      : MAP_REGION_CHIP_PHONE_IDLE_CLASS
-                  }`}
-                >
-                  {region.chipLabel}
-                </button>
-              );
-            })}
+            {BAY_AREA_PRODUCT_REGIONS.map((region) => (
+              <MapRegionChip
+                key={region.id}
+                region={region}
+                isSelected={selectedRegionId === region.id}
+                onSelect={() => onSelectRegion(region.id)}
+                variant="phone"
+                chipRef={(node) => {
+                  if (node) {
+                    chipRefs.current.set(region.id, node);
+                  } else {
+                    chipRefs.current.delete(region.id);
+                  }
+                }}
+              />
+            ))}
           </div>
         </div>
       </div>
@@ -432,27 +418,12 @@ export function MapPhonePortraitControls({
         </h1>
       </div>
 
-      <div aria-label="Bay Area regions" className="flex flex-wrap gap-1.5">
-        {BAY_AREA_PRODUCT_REGIONS.map((region) => {
-          const isSelected = selectedRegionId === region.id;
-
-          return (
-            <button
-              key={region.id}
-              type="button"
-              aria-pressed={isSelected}
-              onClick={() => onSelectRegion(region.id)}
-              className={`${MAP_REGION_CHIP_BASE_CLASS} ${
-                isSelected
-                  ? MAP_REGION_CHIP_PHONE_SELECTED_CLASS
-                  : MAP_REGION_CHIP_PHONE_IDLE_CLASS
-              }`}
-            >
-              {region.chipLabel}
-            </button>
-          );
-        })}
-      </div>
+      <MapRegionChips
+        selectedRegionId={selectedRegionId}
+        onSelectRegion={onSelectRegion}
+        variant="phone"
+        layout="wrap"
+      />
     </div>
   );
 }

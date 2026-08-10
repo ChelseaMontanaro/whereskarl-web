@@ -10,12 +10,11 @@ import {
   type BayAreaMapHandle,
 } from "@/components/map/BayAreaMap";
 import { MapBestRightNowTray } from "@/components/map/MapBestRightNowTray";
-import { MapConditionsPanel } from "@/components/map/MapConditionsPanel";
 import { MapPhonePortraitControls } from "@/components/map/MapPhonePortraitControls";
 import { MapPhonePortraitFogRail } from "@/components/map/MapPhonePortraitFogRail";
 import { MapPhonePortraitLayersControl } from "@/components/map/MapLayerControls";
-import { MapFogLegend } from "@/components/map/MapFogLegend";
 import { MapSelectedLocationCard } from "@/components/map/MapSelectedLocationCard";
+import { MapTopConditionsStack } from "@/components/map/MapTopConditionsStack";
 import { GlassCard } from "@/components/ui/GlassCard";
 import {
   getBestSunshine,
@@ -33,8 +32,18 @@ import {
   isBayAreaProductRegionId,
 } from "@/lib/map/config";
 import {
-  PHONE_MAP_SHEET_BOTTOM_CLASS,
-  TABLET_MAP_BOTTOM_STACK_CLASS,
+  DESKTOP_MAP_BOTTOM_BAR_CLASS,
+  DESKTOP_MAP_TOP_LEFT_CLASS,
+  MAP_ATTRIBUTION_COPY,
+  MAP_ATTRIBUTION_DESKTOP_CLASS,
+  MAP_ATTRIBUTION_PHONE_CLASS,
+  MAP_ATTRIBUTION_TABLET_CLASS,
+  PHONE_MAP_CONTROL_CLUSTER_TOP_CLASS,
+  PHONE_MAP_SHEET_CONTAINER_CLASS,
+  PHONE_MAP_TOP_CHROME_CLASS,
+  TABLET_MAP_BOTTOM_STACK_WRAPPER_CLASS,
+  TABLET_MAP_TOP_LEFT_CLASS,
+  shouldShowMapTopChrome,
 } from "@/lib/map/mapChrome";
 import {
   mapBestRightNowTrayItems,
@@ -512,12 +521,15 @@ function MobileMapView({ state }: { state: MapViewModel }) {
           }`}
         />
 
-        {!isLayersPanelOpen || isPhonePortrait ? (
+        {shouldShowMapTopChrome(
+          isPhonePortrait ? "phone" : "tablet",
+          isLayersPanelOpen,
+        ) ? (
           <div
             className={`pointer-events-auto absolute flex flex-col transition-opacity motion-reduce:transition-none ${
               isPhonePortrait
-                ? "inset-x-3 top-[calc(1.375rem+env(safe-area-inset-top))] gap-0"
-                : "left-3 top-3 max-w-[min(100%,20rem)] gap-2 sm:left-4 sm:top-4 sm:max-w-xs md:top-[4.5rem]"
+                ? PHONE_MAP_TOP_CHROME_CLASS
+                : TABLET_MAP_TOP_LEFT_CLASS
             } opacity-100`}
           >
             {isPhonePortrait ? (
@@ -530,20 +542,15 @@ function MobileMapView({ state }: { state: MapViewModel }) {
                 onClearSelectedLocation={handleSearchClearSelectedLocation}
               />
             ) : (
-              <>
-                <MapConditionsPanel
-                  isLoading={currentQuery.isLoading && !currentQuery.data}
-                  selectedRegionId={
-                    selectedLocation ? null : mapQuery.activeRegionId
-                  }
-                  onSelectRegion={handleSelectRegion}
-                />
-                <MapFogLegend
-                  layout="desktop-stack"
-                  activeIntensity={intensityFilter}
-                  onSelectIntensity={handleSelectIntensity}
-                />
-              </>
+              <MapTopConditionsStack
+                isLoading={currentQuery.isLoading && !currentQuery.data}
+                selectedRegionId={
+                  selectedLocation ? null : mapQuery.activeRegionId
+                }
+                onSelectRegion={handleSelectRegion}
+                activeIntensity={intensityFilter}
+                onSelectIntensity={handleSelectIntensity}
+              />
             )}
             <MapQueryWarnings
               unknownLocationId={unknownLocationId}
@@ -568,7 +575,9 @@ function MobileMapView({ state }: { state: MapViewModel }) {
                 so the rail top was 6rem + 1.125rem. Phase 18: region chips use
                 a 40px (2.5rem) touch floor (+0.625rem), so rail/Layers sit at
                 7.75rem. */}
-            <div className="pointer-events-none absolute left-3 top-[calc(7.75rem+env(safe-area-inset-top))] flex flex-col">
+            <div
+              className={`pointer-events-none absolute left-3 ${PHONE_MAP_CONTROL_CLUSTER_TOP_CLASS} flex flex-col`}
+            >
               <div className="pointer-events-auto flex flex-col items-start gap-2">
                 <MapPhonePortraitFogRail
                   activeIntensity={intensityFilter}
@@ -581,7 +590,9 @@ function MobileMapView({ state }: { state: MapViewModel }) {
                 chips, deliberately separate from the Fog Intensity rail.
                 Phase 16.3C.1a / 18: same top as the fog rail so the
                 chip→Layers gap stays aligned. */}
-            <div className="pointer-events-auto absolute right-3 top-[calc(7.75rem+env(safe-area-inset-top))] flex flex-col items-end">
+            <div
+              className={`pointer-events-auto absolute right-3 ${PHONE_MAP_CONTROL_CLUSTER_TOP_CLASS} flex flex-col items-end`}
+            >
               <MapPhonePortraitLayersControl
                 mapStyle={mapStyle}
                 fogLayerEnabled={fogLayerEnabled}
@@ -605,12 +616,12 @@ function MobileMapView({ state }: { state: MapViewModel }) {
               onClose={handleClearSelectedLocation}
             />
           ) : locationsQuery.isLoading ? (
-            <div className={`pointer-events-auto fixed inset-x-3 ${PHONE_MAP_SHEET_BOTTOM_CLASS} z-40 mx-auto max-w-[26rem] rounded-t-[1.75rem] rounded-b-3xl border border-white/12 bg-black/70 px-4 py-3 shadow-[0_-8px_40px_rgba(0,0,0,0.45)] backdrop-blur-xl`}>
+            <div className={`${PHONE_MAP_SHEET_CONTAINER_CLASS} px-4 py-3`}>
               <p className="text-xs text-white/55">Finding the clearest spot…</p>
             </div>
           ) : null
         ) : (
-          <div className={`pointer-events-auto absolute inset-x-3 ${TABLET_MAP_BOTTOM_STACK_CLASS} flex flex-col items-stretch gap-2.5 sm:inset-x-4`}>
+          <div className={TABLET_MAP_BOTTOM_STACK_WRAPPER_CLASS}>
             {shouldShowDesktopBestRightNowTray(intensityFilter) ? (
               <MapBestRightNowTray
                 items={bestRightNowItems}
@@ -633,17 +644,11 @@ function MobileMapView({ state }: { state: MapViewModel }) {
       <p
         className={
           isPhonePortrait
-            ? // Phone portrait: stay anchored in the map canvas bottom-right
-              // (cleared of the bottom nav only). Type treatment lives in
-              // phone-portrait-map.web.css. z-10 keeps the credit under the
-              // map overlay stacking context (z-20) so the Selected Location
-              // sheet covers it in place rather than lifting it. Tablet/desktop
-              // keep their existing classes.
-              "karl-map-attrib karl-map-attrib--phone pointer-events-none absolute z-10"
-            : "pointer-events-none absolute bottom-[calc(5rem+env(safe-area-inset-bottom))] right-3 z-20 text-[0.6rem] text-white/25 sm:right-4"
+            ? MAP_ATTRIBUTION_PHONE_CLASS
+            : MAP_ATTRIBUTION_TABLET_CLASS
         }
       >
-        Map data © OpenStreetMap contributors · CARTO
+        {MAP_ATTRIBUTION_COPY}
       </p>
     </div>
   );
@@ -688,27 +693,30 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
       />
 
       <div className="pointer-events-none absolute inset-0 z-20">
-        <div className="pointer-events-auto absolute left-6 top-[5.5rem] flex w-full max-w-sm flex-col gap-2.5">
-          <MapConditionsPanel
+        <div
+          className={`pointer-events-auto absolute flex flex-col ${DESKTOP_MAP_TOP_LEFT_CLASS}`}
+        >
+          <MapTopConditionsStack
             isLoading={currentQuery.isLoading && !currentQuery.data}
             selectedRegionId={
               selectedLocation ? null : mapQuery.activeRegionId
             }
             onSelectRegion={handleSelectRegion}
-          />
-          <MapFogLegend
-            layout="desktop-stack"
             activeIntensity={intensityFilter}
             onSelectIntensity={handleSelectIntensity}
-          />
-          <MapQueryWarnings
-            unknownLocationId={unknownLocationId}
-            unknownRegionId={mapQuery.unknownRegionId}
-            variant="desktop"
+            warnings={
+              <MapQueryWarnings
+                unknownLocationId={unknownLocationId}
+                unknownRegionId={mapQuery.unknownRegionId}
+                variant="desktop"
+              />
+            }
           />
         </div>
 
-        <div className="pointer-events-auto absolute inset-x-6 bottom-6 flex items-end justify-between gap-5">
+        <div
+          className={`pointer-events-auto absolute flex ${DESKTOP_MAP_BOTTOM_BAR_CLASS}`}
+        >
           {shouldShowDesktopBestRightNowTray(intensityFilter) ? (
             <div className="min-w-0 max-w-xl shrink">
               <MapBestRightNowTray
@@ -733,9 +741,7 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
         </div>
       </div>
 
-      <p className="pointer-events-none absolute bottom-2 right-4 z-20 text-[0.6rem] text-white/25">
-        Map data © OpenStreetMap contributors · CARTO
-      </p>
+      <p className={MAP_ATTRIBUTION_DESKTOP_CLASS}>{MAP_ATTRIBUTION_COPY}</p>
     </div>
   );
 }

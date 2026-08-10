@@ -51,7 +51,7 @@ describe("root viewport safe-area activation", () => {
 
   it("keeps the approved phone-portrait search header top locked to safe-area", () => {
     const source = readFileSync(
-      join(process.cwd(), "components/map/MapView.tsx"),
+      join(process.cwd(), "lib/map/mapChrome.ts"),
       "utf8",
     );
 
@@ -100,6 +100,10 @@ describe("root viewport safe-area activation", () => {
   });
 
   it("locks the combined phone map top and bottom safe-area control model", () => {
+    const mapChrome = readFileSync(
+      join(process.cwd(), "lib/map/mapChrome.ts"),
+      "utf8",
+    );
     const mapView = readFileSync(
       join(process.cwd(), "components/map/MapView.tsx"),
       "utf8",
@@ -114,16 +118,18 @@ describe("root viewport safe-area activation", () => {
     );
     const mapPage = readFileSync(join(process.cwd(), "app/map/page.tsx"), "utf8");
 
-    expect(mapView).toContain(
+    expect(mapChrome).toContain(
       "top-[calc(1.375rem+env(safe-area-inset-top))]",
     );
     expect(appShell).toContain(
       "pb-[max(env(safe-area-inset-bottom,0px),0.5rem)]",
     );
     expect(searchControls).toContain("mx-1");
-    expect(mapView).toContain(
+    expect(mapChrome).toContain(
       "top-[calc(7.75rem+env(safe-area-inset-top))]",
     );
+    expect(mapView).toContain("PHONE_MAP_TOP_CHROME_CLASS");
+    expect(mapView).toContain("PHONE_MAP_CONTROL_CLUSTER_TOP_CLASS");
     expect(mapView).toContain("restorePhoneMapChrome()");
     expect(mapView).toContain("key={selectedLocation.id}");
     expect(mapPage).toContain("data-karl-phone-map-root");

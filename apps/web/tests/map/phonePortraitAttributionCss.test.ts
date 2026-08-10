@@ -77,8 +77,13 @@ describe("phone-portrait attribution positioning contract", () => {
   it("keeps phone attribution under the map overlay stacking context", () => {
     // Overlay is z-20; phone attrib must be z-10 so the Selected Location sheet
     // paints over the credit instead of the credit floating on top of the sheet.
-    expect(mapViewSource).toMatch(
-      /karl-map-attrib karl-map-attrib--phone pointer-events-none absolute z-10/,
+    const mapChromeSource = readFileSync(
+      fileURLToPath(new URL("../../lib/map/mapChrome.ts", import.meta.url)),
+      "utf8",
     );
+    expect(mapChromeSource).toContain(
+      'MAP_ATTRIBUTION_PHONE_CLASS =\n  "karl-map-attrib karl-map-attrib--phone pointer-events-none absolute z-10"',
+    );
+    expect(mapViewSource).toContain("MAP_ATTRIBUTION_PHONE_CLASS");
   });
 });

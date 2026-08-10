@@ -36,4 +36,30 @@ describe("MapRegionChips", () => {
       expect(button.className).toContain("px-3");
     }
   });
+
+  it("keeps phone selected chips filled gold and panel chips outlined", () => {
+    const { rerender } = render(
+      <MapRegionChips
+        selectedRegionId="san-francisco"
+        onSelectRegion={vi.fn()}
+        variant="phone"
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "SF" }).className).toContain(
+      "bg-karl-gold",
+    );
+
+    rerender(
+      <MapRegionChips
+        selectedRegionId="san-francisco"
+        onSelectRegion={vi.fn()}
+        variant="panel"
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "SF" }).className).toContain(
+      "bg-karl-gold/14",
+    );
+  });
 });
