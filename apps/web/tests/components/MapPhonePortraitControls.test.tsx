@@ -10,7 +10,25 @@ describe("MapPhonePortraitControls", () => {
     cleanup();
   });
 
-  it("renders a compact header without the descriptive subtitle", () => {
+  it("renders phone portrait search and region chips", () => {
+    render(
+      <MapPhonePortraitControls
+        selectedRegionId="san-francisco"
+        onSelectRegion={vi.fn()}
+        isPhonePortrait
+      />,
+    );
+
+    expect(
+      screen.getByTestId("map-phone-portrait-search-bar"),
+    ).toBeInTheDocument();
+    for (const label of ["SF", "North Bay", "East Bay", "South Bay", "Peninsula"]) {
+      expect(screen.getByRole("button", { name: label })).toBeInTheDocument();
+    }
+    expect(screen.queryByRole("button", { name: "Foggy" })).not.toBeInTheDocument();
+  });
+
+  it("returns null outside phone portrait", () => {
     const { container } = render(
       <MapPhonePortraitControls
         selectedRegionId={null}
@@ -18,28 +36,7 @@ describe("MapPhonePortraitControls", () => {
       />,
     );
 
-    expect(screen.getByText("Karl around the Bay")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Bay Area conditions" }))
-      .toBeInTheDocument();
-    expect(
-      screen.queryByText("Explore live fog & clear skies around the Bay."),
-    ).not.toBeInTheDocument();
-    expect(container.querySelector(".rounded-2xl.border")).toBeNull();
-  });
-
-  it("renders compact region pills without fog controls", () => {
-    render(
-      <MapPhonePortraitControls
-        selectedRegionId="san-francisco"
-        onSelectRegion={vi.fn()}
-      />,
-    );
-
-    for (const label of ["SF", "North Bay", "East Bay", "South Bay", "Peninsula"]) {
-      expect(screen.getByRole("button", { name: label })).toBeInTheDocument();
-    }
-
-    expect(screen.queryByRole("button", { name: "Foggy" })).not.toBeInTheDocument();
+    expect(container).toBeEmptyDOMElement();
   });
 
   it("scrolls the selected phone portrait chip into view", () => {
@@ -434,6 +431,7 @@ describe("MapPhonePortraitControls", () => {
       <MapPhonePortraitControls
         selectedRegionId={null}
         onSelectRegion={onSelectRegion}
+        isPhonePortrait
       />,
     );
 

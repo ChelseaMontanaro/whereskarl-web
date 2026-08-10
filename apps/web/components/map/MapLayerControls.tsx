@@ -53,25 +53,9 @@ function ZoomButton({
   );
 }
 
-function LayersIcon({ className = "h-4 w-4" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      className={className}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-    >
-      <path d="M4 6h16M4 12h16M4 18h10" strokeLinecap="round" />
-    </svg>
-  );
-}
-
 /**
  * Recognizable stacked-layers glyph (offset diamond layers, Material "layers"
- * shape). Used by the phone-portrait Map Layers trigger in place of the
- * hamburger `LayersIcon`; desktop/tablet keep `LayersIcon` unchanged.
+ * shape). Shared by phone sheet trigger and desktop/tablet collapsed Layers.
  */
 function StackedLayersIcon({ className = "h-5 w-5" }: { className?: string }) {
   return (
@@ -148,14 +132,14 @@ function LayerPanelContent({
 > & { vertical?: boolean }) {
   return (
     <div className={vertical ? "space-y-3" : "mt-4 space-y-4"}>
-      <section aria-label="Map style">
+      <section aria-label="Map type">
         <p className="text-[0.625rem] font-bold uppercase tracking-[0.14em] text-white/45">
-          Map Style
+          Map type
         </p>
         {vertical ? (
           <div
             role="radiogroup"
-            aria-label="Map style"
+            aria-label="Map type"
             className="mt-2 space-y-1.5"
           >
             {KARL_MAP_STYLE_OPTIONS.map((option) => {
@@ -205,9 +189,9 @@ function LayerPanelContent({
         )}
       </section>
 
-      <section aria-label="Overlays">
+      <section aria-label="Details">
         <p className="text-[0.625rem] font-bold uppercase tracking-[0.14em] text-white/45">
-          Overlays
+          Details
         </p>
         <FogLayerToggle
           enabled={fogLayerEnabled}
@@ -284,8 +268,8 @@ function CollapsibleMapLayerChrome({
             isImmersive ? "px-2.5 py-2 sm:px-3" : "px-3 py-2"
           }`}
         >
-          <LayersIcon className={isImmersive ? "h-4 w-4" : undefined} />
-          {isImmersive ? <span>Layers</span> : "Layers"}
+          <StackedLayersIcon className="h-4 w-4" />
+          <span>Layers</span>
         </button>
       ) : (
         <div

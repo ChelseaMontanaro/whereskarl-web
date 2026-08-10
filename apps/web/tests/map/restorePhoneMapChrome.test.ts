@@ -263,6 +263,10 @@ describe("phone portrait search sheet presentation (source locks)", () => {
       "utf8",
     );
     const search = readFileSync(
+      join(process.cwd(), "components/map/MapLocationSearchBar.tsx"),
+      "utf8",
+    );
+    const phoneControls = readFileSync(
       join(process.cwd(), "components/map/MapPhonePortraitControls.tsx"),
       "utf8",
     );
@@ -283,6 +287,8 @@ describe("phone portrait search sheet presentation (source locks)", () => {
     expect(mapView).toContain("key={selectedLocation.id}");
     expect(mapView).toContain("restorePhoneMapChrome()");
     expect(mapView).toContain("subscribePhoneMapChromeViewportRecovery()");
+    expect(phoneControls).toContain('testIdPrefix="map-phone-portrait-search"');
+    expect(phoneControls).toContain("restoreChrome");
     expect(search).toContain("restorePhoneMapChrome()");
     expect(search).toContain("onBlur=");
     expect(search).not.toContain("max-h-[62dvh]");
@@ -293,7 +299,7 @@ describe("phone portrait search sheet presentation (source locks)", () => {
     expect(restore).not.toContain("paddingBottom");
     // Selection must close the overlay synchronously — no deferred close.
     expect(search).toMatch(
-      /closeOverlay\(\);\s*inputRef\.current\?\.blur\(\);\s*restorePhoneMapChrome\(\);\s*onSelectLocation\(location\.id\);/,
+      /closeOverlay\(\);\s*inputRef\.current\?\.blur\(\);\s*restoreChromeIfNeeded\(\);\s*onSelectLocation\(location\.id\);/,
     );
     expect(search).not.toMatch(
       /handleSelectResult[\s\S]*requestAnimationFrame/,

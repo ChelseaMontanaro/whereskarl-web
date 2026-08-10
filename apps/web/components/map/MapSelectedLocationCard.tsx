@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState, type ReactNode } from "react";
 
 import { KarlLogo } from "@/components/brand/KarlLogo";
 import { MapChromeCloseButton } from "@/components/map/MapChromePrimitives";
-import { MapLocationConditionIcon } from "@/components/map/MapLocationConditionIcon";
 import { BottomSheet } from "@/components/ui/BottomSheet";
 import { desktopGlassCardClass } from "@/components/home/desktopGlass";
 import { useEscapeToDismiss } from "@/lib/hooks/useEscapeToDismiss";
@@ -17,13 +16,9 @@ import {
 } from "@whereskarl/domain";
 import { getPhonePortraitFogRailConditionIconDataUri } from "@/lib/map/phonePortraitConditionIcons";
 import { getProductRegionNameForLocation } from "@whereskarl/domain";
-import { locationWeatherMetadataItems } from "@/lib/map/locationMetadata";
 import { useIsNighttime } from "@/lib/hooks/useIsNighttime";
 import { presentClearSkiesScore } from "@whereskarl/domain";
-import {
-  formatAirQualityCompact,
-  presentAirQuality,
-} from "@whereskarl/domain";
+import { presentAirQuality } from "@whereskarl/domain";
 import {
   CLIMATE_ICON_COLOR,
   presentClimate,
@@ -85,18 +80,6 @@ function FavoriteHeartIcon({
       />
     </svg>
   );
-}
-
-function getConditionSentence(location: LocationWeather): string {
-  const reason = location.karlReason?.trim();
-  const status = location.status?.trim();
-  const intensity = resolveLocationFogIntensity(location);
-
-  if (reason && intensity === "clear") {
-    return reason;
-  }
-
-  return status || reason || "Conditions unavailable";
 }
 
 /**
@@ -826,10 +809,13 @@ function PhonePortraitSelectedCard({
   location,
   onClose,
   showCloseButton,
+  presentation = "sheet",
 }: {
   location: LocationWeather;
   onClose?: () => void;
   showCloseButton: boolean;
+  /** sheet = phone BottomSheet; panel = tablet/desktop scrollable card. */
+  presentation?: "sheet" | "panel";
 }) {
   const isNighttime = useIsNighttime();
   const isDegraded = isLocationDataDegraded(location.dataStatus);
@@ -928,7 +914,7 @@ function PhonePortraitSelectedCard({
             isFavorite={isFavorite}
             onToggle={handleToggleFavorite}
           />
-          {showCloseButton && onClose ? (
+          {showCloseButton && onClose && presentation === "sheet" ? (
             <MapChromeCloseButton
               label="Close selected location"
               onClick={onClose}
@@ -993,14 +979,8 @@ function PhonePortraitSelectedCard({
     </>
   );
 
-  return (
-    <BottomSheet
-      key={location.id}
-      ariaLabel={`Selected location: ${location.name}`}
-      header={header}
-      defaultExpanded={false}
-      expandOnSurfaceTap={surfaceExpandArmed}
-    >
+  const expandedBody = (
+    <>
       {/* Expanded intelligence — identical ordering/styling below Core Weather. */}
       <EnvironmentalMetricsSection
         metrics={[
@@ -1218,110 +1198,41 @@ function PhonePortraitSelectedCard({
           ))}
         </div>
       </section>
-    </BottomSheet>
+    </>
   );
-}
 
-function DesktopSelectedCard({
-  location,
-  onClose,
-  showCloseButton,
-}: {
-  location: LocationWeather;
-  onClose?: () => void;
-  showCloseButton: boolean;
-}) {
-  const conditionSentence = getConditionSentence(location);
-  const isDegraded = isLocationDataDegraded(location.dataStatus);
-  const metadataItems = locationWeatherMetadataItems(location);
-  const score = presentClearSkiesScore(location.sunshineScore);
-  const airQuality = presentAirQuality(location.airQuality);
-  const airQualityCompact = formatAirQualityCompact(airQuality);
-
-  const { isFavorite, handleToggleFavorite } = useFavoriteToggle(location.id);
-
-  useEscapeToDismiss(Boolean(onClose), onClose);
+  if (presentation === "panel") {
+    return (
+      <article
+        className={`${desktopGlassCardClass} relative max-h-[min(70vh,42rem)] max-w-[28rem] overflow-y-auto overscroll-contain px-4 py-3 shadow-[0_8px_28px_rgba(0,0,0,0.28)]`}
+        aria-label={`Selected location: ${location.name}`}
+        data-testid="selected-location-panel"
+      >
+        {showCloseButton && onClose ? (
+          <MapChromeCloseButton
+            label="Close selected location"
+            onClick={onClose}
+            size="ghost"
+          />
+        ) : null}
+        <div className={showCloseButton && onClose ? "pr-6" : undefined}>
+          {header}
+        </div>
+        <div className="mt-1">{expandedBody}</div>
+      </article>
+    );
+  }
 
   return (
-    <article
-      className={`${desktopGlassCardClass} relative max-w-[28rem] px-4 py-3 shadow-[0_8px_28px_rgba(0,0,0,0.28)]`}
-      aria-label={`Selected location: ${location.name}`}
+    <BottomSheet
+      key={location.id}
+      ariaLabel={`Selected location: ${location.name}`}
+      header={header}
+      defaultExpanded={false}
+      expandOnSurfaceTap={surfaceExpandArmed}
     >
-      {showCloseButton && onClose ? (
-        <MapChromeCloseButton
-          label="Close selected location"
-          onClick={onClose}
-          size="ghost"
-        />
-      ) : null}
-
-      <div className="flex w-full items-center gap-3 pr-7">
-        <MapLocationConditionIcon location={location} />
-
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1">
-            <h2 className="text-[1.05rem] font-semibold leading-tight tracking-tight text-white">
-              {location.name}
-            </h2>
-            <FavoriteButton
-              location={location}
-              isFavorite={isFavorite}
-              onToggle={handleToggleFavorite}
-              size="sm"
-            />
-          </div>
-          <p className="mt-0.5 line-clamp-2 text-[0.75rem] leading-snug text-white/72">
-            {conditionSentence}
-          </p>
-
-          {isDegraded ? (
-            <DegradedDataLabel variant="location" className="mt-1" />
-          ) : null}
-
-          {metadataItems.length > 0 ? (
-            <p className="mt-1.5 text-[0.65rem] font-medium text-white/48">
-              {metadataItems.join(" • ")}
-            </p>
-          ) : null}
-
-          {/* Product decision (not a technical limit): desktop/tablet keep the
-              compact AQI chip only for now. UV and pollen ship first on phone
-              Selected Location's environmental grid; desktop/tablet UV/pollen
-              are separate roadmap layout items so we don't bolt them onto this
-              dense chip. */}
-          <p
-            className="mt-1 line-clamp-2 text-[0.65rem] font-medium leading-snug"
-            data-testid="desktop-air-quality"
-            data-aqi-category={
-              airQuality.available ? airQuality.category ?? undefined : undefined
-            }
-            style={
-              airQuality.available && airQuality.color
-                ? { color: airQuality.color }
-                : { color: "rgba(255,255,255,0.48)" }
-            }
-          >
-            AQI {airQualityCompact}
-          </p>
-        </div>
-
-        <div className="flex min-w-[4.5rem] shrink-0 flex-col items-center justify-center self-center border-l border-white/10 pl-3">
-          <div className="text-center">
-            <p className="text-[0.5rem] font-bold uppercase tracking-[0.14em] text-white/40 max-lg:text-[0.625rem] max-lg:tracking-[0.12em]">
-              Clear Skies Score
-            </p>
-            <p
-              className="mt-0.5 text-[1.35rem] font-light leading-none max-lg:mt-1 max-lg:text-[2rem]"
-              style={{ color: score.color }}
-              data-score-band={score.band}
-              data-testid="clear-skies-score"
-            >
-              {score.score}
-            </p>
-          </div>
-        </div>
-      </div>
-    </article>
+      {expandedBody}
+    </BottomSheet>
   );
 }
 
@@ -1331,21 +1242,12 @@ export function MapSelectedLocationCard({
   phonePortrait = false,
   showCloseButton = true,
 }: MapSelectedLocationCardProps) {
-  if (phonePortrait) {
-    return (
-      <PhonePortraitSelectedCard
-        location={location}
-        onClose={onClose}
-        showCloseButton={showCloseButton}
-      />
-    );
-  }
-
   return (
-    <DesktopSelectedCard
+    <PhonePortraitSelectedCard
       location={location}
       onClose={onClose}
       showCloseButton={showCloseButton}
+      presentation={phonePortrait ? "sheet" : "panel"}
     />
   );
 }

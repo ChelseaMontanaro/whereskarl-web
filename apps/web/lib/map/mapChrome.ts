@@ -103,42 +103,38 @@ export const MAP_ATTRIBUTION_COPY =
 
 /**
  * Shared region-chip presentation tokens.
- * Phone uses a denser filled-gold selected state; panel (tablet/desktop)
- * uses the outline tint. Both share sizing / touch-target floors.
+ * One selected / idle language across phone, tablet, and desktop so region
+ * controls feel like the same product. Layout still differs (scroll vs wrap).
  */
 export const MAP_REGION_CHIP_BASE_CLASS =
   "inline-flex min-h-10 min-w-[2.75rem] shrink-0 items-center justify-center whitespace-nowrap rounded-full border px-3 text-center text-xs font-bold leading-none transition-colors motion-reduce:transition-none";
 
-export const MAP_REGION_CHIP_PHONE_SELECTED_CLASS =
+export const MAP_REGION_CHIP_SELECTED_CLASS =
   "border-karl-gold/45 bg-karl-gold text-karl-navy";
 
-export const MAP_REGION_CHIP_PHONE_IDLE_CLASS =
+export const MAP_REGION_CHIP_IDLE_CLASS =
   "border-[rgb(150_175_200/0.2)] bg-[rgb(5_13_24/0.78)] text-white/78 hover:opacity-90";
 
-export const MAP_REGION_CHIP_PANEL_SELECTED_CLASS =
-  "border-karl-gold/40 bg-karl-gold/14 text-karl-gold";
+/** @deprecated Prefer MAP_REGION_CHIP_SELECTED_CLASS — kept as alias for callers. */
+export const MAP_REGION_CHIP_PHONE_SELECTED_CLASS = MAP_REGION_CHIP_SELECTED_CLASS;
 
-export const MAP_REGION_CHIP_PANEL_IDLE_CLASS =
-  "border-white/10 bg-white/[0.04] text-white/65 hover:border-white/18 hover:text-white/85";
+/** @deprecated Prefer MAP_REGION_CHIP_IDLE_CLASS — kept as alias for callers. */
+export const MAP_REGION_CHIP_PHONE_IDLE_CLASS = MAP_REGION_CHIP_IDLE_CLASS;
+
+/** @deprecated Prefer MAP_REGION_CHIP_SELECTED_CLASS — panel now shares phone language. */
+export const MAP_REGION_CHIP_PANEL_SELECTED_CLASS = MAP_REGION_CHIP_SELECTED_CLASS;
+
+/** @deprecated Prefer MAP_REGION_CHIP_IDLE_CLASS — panel now shares phone language. */
+export const MAP_REGION_CHIP_PANEL_IDLE_CLASS = MAP_REGION_CHIP_IDLE_CLASS;
 
 export type MapRegionChipVariant = "phone" | "panel";
 
 export function mapRegionChipClassName(
-  variant: MapRegionChipVariant,
+  _variant: MapRegionChipVariant,
   isSelected: boolean,
 ): string {
-  if (variant === "phone") {
-    return `${MAP_REGION_CHIP_BASE_CLASS} ${
-      isSelected
-        ? MAP_REGION_CHIP_PHONE_SELECTED_CLASS
-        : MAP_REGION_CHIP_PHONE_IDLE_CLASS
-    }`;
-  }
-
   return `${MAP_REGION_CHIP_BASE_CLASS} ${
-    isSelected
-      ? MAP_REGION_CHIP_PANEL_SELECTED_CLASS
-      : MAP_REGION_CHIP_PANEL_IDLE_CLASS
+    isSelected ? MAP_REGION_CHIP_SELECTED_CLASS : MAP_REGION_CHIP_IDLE_CLASS
   }`;
 }
 

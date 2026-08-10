@@ -540,7 +540,7 @@ describe("MapView phone-portrait canonical location search (16.3C.1b)", () => {
     expect(within(results).queryByText("Stinson Beach")).toBeNull();
   });
 
-  it("does not render the interactive search chrome on desktop", async () => {
+  it("renders the shared canonical search chrome on desktop", async () => {
     useMinWidthMock.mockReturnValue(true);
     usePhonePortraitMock.mockReturnValue(false);
     renderMap();
@@ -550,8 +550,9 @@ describe("MapView phone-portrait canonical location search (16.3C.1b)", () => {
       screen.queryByTestId("map-phone-portrait-search-bar"),
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("combobox", { name: "Search locations" }),
-    ).not.toBeInTheDocument();
+      screen.getByRole("combobox", { name: "Search locations" }),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("map-location-search-bar")).toBeInTheDocument();
   });
 });
 

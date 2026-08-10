@@ -10,6 +10,7 @@ import {
   type BayAreaMapHandle,
 } from "@/components/map/BayAreaMap";
 import { MapBestRightNowTray } from "@/components/map/MapBestRightNowTray";
+import { MapLocationSearchBar } from "@/components/map/MapLocationSearchBar";
 import { MapPhonePortraitControls } from "@/components/map/MapPhonePortraitControls";
 import { MapPhonePortraitFogRail } from "@/components/map/MapPhonePortraitFogRail";
 import { MapPhonePortraitLayersControl } from "@/components/map/MapLayerControls";
@@ -542,15 +543,23 @@ function MobileMapView({ state }: { state: MapViewModel }) {
                 onClearSelectedLocation={handleSearchClearSelectedLocation}
               />
             ) : (
-              <MapTopConditionsStack
-                isLoading={currentQuery.isLoading && !currentQuery.data}
-                selectedRegionId={
-                  selectedLocation ? null : mapQuery.activeRegionId
-                }
-                onSelectRegion={handleSelectRegion}
-                activeIntensity={intensityFilter}
-                onSelectIntensity={handleSelectIntensity}
-              />
+              <>
+                <MapLocationSearchBar
+                  locations={markerLocations}
+                  onSelectLocation={handleSearchSelectLocation}
+                  onClearSelectedLocation={handleSearchClearSelectedLocation}
+                  className="relative z-50 w-full"
+                />
+                <MapTopConditionsStack
+                  isLoading={currentQuery.isLoading && !currentQuery.data}
+                  selectedRegionId={
+                    selectedLocation ? null : mapQuery.activeRegionId
+                  }
+                  onSelectRegion={handleSelectRegion}
+                  activeIntensity={intensityFilter}
+                  onSelectIntensity={handleSelectIntensity}
+                />
+              </>
             )}
             <MapQueryWarnings
               unknownLocationId={unknownLocationId}
@@ -655,6 +664,7 @@ function MobileMapView({ state }: { state: MapViewModel }) {
 }
 
 function DesktopMapView({ state }: { state: MapViewModel }) {
+  const mapRef = useRef<BayAreaMapHandle>(null);
   const {
     mapQuery,
     mapStyle,
@@ -675,9 +685,25 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
     suppressViewportUpdateRef,
   } = state;
 
+  const handleSearchSelectLocation = useCallback(
+    (locationId: string) => {
+      const location = markerLocations.find((item) => item.id === locationId);
+      handleSelectLocation(locationId);
+      if (location) {
+        mapRef.current?.focusLocation(location.longitude, location.latitude);
+      }
+    },
+    [handleSelectLocation, markerLocations],
+  );
+
+  const handleSearchClearSelectedLocation = useCallback(() => {
+    handleClearSelectedLocation();
+  }, [handleClearSelectedLocation]);
+
   return (
     <div className="fixed inset-0 z-10">
       <BayAreaMap
+        ref={mapRef}
         locations={markerLocations}
         selectedLocationId={selectedLocation?.id ?? null}
         selectedRegionId={selectedLocation ? null : mapQuery.activeRegionId}
@@ -696,6 +722,12 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
         <div
           className={`pointer-events-auto absolute flex flex-col ${DESKTOP_MAP_TOP_LEFT_CLASS}`}
         >
+          <MapLocationSearchBar
+            locations={markerLocations}
+            onSelectLocation={handleSearchSelectLocation}
+            onClearSelectedLocation={handleSearchClearSelectedLocation}
+            className="relative z-50 w-full"
+          />
           <MapTopConditionsStack
             isLoading={currentQuery.isLoading && !currentQuery.data}
             selectedRegionId={

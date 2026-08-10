@@ -18,7 +18,7 @@ describe("root viewport safe-area activation", () => {
 
   it("documents and locks phone portrait search input at 16px against iOS WebKit auto-zoom", () => {
     const source = readFileSync(
-      join(process.cwd(), "components/map/MapPhonePortraitControls.tsx"),
+      join(process.cwd(), "components/map/MapLocationSearchBar.tsx"),
       "utf8",
     );
 

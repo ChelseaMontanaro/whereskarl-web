@@ -60,41 +60,35 @@ describe("MapSelectedLocationCard", () => {
     window.localStorage.clear();
   });
 
-  it("renders the selected location details in a polished info card", () => {
+  it("renders the selected location details in the shared panel hierarchy", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-03T12:00:00"));
 
-    const { container } = render(
+    render(
       <MapSelectedLocationCard location={location} onClose={vi.fn()} />,
     );
 
+    expect(screen.getByTestId("selected-location-panel")).toBeInTheDocument();
     expect(screen.getByText("Tiburon")).toBeInTheDocument();
-    expect(screen.getByText("Mostly clear across Tiburon.")).toBeInTheDocument();
+    expect(screen.getByText(/Marin, CA|Bay Area, CA/)).toBeInTheDocument();
+    expect(screen.getByTestId("selected-location-metrics")).toBeInTheDocument();
+    expect(screen.getByTestId("clear-skies-score")).toBeInTheDocument();
+    expect(screen.getByTestId("selected-location-env-metrics")).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Karl's Read" })).toBeInTheDocument();
     expect(
-      screen.getByText("Fog: 18% • Wind: W 8 mph • 68°F"),
+      screen.getByRole("button", { name: "Close selected location" }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Close selected location" })).toBeInTheDocument();
 
-    const sunIcon = container.querySelector(
-      '[data-testid="insight-plain-icon"] svg.text-karl-gold',
-    );
-    expect(sunIcon).toBeTruthy();
-    expect(
-      container.querySelector(
-        '[data-testid="insight-plain-icon"].rounded-full',
-      ),
-    ).toBeNull();
-    expect(container.querySelector("span.rounded-full.border")).toBeNull();
+    vi.useRealTimers();
   });
 
-  it("renders metrics with explicit Fog, Wind, and Fahrenheit labels", () => {
+  it("renders shared core weather metrics on the panel card", () => {
     render(<MapSelectedLocationCard location={location} onClose={vi.fn()} />);
 
-    const metrics = screen.getByText("Fog: 18% • Wind: W 8 mph • 68°F");
-
-    expect(metrics).toHaveTextContent("Fog:");
-    expect(metrics).toHaveTextContent("Wind:");
-    expect(metrics).toHaveTextContent("°F");
+    const metrics = screen.getByTestId("selected-location-metrics");
+    expect(within(metrics).getByTestId("fog-value")).toHaveTextContent("18%");
+    expect(within(metrics).getByTestId("temp-value")).toHaveTextContent("68°");
+    expect(within(metrics).getByTestId("wind-value")).toHaveTextContent("W 8");
   });
 
   it("calls onClose when the close button is clicked", () => {
@@ -117,13 +111,15 @@ describe("MapSelectedLocationCard", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it("renders the favorite heart beside the location name", () => {
+  it("renders the favorite heart in the selected location header", () => {
     render(<MapSelectedLocationCard location={location} onClose={vi.fn()} />);
 
     const heading = screen.getByRole("heading", { name: "Tiburon" });
     const favoriteButton = getFavoriteButton();
+    const panel = screen.getByTestId("selected-location-panel");
 
-    expect(heading.parentElement).toContainElement(favoriteButton);
+    expect(panel).toContainElement(heading);
+    expect(panel).toContainElement(favoriteButton);
   });
 
   it("toggles favorite state when the heart control is clicked", () => {
@@ -209,16 +205,13 @@ describe("MapSelectedLocationCard", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("uses larger mobile clear skies score typography", () => {
+  it("uses the shared Clear Sky Score typography on panel cards", () => {
     render(<MapSelectedLocationCard location={location} onClose={vi.fn()} />);
 
-    const label = screen.getByText("Clear Skies Score");
-    const score = label.nextElementSibling;
-
-    expect(label.className).toContain("max-lg:text-[0.625rem]");
-    expect(score?.textContent).toBe("82");
-    expect(score?.className).toContain("max-lg:text-[2rem]");
-    expect(score?.className).toContain("text-[1.35rem]");
+    const score = screen.getByTestId("clear-skies-score");
+    expect(score).toHaveTextContent("82");
+    expect(score.className).toContain("text-[38px]");
+    expect(screen.getByText("Clear Sky Score")).toBeInTheDocument();
   });
 
   it("colors the score with the canonical Clear Skies band", () => {
@@ -1120,7 +1113,7 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
     expect(value).not.toHaveTextContent("Low");
   });
 
-  it("renders desktop compact AQI from the same canonical field", () => {
+  it("renders the shared environmental hierarchy on desktop/tablet panels", () => {
     render(
       <MapSelectedLocationCard
         location={{
@@ -1140,17 +1133,14 @@ describe("MapSelectedLocationCard phone portrait bottom sheet", () => {
       />,
     );
 
-    const desktopAqi = screen.getByTestId("desktop-air-quality");
-    expect(desktopAqi).toHaveTextContent("AQI 110 · Unhealthy for Sensitive Groups");
-    expect(desktopAqi.getAttribute("data-aqi-category")).toBe("unhealthy-sensitive");
-    expect(desktopAqi.className).toContain("line-clamp-2");
-    expect(screen.queryByTestId("desktop-uv-index")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("desktop-pollen")).not.toBeInTheDocument();
-    // Phone Fog & Marine / Environmental Metrics grid remain phone-only.
-    expect(screen.queryByTestId("selected-location-env-metrics")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("selected-location-marine-card")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("climate-slot")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("karl-health-slot")).not.toBeInTheDocument();
+    expect(screen.getByTestId("selected-location-panel")).toBeInTheDocument();
+    expect(screen.getByTestId("selected-location-env-metrics")).toBeInTheDocument();
+    expect(screen.getByTestId("air-quality-value")).toHaveTextContent("110");
+    expect(screen.getByTestId("uv-index-slot")).toBeInTheDocument();
+    expect(screen.getByTestId("pollen-slot")).toBeInTheDocument();
+    expect(screen.getByTestId("climate-slot")).toBeInTheDocument();
+    expect(screen.getByTestId("selected-location-marine-card")).toBeInTheDocument();
+    expect(screen.queryByTestId("desktop-air-quality")).not.toBeInTheDocument();
   });
 
   it("renders each approved Climate classification with the matching icon label", () => {

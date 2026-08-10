@@ -65,9 +65,10 @@ describe("mapChrome", () => {
     expect(DESKTOP_MAP_LAYERS_CLASS).toContain("top-[5.5rem]");
   });
 
-  it("keeps phone and panel chip selected languages distinct", () => {
+  it("keeps phone and panel chips on one filled-gold selected language", () => {
     expect(mapRegionChipClassName("phone", true)).toContain("bg-karl-gold");
-    expect(mapRegionChipClassName("panel", true)).toContain("bg-karl-gold/14");
+    expect(mapRegionChipClassName("panel", true)).toContain("bg-karl-gold");
+    expect(mapRegionChipClassName("panel", true)).not.toContain("bg-karl-gold/14");
   });
 
   it("hides tablet top chrome only while layers are open", () => {

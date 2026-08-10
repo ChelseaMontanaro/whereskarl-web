@@ -37,7 +37,7 @@ describe("MapRegionChips", () => {
     }
   });
 
-  it("keeps phone selected chips filled gold and panel chips outlined", () => {
+  it("keeps phone and panel chips on one filled-gold selected language", () => {
     const { rerender } = render(
       <MapRegionChips
         selectedRegionId="san-francisco"
@@ -59,6 +59,9 @@ describe("MapRegionChips", () => {
     );
 
     expect(screen.getByRole("button", { name: "SF" }).className).toContain(
+      "bg-karl-gold",
+    );
+    expect(screen.getByRole("button", { name: "SF" }).className).not.toContain(
       "bg-karl-gold/14",
     );
   });
