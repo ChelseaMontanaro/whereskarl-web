@@ -79,6 +79,8 @@ type BayAreaMapProps = {
   onMapStyleChange: (styleId: KarlMapStyleId) => void;
   onFogLayerChange: (enabled: boolean) => void;
   isLoading?: boolean;
+  loadError?: string | null;
+  onRetryLoad?: () => void;
   layout?: "mobile" | "desktop" | "immersive";
   suppressViewportUpdateRef?: MutableRefObject<boolean>;
   intensityFilter?: FogIntensity | null;
@@ -98,6 +100,8 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
       onMapStyleChange,
       onFogLayerChange,
       isLoading = false,
+      loadError = null,
+      onRetryLoad,
       layout = "mobile",
       suppressViewportUpdateRef,
       intensityFilter = null,
@@ -775,7 +779,25 @@ export const BayAreaMap = forwardRef<BayAreaMapHandle, BayAreaMapProps>(
             />
           </>
         ) : null}
-        {isLoading || !mapReady ? (
+        {loadError ? (
+          <div
+            role="alert"
+            className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-karl-navy/70 px-6 text-center backdrop-blur-[1px]"
+          >
+            <p className="max-w-sm text-sm font-medium leading-relaxed text-white/80">
+              {loadError}
+            </p>
+            {onRetryLoad ? (
+              <button
+                type="button"
+                onClick={onRetryLoad}
+                className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/20 bg-white/10 px-5 text-sm font-semibold text-white/92 transition hover:bg-white/16 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-karl-gold"
+              >
+                Try again
+              </button>
+            ) : null}
+          </div>
+        ) : isLoading || !mapReady ? (
           <div className="absolute inset-0 flex items-center justify-center bg-karl-navy/55 px-6 text-center text-sm text-white/60 backdrop-blur-[1px]">
             {isLoading
               ? "Loading Bay Area locations…"

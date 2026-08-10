@@ -7,14 +7,28 @@ type HomeHeroProps = {
   subheadline: string;
   confidenceText: string | null;
   isLoading: boolean;
+  isUnavailable?: boolean;
+  onRetry?: () => void;
   clearSkiesLocationId: string | null;
   isFindingClearSkies: boolean;
 };
 
-function HeroPositionBadge({ isLoading }: { isLoading: boolean }) {
+function HeroPositionBadge({
+  isLoading,
+  isUnavailable,
+}: {
+  isLoading: boolean;
+  isUnavailable: boolean;
+}) {
+  const label = isUnavailable
+    ? "Conditions unavailable"
+    : isLoading
+      ? "Reading Karl intelligence"
+      : "Karl's current position";
+
   return (
     <span className="inline-flex items-center rounded-full border border-white/10 bg-black/30 px-2.5 py-1 text-[0.625rem] font-semibold uppercase tracking-[0.115em] text-white/78 backdrop-blur-sm">
-      {isLoading ? "Reading Karl intelligence" : "Karl's current position"}
+      {label}
     </span>
   );
 }
@@ -24,6 +38,8 @@ export function HomeHero({
   subheadline,
   confidenceText,
   isLoading,
+  isUnavailable = false,
+  onRetry,
   clearSkiesLocationId,
   isFindingClearSkies,
 }: HomeHeroProps) {
@@ -43,7 +59,10 @@ export function HomeHero({
         </div>
 
         <div className="mt-auto px-5 pb-12 sm:pb-14 lg:mt-0 lg:min-h-[18rem] lg:px-0 lg:pb-8 lg:pt-[10.5rem] lg:text-left xl:min-h-[19rem] xl:pt-44">
-          <HeroPositionBadge isLoading={isLoading} />
+          <HeroPositionBadge
+            isLoading={isLoading}
+            isUnavailable={isUnavailable}
+          />
           <h1
             className={`mt-4 max-w-[17ch] font-serif text-[1.65rem] font-semibold leading-[1.14] text-white/[0.98] [text-shadow:0_5px_14px_rgba(0,0,0,0.56)] sm:max-w-[18ch] sm:text-[1.8rem] sm:leading-[1.12] md:text-[1.85rem] lg:max-w-[20ch] lg:text-[2.05rem] lg:leading-[1.1] xl:max-w-[21ch] xl:text-[2.2rem] ${
               isLoading ? "opacity-70" : ""
@@ -59,11 +78,21 @@ export function HomeHero({
               {confidenceText}
             </p>
           ) : null}
-          <FindClearSkiesCta
-            locationId={clearSkiesLocationId}
-            isLoading={isFindingClearSkies}
-            className="mt-6 max-sm:mb-3.5 sm:mt-5 lg:hidden"
-          />
+          {isUnavailable && onRetry ? (
+            <button
+              type="button"
+              onClick={onRetry}
+              className="mt-5 inline-flex min-h-11 items-center justify-center rounded-full border border-white/20 bg-white/10 px-5 text-sm font-semibold text-white/92 backdrop-blur-sm transition hover:bg-white/16 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-karl-gold lg:mt-4"
+            >
+              Try again
+            </button>
+          ) : (
+            <FindClearSkiesCta
+              locationId={clearSkiesLocationId}
+              isLoading={isFindingClearSkies}
+              className="mt-6 max-sm:mb-3.5 sm:mt-5 lg:hidden"
+            />
+          )}
         </div>
       </div>
     </section>

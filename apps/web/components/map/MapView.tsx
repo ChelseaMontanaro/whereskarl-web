@@ -122,6 +122,8 @@ type MapViewModel = {
   setFogLayerEnabled: (enabled: boolean) => void;
   locationsQuery: {
     isLoading: boolean;
+    isError?: boolean;
+    refetch?: () => unknown;
     data?: Awaited<ReturnType<typeof getLocations>>;
   };
   currentQuery: {
@@ -129,6 +131,8 @@ type MapViewModel = {
     data?: Awaited<ReturnType<typeof getCurrent>>;
   };
   locations: LocationWeather[];
+  locationsLoadError: string | null;
+  retryLocations: () => void;
   selectedLocation: LocationWeather | null;
   unknownLocationId: string | null;
   activeRegion: ReturnType<typeof findBayAreaProductRegion>;
@@ -191,6 +195,15 @@ function useMapViewState(): MapViewModel {
     () => locationsQuery.data?.locations ?? [],
     [locationsQuery.data?.locations],
   );
+
+  const locationsLoadError =
+    locationsQuery.isError && locations.length === 0
+      ? "Live map data is unavailable right now. Try again in a moment."
+      : null;
+
+  const retryLocations = () => {
+    void locationsQuery.refetch();
+  };
 
   const bestSunshinePending = bestSunshineQuery.isPending;
   const bestRightNowLocationId = useMemo(() => {
@@ -291,6 +304,8 @@ function useMapViewState(): MapViewModel {
     locationsQuery,
     currentQuery,
     locations,
+    locationsLoadError,
+    retryLocations,
     selectedLocation,
     unknownLocationId,
     activeRegion,
@@ -326,6 +341,8 @@ function MobileMapView({ state }: { state: MapViewModel }) {
     markerLocations,
     bestRightNowItems,
     bestRightNowLocationId,
+    locationsLoadError,
+    retryLocations,
     handleSelectLocation,
     handleSelectRegion,
     handleClearSelectedLocation,
@@ -497,6 +514,8 @@ function MobileMapView({ state }: { state: MapViewModel }) {
         onMapStyleChange={setMapStyle}
         onFogLayerChange={setFogLayerEnabled}
         isLoading={locationsQuery.isLoading}
+        loadError={locationsLoadError}
+        onRetryLoad={locationsLoadError ? retryLocations : undefined}
         layout="immersive"
         suppressViewportUpdateRef={suppressViewportUpdateRef}
         intensityFilter={intensityFilter}
@@ -662,6 +681,8 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
     unknownLocationId,
     markerLocations,
     bestRightNowItems,
+    locationsLoadError,
+    retryLocations,
     handleSelectLocation,
     handleSelectRegion,
     handleClearSelectedLocation,
@@ -682,6 +703,8 @@ function DesktopMapView({ state }: { state: MapViewModel }) {
         onMapStyleChange={setMapStyle}
         onFogLayerChange={setFogLayerEnabled}
         isLoading={locationsQuery.isLoading}
+        loadError={locationsLoadError}
+        onRetryLoad={locationsLoadError ? retryLocations : undefined}
         layout="desktop"
         suppressViewportUpdateRef={suppressViewportUpdateRef}
         intensityFilter={intensityFilter}

@@ -41,6 +41,7 @@ type DashboardGridProps = {
   bestSunshine: BestSunshineResponse | null;
   intelligence?: KarlIntelligenceResponse | null;
   isLoading: boolean;
+  isBestSunshineUnavailable?: boolean;
   isNightPresentation?: boolean;
 };
 
@@ -204,6 +205,7 @@ export function DashboardGrid({
   bestSunshine,
   intelligence = null,
   isLoading,
+  isBestSunshineUnavailable = false,
   isNightPresentation = false,
 }: DashboardGridProps) {
   const [activeMetric, setActiveMetric] = useState<MetricDetailKey | null>(null);
@@ -296,14 +298,18 @@ export function DashboardGrid({
         <MetricCard
           label="Clearest Spot"
           value={
-            isLoading || !bestSunshine ? "--" : `${bestSunshine.sunshineScore}`
+            isLoading || isBestSunshineUnavailable || !bestSunshine
+              ? "--"
+              : `${bestSunshine.sunshineScore}`
           }
           detail={
-            isLoading || !bestSunshine
-              ? "Finding brighter spots"
-              : bestSunshine.locationName
+            isBestSunshineUnavailable
+              ? "Unavailable right now"
+              : isLoading || !bestSunshine
+                ? "Finding brighter spots"
+                : bestSunshine.locationName
           }
-          isLoading={isLoading}
+          isLoading={isLoading && !isBestSunshineUnavailable}
           icon={spotIcon}
           iconFrameClassName={
             isNightPresentation ? desktopMistIconClass : desktopGoldIconClass
@@ -311,7 +317,7 @@ export function DashboardGrid({
           mapHref={spotMapHref}
           mapAriaLabel={spotMapAriaLabel}
           mobileDetailAddon={
-            !isLoading && bestSunshine ? (
+            !isLoading && !isBestSunshineUnavailable && bestSunshine ? (
               <ClearestSpotGauge score={bestSunshine.sunshineScore} />
             ) : null
           }

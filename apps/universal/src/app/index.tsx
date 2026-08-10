@@ -21,23 +21,15 @@ import {
 } from '@/lib/map/locationsDisplay';
 import { useClearSkiesNav } from '@/providers/ClearSkiesNavProvider';
 
-const PLACEHOLDER = {
-  headline: 'Karl is draped across the Golden Gate',
+const UNAVAILABLE = {
+  headline: 'Karl conditions are unavailable',
   subheadline:
-    'Fog is holding along the coast while inland pockets stay brighter through late morning.',
-  confidenceText: 'Sample conditions while Karl intelligence loads',
-  sunshineScore: 42,
-  location: {
-    name: 'Sausalito Waterfront',
-    status: 'Patchy fog, limited sunshine',
-    temperature: 58,
-    distanceText: '4.2 mi',
-    sunshineScore: 38,
-  },
+    'Live Bay Area weather couldn’t be loaded right now. Try again in a moment.',
+  confidenceText: 'Conditions unavailable',
 };
 
 export default function HomeScreen() {
-  const { isLoading, current, locations, bestSunshine, hasLiveData } =
+  const { isLoading, current, locations, bestSunshine, hasLiveData, isUnavailable } =
     useHomeWeather();
   const { homeLocation } = useHomeLocation(locations);
 
@@ -60,7 +52,9 @@ export default function HomeScreen() {
 
   const headline = hasLoadedWeather
     ? heroHeadline({ current, karlLocation, hasLoadedWeather: true })
-    : PLACEHOLDER.headline;
+    : isUnavailable
+      ? UNAVAILABLE.headline
+      : 'Reading Karl intelligence';
 
   const subheadline = hasLiveData
     ? heroSubheadline({
@@ -68,13 +62,17 @@ export default function HomeScreen() {
         karlLocation,
         hasLoadedWeather: Boolean(current),
       })
-    : PLACEHOLDER.subheadline;
+    : isUnavailable
+      ? UNAVAILABLE.subheadline
+      : 'Checking conditions';
 
   const confidenceText = hasLiveData
     ? heroConfidenceText({ karlLocation, current })
-    : PLACEHOLDER.confidenceText;
+    : isUnavailable
+      ? UNAVAILABLE.confidenceText
+      : null;
 
-  const sunshineScore = current?.sunshineScore ?? PLACEHOLDER.sunshineScore;
+  const sunshineScore = current?.sunshineScore ?? 0;
 
   const featuredSpot = homeLocation
     ? {
@@ -96,11 +94,7 @@ export default function HomeScreen() {
           isHomeLocation: false,
           isPlaceholder: false,
         }
-      : {
-          ...PLACEHOLDER.location,
-          isHomeLocation: false,
-          isPlaceholder: true,
-        };
+      : null;
 
   return (
     <View style={styles.root}>
@@ -127,7 +121,7 @@ export default function HomeScreen() {
 
             <ClearSkiesScore
               sunshineScore={sunshineScore}
-              isLoading={showLoading && !current}
+              isLoading={showLoading || (isUnavailable && !current)}
             />
 
             <Pressable
@@ -141,18 +135,31 @@ export default function HomeScreen() {
               <Text style={styles.ctaLabel}>Find Brightest Spot</Text>
             </Pressable>
 
-            <LocationCard
-              name={featuredSpot.name}
-              status={featuredSpot.status}
-              temperature={featuredSpot.temperature}
-              distanceText={featuredSpot.distanceText}
-              sunshineScore={featuredSpot.sunshineScore}
-              isHomeLocation={featuredSpot.isHomeLocation}
-              isPlaceholder={featuredSpot.isPlaceholder}
-              isLoading={
-                showLoading && !homeLocation && !bestSunshine
-              }
-            />
+            {featuredSpot ? (
+              <LocationCard
+                name={featuredSpot.name}
+                status={featuredSpot.status}
+                temperature={featuredSpot.temperature}
+                distanceText={featuredSpot.distanceText}
+                sunshineScore={featuredSpot.sunshineScore}
+                isHomeLocation={featuredSpot.isHomeLocation}
+                isPlaceholder={featuredSpot.isPlaceholder}
+                isLoading={false}
+              />
+            ) : (
+              <LocationCard
+                name={
+                  isUnavailable ? 'Brightest spot unavailable' : 'Finding…'
+                }
+                status={
+                  isUnavailable
+                    ? 'Live recommendations couldn’t be loaded'
+                    : 'Looking for clearer skies nearby'
+                }
+                isPlaceholder
+                isLoading={showLoading}
+              />
+            )}
           </View>
         </ScrollView>
       </SafeAreaView>

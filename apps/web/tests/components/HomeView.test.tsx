@@ -142,5 +142,35 @@ describe("HomeView", () => {
     expect(
       screen.queryByRole("link", { name: "View brightest spot on map" }),
     ).not.toBeInTheDocument();
+    expect(screen.getByText("Unavailable right now")).toBeInTheDocument();
+  });
+
+  it("surfaces a friendly unavailable state when core weather fails", async () => {
+    vi.spyOn(weatherApi, "getCurrent").mockRejectedValue(
+      new Error("API request failed with status 500"),
+    );
+    vi.spyOn(weatherApi, "getLocations").mockRejectedValue(
+      new Error("API request failed with status 500"),
+    );
+    vi.spyOn(weatherApi, "getBestSunshine").mockRejectedValue(
+      new Error("API request failed with status 500"),
+    );
+
+    renderHome();
+
+    expect(
+      await screen.findByRole("heading", {
+        level: 1,
+        name: "Karl conditions are unavailable",
+      }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Conditions unavailable")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Try again" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Reading Karl intelligence")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("API request failed with status 500"),
+    ).not.toBeInTheDocument();
   });
 });

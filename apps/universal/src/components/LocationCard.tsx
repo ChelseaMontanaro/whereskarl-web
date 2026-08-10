@@ -6,7 +6,7 @@ import { Colors, Fonts, Radius, Spacing } from '@/constants/theme';
 type LocationCardProps = {
   name: string;
   status: string;
-  temperature: number;
+  temperature?: number;
   distanceText?: string;
   sunshineScore?: number;
   isHomeLocation?: boolean;
@@ -24,6 +24,8 @@ export function LocationCard({
   isPlaceholder = false,
   isLoading = false,
 }: LocationCardProps) {
+  const showMetrics = typeof temperature === 'number';
+
   return (
     <View
       style={[
@@ -42,18 +44,20 @@ export function LocationCard({
 
       <Text style={styles.status}>{status}</Text>
 
-      <View style={styles.metrics}>
-        <Text style={styles.temperature}>{Math.round(temperature)}°</Text>
-        {typeof sunshineScore === 'number' ? (
-          <Text style={styles.score}>{Math.round(sunshineScore)}% clear</Text>
-        ) : null}
-      </View>
+      {showMetrics ? (
+        <View style={styles.metrics}>
+          <Text style={styles.temperature}>{Math.round(temperature)}°</Text>
+          {typeof sunshineScore === 'number' ? (
+            <Text style={styles.score}>{Math.round(sunshineScore)}% clear</Text>
+          ) : null}
+        </View>
+      ) : null}
 
       {isPlaceholder ? (
         <Text style={styles.placeholderHint}>
           {isLoading
             ? 'Loading brightest spot…'
-            : 'Showing sample conditions while the API is unavailable'}
+            : 'Live conditions are unavailable right now'}
         </Text>
       ) : null}
     </View>

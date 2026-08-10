@@ -133,6 +133,19 @@ export function HomeView() {
   const hasLoadedWeather =
     hasLoadedCoreWeather && (hasBestSunshine || bestSunshineQuery.isError);
 
+  /** Core weather failed with nothing usable to show (including last-known). */
+  const isCoreWeatherUnavailable =
+    !hasLoadedCoreWeather &&
+    (currentQuery.isError || locationsQuery.isError) &&
+    !currentQuery.isPending &&
+    !locationsQuery.isPending;
+
+  const isShowingCoreLoading =
+    !hasLoadedCoreWeather && !isCoreWeatherUnavailable;
+
+  const isBestSunshineUnavailable =
+    bestSunshineQuery.isError && !bestSunshineQuery.data;
+
   const current = currentQuery.data ?? null;
   const bestSunshine = bestSunshineQuery.data ?? null;
   const intelligence = intelligenceQuery.data ?? null;
@@ -174,30 +187,43 @@ export function HomeView() {
   const nextHourConfidence =
     karlLocation?.prediction?.predictionConfidenceLabel ?? null;
 
-  const headline = heroHeadline({
-    current,
-    karlLocation,
-    intelligenceFocusLocationId: intelligence?.heroImagery?.focusLocationId,
-    hasLoadedWeather: hasLoadedCoreWeather,
-  });
+  const headline = isCoreWeatherUnavailable
+    ? "Karl conditions are unavailable"
+    : heroHeadline({
+        current,
+        karlLocation,
+        intelligenceFocusLocationId: intelligence?.heroImagery?.focusLocationId,
+        hasLoadedWeather: hasLoadedCoreWeather,
+      });
 
-  const subheadline = heroSubheadline({
-    current,
-    karlLocation,
-    hasLoadedWeather: hasLoadedCoreWeather,
-  });
+  const subheadline = isCoreWeatherUnavailable
+    ? "Live Bay Area weather couldn’t be loaded right now."
+    : heroSubheadline({
+        current,
+        karlLocation,
+        hasLoadedWeather: hasLoadedCoreWeather,
+      });
 
   const isFindingClearSkies =
-    bestSunshineQuery.isLoading ||
-    (bestSunshineQuery.isFetching && !bestSunshine);
+    !isBestSunshineUnavailable &&
+    (bestSunshineQuery.isLoading ||
+      (bestSunshineQuery.isFetching && !bestSunshine));
 
   const clearSkiesLocationId = bestSunshine?.locationID ?? null;
 
-  const confidenceText = heroConfidenceText({
-    intelligence,
-    karlLocation,
-    current,
-  });
+  const confidenceText = isCoreWeatherUnavailable
+    ? "Try again in a moment."
+    : heroConfidenceText({
+        intelligence,
+        karlLocation,
+        current,
+      });
+
+  const retryCoreWeather = () => {
+    void currentQuery.refetch();
+    void locationsQuery.refetch();
+    void bestSunshineQuery.refetch();
+  };
 
   useEffect(() => {
     if (initialLastKnown && !currentQuery.isFetchedAfterMount) {
@@ -269,7 +295,9 @@ export function HomeView() {
         headline={headline}
         subheadline={subheadline}
         confidenceText={confidenceText}
-        isLoading={!hasLoadedCoreWeather}
+        isLoading={isShowingCoreLoading}
+        isUnavailable={isCoreWeatherUnavailable}
+        onRetry={isCoreWeatherUnavailable ? retryCoreWeather : undefined}
         clearSkiesLocationId={clearSkiesLocationId}
         isFindingClearSkies={isFindingClearSkies}
       />
@@ -280,7 +308,8 @@ export function HomeView() {
           current={current}
           bestSunshine={bestSunshine}
           intelligence={intelligence}
-          isLoading={!hasLoadedCoreWeather}
+          isLoading={isShowingCoreLoading}
+          isBestSunshineUnavailable={isBestSunshineUnavailable}
           isNightPresentation={isNightPresentation}
         />
 
@@ -302,7 +331,7 @@ export function HomeView() {
           <NextHourOutlookCard
             summary={nextHourSummary}
             confidenceLabel={nextHourConfidence}
-            isLoading={!hasLoadedCoreWeather}
+            isLoading={isShowingCoreLoading}
           />
         </div>
         ) : null}
@@ -319,7 +348,7 @@ export function HomeView() {
           <div className="grid grid-cols-2 gap-4">
             <BestRightNowSection
               items={desktopBestRightNow}
-              isLoading={!hasLoadedCoreWeather}
+              isLoading={isShowingCoreLoading}
               isNightPresentation={isNightPresentation}
               layout="desktop"
             />
@@ -328,7 +357,7 @@ export function HomeView() {
           <NextHourOutlookCard
             summary={nextHourSummary}
             confidenceLabel={nextHourConfidence}
-            isLoading={!hasLoadedCoreWeather}
+            isLoading={isShowingCoreLoading}
             layout="desktop"
           />
         </div>

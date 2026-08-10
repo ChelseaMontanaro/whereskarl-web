@@ -317,6 +317,20 @@ describe("DashboardGrid", () => {
     expect(screen.queryByTestId("clearest-spot-gauge")).not.toBeInTheDocument();
   });
 
+  it("shows Clearest Spot as unavailable when the recommendation fails", () => {
+    render(
+      <DashboardGrid
+        current={currentFixture}
+        bestSunshine={null}
+        isLoading={false}
+        isBestSunshineUnavailable
+      />,
+    );
+
+    expect(screen.getByText("Unavailable right now")).toBeInTheDocument();
+    expect(screen.queryByText("Finding brighter spots")).not.toBeInTheDocument();
+  });
+
   it("renders an orange clear skies slider only on the Clear Skies Score tile", () => {
     render(
       <DashboardGrid

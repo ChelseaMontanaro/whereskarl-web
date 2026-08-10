@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 
-import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { HomeHero } from "@/components/home/HomeHero";
 
@@ -55,6 +55,27 @@ describe("HomeHero", () => {
     expect(container.querySelector(".mt-6")).toBeInTheDocument();
     expect(container.querySelector(".pb-12")).toBeInTheDocument();
     expect(container.querySelector(".min-h-\\[min\\(560px\\,70vh\\)\\]")).toBeInTheDocument();
+  });
+
+  it("shows unavailable badge and retry instead of clear skies CTA", () => {
+    const onRetry = vi.fn();
+
+    render(
+      <HomeHero
+        {...heroDefaults}
+        headline="Karl conditions are unavailable"
+        subheadline="Live Bay Area weather couldn’t be loaded right now."
+        confidenceText="Try again in a moment."
+        isLoading={false}
+        isUnavailable
+        onRetry={onRetry}
+      />,
+    );
+
+    expect(screen.getByText("Conditions unavailable")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Find Clear Skies" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+    expect(onRetry).toHaveBeenCalledTimes(1);
   });
 
   it("does not render a duplicate inline hero image", () => {

@@ -24,6 +24,9 @@ const INITIAL_STATE: Omit<LocationsState, 'refresh'> = {
   hasLiveData: false,
 };
 
+const LOCATIONS_UNAVAILABLE_MESSAGE =
+  'Live Bay Area locations are unavailable right now. Try again in a moment.';
+
 export function useLocations(): LocationsState {
   const [state, setState] = useState<Omit<LocationsState, 'refresh'>>(
     INITIAL_STATE,
@@ -34,7 +37,7 @@ export function useLocations(): LocationsState {
       setState({
         ...INITIAL_STATE,
         isLoading: false,
-        error: 'API URL is not configured. Set EXPO_PUBLIC_API_URL to load live locations.',
+        error: LOCATIONS_UNAVAILABLE_MESSAGE,
       });
       return;
     }
@@ -55,17 +58,12 @@ export function useLocations(): LocationsState {
         error: null,
         hasLiveData: response.locations.length > 0,
       });
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : 'Unable to load Bay Area locations.';
-
+    } catch {
       setState((current) => ({
         isLoading: false,
         isRefreshing: false,
         locations: current.locations,
-        error: message,
+        error: LOCATIONS_UNAVAILABLE_MESSAGE,
         hasLiveData: current.locations.length > 0,
       }));
     }

@@ -27,17 +27,32 @@ vi.mock("@/lib/hooks/useMinWidth", () => ({
 vi.mock("@/components/map/BayAreaMap", () => ({
   BayAreaMap: ({
     onSelectLocation,
+    loadError,
+    onRetryLoad,
   }: {
     onSelectLocation: (locationId: string) => void;
+    loadError?: string | null;
+    onRetryLoad?: () => void;
   }) => (
     <div data-testid="bay-area-map">
-      <button
-        type="button"
-        data-testid="map-marker-sausalito"
-        onClick={() => onSelectLocation("sausalito")}
-      >
-        Sausalito marker
-      </button>
+      {loadError ? (
+        <div role="alert">
+          <p>{loadError}</p>
+          {onRetryLoad ? (
+            <button type="button" onClick={onRetryLoad}>
+              Try again
+            </button>
+          ) : null}
+        </div>
+      ) : (
+        <button
+          type="button"
+          data-testid="map-marker-sausalito"
+          onClick={() => onSelectLocation("sausalito")}
+        >
+          Sausalito marker
+        </button>
+      )}
     </div>
   ),
 }));
@@ -225,5 +240,23 @@ describe("MapView", () => {
     expect(replaceMock).toHaveBeenCalledWith("/map?region=north-bay", {
       scroll: false,
     });
+  });
+
+  it("shows a friendly retry state when locations fail to load", async () => {
+    vi.spyOn(weatherApi, "getLocations").mockRejectedValue(
+      new Error("API request failed with status 500"),
+    );
+
+    renderMap();
+
+    expect(
+      await screen.findByText(
+        "Live map data is unavailable right now. Try again in a moment.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
+    expect(
+      screen.queryByText("API request failed with status 500"),
+    ).not.toBeInTheDocument();
   });
 });

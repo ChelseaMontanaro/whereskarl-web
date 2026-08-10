@@ -21,6 +21,8 @@ export type HomeWeatherState = {
   locations: LocationWeather[];
   bestSunshine: BestSunshineResponse | null;
   hasLiveData: boolean;
+  /** Settled with no usable weather — show unavailable, not sample content. */
+  isUnavailable: boolean;
 };
 
 const INITIAL_STATE: HomeWeatherState = {
@@ -29,6 +31,7 @@ const INITIAL_STATE: HomeWeatherState = {
   locations: [],
   bestSunshine: null,
   hasLiveData: false,
+  isUnavailable: false,
 };
 
 export function useHomeWeather(): HomeWeatherState {
@@ -43,6 +46,7 @@ export function useHomeWeather(): HomeWeatherState {
           setState({
             ...INITIAL_STATE,
             isLoading: false,
+            isUnavailable: true,
           });
         }
         return;
@@ -80,6 +84,7 @@ export function useHomeWeather(): HomeWeatherState {
         locations,
         bestSunshine,
         hasLiveData,
+        isUnavailable: !hasLiveData,
       });
     }
 

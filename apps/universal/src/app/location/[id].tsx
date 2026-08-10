@@ -164,8 +164,8 @@ export default function LocationDetailScreen() {
             <View style={styles.stateCard}>
               <Text style={styles.stateTitle}>Live data unavailable</Text>
               <Text style={styles.stateBody}>
-                Karl can&apos;t reach the weather service right now. Set
-                EXPO_PUBLIC_API_URL or pull to refresh when the API is back.
+                Karl can&apos;t reach live weather right now. Pull to refresh
+                when you&apos;re back online.
               </Text>
             </View>
           ) : null}

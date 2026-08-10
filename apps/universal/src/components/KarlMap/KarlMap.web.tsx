@@ -649,7 +649,7 @@ const KarlMapWeb = forwardRef<KarlMapHandle, KarlMapProps>(function KarlMapWeb(
     }
 
     if (error && locations.length === 0) {
-      return 'Live map data is unavailable right now. Check your API connection and try again.';
+      return 'Live map data is unavailable right now. Try again in a moment.';
     }
 
     if (locations.length === 0 && searchQuery.trim()) {
