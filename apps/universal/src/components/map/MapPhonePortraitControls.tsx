@@ -1,33 +1,53 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { Colors, Fonts, Radius } from '@/constants/theme';
-import { LiquidGlassTokens } from '@/constants/liquidGlass';
+import { MapLocationSearchBar } from '@/components/map/MapLocationSearchBar';
+import { Colors, Radius } from '@/constants/theme';
 import {
   BAY_AREA_PRODUCT_REGIONS,
   type BayAreaVisibleProductRegionId,
 } from '@/lib/map/regions';
+import type { LocationWeather } from '@whereskarl/schemas';
 
 type MapPhonePortraitControlsProps = {
   selectedRegionId: BayAreaVisibleProductRegionId | null;
   onSelectRegion: (regionId: BayAreaVisibleProductRegionId) => void;
-  isPhonePortrait?: boolean;
+  /** Canonical catalog for in-map search (name + aliases). */
+  locations?: readonly LocationWeather[];
+  onSelectLocation?: (locationId: string) => void;
+  onClearSelectedLocation?: () => void;
+  isSearchDisabled?: boolean;
 };
 
+/**
+ * Phone map top chrome aligned with mobile Web hierarchy:
+ * search pill → compact region chips (map-first, no oversized title).
+ */
 export function MapPhonePortraitControls({
   selectedRegionId,
   onSelectRegion,
-  isPhonePortrait = false,
+  locations = [],
+  onSelectLocation,
+  onClearSelectedLocation,
+  isSearchDisabled = false,
 }: MapPhonePortraitControlsProps) {
+  const showSearch =
+    typeof onSelectLocation === 'function' &&
+    typeof onClearSelectedLocation === 'function';
+
   return (
-    <View style={styles.root} accessibilityLabel="Bay Area regions">
-      <Text
-        style={[
-          styles.title,
-          isPhonePortrait && styles.titlePhonePortrait,
-        ]}>
-        Karl Around the Bay
-      </Text>
-      <View style={[styles.chipRow, isPhonePortrait && styles.chipRowPhonePortrait]}>
+    <View style={styles.root} accessibilityLabel="Map search and regions">
+      {showSearch ? (
+        <MapLocationSearchBar
+          locations={locations}
+          onSelectLocation={onSelectLocation}
+          onClearSelectedLocation={onClearSelectedLocation}
+          isDisabled={isSearchDisabled}
+        />
+      ) : null}
+
+      <View
+        style={styles.chipRow}
+        accessibilityLabel="Bay Area regions">
         {BAY_AREA_PRODUCT_REGIONS.map((region) => {
           const isActive = selectedRegionId === region.id;
 
@@ -39,18 +59,12 @@ export function MapPhonePortraitControls({
               onPress={() => onSelectRegion(region.id)}
               style={({ pressed }) => [
                 styles.chip,
-                isPhonePortrait && styles.chipPhonePortrait,
                 isActive && styles.chipActive,
-                isActive && isPhonePortrait && styles.chipActivePhonePortrait,
                 pressed && styles.pressed,
               ]}>
               <Text
                 numberOfLines={1}
-                style={[
-                  styles.chipLabel,
-                  isPhonePortrait && styles.chipLabelPhonePortrait,
-                  isActive && styles.chipLabelActive,
-                ]}>
+                style={[styles.chipLabel, isActive && styles.chipLabelActive]}>
                 {region.chipLabel}
               </Text>
             </Pressable>
@@ -64,72 +78,40 @@ export function MapPhonePortraitControls({
 const styles = StyleSheet.create({
   root: {
     width: '100%',
-    gap: 6,
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 2,
-    textTransform: 'uppercase',
-    color: 'rgba(242, 163, 38, 0.92)',
-    textAlign: 'center',
-  },
-  titlePhonePortrait: {
-    fontFamily: Fonts.serif,
-    fontSize: 19,
-    lineHeight: 24,
-    fontWeight: '600',
-    letterSpacing: 0.4,
-    textTransform: 'none',
-    color: Colors.gold,
-    marginBottom: 4,
+    gap: 8,
+    alignItems: 'stretch',
   },
   chipRow: {
     flexDirection: 'row',
     flexWrap: 'nowrap',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
-    width: '100%',
-  },
-  chipRowPhonePortrait: {
     gap: 6,
+    width: '100%',
   },
   chip: {
     flex: 1,
     minWidth: 0,
+    minHeight: 40,
     alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: Radius.pill,
     borderWidth: 1,
-    borderColor: LiquidGlassTokens.border,
-    backgroundColor: LiquidGlassTokens.fillStrong,
-    paddingHorizontal: 5,
-    paddingVertical: 6,
-  },
-  chipPhonePortrait: {
+    borderColor: 'rgba(150, 175, 200, 0.2)',
+    backgroundColor: 'rgba(5, 13, 24, 0.78)',
     paddingHorizontal: 8,
     paddingVertical: 9,
-    backgroundColor: 'rgba(5, 13, 24, 0.78)',
-    borderColor: 'rgba(150, 175, 200, 0.2)',
   },
   chipActive: {
-    borderColor: 'rgba(242, 163, 38, 0.3)',
+    borderColor: 'rgba(242, 163, 38, 0.45)',
     backgroundColor: Colors.gold,
   },
-  chipActivePhonePortrait: {
-    borderColor: 'rgba(242, 163, 38, 0.45)',
-  },
   chipLabel: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.78)',
-    textAlign: 'center',
-  },
-  chipLabelPhonePortrait: {
     fontSize: 12,
     lineHeight: 14,
     fontWeight: '700',
+    color: 'rgba(255, 255, 255, 0.78)',
+    textAlign: 'center',
   },
   chipLabelActive: {
     color: Colors.navy,

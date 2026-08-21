@@ -1,3 +1,8 @@
+import {
+  getFogIntensity,
+  getFogIntensityLabel,
+  resolveLocationFogIntensity,
+} from '@whereskarl/domain';
 import type { LocationWeather } from '@whereskarl/schemas';
 
 function trimmedNonEmpty(value: string | null | undefined): string | null {
@@ -119,4 +124,59 @@ export function getSelectedLocationSubtitle(
     trimmedNonEmpty(location.status) ??
     'Conditions unavailable'
   );
+}
+
+/**
+ * Karl's Read — same hierarchy as mobile Web selected-location sheet:
+ * authored karlReason → prediction narrative → terse status.
+ */
+export function getKarlReadParagraph(
+  location: Pick<
+    LocationWeather,
+    'karlReason' | 'status' | 'prediction'
+  >,
+): string {
+  return (
+    trimmedNonEmpty(location.karlReason) ??
+    trimmedNonEmpty(location.prediction?.predictionReason) ??
+    trimmedNonEmpty(location.status) ??
+    'Conditions unavailable'
+  );
+}
+
+export type SelectedLocationHourlyPeriod = {
+  key: string;
+  label: string;
+  caption: string;
+};
+
+/** Lightweight Now + optional Next hr strip (matches mobile Web). */
+export function getSelectedLocationHourlyPeriods(
+  location: LocationWeather,
+  isNighttime = false,
+): SelectedLocationHourlyPeriod[] {
+  const periods: SelectedLocationHourlyPeriod[] = [
+    {
+      key: 'now',
+      label: 'Now',
+      caption: getFogIntensityLabel(
+        resolveLocationFogIntensity(location),
+        isNighttime,
+      ),
+    },
+  ];
+
+  const projected = location.prediction?.projectedFogScore1h;
+  if (typeof projected === 'number' && Number.isFinite(projected)) {
+    const nextIntensity = getFogIntensity(
+      Math.max(0, Math.min(100, projected)),
+    );
+    periods.push({
+      key: 'next',
+      label: 'Next hr',
+      caption: getFogIntensityLabel(nextIntensity, isNighttime),
+    });
+  }
+
+  return periods;
 }

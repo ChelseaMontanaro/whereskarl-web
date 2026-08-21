@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react';
+import { Image } from 'expo-image';
+import { useState, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { MapConditionIcon } from '@/components/KarlMap/KarlMapMarkerView';
@@ -7,12 +8,26 @@ import { HomeLocationBadge } from '@/components/HomeLocationBadge';
 import { LiquidGlassSurface } from '@/components/ui/LiquidGlassSurface';
 import { Colors, Fonts, Radius, Spacing } from '@/constants/theme';
 import { LiquidGlassTokens } from '@/constants/liquidGlass';
+import { useFavoriteToggle } from '@/hooks/useFavoriteToggle';
 import { useIsNighttime } from '@/hooks/useIsNighttime';
-import { locationWeatherMetadataItems } from '@/lib/map/locationMetadata';
 import {
+  formatTemperature,
+  locationWeatherMetadataItems,
+} from '@/lib/map/locationMetadata';
+import {
+  formatRelativeUpdatedAt,
+  getKarlReadParagraph,
+  getSelectedLocationHourlyPeriods,
+  getSelectedLocationSubtitle,
+} from '@/lib/map/mapPanelDisplay';
+import {
+  clearSkiesScoreColor,
+  getFogIntensityLabel,
+  getProductRegionNameForLocation,
+  presentClearSkiesScore,
+  resolveFogScore,
   resolveLocationFogIntensity,
 } from '@whereskarl/domain';
-import { getSelectedLocationSubtitle } from '@/lib/map/mapPanelDisplay';
 import type { LocationWeather } from '@whereskarl/schemas';
 
 type SelectedLocationPreviewProps = {
@@ -22,11 +37,10 @@ type SelectedLocationPreviewProps = {
   onOpenDetail?: (locationId: string) => void;
   onDismiss?: () => void;
   variant?: 'card' | 'compact';
-  /** Approved phone-portrait treatment: darker navy glass + score divider. */
+  /** Phone map sheet treatment aligned with mobile Web info hierarchy. */
   phonePortrait?: boolean;
 };
 
-const compactScoreGreen = '#22E36B';
 const cardScoreGreen = '#22E36B';
 
 export function SelectedLocationPreview({
@@ -44,12 +58,24 @@ export function SelectedLocationPreview({
     return null;
   }
 
+  if (variant === 'compact' && phonePortrait) {
+    return (
+      <PhoneSelectedLocationSheet
+        location={location}
+        isHomeLocation={isHomeLocation}
+        onDismiss={onDismiss}
+        onOpenDetail={onOpenDetail}
+        isNighttime={isNighttime}
+      />
+    );
+  }
+
   const isCompact = variant === 'compact';
   const subtitle = getSelectedLocationSubtitle(location);
   const metadata = locationWeatherMetadataItems(location).join(' • ');
   const score = Math.round(location.sunshineScore);
   const scoreColor = isCompact
-    ? compactScoreGreen
+    ? clearSkiesScoreColor(location.sunshineScore)
     : cardScoreGreen;
   const conditionIntensity = isCompact
     ? resolveLocationFogIntensity(location)
@@ -70,10 +96,7 @@ export function SelectedLocationPreview({
     ) : null;
 
   return (
-    <PreviewContainer
-      isCompact={isCompact}
-      isSelected={isSelected}
-      phonePortrait={phonePortrait}>
+    <PreviewContainer isCompact={isCompact} isSelected={isSelected}>
       {onDismiss ? (
         <Pressable
           accessibilityRole="button"
@@ -125,11 +148,7 @@ export function SelectedLocationPreview({
         </View>
 
         <View
-          style={[
-            styles.scoreBlock,
-            isCompact && styles.scoreBlockCompact,
-            phonePortrait && styles.scoreBlockPhonePortrait,
-          ]}>
+          style={[styles.scoreBlock, isCompact && styles.scoreBlockCompact]}>
           <Text
             style={[
               styles.scoreEyebrow,
@@ -154,24 +173,224 @@ export function SelectedLocationPreview({
   );
 }
 
+function PhoneSelectedLocationSheet({
+  location,
+  isHomeLocation,
+  onDismiss,
+  onOpenDetail,
+  isNighttime,
+}: {
+  location: LocationWeather;
+  isHomeLocation: boolean;
+  onDismiss?: () => void;
+  onOpenDetail?: (locationId: string) => void;
+  isNighttime: boolean;
+}) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const { isFavorite, handleToggleFavorite } = useFavoriteToggle(location.id);
+  const score = presentClearSkiesScore(location.sunshineScore);
+  const fogScore = resolveFogScore(location);
+  const fogLabel = getFogIntensityLabel(
+    resolveLocationFogIntensity(location),
+  );
+  const temperature = formatTemperature(location);
+  const windSpeed =
+    typeof location.windSpeed === 'number' && Number.isFinite(location.windSpeed)
+      ? `${Math.round(location.windSpeed)} mph`
+      : null;
+  const regionName = getProductRegionNameForLocation(location);
+  const karlRead = getKarlReadParagraph(location);
+  const hourly = getSelectedLocationHourlyPeriods(location, isNighttime);
+  const imageUrl = location.imageUrl?.trim() || null;
+
+  return (
+    <LiquidGlassSurface variant="panel" style={styles.phoneSheet}>
+      <View style={styles.phoneHeaderRow}>
+        {imageUrl ? (
+          <Image
+            source={{ uri: imageUrl }}
+            style={styles.phoneImage}
+            contentFit="cover"
+            accessibilityLabel={`${location.name} photo`}
+          />
+        ) : (
+          <View style={styles.phoneImageFallback}>
+            <ConditionIcon
+              intensity={resolveLocationFogIntensity(location)}
+              isNighttime={isNighttime}
+              size={28}
+            />
+          </View>
+        )}
+
+        <View style={styles.phoneHeaderCopy}>
+          {isHomeLocation ? <HomeLocationBadge /> : null}
+          <Text style={styles.phoneName} numberOfLines={1}>
+            {location.name}
+          </Text>
+          <Text style={styles.phoneMeta} numberOfLines={1}>
+            {[
+              regionName ? `${regionName}, CA` : null,
+              formatRelativeUpdatedAt(location.updatedAt ?? null),
+            ]
+              .filter(Boolean)
+              .join(' · ')}
+          </Text>
+        </View>
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ selected: isFavorite }}
+          accessibilityLabel={
+            isFavorite
+              ? `Remove ${location.name} from favorites`
+              : `Add ${location.name} to favorites`
+          }
+          onPress={handleToggleFavorite}
+          style={({ pressed }) => [
+            styles.phoneIconButton,
+            pressed && styles.buttonPressed,
+          ]}>
+          <Text
+            style={[
+              styles.favoriteGlyph,
+              isFavorite && styles.favoriteGlyphActive,
+            ]}>
+            ♥
+          </Text>
+        </Pressable>
+
+        {onDismiss ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Clear selected location"
+            onPress={onDismiss}
+            style={({ pressed }) => [
+              styles.phoneIconButton,
+              pressed && styles.buttonPressed,
+            ]}>
+            <Text style={styles.closeLabel}>×</Text>
+          </Pressable>
+        ) : null}
+      </View>
+
+      <View
+        style={styles.coreWeatherRow}
+        accessibilityLabel="Core weather">
+        <CoreWeatherCell
+          title="Clear Sky Score"
+          value={String(score.score)}
+          valueColor={score.color}
+          supporting={score.qualityLabel}
+        />
+        <CoreWeatherCell
+          title="Fog"
+          value={fogScore === null ? '—' : `${fogScore}%`}
+          supporting={fogLabel}
+        />
+        <CoreWeatherCell
+          title="Temp"
+          value={temperature?.replace('°F', '°') ?? '—'}
+          supporting={temperature ? 'Fahrenheit' : undefined}
+        />
+        <CoreWeatherCell
+          title="Wind"
+          value={windSpeed ?? '—'}
+          supporting={location.windDirection?.trim() || undefined}
+        />
+      </View>
+
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={
+          isExpanded ? 'Collapse location details' : 'Expand location details'
+        }
+        onPress={() => setIsExpanded((current) => !current)}
+        style={({ pressed }) => [
+          styles.expandToggle,
+          pressed && styles.buttonPressed,
+        ]}>
+        <Text style={styles.expandToggleLabel}>
+          {isExpanded ? 'Show less' : 'Karl’s Read & outlook'}
+        </Text>
+        <Text style={styles.expandChevron}>{isExpanded ? '⌃' : '⌄'}</Text>
+      </Pressable>
+
+      {isExpanded ? (
+        <View style={styles.expandedBody}>
+          <Text style={styles.sectionLabel}>Karl’s Read</Text>
+          <Text style={styles.karlRead}>{karlRead}</Text>
+
+          <Text style={[styles.sectionLabel, styles.sectionLabelSpaced]}>
+            Hourly Outlook
+          </Text>
+          <View style={styles.hourlyRow}>
+            {hourly.map((period) => (
+              <View key={period.key} style={styles.hourlyCell}>
+                <Text style={styles.hourlyLabel}>{period.label}</Text>
+                <Text style={styles.hourlyCaption}>{period.caption}</Text>
+              </View>
+            ))}
+          </View>
+
+          {onOpenDetail ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Open details for ${location.name}`}
+              onPress={() => onOpenDetail(location.id)}
+              style={({ pressed }) => [
+                styles.detailLink,
+                pressed && styles.buttonPressed,
+              ]}>
+              <Text style={styles.detailLinkLabel}>View details ›</Text>
+            </Pressable>
+          ) : null}
+        </View>
+      ) : null}
+    </LiquidGlassSurface>
+  );
+}
+
+function CoreWeatherCell({
+  title,
+  value,
+  valueColor,
+  supporting,
+}: {
+  title: string;
+  value: string;
+  valueColor?: string;
+  supporting?: string;
+}) {
+  return (
+    <View style={styles.coreCell}>
+      <Text style={styles.coreTitle}>{title}</Text>
+      <Text style={[styles.coreValue, valueColor ? { color: valueColor } : null]}>
+        {value}
+      </Text>
+      {supporting ? (
+        <Text style={styles.coreSupporting} numberOfLines={1}>
+          {supporting}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
 function PreviewContainer({
   children,
   isCompact,
   isSelected,
-  phonePortrait,
 }: {
   children: ReactNode;
   isCompact: boolean;
   isSelected: boolean;
-  phonePortrait: boolean;
 }) {
   const containerStyle = [
     styles.container,
     isSelected && styles.containerSelected,
     isCompact && styles.containerCompact,
     isCompact && isSelected && styles.containerCompactSelected,
-    phonePortrait && styles.containerPhonePortrait,
-    phonePortrait && isSelected && styles.containerPhonePortraitSelected,
   ];
 
   if (isCompact) {
@@ -221,21 +440,163 @@ const styles = StyleSheet.create({
   containerCompactSelected: {
     borderColor: LiquidGlassTokens.borderHighlight,
   },
-  containerPhonePortrait: {
-    borderRadius: 16,
-    paddingTop: 14,
-    paddingBottom: 14,
-    paddingHorizontal: 14,
+  phoneSheet: {
+    width: '100%',
+    borderRadius: 20,
+    borderWidth: 1,
     borderColor: 'rgba(160, 185, 210, 0.24)',
     backgroundColor: 'rgba(6, 15, 27, 0.92)',
+    paddingTop: 14,
+    paddingBottom: 12,
+    paddingHorizontal: 14,
+    gap: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.45,
     shadowRadius: 18,
     elevation: 10,
   },
-  containerPhonePortraitSelected: {
-    borderColor: 'rgba(242, 163, 38, 0.42)',
+  phoneHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  phoneImage: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+  },
+  phoneImageFallback: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  phoneHeaderCopy: {
+    flex: 1,
+    minWidth: 0,
+    gap: 2,
+  },
+  phoneName: {
+    fontFamily: Fonts?.sans,
+    fontSize: 18,
+    lineHeight: 22,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+  },
+  phoneMeta: {
+    fontSize: 11,
+    lineHeight: 14,
+    fontWeight: '500',
+    color: Colors.textMuted,
+  },
+  phoneIconButton: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: Radius.pill,
+  },
+  favoriteGlyph: {
+    fontSize: 18,
+    color: 'rgba(255, 255, 255, 0.42)',
+  },
+  favoriteGlyphActive: {
+    color: Colors.gold,
+  },
+  coreWeatherRow: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  coreCell: {
+    flex: 1,
+    minWidth: 0,
+    gap: 2,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    paddingHorizontal: 6,
+    paddingVertical: 8,
+  },
+  coreTitle: {
+    fontSize: 9,
+    fontWeight: '700',
+    letterSpacing: 0.4,
+    textTransform: 'uppercase',
+    color: 'rgba(255, 255, 255, 0.45)',
+  },
+  coreValue: {
+    fontSize: 16,
+    lineHeight: 20,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+  },
+  coreSupporting: {
+    fontSize: 10,
+    lineHeight: 12,
+    fontWeight: '500',
+    color: Colors.textMuted,
+  },
+  expandToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: 2,
+  },
+  expandToggleLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: Colors.gold,
+  },
+  expandChevron: {
+    fontSize: 14,
+    color: Colors.gold,
+  },
+  expandedBody: {
+    gap: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    paddingTop: 10,
+  },
+  sectionLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+    color: 'rgba(255, 255, 255, 0.5)',
+  },
+  sectionLabelSpaced: {
+    marginTop: 6,
+  },
+  karlRead: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '500',
+    color: 'rgba(255, 255, 255, 0.82)',
+  },
+  hourlyRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  hourlyCell: {
+    gap: 2,
+    minWidth: 72,
+  },
+  hourlyLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: Colors.textSecondary,
+  },
+  hourlyCaption: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: Colors.textPrimary,
   },
   closeButton: {
     position: 'absolute',
@@ -327,10 +688,6 @@ const styles = StyleSheet.create({
     minWidth: 72,
     paddingLeft: Spacing.sm,
     gap: 2,
-  },
-  scoreBlockPhonePortrait: {
-    borderLeftWidth: 1,
-    borderLeftColor: 'rgba(150, 175, 200, 0.16)',
   },
   scoreEyebrow: {
     fontSize: 8,

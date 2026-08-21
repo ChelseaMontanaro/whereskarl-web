@@ -70,7 +70,14 @@ export function MapLayerControls({
   return (
     <View style={[mapGlassPanel.panel, styles.panel]}>
       <View style={styles.headerRow}>
-        <Text style={mapGlassPanel.eyebrow}>Layers</Text>
+        <View style={styles.headerCopy}>
+          <Text style={styles.headerTitle}>
+            {isCompact || isImmersive ? 'Map Layers' : 'Layers'}
+          </Text>
+          {isCompact || isImmersive ? (
+            <Text style={styles.headerSubtitle}>Customize the Karl map</Text>
+          ) : null}
+        </View>
         {isImmersive || isCompact ? (
           <Pressable
             accessibilityRole="button"
@@ -82,7 +89,7 @@ export function MapLayerControls({
         ) : null}
       </View>
 
-      {onZoomIn && onZoomOut ? (
+      {onZoomIn && onZoomOut && !isCompact ? (
         <View style={styles.zoomRow}>
           <Pressable
             accessibilityRole="button"
@@ -103,6 +110,7 @@ export function MapLayerControls({
       ) : null}
 
       <View style={styles.section}>
+        <Text style={styles.sectionLabel}>Map type</Text>
         {KARL_MAP_STYLE_OPTIONS.map((option) => {
           const isSelected = mapStyle === option.id;
 
@@ -131,38 +139,45 @@ export function MapLayerControls({
       </View>
 
       {fogLayerSupported ? (
-        <View style={styles.toggleRow}>
-          <Text style={styles.toggleLabel}>Fog Layer</Text>
-          <Switch
-            value={fogLayerEnabled}
-            onValueChange={onFogLayerChange}
-            trackColor={{
-              false: 'rgba(255, 255, 255, 0.1)',
-              true: 'rgba(242, 163, 38, 0.3)',
-            }}
-            thumbColor={fogLayerEnabled ? Colors.gold : '#f4f3f4'}
-            ios_backgroundColor="rgba(255, 255, 255, 0.1)"
-          />
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>Details</Text>
+          <View style={styles.toggleRow}>
+            <Text style={styles.toggleLabel}>Fog Layer</Text>
+            <Switch
+              value={fogLayerEnabled}
+              onValueChange={onFogLayerChange}
+              trackColor={{
+                false: 'rgba(255, 255, 255, 0.1)',
+                true: 'rgba(242, 163, 38, 0.3)',
+              }}
+              thumbColor={fogLayerEnabled ? Colors.gold : '#f4f3f4'}
+              ios_backgroundColor="rgba(255, 255, 255, 0.1)"
+            />
+          </View>
         </View>
       ) : null}
 
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Locate me"
-        onPress={onLocateMe}
-        style={({ pressed }) => [styles.actionButton, pressed && styles.pressed]}>
-        <Text style={styles.actionIcon}>⌖</Text>
-        <Text style={styles.actionLabel}>Locate Me</Text>
-      </Pressable>
+      {!isCompact ? (
+        <>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Locate me"
+            onPress={onLocateMe}
+            style={({ pressed }) => [styles.actionButton, pressed && styles.pressed]}>
+            <Text style={styles.actionIcon}>⌖</Text>
+            <Text style={styles.actionLabel}>Locate Me</Text>
+          </Pressable>
 
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Reset view"
-        onPress={onResetView}
-        style={({ pressed }) => [styles.actionButton, pressed && styles.pressed]}>
-        <Text style={styles.actionIcon}>◎</Text>
-        <Text style={styles.actionLabel}>Reset View</Text>
-      </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Reset view"
+            onPress={onResetView}
+            style={({ pressed }) => [styles.actionButton, pressed && styles.pressed]}>
+            <Text style={styles.actionIcon}>◎</Text>
+            <Text style={styles.actionLabel}>Reset View</Text>
+          </Pressable>
+        </>
+      ) : null}
     </View>
   );
 }
@@ -191,8 +206,24 @@ const styles = StyleSheet.create({
   },
   headerRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'space-between',
+    gap: 8,
+  },
+  headerCopy: {
+    flex: 1,
+    minWidth: 0,
+    gap: 2,
+  },
+  headerTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+  },
+  headerSubtitle: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: 'rgba(255, 255, 255, 0.55)',
   },
   closeButton: {
     width: 24,
@@ -232,6 +263,13 @@ const styles = StyleSheet.create({
   },
   section: {
     gap: 6,
+  },
+  sectionLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+    color: 'rgba(255, 255, 255, 0.45)',
   },
   styleOption: {
     flexDirection: 'row',

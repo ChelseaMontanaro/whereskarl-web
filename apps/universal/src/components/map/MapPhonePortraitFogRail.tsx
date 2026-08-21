@@ -23,9 +23,8 @@ type MapPhonePortraitFogRailProps = {
 };
 
 /**
- * Phone-portrait web fog intensity rail — matches the approved mobile mockup:
- * strong glass panel, stacked FOG INTENSITY title, and four large selectable
- * condition cards with detailed icons and gold selected treatment.
+ * Phone fog intensity rail — matches mobile Web product language:
+ * Fog Intensity title, stacked condition cards, gold selected treatment.
  */
 export function MapPhonePortraitFogRail({
   activeIntensity,

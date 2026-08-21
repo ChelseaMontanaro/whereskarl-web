@@ -109,6 +109,8 @@ export default function MapScreen() {
   const [mapStyle, setMapStyle] = useState<KarlMapStyleId>('hybrid');
   const [fogLayerEnabled, setFogLayerEnabled] = useState(true);
   const [isLayersPanelOpen, setIsLayersPanelOpen] = useState(false);
+  /** Phone sheet dismiss latch — matches mobile Web BRN auto-select behavior. */
+  const sheetDismissedRef = useRef(false);
 
   const routeSyncSource = useRef<'local' | 'external'>('external');
 
@@ -189,6 +191,34 @@ export default function MapScreen() {
     });
   }, [bestRightNowItems, isLoading, locations.length, setClearSkiesNav]);
 
+  // Phone map: auto-select Best Right Now into the bottom sheet (mobile Web parity).
+  useEffect(() => {
+    if (!isPhone || showListMode || sheetDismissedRef.current) {
+      return;
+    }
+
+    if (selectedLocationId || locations.length === 0) {
+      return;
+    }
+
+    const bestLocation = [...locations].sort(
+      (left, right) => right.sunshineScore - left.sunshineScore,
+    )[0];
+
+    if (!bestLocation) {
+      return;
+    }
+
+    setSelectedLocationId(bestLocation.id);
+    syncMapRoute(bestLocation.id);
+  }, [
+    isPhone,
+    locations,
+    selectedLocationId,
+    showListMode,
+    syncMapRoute,
+  ]);
+
   const selectedLocation = useMemo(
     () =>
       markerLocations.find((location) => location.id === selectedLocationId) ??
@@ -211,11 +241,15 @@ export default function MapScreen() {
   }, [markerLocations, searchQuery, selectedLocationId, showListMode, syncMapRoute]);
 
   function handleSelectLocation(locationId: string) {
+    sheetDismissedRef.current = false;
     setSelectedLocationId(locationId);
     syncMapRoute(locationId);
   }
 
   function handleClearSelection() {
+    if (isPhone) {
+      sheetDismissedRef.current = true;
+    }
     setSelectedLocationId(null);
     setSearchQuery('');
     syncMapRoute(null);
@@ -246,6 +280,12 @@ export default function MapScreen() {
     syncMapRoute(selectedLocationId, 'list');
   }
 
+  function handlePhoneSearchSelect(locationId: string) {
+    sheetDismissedRef.current = false;
+    setSelectedLocationId(locationId);
+    syncMapRoute(locationId);
+  }
+
   function handleSelectRegion(regionId: BayAreaVisibleProductRegionId) {
     const nextRegionId = toggleRegionFilter(selectedRegionId, regionId);
     setSelectedRegionId(nextRegionId);
@@ -269,8 +309,8 @@ export default function MapScreen() {
     homeLocationId?.trim().toLowerCase() ===
       selectedLocationId?.trim().toLowerCase();
 
-  // Approved phone-portrait layout always shows a location card below the
-  // Best Right Now tray: the explicit selection, or the current best spot.
+  // Phone map always shows a selected-location sheet: explicit selection, or
+  // the current Best Right Now spot (mobile Web product hierarchy).
   const featuredPhoneLocation = useMemo(() => {
     if (selectedLocation) {
       return selectedLocation;
@@ -284,18 +324,17 @@ export default function MapScreen() {
     return locations.find((location) => location.id === topLocationId) ?? null;
   }, [bestRightNowItems, locations, selectedLocation]);
 
-  const phonePreview =
-    isPhonePortraitWeb && featuredPhoneLocation ? (
-      <SelectedLocationPreview
-        location={featuredPhoneLocation}
-        isSelected={selectedLocationId !== null}
-        isHomeLocation={isHomeSelected}
-        onDismiss={selectedLocationId ? handleClearSelection : undefined}
-        onOpenDetail={handleOpenLocationDetail}
-        variant="compact"
-        phonePortrait
-      />
-    ) : null;
+  const phonePreview = isPhone && featuredPhoneLocation ? (
+    <SelectedLocationPreview
+      location={featuredPhoneLocation}
+      isSelected={selectedLocationId !== null}
+      isHomeLocation={isHomeSelected}
+      onDismiss={selectedLocationId ? handleClearSelection : undefined}
+      onOpenDetail={handleOpenLocationDetail}
+      variant="compact"
+      phonePortrait
+    />
+  ) : null;
 
   const selectedPreview = selectedLocation ? (
     <SelectedLocationPreview
@@ -467,37 +506,31 @@ export default function MapScreen() {
                   style={[
                     styles.phoneTopControls,
                     {
-                      top: insets.top + (isPhonePortraitWeb ? 22 : 4),
-                      paddingLeft: Spacing.sm,
-                      paddingRight: isPhonePortraitWeb ? Spacing.sm : 56,
+                      top: insets.top + 12,
+                      paddingHorizontal: Spacing.sm,
                     },
                   ]}
                   pointerEvents="box-none">
                   <MapPhonePortraitControls
                     selectedRegionId={selectedRegionId}
                     onSelectRegion={handleSelectRegion}
-                    isPhonePortrait={isPhonePortraitWeb}
+                    locations={locations}
+                    onSelectLocation={handlePhoneSearchSelect}
+                    onClearSelectedLocation={handleClearSelection}
+                    isSearchDisabled={isLoading && locations.length === 0}
                   />
                 </View>
 
                 <View
                   style={[
                     styles.phoneFogRail,
-                    { top: insets.top + (isPhonePortraitWeb ? 112 : 64) },
+                    { top: insets.top + 112 },
                   ]}
                   pointerEvents="box-none">
-                  {isPhonePortraitWeb ? (
-                    <MapPhonePortraitFogRail
-                      activeIntensity={conditionFilter}
-                      onSelectIntensity={handleSelectCondition}
-                    />
-                  ) : (
-                    <MapFogLegend
-                      layout="phone-rail"
-                      activeIntensity={conditionFilter}
-                      onSelectIntensity={handleSelectCondition}
-                    />
-                  )}
+                  <MapPhonePortraitFogRail
+                    activeIntensity={conditionFilter}
+                    onSelectIntensity={handleSelectCondition}
+                  />
                 </View>
               </>
             ) : null}
@@ -506,10 +539,9 @@ export default function MapScreen() {
               <View
                 style={[
                   styles.phoneFloatingControls,
-                  { top: insets.top + (isPhonePortraitWeb ? 120 : 132) },
+                  { top: insets.top + 120 },
                 ]}
                 pointerEvents="box-none">
-                <LocationSearchIconButton onPress={handleOpenSearch} />
                 <MapPhonePortraitFloatingControls
                   onOpenLayers={() => setIsLayersPanelOpen(true)}
                   onLocateMe={() => mapRef.current?.locateMe()}
@@ -533,17 +565,7 @@ export default function MapScreen() {
                 { bottom: bottomInset + 72 },
               ]}
               pointerEvents="box-none">
-              {bestRightNowItems.length > 0 ? (
-                <MapBestRightNowTray
-                  items={bestRightNowItems}
-                  selectedLocationId={selectedLocationId}
-                  onSelectLocation={handleSelectLocation}
-                  isLoading={isLoading && locations.length === 0}
-                  variant="mobile"
-                  isPhonePortrait={isPhonePortraitWeb}
-                />
-              ) : null}
-              {isPhonePortraitWeb ? phonePreview : selectedPreview}
+              {phonePreview}
             </View>
           </>
         ) : (
