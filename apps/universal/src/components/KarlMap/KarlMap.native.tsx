@@ -162,14 +162,18 @@ const KarlMapNative = forwardRef<KarlMapHandle, KarlMapProps>(function KarlMapNa
 
     mapRef.current.animateToRegion(
       {
-        latitude: selected.latitude,
+        // Bias center south so the selected marker stays above the bottom sheet.
+        latitude:
+          layout === 'mobile'
+            ? selected.latitude - 0.035
+            : selected.latitude,
         longitude: selected.longitude,
-        latitudeDelta: 0.22,
-        longitudeDelta: 0.22,
+        latitudeDelta: layout === 'mobile' ? 0.18 : 0.22,
+        longitudeDelta: layout === 'mobile' ? 0.18 : 0.22,
       },
       350,
     );
-  }, [locations, selectedLocationId]);
+  }, [layout, locations, selectedLocationId]);
 
   const overlayMessage = (() => {
     if (isLoading && locations.length === 0) {

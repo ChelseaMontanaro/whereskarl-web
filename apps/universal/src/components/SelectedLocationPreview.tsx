@@ -218,7 +218,7 @@ function PhoneSelectedLocationSheet({
             <ConditionIcon
               intensity={resolveLocationFogIntensity(location)}
               isNighttime={isNighttime}
-              size={28}
+              size={22}
             />
           </View>
         )}
@@ -278,7 +278,7 @@ function PhoneSelectedLocationSheet({
         style={styles.coreWeatherRow}
         accessibilityLabel="Core weather">
         <CoreWeatherCell
-          title="Clear Sky Score"
+          title="Score"
           value={String(score.score)}
           valueColor={score.color}
           supporting={score.qualityLabel}
@@ -291,7 +291,6 @@ function PhoneSelectedLocationSheet({
         <CoreWeatherCell
           title="Temp"
           value={temperature?.replace('°F', '°') ?? '—'}
-          supporting={temperature ? 'Fahrenheit' : undefined}
         />
         <CoreWeatherCell
           title="Wind"
@@ -442,14 +441,14 @@ const styles = StyleSheet.create({
   },
   phoneSheet: {
     width: '100%',
-    borderRadius: 20,
+    borderRadius: 18,
     borderWidth: 1,
     borderColor: 'rgba(160, 185, 210, 0.24)',
     backgroundColor: 'rgba(6, 15, 27, 0.92)',
-    paddingTop: 14,
-    paddingBottom: 12,
-    paddingHorizontal: 14,
-    gap: 12,
+    paddingTop: 10,
+    paddingBottom: 8,
+    paddingHorizontal: 12,
+    gap: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.45,
@@ -459,18 +458,18 @@ const styles = StyleSheet.create({
   phoneHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 8,
   },
   phoneImage: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: 'rgba(255, 255, 255, 0.06)',
   },
   phoneImageFallback: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.06)',
@@ -480,30 +479,30 @@ const styles = StyleSheet.create({
   phoneHeaderCopy: {
     flex: 1,
     minWidth: 0,
-    gap: 2,
+    gap: 1,
   },
   phoneName: {
     fontFamily: Fonts?.sans,
-    fontSize: 18,
-    lineHeight: 22,
+    fontSize: 16,
+    lineHeight: 19,
     fontWeight: '700',
     color: Colors.textPrimary,
   },
   phoneMeta: {
-    fontSize: 11,
-    lineHeight: 14,
+    fontSize: 10,
+    lineHeight: 13,
     fontWeight: '500',
     color: Colors.textMuted,
   },
   phoneIconButton: {
-    width: 36,
-    height: 36,
+    width: 32,
+    height: 32,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: Radius.pill,
   },
   favoriteGlyph: {
-    fontSize: 18,
+    fontSize: 16,
     color: 'rgba(255, 255, 255, 0.42)',
   },
   favoriteGlyphActive: {
@@ -511,35 +510,35 @@ const styles = StyleSheet.create({
   },
   coreWeatherRow: {
     flexDirection: 'row',
-    gap: 6,
+    gap: 4,
   },
   coreCell: {
     flex: 1,
     minWidth: 0,
-    gap: 2,
-    borderRadius: 12,
+    gap: 1,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.08)',
     backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    paddingHorizontal: 6,
-    paddingVertical: 8,
+    paddingHorizontal: 5,
+    paddingVertical: 6,
   },
   coreTitle: {
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: '700',
-    letterSpacing: 0.4,
+    letterSpacing: 0.3,
     textTransform: 'uppercase',
     color: 'rgba(255, 255, 255, 0.45)',
   },
   coreValue: {
-    fontSize: 16,
-    lineHeight: 20,
+    fontSize: 14,
+    lineHeight: 17,
     fontWeight: '600',
     color: Colors.textPrimary,
   },
   coreSupporting: {
-    fontSize: 10,
-    lineHeight: 12,
+    fontSize: 9,
+    lineHeight: 11,
     fontWeight: '500',
     color: Colors.textMuted,
   },
@@ -547,22 +546,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingTop: 2,
+    paddingTop: 0,
   },
   expandToggleLabel: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
     color: Colors.gold,
   },
   expandChevron: {
-    fontSize: 14,
+    fontSize: 13,
     color: Colors.gold,
   },
   expandedBody: {
-    gap: 8,
+    gap: 6,
     borderTopWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.1)',
-    paddingTop: 10,
+    paddingTop: 8,
   },
   sectionLabel: {
     fontSize: 10,

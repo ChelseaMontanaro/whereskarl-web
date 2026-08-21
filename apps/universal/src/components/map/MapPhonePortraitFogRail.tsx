@@ -15,7 +15,7 @@ const RAIL_INTENSITIES: FogIntensity[] = [
   'karlTerritory',
 ];
 
-const RAIL_ICON_SIZE = 28;
+const RAIL_ICON_SIZE = 22;
 
 type MapPhonePortraitFogRailProps = {
   activeIntensity: FogIntensity | null;
@@ -23,8 +23,8 @@ type MapPhonePortraitFogRailProps = {
 };
 
 /**
- * Phone fog intensity rail — matches mobile Web product language:
- * Fog Intensity title, stacked condition cards, gold selected treatment.
+ * Compact fog-intensity rail integrated into the map (mobile Web parity).
+ * Labels: Clear / Light Fog / Foggy / Karl Territory — domain labels only.
  */
 export function MapPhonePortraitFogRail({
   activeIntensity,
@@ -78,11 +78,11 @@ export function MapPhonePortraitFogRail({
 
 const styles = StyleSheet.create({
   panel: {
-    width: 72,
-    paddingHorizontal: 5,
-    paddingVertical: 8,
-    gap: 7,
-    borderRadius: 16,
+    width: 64,
+    paddingHorizontal: 4,
+    paddingVertical: 6,
+    gap: 5,
+    borderRadius: 14,
     borderColor: 'rgba(150, 175, 200, 0.18)',
     backgroundColor: 'rgba(5, 13, 24, 0.82)',
     shadowColor: '#000',
@@ -92,27 +92,27 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   title: {
-    fontSize: 9,
-    lineHeight: 12,
+    fontSize: 8,
+    lineHeight: 10,
     fontWeight: '800',
-    letterSpacing: 0.8,
+    letterSpacing: 0.6,
     textTransform: 'uppercase',
     textAlign: 'center',
     color: 'rgba(255, 255, 255, 0.9)',
   },
   cards: {
-    gap: 6,
+    gap: 4,
   },
   card: {
     alignItems: 'center',
-    gap: 4,
-    borderRadius: 12,
+    gap: 3,
+    borderRadius: 10,
     borderWidth: 1.5,
     borderColor: 'rgba(150, 175, 200, 0.13)',
     backgroundColor: 'rgba(16, 28, 44, 0.45)',
-    paddingHorizontal: 3,
-    paddingVertical: 7,
-    minHeight: 60,
+    paddingHorizontal: 2,
+    paddingVertical: 5,
+    minHeight: 52,
     justifyContent: 'center',
   },
   cardActive: {
@@ -124,8 +124,8 @@ const styles = StyleSheet.create({
     height: RAIL_ICON_SIZE,
   },
   label: {
-    fontSize: 10,
-    lineHeight: 12,
+    fontSize: 9,
+    lineHeight: 11,
     fontWeight: '600',
     textAlign: 'center',
     color: 'rgba(255, 255, 255, 0.85)',

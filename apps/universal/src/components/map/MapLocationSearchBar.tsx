@@ -21,8 +21,8 @@ type MapLocationSearchBarProps = {
 };
 
 /**
- * Phone map search pill — product language matches mobile Web:
- * glass pill, magnifier, clear, and canonical catalog results (name + aliases).
+ * Immersive phone map search pill — floats over the map like mobile Web.
+ * Canonical catalog matching only (name + aliases); no local search algorithm.
  */
 export function MapLocationSearchBar({
   locations,
@@ -69,13 +69,13 @@ export function MapLocationSearchBar({
             setIsOverlayOpen(true);
           }}
           onFocus={() => setIsOverlayOpen(true)}
-          placeholder="Search Bay Area locations"
+          placeholder="Search locations…"
           placeholderTextColor="rgba(255, 255, 255, 0.42)"
           editable={!isDisabled}
           autoCapitalize="none"
           autoCorrect={false}
           returnKeyType="search"
-          accessibilityLabel="Search Bay Area locations"
+          accessibilityLabel="Search locations"
           style={[styles.input, isDisabled && styles.inputDisabled]}
         />
         {hasQuery ? (
@@ -136,16 +136,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    minHeight: 44,
+    minHeight: 40,
     borderRadius: Radius.pill,
     borderWidth: 1,
     borderColor: 'rgba(150, 175, 200, 0.22)',
-    backgroundColor: 'rgba(5, 13, 24, 0.82)',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    backgroundColor: 'rgba(5, 13, 24, 0.78)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
   },
   magnifier: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
     color: 'rgba(255, 255, 255, 0.85)',
     marginTop: -1,
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     minWidth: 0,
-    paddingVertical: 4,
+    paddingVertical: 2,
     fontSize: 16,
     fontWeight: '500',
     color: Colors.textPrimary,
@@ -174,21 +174,21 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.55)',
   },
   overlay: {
-    marginTop: 8,
-    maxHeight: 220,
-    borderRadius: 16,
+    marginTop: 6,
+    maxHeight: 200,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: LiquidGlassTokens.border,
     backgroundColor: 'rgba(6, 15, 27, 0.94)',
-    paddingVertical: 6,
+    paddingVertical: 4,
     overflow: 'hidden',
   },
   resultsList: {
-    maxHeight: 208,
+    maxHeight: 192,
   },
   resultRow: {
     paddingHorizontal: Spacing.md,
-    paddingVertical: 12,
+    paddingVertical: 11,
   },
   resultName: {
     fontSize: 15,
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
   },
   emptyLabel: {
     paddingHorizontal: Spacing.md,
-    paddingVertical: 14,
+    paddingVertical: 12,
     fontSize: 13,
     fontWeight: '500',
     color: Colors.textSecondary,

@@ -67,7 +67,7 @@ export default function MapScreen() {
     selected?: string;
     location?: string;
   }>();
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const isPhonePortrait = usePhonePortrait();
   const isNighttime = useIsNighttime();
@@ -83,7 +83,10 @@ export default function MapScreen() {
   } = useLocations();
   const { homeLocationId } = useHomeLocation(locations);
 
-  const layoutProfile = resolveMapScreenLayoutProfile(width, isPhonePortrait);
+  const layoutProfile = resolveMapScreenLayoutProfile(width, isPhonePortrait, {
+    platformOS: Platform.OS,
+    height,
+  });
   const mapLayout = mapLayoutModeForProfile(layoutProfile);
   const isDesktop = layoutProfile === 'desktop';
   const isPhone = layoutProfile === 'phone';
@@ -506,7 +509,7 @@ export default function MapScreen() {
                   style={[
                     styles.phoneTopControls,
                     {
-                      top: insets.top + 12,
+                      top: insets.top + 8,
                       paddingHorizontal: Spacing.sm,
                     },
                   ]}
@@ -524,7 +527,7 @@ export default function MapScreen() {
                 <View
                   style={[
                     styles.phoneFogRail,
-                    { top: insets.top + 112 },
+                    { top: insets.top + 96 },
                   ]}
                   pointerEvents="box-none">
                   <MapPhonePortraitFogRail
@@ -539,20 +542,21 @@ export default function MapScreen() {
               <View
                 style={[
                   styles.phoneFloatingControls,
-                  { top: insets.top + 120 },
+                  { top: insets.top + 96 },
                 ]}
                 pointerEvents="box-none">
                 <MapPhonePortraitFloatingControls
                   onOpenLayers={() => setIsLayersPanelOpen(true)}
-                  onLocateMe={() => mapRef.current?.locateMe()}
-                  onResetView={() => mapRef.current?.resetView()}
                 />
               </View>
             ) : (
               <View
                 style={[
                   styles.phoneLayers,
-                  { top: insets.top + Spacing.sm },
+                  {
+                    top: insets.top + Spacing.sm,
+                    bottom: bottomInset + 80,
+                  },
                 ]}
                 pointerEvents="box-none">
                 {layerControls}
@@ -562,7 +566,7 @@ export default function MapScreen() {
             <View
               style={[
                 styles.phoneBottom,
-                { bottom: bottomInset + 72 },
+                { bottom: bottomInset + 64 },
               ]}
               pointerEvents="box-none">
               {phonePreview}
@@ -658,8 +662,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(3, 11, 20, 0.42)',
   },
   mapGradientTopMobile: {
-    height: 96,
-    backgroundColor: 'rgba(3, 11, 20, 0.38)',
+    height: 72,
+    backgroundColor: 'rgba(3, 11, 20, 0.28)',
   },
   overlayRoot: {
     ...StyleSheet.absoluteFill,
@@ -699,8 +703,10 @@ const styles = StyleSheet.create({
   },
   phoneLayers: {
     position: 'absolute',
+    left: Spacing.sm,
     right: Spacing.sm,
     alignItems: 'flex-end',
+    justifyContent: 'flex-start',
   },
   phoneFloatingControls: {
     position: 'absolute',
@@ -712,7 +718,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: Spacing.sm,
     right: Spacing.sm,
-    gap: 10,
+    gap: 8,
     alignItems: 'stretch',
   },
   tabletTopLeft: {

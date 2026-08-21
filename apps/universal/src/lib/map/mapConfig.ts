@@ -65,19 +65,19 @@ export type MapViewportPadding =
     };
 
 export const BAY_AREA_MOBILE_VIEWPORT_PADDING: MapViewportPadding = {
-  top: 120,
-  right: 24,
-  bottom: 200,
-  left: 24,
+  top: 96,
+  right: 48,
+  bottom: 168,
+  left: 72,
 };
 
-/** Room for phone portrait region chips, fog rail, tray, and bottom nav. */
+/** Room for phone portrait region chips, fog rail, sheet, and bottom nav. */
 export const BAY_AREA_PHONE_PORTRAIT_REGION_VIEWPORT_PADDING: MapViewportPadding =
   {
-    top: 72,
-    right: 44,
-    bottom: 208,
-    left: 78,
+    top: 88,
+    right: 48,
+    bottom: 176,
+    left: 72,
   };
 
 export const BAY_AREA_DESKTOP_VIEWPORT_PADDING: MapViewportPadding = {

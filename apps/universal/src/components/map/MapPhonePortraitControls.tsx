@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { MapLocationSearchBar } from '@/components/map/MapLocationSearchBar';
 import { Colors, Radius } from '@/constants/theme';
@@ -19,8 +19,9 @@ type MapPhonePortraitControlsProps = {
 };
 
 /**
- * Phone map top chrome aligned with mobile Web hierarchy:
- * search pill → compact region chips (map-first, no oversized title).
+ * Immersive phone map top chrome (mobile Web hierarchy):
+ * floating search pill → compact horizontal region chips.
+ * No page title, no “Around the Bay” section labels.
  */
 export function MapPhonePortraitControls({
   selectedRegionId,
@@ -45,8 +46,11 @@ export function MapPhonePortraitControls({
         />
       ) : null}
 
-      <View
-        style={styles.chipRow}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={styles.chipRow}
         accessibilityLabel="Bay Area regions">
         {BAY_AREA_PRODUCT_REGIONS.map((region) => {
           const isActive = selectedRegionId === region.id;
@@ -70,7 +74,7 @@ export function MapPhonePortraitControls({
             </Pressable>
           );
         })}
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -78,29 +82,26 @@ export function MapPhonePortraitControls({
 const styles = StyleSheet.create({
   root: {
     width: '100%',
-    gap: 8,
+    gap: 6,
     alignItems: 'stretch',
   },
   chipRow: {
     flexDirection: 'row',
-    flexWrap: 'nowrap',
     alignItems: 'center',
-    justifyContent: 'center',
     gap: 6,
-    width: '100%',
+    paddingVertical: 1,
   },
   chip: {
-    flex: 1,
-    minWidth: 0,
-    minHeight: 40,
+    minHeight: 36,
+    minWidth: 44,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: Radius.pill,
     borderWidth: 1,
     borderColor: 'rgba(150, 175, 200, 0.2)',
     backgroundColor: 'rgba(5, 13, 24, 0.78)',
-    paddingHorizontal: 8,
-    paddingVertical: 9,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
   },
   chipActive: {
     borderColor: 'rgba(242, 163, 38, 0.45)',

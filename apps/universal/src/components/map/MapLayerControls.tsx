@@ -68,7 +68,12 @@ export function MapLayerControls({
   }
 
   return (
-    <View style={[mapGlassPanel.panel, styles.panel]}>
+    <View
+      style={[
+        mapGlassPanel.panel,
+        styles.panel,
+        isCompact && styles.panelCompact,
+      ]}>
       <View style={styles.headerRow}>
         <View style={styles.headerCopy}>
           <Text style={styles.headerTitle}>
@@ -157,6 +162,17 @@ export function MapLayerControls({
         </View>
       ) : null}
 
+      {isCompact && onResetView ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Reset view"
+          onPress={onResetView}
+          style={({ pressed }) => [styles.actionButton, pressed && styles.pressed]}>
+          <Text style={styles.actionIcon}>◎</Text>
+          <Text style={styles.actionLabel}>Reset View</Text>
+        </Pressable>
+      ) : null}
+
       {!isCompact ? (
         <>
           <Pressable
@@ -187,6 +203,13 @@ const styles = StyleSheet.create({
     width: 200,
     padding: Spacing.md,
     gap: Spacing.sm,
+  },
+  panelCompact: {
+    width: 240,
+    maxWidth: '100%',
+    padding: 12,
+    gap: 10,
+    alignSelf: 'flex-end',
   },
   layersButton: {
     flexDirection: 'row',
