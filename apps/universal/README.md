@@ -50,6 +50,32 @@ To test the web app on a phone over your local network:
    npx expo start
    ```
 
+### iOS Simulator QA (Phase 22+)
+
+**Do not open the legacy Swift project** at
+`~/Documents/Development/WheresKarl-iOS/.../WheresKarl.xcodeproj`.
+That app still ships the old stacked Map chrome (`Karl Map`, `AROUND THE BAY`,
+`Search Bay Area spots`) and is out of scope for Phase 22.
+
+Validate Universal instead:
+
+```bash
+# from repo root
+npm run qa:ios-universal
+```
+
+Or:
+
+```bash
+cd apps/universal
+npm run ios:qa
+```
+
+Confirm the running app exposes Accessibility label
+`Where's Karl Universal Map` / testID `universal-map-screen`.
+`apps/universal` has no checked-in `ios/` folder — Expo generates it via
+`expo run:ios` (gitignored).
+
 In the output, you'll find options to open the app in a
 
 - [development build](https://docs.expo.dev/develop/development-builds/introduction/)

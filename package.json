@@ -9,6 +9,7 @@
   "scripts": {
     "dev:web": "npm run dev -w @whereskarl/web",
     "dev:universal": "npm run start -w whereskarl-universal",
+    "qa:ios-universal": "npm run ios:qa -w whereskarl-universal",
     "build": "npm run build:web",
     "build:web": "npm run build -w @whereskarl/web",
     "start:web": "npm run start -w @whereskarl/web",

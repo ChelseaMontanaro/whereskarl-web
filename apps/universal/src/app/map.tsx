@@ -417,7 +417,10 @@ export default function MapScreen() {
   const desktopHeaderOffset = 88;
 
   return (
-    <View style={styles.root}>
+    <View
+      style={styles.root}
+      testID="universal-map-screen"
+      accessibilityLabel="Where's Karl Universal Map">
       <View
         style={[
           styles.mapGradientTop,

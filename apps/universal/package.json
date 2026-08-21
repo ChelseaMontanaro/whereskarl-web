@@ -44,6 +44,7 @@
   "scripts": {
     "start": "expo start",
     "ios": "expo start --ios",
+    "ios:qa": "bash ./scripts/run-ios-qa.sh",
     "web": "expo start --web",
     "web:lan": "expo start --web --host lan",
     "android": "expo start --android",
