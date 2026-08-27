@@ -23,7 +23,11 @@ import {
   normalizeViewportPadding,
   PHONE_PORTRAIT_MAP_CENTER,
 } from '@/lib/map/mapConfig';
-import { resolvePhonePortraitVisibleLabelIds } from '@/lib/map/phonePortraitMapPresentation';
+import {
+  PHONE_PORTRAIT_APPLE_LEGAL_LABEL_INSETS,
+  PHONE_PORTRAIT_APPLE_LOGO_INSETS,
+  resolvePhonePortraitVisibleLabelIds,
+} from '@/lib/map/phonePortraitMapPresentation';
 import {
   findBayAreaProductRegion,
   resolveRegionViewportFitOptions,
@@ -254,7 +258,13 @@ const KarlMapNative = forwardRef<KarlMapHandle, KarlMapProps>(function KarlMapNa
         showsCompass={false}
         showsBuildings={false}
         showsTraffic={false}
-        mapPadding={mapPadding}>
+        mapPadding={mapPadding}
+        legalLabelInsets={
+          phonePortraitWeb ? PHONE_PORTRAIT_APPLE_LEGAL_LABEL_INSETS : undefined
+        }
+        appleLogoInsets={
+          phonePortraitWeb ? PHONE_PORTRAIT_APPLE_LOGO_INSETS : undefined
+        }>
         {locations.map((location) => {
           const isFilteredOut = intensityFilter
             ? !locationMatchesFogIntensityFilter(location, intensityFilter)

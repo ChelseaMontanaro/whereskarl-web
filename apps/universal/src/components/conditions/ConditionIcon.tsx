@@ -1,4 +1,5 @@
-import { Image, StyleSheet, View } from 'react-native';
+import { Image } from 'expo-image';
+import { StyleSheet, View } from 'react-native';
 
 import { getConditionIconDataUri } from '@/lib/map/conditionIcons';
 import type { FogIntensity } from '@whereskarl/domain';
@@ -9,6 +10,10 @@ type ConditionIconProps = {
   size?: number;
 };
 
+/**
+ * Condition artwork for native + web. expo-image is required on iOS/Android
+ * because React Native Image does not render SVG data URIs.
+ */
 export function ConditionIcon({
   intensity,
   isNighttime = false,
@@ -23,9 +28,9 @@ export function ConditionIcon({
       <Image
         source={{ uri }}
         style={{ width: size, height: size }}
-        resizeMode="contain"
+        contentFit="contain"
         accessibilityElementsHidden
-        alt=""
+        pointerEvents="none"
       />
     </View>
   );

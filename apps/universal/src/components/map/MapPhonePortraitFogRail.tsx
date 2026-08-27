@@ -1,4 +1,5 @@
-import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { Image } from 'expo-image';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { LiquidGlassSurface } from '@/components/ui/LiquidGlassSurface';
 import { Colors } from '@/constants/theme';
@@ -15,7 +16,7 @@ const RAIL_INTENSITIES: FogIntensity[] = [
   'karlTerritory',
 ];
 
-const RAIL_ICON_SIZE = 22;
+const RAIL_ICON_SIZE = 24;
 
 type MapPhonePortraitFogRailProps = {
   activeIntensity: FogIntensity | null;
@@ -24,7 +25,8 @@ type MapPhonePortraitFogRailProps = {
 
 /**
  * Compact icon-led fog-intensity rail (mobile Web parity).
- * Visible chrome is icon-first; full labels stay on accessibilityLabel.
+ * Uses expo-image so SVG data-URI artwork renders on native (RN Image does not).
+ * Full state names stay on accessibilityLabel.
  */
 export function MapPhonePortraitFogRail({
   activeIntensity,
@@ -58,9 +60,9 @@ export function MapPhonePortraitFogRail({
                   uri: getPhonePortraitConditionIconDataUri(intensity),
                 }}
                 style={styles.icon}
-                resizeMode="contain"
+                contentFit="contain"
                 accessibilityElementsHidden
-                importantForAccessibility="no"
+                pointerEvents="none"
               />
             </Pressable>
           );
@@ -72,7 +74,7 @@ export function MapPhonePortraitFogRail({
 
 const styles = StyleSheet.create({
   panel: {
-    width: 44,
+    width: 48,
     paddingHorizontal: 2,
     paddingVertical: 3,
     gap: 2,
@@ -96,7 +98,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(150, 175, 200, 0.13)',
     backgroundColor: 'rgba(16, 28, 44, 0.45)',
     minHeight: 44,
-    minWidth: 40,
+    minWidth: 44,
   },
   cardActive: {
     borderColor: Colors.gold,

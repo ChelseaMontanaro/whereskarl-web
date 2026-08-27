@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { resolvePhonePortraitVisibleLabelIds } from '@/lib/map/phonePortraitMapPresentation';
+import {
+  PHONE_PORTRAIT_APPLE_LEGAL_LABEL_INSETS,
+  PHONE_PORTRAIT_APPLE_LOGO_INSETS,
+  resolvePhonePortraitVisibleLabelIds,
+} from '@/lib/map/phonePortraitMapPresentation';
 import { bottomNavItems } from '@/lib/navigation';
 
 describe('Phase 22 native map parity polish', () => {
@@ -74,5 +78,13 @@ describe('Phase 22 native map parity polish', () => {
 
     const visible = resolvePhonePortraitVisibleLabelIds(locations, 'presidio');
     expect(visible.has('presidio')).toBe(true);
+  });
+
+  it('exposes supported Apple Maps legal/logo insets for phone portrait', () => {
+    // Non-zero required: react-native-maps treats 0 as unset.
+    expect(PHONE_PORTRAIT_APPLE_LEGAL_LABEL_INSETS.bottom).toBeGreaterThan(0);
+    expect(PHONE_PORTRAIT_APPLE_LEGAL_LABEL_INSETS.left).toBeGreaterThan(0);
+    expect(PHONE_PORTRAIT_APPLE_LOGO_INSETS.bottom).toBeGreaterThan(0);
+    expect(PHONE_PORTRAIT_APPLE_LOGO_INSETS.right).toBeGreaterThan(0);
   });
 });

@@ -44,6 +44,26 @@ export const PHONE_PORTRAIT_MAP_VIEWPORT_PADDING: MapViewportPadding = {
   left: 108,
 };
 
+/**
+ * Pin Apple Maps Legal / logo near the MapView lower edge.
+ * mapPadding raises Apple’s default attribution via layoutMargins; these
+ * supported react-native-maps insets reposition without hiding attribution.
+ * Non-zero edges required (native treats 0 as unset).
+ */
+export const PHONE_PORTRAIT_APPLE_LEGAL_LABEL_INSETS = {
+  top: 0,
+  right: 0,
+  bottom: 14,
+  left: 10,
+} as const;
+
+export const PHONE_PORTRAIT_APPLE_LOGO_INSETS = {
+  top: 0,
+  left: 0,
+  bottom: 14,
+  right: 10,
+} as const;
+
 export const PHONE_PORTRAIT_MARKER_ICON_PX = 36;
 
 export const PHONE_PORTRAIT_MARKER_ICON_REM = '2.25rem';
@@ -148,9 +168,9 @@ export function resolvePhonePortraitVisibleLabelIds(
   });
 
   const placed: Array<{ latitude: number; longitude: number }> = [];
-  // ~marker footprint at default Bay composition zoom (degrees).
-  const latThreshold = 0.035;
-  const lngThreshold = 0.045;
+  // Slightly larger than prior pass — SF/Marin default framing still dense.
+  const latThreshold = 0.042;
+  const lngThreshold = 0.055;
 
   for (const location of ordered) {
     if (PHONE_PORTRAIT_LOW_ZOOM_HIDDEN_LOCATION_IDS.has(location.id)) {
