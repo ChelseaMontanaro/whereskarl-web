@@ -23,6 +23,7 @@ import {
   normalizeViewportPadding,
   PHONE_PORTRAIT_MAP_CENTER,
 } from '@/lib/map/mapConfig';
+import { resolvePhonePortraitVisibleLabelIds } from '@/lib/map/phonePortraitMapPresentation';
 import {
   findBayAreaProductRegion,
   resolveRegionViewportFitOptions,
@@ -225,6 +226,21 @@ const KarlMapNative = forwardRef<KarlMapHandle, KarlMapProps>(function KarlMapNa
         }
       : padding;
   const shouldShowLabels = showLocationLabels ?? layout === 'desktop';
+  const phonePortraitLabelIds = useMemo(() => {
+    if (!phonePortraitWeb || !shouldShowLabels) {
+      return null;
+    }
+
+    return resolvePhonePortraitVisibleLabelIds(
+      locations.map((location) => ({
+        id: location.id,
+        latitude: location.latitude,
+        longitude: location.longitude,
+        sunshineScore: location.sunshineScore,
+      })),
+      selectedLocationId,
+    );
+  }, [locations, phonePortraitWeb, selectedLocationId, shouldShowLabels]);
 
   return (
     <View style={styles.container}>
@@ -243,6 +259,9 @@ const KarlMapNative = forwardRef<KarlMapHandle, KarlMapProps>(function KarlMapNa
           const isFilteredOut = intensityFilter
             ? !locationMatchesFogIntensityFilter(location, intensityFilter)
             : false;
+          const showLocationLabel = phonePortraitLabelIds
+            ? phonePortraitLabelIds.has(location.id)
+            : shouldShowLabels;
 
           return (
             <KarlMapMarker
@@ -250,7 +269,7 @@ const KarlMapNative = forwardRef<KarlMapHandle, KarlMapProps>(function KarlMapNa
               location={location}
               isSelected={selectedLocationId === location.id}
               layout={layout}
-              showLocationLabel={shouldShowLabels}
+              showLocationLabel={showLocationLabel}
               isFilteredOut={isFilteredOut}
               isNighttime={isNighttime}
               useSvgIcons={useConditionSvgIcons}

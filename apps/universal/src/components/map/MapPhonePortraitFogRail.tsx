@@ -1,4 +1,4 @@
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
 
 import { LiquidGlassSurface } from '@/components/ui/LiquidGlassSurface';
 import { Colors } from '@/constants/theme';
@@ -15,7 +15,7 @@ const RAIL_INTENSITIES: FogIntensity[] = [
   'karlTerritory',
 ];
 
-const RAIL_ICON_SIZE = 24;
+const RAIL_ICON_SIZE = 22;
 
 type MapPhonePortraitFogRailProps = {
   activeIntensity: FogIntensity | null;
@@ -23,8 +23,8 @@ type MapPhonePortraitFogRailProps = {
 };
 
 /**
- * Compact fog-intensity rail integrated into the map (mobile Web parity).
- * Labels: Clear / Light Fog / Foggy / Karl Territory — domain labels only.
+ * Compact icon-led fog-intensity rail (mobile Web parity).
+ * Visible chrome is icon-first; full labels stay on accessibilityLabel.
  */
 export function MapPhonePortraitFogRail({
   activeIntensity,
@@ -35,8 +35,6 @@ export function MapPhonePortraitFogRail({
       variant="rail"
       style={styles.panel}
       accessibilityLabel="Fog intensity filter">
-      <Text style={styles.title}>Fog{'\n'}Intensity</Text>
-
       <View style={styles.cards}>
         {RAIL_INTENSITIES.map((intensity) => {
           const isActive = activeIntensity === intensity;
@@ -48,6 +46,7 @@ export function MapPhonePortraitFogRail({
               accessibilityRole="button"
               accessibilityState={{ selected: isActive }}
               accessibilityLabel={label}
+              hitSlop={4}
               onPress={() => onSelectIntensity(intensity)}
               style={({ pressed }) => [
                 styles.card,
@@ -61,13 +60,8 @@ export function MapPhonePortraitFogRail({
                 style={styles.icon}
                 resizeMode="contain"
                 accessibilityElementsHidden
-                alt=""
+                importantForAccessibility="no"
               />
-              <Text
-                style={[styles.label, isActive && styles.labelActive]}
-                numberOfLines={2}>
-                {label}
-              </Text>
             </Pressable>
           );
         })}
@@ -78,42 +72,31 @@ export function MapPhonePortraitFogRail({
 
 const styles = StyleSheet.create({
   panel: {
-    width: 50,
-    paddingHorizontal: 3,
-    paddingVertical: 4,
-    gap: 4,
-    borderRadius: 14,
+    width: 44,
+    paddingHorizontal: 2,
+    paddingVertical: 3,
+    gap: 2,
+    borderRadius: 12,
     borderColor: 'rgba(150, 175, 200, 0.18)',
     backgroundColor: 'rgba(5, 13, 24, 0.82)',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.32,
-    shadowRadius: 12,
+    shadowOpacity: 0.28,
+    shadowRadius: 10,
     elevation: 6,
   },
-  title: {
-    fontSize: 7,
-    lineHeight: 9,
-    fontWeight: '800',
-    letterSpacing: 0.32,
-    textTransform: 'uppercase',
-    textAlign: 'center',
-    color: 'rgba(255, 255, 255, 0.9)',
-  },
   cards: {
-    gap: 4,
+    gap: 2,
   },
   card: {
     alignItems: 'center',
-    gap: 2,
-    borderRadius: 12,
+    justifyContent: 'center',
+    borderRadius: 10,
     borderWidth: 1.5,
     borderColor: 'rgba(150, 175, 200, 0.13)',
     backgroundColor: 'rgba(16, 28, 44, 0.45)',
-    paddingHorizontal: 0,
-    paddingVertical: 0,
-    minHeight: 48,
-    justifyContent: 'center',
+    minHeight: 44,
+    minWidth: 40,
   },
   cardActive: {
     borderColor: Colors.gold,
@@ -122,17 +105,6 @@ const styles = StyleSheet.create({
   icon: {
     width: RAIL_ICON_SIZE,
     height: RAIL_ICON_SIZE,
-  },
-  label: {
-    fontSize: 8,
-    lineHeight: 9,
-    fontWeight: '600',
-    textAlign: 'center',
-    color: 'rgba(255, 255, 255, 0.85)',
-  },
-  labelActive: {
-    color: Colors.gold,
-    fontWeight: '700',
   },
   pressed: {
     opacity: 0.88,

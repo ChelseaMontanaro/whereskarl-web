@@ -16,11 +16,7 @@ export const primaryNavItems: PrimaryNavItem[] = [
 
 export const bottomNavItems: PrimaryNavItem[] = [
   { href: '/', label: 'Home', shortLabel: 'Home' },
-  {
-    href: '/map',
-    label: 'Find Clear Skies',
-    shortLabel: 'Find Clear Skies',
-  },
+  { href: '/map', label: 'Map', shortLabel: 'Map' },
   { href: '/favorites', label: 'Favorites', shortLabel: 'Favorites' },
   { href: '/settings', label: 'Settings', shortLabel: 'Settings' },
 ];

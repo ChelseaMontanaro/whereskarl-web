@@ -109,6 +109,80 @@ export function getPhonePortraitMarkerPriority(locationId: string): number {
   return index === -1 ? Number.MAX_SAFE_INTEGER : index;
 }
 
+type PhonePortraitLabelCandidate = {
+  id: string;
+  latitude: number;
+  longitude: number;
+  sunshineScore: number;
+};
+
+/**
+ * Native phone-portrait label declutter: keep every marker, but only show
+ * text labels for the selected location plus a priority non-colliding set.
+ * Approximate geographic proximity stands in for MapLibre screen projection.
+ */
+export function resolvePhonePortraitVisibleLabelIds(
+  locations: readonly PhonePortraitLabelCandidate[],
+  selectedLocationId: string | null,
+): ReadonlySet<string> {
+  const visible = new Set<string>();
+  if (selectedLocationId) {
+    visible.add(selectedLocationId);
+  }
+
+  const ordered = [...locations].sort((left, right) => {
+    const leftSelected = left.id === selectedLocationId;
+    const rightSelected = right.id === selectedLocationId;
+    if (leftSelected !== rightSelected) {
+      return leftSelected ? -1 : 1;
+    }
+
+    const priorityDelta =
+      getPhonePortraitMarkerPriority(left.id) -
+      getPhonePortraitMarkerPriority(right.id);
+    if (priorityDelta !== 0) {
+      return priorityDelta;
+    }
+
+    return right.sunshineScore - left.sunshineScore;
+  });
+
+  const placed: Array<{ latitude: number; longitude: number }> = [];
+  // ~marker footprint at default Bay composition zoom (degrees).
+  const latThreshold = 0.035;
+  const lngThreshold = 0.045;
+
+  for (const location of ordered) {
+    if (PHONE_PORTRAIT_LOW_ZOOM_HIDDEN_LOCATION_IDS.has(location.id)) {
+      if (location.id === selectedLocationId) {
+        placed.push({
+          latitude: location.latitude,
+          longitude: location.longitude,
+        });
+      }
+      continue;
+    }
+
+    const collides = placed.some(
+      (other) =>
+        Math.abs(other.latitude - location.latitude) < latThreshold &&
+        Math.abs(other.longitude - location.longitude) < lngThreshold,
+    );
+
+    if (collides && location.id !== selectedLocationId) {
+      continue;
+    }
+
+    visible.add(location.id);
+    placed.push({
+      latitude: location.latitude,
+      longitude: location.longitude,
+    });
+  }
+
+  return visible;
+}
+
 /** Approximate rendered marker footprint used for collision checks. */
 export const PHONE_PORTRAIT_MARKER_COLLISION_X = 56;
 export const PHONE_PORTRAIT_MARKER_COLLISION_Y = 76;
