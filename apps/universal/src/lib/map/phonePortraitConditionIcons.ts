@@ -1,29 +1,26 @@
 /**
- * Phone-portrait web condition icons — illustrated artwork matching the
- * approved mobile mockup: blue crescent-moon/cloud for Clear and soft gray
- * layered clouds for the fog tiers. Only used by the phone-portrait map
- * markers and fog rail; desktop and native keep the shared set in
- * `conditionIcons.ts`.
- *
- * Intentionally no <defs>/gradient ids: these SVGs are inlined once per map
- * marker, and duplicate ids across inline SVGs break gradient resolution in
- * the browser (icons rendered as dark discs). Solid fills only.
+ * Phone-portrait condition icons — aligned with mobile-web Map artwork.
+ * Fog rail and map markers share the same intensity semantics; Clear uses
+ * cloud-free sun/moon on both surfaces so fog tiers stay visually distinct.
+ * Karl Territory markers use the brand KarlLogo (rendered by the marker view).
  */
 
 import type { FogIntensity } from '@whereskarl/domain';
 
-/** Icy-blue crescent moon with a soft blue-white cloud — approved Clear. */
-const MOON_CLOUD_DETAILED_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" aria-hidden="true" fill="none">
-  <path d="M36.5 8.2A15.6 15.6 0 1 1 15.9 29a12.6 12.6 0 0 0 20.6-20.8Z" fill="#9FC4E6" opacity="0.92" transform="rotate(-14 26 20)" />
-  <path d="M34.2 10.4A13.2 13.2 0 0 1 18 27.2a12.6 12.6 0 0 0 16.2-16.8Z" fill="#C4DDF2" opacity="0.5" transform="rotate(-14 26 20)" />
-  <g>
-    <rect x="5.4" y="32.2" width="23" height="7.8" rx="3.9" fill="#E4EEF7" />
-    <circle cx="9.8" cy="34.2" r="5.2" fill="#EDF4FA" />
-    <circle cx="16.8" cy="30.8" r="6.4" fill="#FAFDFF" />
-    <circle cx="23.6" cy="34.2" r="4.9" fill="#D5E5F2" />
-    <circle cx="15" cy="29.2" r="4" fill="#FFFFFF" opacity="0.85" />
-    <path d="M6.5 37.6h21" stroke="#B9CCDD" stroke-width="1.4" stroke-linecap="round" opacity="0.5" />
-  </g>
+export type PhonePortraitIconOptions = {
+  isNighttime?: boolean;
+};
+
+/** Daytime clear: warm sun only. */
+const CLEAR_SUN_ONLY_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" aria-hidden="true" fill="none">
+  <circle cx="24" cy="24" r="9" fill="#F2A326" opacity="0.95" />
+  <circle cx="24" cy="24" r="6.8" fill="#F6C15A" opacity="0.9" />
+  <path d="M24 5.5v4.2M24 38.3v4.2M5.5 24h4.2M38.3 24h4.2M11 11l3 3M34 34l3 3M11 37l3-3M34 14l3-3" stroke="#F2A326" stroke-width="2" stroke-linecap="round" opacity="0.9" />
+</svg>`;
+
+/** Nighttime clear: icy-blue crescent moon only. */
+const CLEAR_MOON_ONLY_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" aria-hidden="true" fill="none">
+  <path d="M24 10A14 14 0 0 0 24 38 A26 26 0 0 1 24 10Z" fill="#9FC4E6" opacity="0.92" />
 </svg>`;
 
 /** Soft pale wisp of fog — approved Light Fog. */
@@ -52,7 +49,7 @@ const FOGGY_DETAILED_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 
   <path d="M12 38.6c2.4 0 3.6-1.2 4.7-2.2 1.1 1 2.3 2.2 4.7 2.2s3.6-1.2 4.7-2.2c1.1 1 2.3 2.2 4.7 2.2s3.6-1.2 4.7-2.2" stroke="#94A3B2" stroke-width="1.8" stroke-linecap="round" opacity="0.7" />
 </svg>`;
 
-/** Dense low gray cloud with layered fog bands — approved Karl Territory. */
+/** Dense low gray cloud — Fog Intensity rail Karl Territory cell. */
 const KARL_TERRITORY_DETAILED_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" aria-hidden="true" fill="none">
   <g opacity="0.96">
     <rect x="6" y="17.8" width="36.5" height="12.4" rx="6.2" fill="#8F9BA9" />
@@ -67,12 +64,17 @@ const KARL_TERRITORY_DETAILED_ICON = `<svg xmlns="http://www.w3.org/2000/svg" vi
   <path d="M13.5 41c2.5 0 3.8-1.3 5-2.4 1.2 1.1 2.5 2.4 5 2.4s3.8-1.3 5-2.4c1.2 1.1 2.5 2.4 5 2.4" stroke="#8797A6" stroke-width="1.8" stroke-linecap="round" opacity="0.5" />
 </svg>`;
 
-export function getPhonePortraitConditionIconSvg(intensity: FogIntensity): string {
+function getClearSkyIconSvg(options: PhonePortraitIconOptions = {}): string {
+  return options.isNighttime ? CLEAR_MOON_ONLY_ICON : CLEAR_SUN_ONLY_ICON;
+}
+
+export function getPhonePortraitConditionIconSvg(
+  intensity: FogIntensity,
+  options: PhonePortraitIconOptions = {},
+): string {
   switch (intensity) {
     case 'clear':
-      // Approved mockup treatment: Clear always uses the crescent-moon/cloud
-      // artwork on phone portrait, regardless of time of day.
-      return MOON_CLOUD_DETAILED_ICON;
+      return getClearSkyIconSvg(options);
     case 'lightFog':
       return LIGHT_FOG_DETAILED_ICON;
     case 'foggy':
@@ -82,16 +84,40 @@ export function getPhonePortraitConditionIconSvg(intensity: FogIntensity): strin
   }
 }
 
-export function getPhonePortraitConditionIconDataUri(
+/** Fog-rail data URI — Clear is cloud-free sun/moon; fog tiers keep detailed clouds. */
+export function getPhonePortraitFogRailConditionIconDataUri(
   intensity: FogIntensity,
+  options: PhonePortraitIconOptions = {},
 ): string {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
-    getPhonePortraitConditionIconSvg(intensity),
+    getPhonePortraitConditionIconSvg(intensity, options),
   )}`;
 }
 
-export function getPhonePortraitMarkerIconMarkup(intensity: FogIntensity): string {
-  return getPhonePortraitConditionIconSvg(intensity).replace(
+/** Marker data URI for Clear / Light Fog / Foggy (Karl Territory uses KarlLogo). */
+export function getPhonePortraitMarkerConditionIconDataUri(
+  intensity: Exclude<FogIntensity, 'karlTerritory'>,
+  options: PhonePortraitIconOptions = {},
+): string {
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
+    getPhonePortraitConditionIconSvg(intensity, options),
+  )}`;
+}
+
+/** @deprecated Prefer fog-rail or marker-specific helpers. */
+export function getPhonePortraitConditionIconDataUri(
+  intensity: FogIntensity,
+  options: PhonePortraitIconOptions = {},
+): string {
+  return getPhonePortraitFogRailConditionIconDataUri(intensity, options);
+}
+
+export function getPhonePortraitMarkerIconMarkup(
+  intensity: FogIntensity,
+  options: PhonePortraitIconOptions = {},
+): string {
+  const svg = getPhonePortraitConditionIconSvg(intensity, options);
+  return svg.replace(
     '<svg xmlns="http://www.w3.org/2000/svg"',
     '<svg class="karl-universal-map-marker__svg" xmlns="http://www.w3.org/2000/svg"',
   );

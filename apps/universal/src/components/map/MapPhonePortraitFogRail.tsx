@@ -3,11 +3,12 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { LiquidGlassSurface } from '@/components/ui/LiquidGlassSurface';
 import { Colors } from '@/constants/theme';
+import { useIsNighttime } from '@/hooks/useIsNighttime';
 import {
   getFogIntensityLabel,
   type FogIntensity,
 } from '@whereskarl/domain';
-import { getPhonePortraitConditionIconDataUri } from '@/lib/map/phonePortraitConditionIcons';
+import { getPhonePortraitFogRailConditionIconDataUri } from '@/lib/map/phonePortraitConditionIcons';
 
 const RAIL_INTENSITIES: FogIntensity[] = [
   'clear',
@@ -25,13 +26,15 @@ type MapPhonePortraitFogRailProps = {
 
 /**
  * Compact icon-led fog-intensity rail (mobile Web parity).
- * Uses expo-image so SVG data-URI artwork renders on native (RN Image does not).
+ * Uses expo-image so SVG data-URI artwork renders on native.
  * Full state names stay on accessibilityLabel.
  */
 export function MapPhonePortraitFogRail({
   activeIntensity,
   onSelectIntensity,
 }: MapPhonePortraitFogRailProps) {
+  const isNighttime = useIsNighttime();
+
   return (
     <LiquidGlassSurface
       variant="rail"
@@ -57,7 +60,9 @@ export function MapPhonePortraitFogRail({
               ]}>
               <Image
                 source={{
-                  uri: getPhonePortraitConditionIconDataUri(intensity),
+                  uri: getPhonePortraitFogRailConditionIconDataUri(intensity, {
+                    isNighttime,
+                  }),
                 }}
                 style={styles.icon}
                 contentFit="contain"

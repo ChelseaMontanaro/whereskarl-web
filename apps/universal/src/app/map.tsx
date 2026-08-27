@@ -253,8 +253,10 @@ export default function MapScreen() {
 
   const selectedLocation = useMemo(
     () =>
-      markerLocations.find((location) => location.id === selectedLocationId) ??
+      // Prefer the full locations payload so canonical imageUrl/focalPoint are
+      // never dropped by map marker result shaping.
       locations.find((location) => location.id === selectedLocationId) ??
+      markerLocations.find((location) => location.id === selectedLocationId) ??
       null,
     [locations, markerLocations, selectedLocationId],
   );

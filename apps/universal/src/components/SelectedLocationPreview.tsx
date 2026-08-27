@@ -1,10 +1,10 @@
-import { Image } from 'expo-image';
 import { useState, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { MapConditionIcon } from '@/components/KarlMap/KarlMapMarkerView';
 import { ConditionIcon } from '@/components/conditions/ConditionIcon';
 import { HomeLocationBadge } from '@/components/HomeLocationBadge';
+import { LocationCircularImage } from '@/components/location/LocationCircularImage';
 import { LiquidGlassSurface } from '@/components/ui/LiquidGlassSurface';
 import { Colors, Fonts, Radius, Spacing } from '@/constants/theme';
 import { LiquidGlassTokens } from '@/constants/liquidGlass';
@@ -29,6 +29,8 @@ import {
   resolveLocationFogIntensity,
 } from '@whereskarl/domain';
 import type { LocationWeather } from '@whereskarl/schemas';
+
+
 
 type SelectedLocationPreviewProps = {
   location: LocationWeather | null;
@@ -201,27 +203,16 @@ function PhoneSelectedLocationSheet({
   const regionName = getProductRegionNameForLocation(location);
   const karlRead = getKarlReadParagraph(location);
   const hourly = getSelectedLocationHourlyPeriods(location, isNighttime);
-  const imageUrl = location.imageUrl?.trim() || null;
 
   return (
     <LiquidGlassSurface variant="panel" style={styles.phoneSheet}>
       <View style={styles.phoneHeaderRow}>
-        {imageUrl ? (
-          <Image
-            source={{ uri: imageUrl }}
-            style={styles.phoneImage}
-            contentFit="cover"
-            accessibilityLabel={`${location.name} photo`}
-          />
-        ) : (
-          <View style={styles.phoneImageFallback}>
-            <ConditionIcon
-              intensity={resolveLocationFogIntensity(location)}
-              isNighttime={isNighttime}
-              size={22}
-            />
-          </View>
-        )}
+        <LocationCircularImage
+          imageUrl={location.imageUrl}
+          focalPoint={location.focalPoint}
+          alt={`${location.name} photo`}
+          size={56}
+        />
 
         <View style={styles.phoneHeaderCopy}>
           {isHomeLocation ? <HomeLocationBadge /> : null}
@@ -459,22 +450,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-  },
-  phoneImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
-  },
-  phoneImageFallback: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   phoneHeaderCopy: {
     flex: 1,

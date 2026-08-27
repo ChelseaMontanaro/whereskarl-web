@@ -1,5 +1,7 @@
+import { Image } from 'expo-image';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { KarlLogo } from '@/components/brand/KarlLogo';
 import { ConditionIcon } from '@/components/conditions/ConditionIcon';
 import { Colors } from '@/constants/theme';
 import {
@@ -8,8 +10,8 @@ import {
   type KarlMapMarkerLocation,
 } from '@/lib/map/markerAppearance';
 import { getMarkerConditionSymbol } from '@/lib/map/markerIcons';
-
-const PHONE_PORTRAIT_MARKER_ICON_SIZE = 40;
+import { PHONE_PORTRAIT_MARKER_ICON_PX } from '@/lib/map/phonePortraitMapPresentation';
+import { getPhonePortraitMarkerConditionIconDataUri } from '@/lib/map/phonePortraitConditionIcons';
 
 type KarlMapMarkerViewProps = {
   location: KarlMapMarkerLocation;
@@ -20,6 +22,34 @@ type KarlMapMarkerViewProps = {
   isNighttime?: boolean;
   useSvgIcons?: boolean;
 };
+
+function PhonePortraitMarkerIcon({
+  intensity,
+  isNighttime,
+  size,
+}: {
+  intensity: ReturnType<typeof getMarkerVisualState>['intensity'];
+  isNighttime: boolean;
+  size: number;
+}) {
+  if (intensity === 'karlTerritory') {
+    return <KarlLogo size={size} />;
+  }
+
+  return (
+    <Image
+      source={{
+        uri: getPhonePortraitMarkerConditionIconDataUri(intensity, {
+          isNighttime,
+        }),
+      }}
+      style={{ width: size, height: size }}
+      contentFit="contain"
+      accessibilityElementsHidden
+      pointerEvents="none"
+    />
+  );
+}
 
 export function KarlMapMarkerView({
   location,
@@ -35,7 +65,7 @@ export function KarlMapMarkerView({
   const isCompact = size === 'compact';
   const scoreColor = isCompact ? Colors.gold : getScoreBadgeColor(score);
   const symbol = getMarkerConditionSymbol(visual.intensity, isNighttime);
-  const iconSize = isCompact ? PHONE_PORTRAIT_MARKER_ICON_SIZE : 24;
+  const iconSize = isCompact ? PHONE_PORTRAIT_MARKER_ICON_PX : 24;
 
   return (
     <View
@@ -43,15 +73,22 @@ export function KarlMapMarkerView({
         styles.root,
         !isCompact && { transform: [{ scale: visual.scale }] },
         isCompact && styles.rootCompact,
+        isCompact && isSelected && styles.rootCompactSelected,
       ]}>
       <View
         style={[
           styles.iconWrap,
           isCompact && isSelected && styles.iconWrapSelected,
           isCompact &&
-            isSelected && { transform: [{ scale: 1.08 }] },
+            isSelected && { transform: [{ scale: 1.06 }] },
         ]}>
-        {useSvgIcons ? (
+        {isCompact && useSvgIcons ? (
+          <PhonePortraitMarkerIcon
+            intensity={visual.intensity}
+            isNighttime={isNighttime}
+            size={iconSize}
+          />
+        ) : useSvgIcons ? (
           <ConditionIcon
             intensity={visual.intensity}
             isNighttime={isNighttime}
@@ -130,14 +167,17 @@ const styles = StyleSheet.create({
   rootCompact: {
     gap: 3,
   },
+  rootCompactSelected: {
+    zIndex: 4,
+  },
   iconWrap: {
     alignItems: 'center',
     justifyContent: 'center',
   },
   iconWrapSelected: {
     shadowColor: Colors.gold,
-    shadowOpacity: 0.45,
-    shadowRadius: 8,
+    shadowOpacity: 0.55,
+    shadowRadius: 10,
     shadowOffset: { width: 0, height: 0 },
   },
   symbol: {
