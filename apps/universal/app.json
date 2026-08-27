@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "whereskarl-universal",
+    "name": "Where's Karl Universal",
     "slug": "whereskarl-universal",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,6 +8,7 @@
     "scheme": "whereskarluniversal",
     "userInterfaceStyle": "dark",
     "ios": {
+      "bundleIdentifier": "com.anonymous.whereskarl-universal",
       "icon": "./assets/expo.icon"
     },
     "android": {

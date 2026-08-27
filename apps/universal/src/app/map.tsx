@@ -118,6 +118,34 @@ export default function MapScreen() {
 
   const routeSyncSource = useRef<'local' | 'external'>('external');
 
+  useEffect(() => {
+    if (!__DEV__) {
+      return;
+    }
+
+    console.log('[Phase22 Universal Map]', {
+      layoutProfile,
+      isPhone,
+      isPhonePortraitMap,
+      width,
+      height,
+      platform: Platform.OS,
+      chrome:
+        isPhone
+          ? 'MapPhonePortraitControls (search + chips)'
+          : isDesktop
+            ? 'MapConditionsPanel desktop'
+            : 'MapConditionsPanel tablet',
+    });
+  }, [
+    height,
+    isDesktop,
+    isPhone,
+    isPhonePortraitMap,
+    layoutProfile,
+    width,
+  ]);
+
   const syncMapRoute = useCallback(
     (
       nextSelectedLocationId: string | null,
