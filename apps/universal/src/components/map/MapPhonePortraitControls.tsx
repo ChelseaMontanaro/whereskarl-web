@@ -89,10 +89,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    paddingVertical: 1,
+    paddingVertical: 0,
   },
   chip: {
-    minHeight: 36,
+    minHeight: 40,
     minWidth: 44,
     alignItems: 'center',
     justifyContent: 'center',

@@ -15,7 +15,7 @@ const RAIL_INTENSITIES: FogIntensity[] = [
   'karlTerritory',
 ];
 
-const RAIL_ICON_SIZE = 22;
+const RAIL_ICON_SIZE = 24;
 
 type MapPhonePortraitFogRailProps = {
   activeIntensity: FogIntensity | null;
@@ -78,10 +78,10 @@ export function MapPhonePortraitFogRail({
 
 const styles = StyleSheet.create({
   panel: {
-    width: 64,
-    paddingHorizontal: 4,
-    paddingVertical: 6,
-    gap: 5,
+    width: 50,
+    paddingHorizontal: 3,
+    paddingVertical: 4,
+    gap: 4,
     borderRadius: 14,
     borderColor: 'rgba(150, 175, 200, 0.18)',
     backgroundColor: 'rgba(5, 13, 24, 0.82)',
@@ -92,10 +92,10 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   title: {
-    fontSize: 8,
-    lineHeight: 10,
+    fontSize: 7,
+    lineHeight: 9,
     fontWeight: '800',
-    letterSpacing: 0.6,
+    letterSpacing: 0.32,
     textTransform: 'uppercase',
     textAlign: 'center',
     color: 'rgba(255, 255, 255, 0.9)',
@@ -105,14 +105,14 @@ const styles = StyleSheet.create({
   },
   card: {
     alignItems: 'center',
-    gap: 3,
-    borderRadius: 10,
+    gap: 2,
+    borderRadius: 12,
     borderWidth: 1.5,
     borderColor: 'rgba(150, 175, 200, 0.13)',
     backgroundColor: 'rgba(16, 28, 44, 0.45)',
-    paddingHorizontal: 2,
-    paddingVertical: 5,
-    minHeight: 52,
+    paddingHorizontal: 0,
+    paddingVertical: 0,
+    minHeight: 48,
     justifyContent: 'center',
   },
   cardActive: {
@@ -124,8 +124,8 @@ const styles = StyleSheet.create({
     height: RAIL_ICON_SIZE,
   },
   label: {
-    fontSize: 9,
-    lineHeight: 11,
+    fontSize: 8,
+    lineHeight: 9,
     fontWeight: '600',
     textAlign: 'center',
     color: 'rgba(255, 255, 255, 0.85)',

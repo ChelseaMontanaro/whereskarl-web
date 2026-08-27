@@ -21,6 +21,7 @@ import {
   getMapBoundsForLayout,
   getMapViewportPaddingForLayout,
   normalizeViewportPadding,
+  PHONE_PORTRAIT_MAP_CENTER,
 } from '@/lib/map/mapConfig';
 import {
   findBayAreaProductRegion,
@@ -98,15 +99,33 @@ const KarlMapNative = forwardRef<KarlMapHandle, KarlMapProps>(function KarlMapNa
     intensityFilter = null,
     isNighttime = false,
     useConditionSvgIcons = false,
+    phonePortraitWeb = false,
   },
   ref,
 ) {
   const mapRef = useRef<MapView>(null);
-  const initialRegion = useMemo(
-    () => boundsToRegion(getMapBoundsForLayout(layout ?? 'mobile')),
-    [layout],
+  const viewportOptions = useMemo(
+    () => ({ phonePortraitWeb }),
+    [phonePortraitWeb],
   );
-  const padding = normalizeViewportPadding(getMapViewportPaddingForLayout(layout ?? 'mobile'));
+  const initialRegion = useMemo(() => {
+    const boundsRegion = boundsToRegion(
+      getMapBoundsForLayout(layout ?? 'mobile', viewportOptions),
+    );
+
+    if (!phonePortraitWeb) {
+      return boundsRegion;
+    }
+
+    return {
+      ...boundsRegion,
+      latitude: PHONE_PORTRAIT_MAP_CENTER.latitude,
+      longitude: PHONE_PORTRAIT_MAP_CENTER.longitude,
+    };
+  }, [layout, phonePortraitWeb, viewportOptions]);
+  const padding = normalizeViewportPadding(
+    getMapViewportPaddingForLayout(layout ?? 'mobile', viewportOptions),
+  );
 
   useImperativeHandle(ref, () => ({
     zoomIn: () => undefined,
@@ -123,6 +142,7 @@ const KarlMapNative = forwardRef<KarlMapHandle, KarlMapProps>(function KarlMapNa
       const fitOptions = resolveRegionViewportFitOptions(
         region,
         layout ?? 'mobile',
+        viewportOptions,
       );
       const resolvedPadding = normalizeViewportPadding(fitOptions.padding);
       const edgePadding =
@@ -165,15 +185,15 @@ const KarlMapNative = forwardRef<KarlMapHandle, KarlMapProps>(function KarlMapNa
         // Bias center south so the selected marker stays above the bottom sheet.
         latitude:
           layout === 'mobile'
-            ? selected.latitude - 0.035
+            ? selected.latitude - (phonePortraitWeb ? 0.028 : 0.035)
             : selected.latitude,
         longitude: selected.longitude,
-        latitudeDelta: layout === 'mobile' ? 0.18 : 0.22,
-        longitudeDelta: layout === 'mobile' ? 0.18 : 0.22,
+        latitudeDelta: layout === 'mobile' ? (phonePortraitWeb ? 0.14 : 0.18) : 0.22,
+        longitudeDelta: layout === 'mobile' ? (phonePortraitWeb ? 0.14 : 0.18) : 0.22,
       },
       350,
     );
-  }, [layout, locations, selectedLocationId]);
+  }, [layout, locations, phonePortraitWeb, selectedLocationId]);
 
   const overlayMessage = (() => {
     if (isLoading && locations.length === 0) {

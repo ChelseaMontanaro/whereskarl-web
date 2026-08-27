@@ -90,7 +90,8 @@ export default function MapScreen() {
   const mapLayout = mapLayoutModeForProfile(layoutProfile);
   const isDesktop = layoutProfile === 'desktop';
   const isPhone = layoutProfile === 'phone';
-  const isPhonePortraitWeb = isPhone && Platform.OS === 'web';
+  // Phone Map uses the same map-first presentation on native and web.
+  const isPhonePortraitMap = isPhone;
 
   const showListMode = parseMapViewMode(params.view) === 'list';
 
@@ -101,7 +102,7 @@ export default function MapScreen() {
   // Approved phone-portrait layout opens on the SF region tab.
   const [selectedRegionId, setSelectedRegionId] =
     useState<BayAreaVisibleProductRegionId | null>(() =>
-      isPhonePortraitWeb ? 'san-francisco' : null,
+      isPhonePortraitMap ? 'san-francisco' : null,
     );
   const [conditionFilter, setConditionFilter] = useState<FogIntensity | null>(
     null,
@@ -143,10 +144,10 @@ export default function MapScreen() {
   }, [params.location, params.selected]);
 
   const markerLocations = useMemo(() => {
-    // Phone-portrait web SF tab keeps the approved Marin/central Bay
-    // composition: plot every monitored location inside the approved bounds
-    // instead of narrowing to backend SF-region locations only.
-    if (isPhonePortraitWeb && selectedRegionId === 'san-francisco') {
+    // Phone SF tab keeps the approved Marin/central Bay composition: plot
+    // every monitored location inside the approved bounds instead of
+    // narrowing to backend SF-region locations only.
+    if (isPhonePortraitMap && selectedRegionId === 'san-francisco') {
       return filterLocationsForPhonePortraitSfComposition(
         prepareMapLocationResults(locations, {
           query: searchQuery,
@@ -161,7 +162,7 @@ export default function MapScreen() {
       regionId: selectedRegionId,
       conditionFilter: null,
     });
-  }, [isPhonePortraitWeb, locations, searchQuery, selectedRegionId]);
+  }, [isPhonePortraitMap, locations, searchQuery, selectedRegionId]);
 
   const listLocations = useMemo(
     () =>
@@ -438,7 +439,7 @@ export default function MapScreen() {
         error={error}
         layout={mapLayout}
         showLocationLabels={isPhone}
-        phonePortraitWeb={isPhonePortraitWeb}
+        phonePortraitWeb={isPhonePortraitMap}
         searchQuery={searchQuery}
         mapStyle={mapStyle}
         fogLayerEnabled={fogLayerEnabled}
@@ -506,65 +507,53 @@ export default function MapScreen() {
           </>
         ) : isPhone ? (
           <>
-            {!isLayersPanelOpen ? (
-              <>
-                <View
-                  style={[
-                    styles.phoneTopControls,
-                    {
-                      top: insets.top + 8,
-                      paddingHorizontal: Spacing.sm,
-                    },
-                  ]}
-                  pointerEvents="box-none">
-                  <MapPhonePortraitControls
-                    selectedRegionId={selectedRegionId}
-                    onSelectRegion={handleSelectRegion}
-                    locations={locations}
-                    onSelectLocation={handlePhoneSearchSelect}
-                    onClearSelectedLocation={handleClearSelection}
-                    isSearchDisabled={isLoading && locations.length === 0}
-                  />
-                </View>
+            <View
+              style={[
+                styles.phoneTopControls,
+                {
+                  top: insets.top + 8,
+                  paddingHorizontal: Spacing.sm,
+                },
+              ]}
+              pointerEvents="box-none">
+              <MapPhonePortraitControls
+                selectedRegionId={selectedRegionId}
+                onSelectRegion={handleSelectRegion}
+                locations={locations}
+                onSelectLocation={handlePhoneSearchSelect}
+                onClearSelectedLocation={handleClearSelection}
+                isSearchDisabled={isLoading && locations.length === 0}
+              />
+            </View>
 
-                <View
-                  style={[
-                    styles.phoneFogRail,
-                    { top: insets.top + 96 },
-                  ]}
-                  pointerEvents="box-none">
-                  <MapPhonePortraitFogRail
-                    activeIntensity={conditionFilter}
-                    onSelectIntensity={handleSelectCondition}
-                  />
-                </View>
-              </>
-            ) : null}
+            <View
+              style={[
+                styles.phoneFogRail,
+                { top: insets.top + 96 },
+              ]}
+              pointerEvents="box-none">
+              <MapPhonePortraitFogRail
+                activeIntensity={conditionFilter}
+                onSelectIntensity={handleSelectCondition}
+              />
+            </View>
 
-            {!isLayersPanelOpen ? (
-              <View
-                style={[
-                  styles.phoneFloatingControls,
-                  { top: insets.top + 96 },
-                ]}
-                pointerEvents="box-none">
+            <View
+              style={[
+                styles.phoneFloatingControls,
+                { top: insets.top + 96 },
+              ]}
+              pointerEvents="box-none">
+              {!isLayersPanelOpen ? (
                 <MapPhonePortraitFloatingControls
                   onOpenLayers={() => setIsLayersPanelOpen(true)}
                 />
-              </View>
-            ) : (
-              <View
-                style={[
-                  styles.phoneLayers,
-                  {
-                    top: insets.top + Spacing.sm,
-                    bottom: bottomInset + 80,
-                  },
-                ]}
-                pointerEvents="box-none">
-                {layerControls}
-              </View>
-            )}
+              ) : (
+                <View style={styles.phoneLayersPopover} pointerEvents="box-none">
+                  {layerControls}
+                </View>
+              )}
+            </View>
 
             <View
               style={[
@@ -665,8 +654,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(3, 11, 20, 0.42)',
   },
   mapGradientTopMobile: {
-    height: 72,
-    backgroundColor: 'rgba(3, 11, 20, 0.28)',
+    height: 56,
+    backgroundColor: 'rgba(3, 11, 20, 0.18)',
   },
   overlayRoot: {
     ...StyleSheet.absoluteFill,
@@ -710,6 +699,11 @@ const styles = StyleSheet.create({
     right: Spacing.sm,
     alignItems: 'flex-end',
     justifyContent: 'flex-start',
+  },
+  phoneLayersPopover: {
+    width: 272,
+    maxWidth: '100%',
+    alignItems: 'stretch',
   },
   phoneFloatingControls: {
     position: 'absolute',
