@@ -3,32 +3,41 @@ import { useEffect, useState } from 'react';
 import {
   getBestSunshine,
   getCurrent,
+  getKarlIntelligence,
   getLocations,
 } from '@whereskarl/api-client';
-
-import { getApiBaseUrl, isApiBaseUrlConfigured } from '@/constants/config';
 import type {
   BestSunshineResponse,
   CurrentResponse,
+  KarlIntelligenceResponse,
   LocationWeather,
 } from '@whereskarl/schemas';
+
+import { getApiBaseUrl, isApiBaseUrlConfigured } from '@/constants/config';
+import { foggiestKarlLocation } from '@/lib/home/weatherDisplay';
 
 const apiConfig = { getBaseUrl: getApiBaseUrl };
 
 export type HomeWeatherState = {
   isLoading: boolean;
+  isLoadingIntelligence: boolean;
   current: CurrentResponse | null;
   locations: LocationWeather[];
   bestSunshine: BestSunshineResponse | null;
+  intelligence: KarlIntelligenceResponse | null;
   hasLiveData: boolean;
+  hasLoadedCoreWeather: boolean;
 };
 
 const INITIAL_STATE: HomeWeatherState = {
   isLoading: true,
+  isLoadingIntelligence: false,
   current: null,
   locations: [],
   bestSunshine: null,
+  intelligence: null,
   hasLiveData: false,
+  hasLoadedCoreWeather: false,
 };
 
 export function useHomeWeather(): HomeWeatherState {
@@ -73,14 +82,42 @@ export function useHomeWeather(): HomeWeatherState {
       const hasLiveData = Boolean(
         current || locations.length > 0 || bestSunshine,
       );
+      const hasLoadedCoreWeather = Boolean(current && locations.length > 0);
 
       setState({
         isLoading: false,
+        isLoadingIntelligence: true,
         current,
         locations,
         bestSunshine,
+        intelligence: null,
         hasLiveData,
+        hasLoadedCoreWeather,
       });
+
+      const focusLocationId = foggiestKarlLocation(locations)?.id ?? null;
+
+      try {
+        const intelligence = await getKarlIntelligence(
+          apiConfig,
+          focusLocationId ? { locationId: focusLocationId } : undefined,
+        );
+
+        if (!cancelled) {
+          setState((prev) => ({
+            ...prev,
+            intelligence,
+            isLoadingIntelligence: false,
+          }));
+        }
+      } catch {
+        if (!cancelled) {
+          setState((prev) => ({
+            ...prev,
+            isLoadingIntelligence: false,
+          }));
+        }
+      }
     }
 
     loadWeather();

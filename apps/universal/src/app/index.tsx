@@ -1,46 +1,43 @@
-import { router } from 'expo-router';
 import { useEffect, useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ClearSkiesScore } from '@/components/ClearSkiesScore';
-import { KarlStatusCard } from '@/components/KarlStatusCard';
-import { LocationCard } from '@/components/LocationCard';
-import { Colors, Fonts, MaxContentWidth, Radius, Spacing } from '@/constants/theme';
+import { BestRightNowSection } from '@/components/home/BestRightNowSection';
+import { DashboardGrid } from '@/components/home/DashboardGrid';
+import { HomeHero } from '@/components/home/HomeHero';
+import { HomeHeroBackground } from '@/components/home/HomeHeroBackground';
+import { IntelligenceNarrativeCard } from '@/components/home/IntelligenceNarrativeCard';
+import { NextHourOutlookCard } from '@/components/home/NextHourOutlookCard';
+import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useHomeWeather } from '@/hooks/useHomeWeather';
-import { useHomeLocation } from '@/hooks/useHomeLocation';
+import { resolveHeroPresentation } from '@/lib/home/heroPresentation';
 import {
-  bestSunshineStatus,
+  bestRightNowItems,
+  enrichBestRightNowItemsWithLocationWeather,
   foggiestKarlLocation,
+  formatUpdatedAt,
   heroConfidenceText,
   heroHeadline,
   heroSubheadline,
+  isNighttime,
+  nextHourOutlookSummary,
+  resolveKarlReadPresentation,
 } from '@/lib/home/weatherDisplay';
-import {
-  getCloudSummary,
-} from '@/lib/map/locationsDisplay';
 import { useClearSkiesNav } from '@/providers/ClearSkiesNavProvider';
 
-const PLACEHOLDER = {
-  headline: 'Karl is draped across the Golden Gate',
-  subheadline:
-    'Fog is holding along the coast while inland pockets stay brighter through late morning.',
-  confidenceText: 'Sample conditions while Karl intelligence loads',
-  sunshineScore: 42,
-  location: {
-    name: 'Sausalito Waterfront',
-    status: 'Patchy fog, limited sunshine',
-    temperature: 58,
-    distanceText: '4.2 mi',
-    sunshineScore: 38,
-  },
-};
+const BOTTOM_NAV_CONTENT_INSET = 88;
 
 export default function HomeScreen() {
-  const { isLoading, current, locations, bestSunshine, hasLiveData } =
-    useHomeWeather();
-  const { homeLocation } = useHomeLocation(locations);
-
+  const insets = useSafeAreaInsets();
+  const {
+    isLoading,
+    isLoadingIntelligence,
+    current,
+    locations,
+    bestSunshine,
+    intelligence,
+    hasLoadedCoreWeather,
+  } = useHomeWeather();
   const { setClearSkiesNav } = useClearSkiesNav();
 
   const karlLocation = useMemo(
@@ -48,114 +45,147 @@ export default function HomeScreen() {
     [locations],
   );
 
-  const hasLoadedWeather = hasLiveData && Boolean(current);
-  const showLoading = isLoading && !hasLiveData;
+  const isNightPresentation = useMemo(
+    () => isNighttime(new Date().getHours()),
+    [],
+  );
+
+  const heroPresentation = useMemo(
+    () => resolveHeroPresentation(intelligence?.heroImagery),
+    [intelligence?.heroImagery],
+  );
+
+  const bestRightNow = useMemo(
+    () =>
+      enrichBestRightNowItemsWithLocationWeather(
+        bestRightNowItems(intelligence, bestSunshine),
+        locations,
+      ),
+    [intelligence, bestSunshine, locations],
+  );
+
+  const karlReadPresentation = useMemo(
+    () =>
+      resolveKarlReadPresentation({
+        intelligence,
+        bestSunshine,
+        locations,
+        bestRightNow,
+      }),
+    [intelligence, bestSunshine, locations, bestRightNow],
+  );
+
+  const nextHourSummary = nextHourOutlookSummary(karlLocation?.prediction);
+  const nextHourConfidence =
+    karlLocation?.prediction?.predictionConfidenceLabel ?? null;
+
+  const showLoading = isLoading && !hasLoadedCoreWeather;
+  const isFindingClearSkies = isLoading && !bestSunshine;
+  const clearSkiesLocationId = bestSunshine?.locationID ?? null;
+
+  const headline = heroHeadline({
+    current,
+    karlLocation,
+    intelligenceFocusLocationId: intelligence?.heroImagery?.focusLocationId,
+    hasLoadedWeather: hasLoadedCoreWeather,
+  });
+
+  const subheadline = heroSubheadline({
+    current,
+    karlLocation,
+    hasLoadedWeather: hasLoadedCoreWeather,
+  });
+
+  const confidenceText = heroConfidenceText({
+    intelligence,
+    karlLocation,
+    current,
+  });
 
   useEffect(() => {
     setClearSkiesNav({
-      locationId: bestSunshine?.id ?? null,
-      isLoading: showLoading,
+      locationId: clearSkiesLocationId,
+      isLoading: isFindingClearSkies,
     });
-  }, [bestSunshine?.id, setClearSkiesNav, showLoading]);
+  }, [clearSkiesLocationId, isFindingClearSkies, setClearSkiesNav]);
 
-  const headline = hasLoadedWeather
-    ? heroHeadline({ current, karlLocation, hasLoadedWeather: true })
-    : PLACEHOLDER.headline;
-
-  const subheadline = hasLiveData
-    ? heroSubheadline({
-        current,
-        karlLocation,
-        hasLoadedWeather: Boolean(current),
-      })
-    : PLACEHOLDER.subheadline;
-
-  const confidenceText = hasLiveData
-    ? heroConfidenceText({ karlLocation, current })
-    : PLACEHOLDER.confidenceText;
-
-  const sunshineScore = current?.sunshineScore ?? PLACEHOLDER.sunshineScore;
-
-  const featuredSpot = homeLocation
-    ? {
-        name: homeLocation.name,
-        status: getCloudSummary(homeLocation),
-        temperature: homeLocation.temperature,
-        distanceText: homeLocation.distanceText,
-        sunshineScore: homeLocation.sunshineScore,
-        isHomeLocation: true,
-        isPlaceholder: false,
-      }
-    : bestSunshine
-      ? {
-          name: bestSunshine.locationName,
-          status: bestSunshineStatus(bestSunshine),
-          temperature: bestSunshine.temperature,
-          distanceText: bestSunshine.distanceText,
-          sunshineScore: bestSunshine.sunshineScore,
-          isHomeLocation: false,
-          isPlaceholder: false,
-        }
-      : {
-          ...PLACEHOLDER.location,
-          isHomeLocation: false,
-          isPlaceholder: true,
-        };
+  const statusBarInset = Math.max(insets.top, 8);
 
   return (
     <View style={styles.root}>
-      <View style={styles.glowTop} />
-      <View style={styles.glowBottom} />
-      <View style={styles.vignette} />
+      <HomeHeroBackground presentation={heroPresentation} />
 
-      <SafeAreaView style={styles.safeArea}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}>
-          <View style={styles.hero}>
-            <Text style={styles.title}>Where&apos;s Karl?</Text>
-            <Text style={styles.tagline}>Track Karl across the Bay</Text>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={[
+          styles.scrollContent,
+          {
+            // Initial content clears the status bar; hero image remains full-bleed behind.
+            paddingTop: statusBarInset,
+            paddingBottom:
+              BOTTOM_NAV_CONTENT_INSET + Math.max(insets.bottom, 8),
+          },
+        ]}
+        showsVerticalScrollIndicator={false}
+        // Avoid iOS automatically inset-adjusting in a way that fights full-bleed hero.
+        contentInsetAdjustmentBehavior="never">
+        <HomeHero
+          headline={headline}
+          subheadline={subheadline}
+          confidenceText={confidenceText}
+          isLoading={showLoading}
+          clearSkiesLocationId={clearSkiesLocationId}
+          isFindingClearSkies={isFindingClearSkies}
+        />
+
+        <View style={styles.content}>
+          <DashboardGrid
+            current={current}
+            bestSunshine={bestSunshine}
+            intelligence={intelligence}
+            isLoading={!hasLoadedCoreWeather}
+            isNightPresentation={isNightPresentation}
+          />
+
+          <View style={styles.insightStack}>
+            <IntelligenceNarrativeCard
+              intelligence={intelligence}
+              karlReadPresentation={karlReadPresentation}
+              isLoading={isLoadingIntelligence && !intelligence}
+            />
+
+            <BestRightNowSection
+              items={bestRightNow}
+              isNightPresentation={isNightPresentation}
+            />
+
+            <NextHourOutlookCard
+              summary={nextHourSummary}
+              confidenceLabel={nextHourConfidence}
+              isLoading={!hasLoadedCoreWeather}
+            />
           </View>
 
-          <View style={styles.content}>
-            <KarlStatusCard
-              headline={headline}
-              subheadline={subheadline}
-              confidenceText={confidenceText}
-              isLoading={showLoading}
-            />
+          {current ? (
+            <Text style={styles.updated}>
+              Updated {formatUpdatedAt(current.updatedAt)}
+            </Text>
+          ) : null}
+        </View>
+      </ScrollView>
 
-            <ClearSkiesScore
-              sunshineScore={sunshineScore}
-              isLoading={showLoading && !current}
-            />
-
-            <Pressable
-              style={({ pressed }) => [
-                styles.ctaButton,
-                pressed && styles.ctaButtonPressed,
-              ]}
-              accessibilityRole="button"
-              accessibilityLabel="Find brightest spot"
-              onPress={() => router.push('/map')}>
-              <Text style={styles.ctaLabel}>Find Brightest Spot</Text>
-            </Pressable>
-
-            <LocationCard
-              name={featuredSpot.name}
-              status={featuredSpot.status}
-              temperature={featuredSpot.temperature}
-              distanceText={featuredSpot.distanceText}
-              sunshineScore={featuredSpot.sunshineScore}
-              isHomeLocation={featuredSpot.isHomeLocation}
-              isPlaceholder={featuredSpot.isPlaceholder}
-              isLoading={
-                showLoading && !homeLocation && !bestSunshine
-              }
-            />
-          </View>
-        </ScrollView>
-      </SafeAreaView>
+      {/*
+        Full-bleed hero is intentional (image under status bar at rest).
+        Once scrolled, glass cards colliding with the Dynamic Island is not.
+        A short non-interactive top scrim — height = status-bar inset only —
+        softens that collision without adding header chrome.
+      */}
+      <View
+        pointerEvents="none"
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+        style={[styles.statusBarScrim, { height: statusBarInset }]}
+      />
     </View>
   );
 }
@@ -163,87 +193,38 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: Colors.navy,
+    backgroundColor: '#000',
   },
-  glowTop: {
-    position: 'absolute',
-    top: -120,
-    left: '10%',
-    right: '10%',
-    height: 280,
-    borderRadius: 200,
-    backgroundColor: Colors.goldDeep,
-    opacity: 0.22,
-  },
-  glowBottom: {
-    position: 'absolute',
-    bottom: -80,
-    left: -40,
-    right: -40,
-    height: 240,
-    borderRadius: 200,
-    backgroundColor: Colors.navySoft,
-    opacity: 0.9,
-  },
-  vignette: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(0, 0, 0, 0.18)',
-  },
-  safeArea: {
+  scroll: {
     flex: 1,
   },
   scrollContent: {
-    flexGrow: 1,
     alignItems: 'center',
-    paddingHorizontal: Spacing.lg,
-    paddingBottom: Spacing.xxl,
-    gap: Spacing.lg,
-  },
-  hero: {
-    width: '100%',
-    maxWidth: MaxContentWidth,
-    alignItems: 'center',
-    paddingTop: Spacing.md,
-    gap: Spacing.xs,
-  },
-  title: {
-    fontFamily: Fonts?.serif,
-    fontSize: 32,
-    fontWeight: '600',
-    letterSpacing: 0.3,
-    color: Colors.textPrimary,
-    textAlign: 'center',
-  },
-  tagline: {
-    fontFamily: Fonts?.serif,
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 3.2,
-    textTransform: 'uppercase',
-    color: Colors.gold,
-    textAlign: 'center',
+    paddingHorizontal: Spacing.md,
   },
   content: {
     width: '100%',
     maxWidth: MaxContentWidth,
-    gap: Spacing.lg,
+    marginTop: -8,
+    gap: 16,
   },
-  ctaButton: {
-    alignSelf: 'stretch',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: Radius.pill,
-    backgroundColor: Colors.gold,
-    paddingVertical: 14,
-    paddingHorizontal: Spacing.lg,
+  insightStack: {
+    gap: 16,
   },
-  ctaButtonPressed: {
-    opacity: 0.88,
+  updated: {
+    marginTop: 4,
+    marginBottom: 8,
+    textAlign: 'center',
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.35)',
   },
-  ctaLabel: {
-    fontSize: 15,
-    fontWeight: '700',
-    letterSpacing: 0.2,
-    color: Colors.navy,
+  statusBarScrim: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 20,
+    // Soft veil only — hero still reads through at rest; scrolled cards stay legible.
+    backgroundColor: 'rgba(0, 0, 0, 0.42)',
   },
 });

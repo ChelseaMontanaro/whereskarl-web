@@ -91,12 +91,17 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   primaryButton: {
+    alignSelf: 'stretch',
     minHeight: 52,
     borderRadius: Radius.pill,
     backgroundColor: Colors.gold,
     paddingHorizontal: 20,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: Colors.goldDeep,
+    shadowOpacity: 0.28,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
   },
   primaryDisabled: {
     opacity: 0.6,
