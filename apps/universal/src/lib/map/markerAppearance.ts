@@ -4,7 +4,8 @@
 
 import {
   clearSkiesScoreColor,
-  resolveLocationFogIntensity,
+  getMarkerDisplayConditionLabel,
+  resolveMarkerDisplayIntensity,
   type FogIntensity,
 } from '@whereskarl/domain';
 
@@ -65,7 +66,7 @@ const INTENSITY_COLORS: Record<
 };
 
 export function getMarkerIntensity(location: KarlMapMarkerLocation): FogIntensity {
-  return resolveLocationFogIntensity(location);
+  return resolveMarkerDisplayIntensity(location);
 }
 
 export function getMarkerVisualState(
@@ -84,6 +85,13 @@ export function getMarkerVisualState(
   };
 }
 
+/** Phone-portrait marker score — mobile-web always shows clear-sky score. */
+export function getPhonePortraitMarkerScoreValue(
+  location: KarlMapMarkerLocation,
+): number {
+  return Math.round(location.sunshineScore);
+}
+
 export function getScoreBadgeColor(sunshineScore: number): string {
   return clearSkiesScoreColor(sunshineScore);
 }
@@ -91,14 +99,13 @@ export function getScoreBadgeColor(sunshineScore: number): string {
 export function getMarkerAccessibilityLabel(
   location: KarlMapMarkerLocation,
   isSelected: boolean,
+  options?: { isNighttime?: boolean },
 ): string {
-  const intensity = getMarkerIntensity(location);
-  const condition =
-    intensity === 'clear'
-      ? `${Math.round(location.sunshineScore)}% clear skies`
-      : intensity.replace(/([A-Z])/g, ' $1').trim();
+  const conditionLabel = getMarkerDisplayConditionLabel(location, {
+    isNighttime: options?.isNighttime ?? false,
+  });
 
   return isSelected
-    ? `${location.name}, selected, ${condition}`
-    : `${location.name}, ${condition}`;
+    ? `${location.name}, selected, ${conditionLabel}`
+    : `${location.name}, ${conditionLabel}`;
 }

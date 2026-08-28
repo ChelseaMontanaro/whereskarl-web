@@ -77,7 +77,9 @@ function KarlMapMarker({
         longitude: location.longitude,
       }}
       onPress={() => onSelect(location.id)}
-      accessibilityLabel={getMarkerAccessibilityLabel(location, isSelected)}
+      accessibilityLabel={getMarkerAccessibilityLabel(location, isSelected, {
+        isNighttime,
+      })}
       anchor={hasMeta ? { x: 0.5, y: 0.42 } : { x: 0.5, y: 0.92 }}
       opacity={isFilteredOut ? 0.35 : 1}
       tracksViewChanges={false}>

@@ -126,5 +126,7 @@ describe('Phase 22 native map parity polish', () => {
     expect(PHONE_PORTRAIT_APPLE_LEGAL_LABEL_INSETS.left).toBeGreaterThan(0);
     expect(PHONE_PORTRAIT_APPLE_LOGO_INSETS.bottom).toBeGreaterThan(0);
     expect(PHONE_PORTRAIT_APPLE_LOGO_INSETS.right).toBeGreaterThan(0);
+    // Tucked above the phone bottom sheet, not the prior near-zero gutter.
+    expect(PHONE_PORTRAIT_APPLE_LEGAL_LABEL_INSETS.bottom).toBeGreaterThan(100);
   });
 });

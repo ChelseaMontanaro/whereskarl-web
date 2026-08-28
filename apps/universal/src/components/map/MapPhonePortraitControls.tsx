@@ -1,7 +1,7 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { MapLocationSearchBar } from '@/components/map/MapLocationSearchBar';
-import { Colors, Radius } from '@/constants/theme';
+import { Colors, Radius, Spacing } from '@/constants/theme';
 import {
   BAY_AREA_PRODUCT_REGIONS,
   type BayAreaVisibleProductRegionId,
@@ -50,6 +50,7 @@ export function MapPhonePortraitControls({
         horizontal
         showsHorizontalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        style={styles.chipScroll}
         contentContainerStyle={styles.chipRow}
         accessibilityLabel="Bay Area regions">
         {BAY_AREA_PRODUCT_REGIONS.map((region) => {
@@ -74,6 +75,10 @@ export function MapPhonePortraitControls({
             </Pressable>
           );
         })}
+        {/* Explicit trailing spacer — RN horizontal ScrollView + gap often
+            under-counts contentContainerStyle paddingRight, which clips the
+            last chip (Peninsula) at max scroll. */}
+        <View style={styles.chipRowTrailing} accessibilityElementsHidden />
       </ScrollView>
     </View>
   );
@@ -85,13 +90,26 @@ const styles = StyleSheet.create({
     gap: 6,
     alignItems: 'stretch',
   },
+  chipScroll: {
+    // Bleed past map.tsx phoneTopControls paddingHorizontal so the scroll
+    // viewport reaches the screen edge and Peninsula is not masked by the
+    // parent inset. Leading/trailing content insets restore readable padding.
+    marginHorizontal: -Spacing.sm,
+    flexGrow: 0,
+  },
   chipRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    flexGrow: 0,
     gap: 6,
     paddingVertical: 0,
+    paddingLeft: Spacing.sm,
+  },
+  chipRowTrailing: {
+    width: Spacing.md,
   },
   chip: {
+    flexShrink: 0,
     minHeight: 40,
     minWidth: 44,
     alignItems: 'center',

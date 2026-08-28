@@ -6,11 +6,11 @@ import { ConditionIcon } from '@/components/conditions/ConditionIcon';
 import { Colors } from '@/constants/theme';
 import {
   getMarkerVisualState,
+  getPhonePortraitMarkerScoreValue,
   getScoreBadgeColor,
   type KarlMapMarkerLocation,
 } from '@/lib/map/markerAppearance';
 import { getMarkerConditionSymbol } from '@/lib/map/markerIcons';
-import { formatMarkerTemperature } from '@/lib/map/locationMetadata';
 import {
   PHONE_PORTRAIT_MARKER_ICON_OPACITY,
   PHONE_PORTRAIT_MARKER_ICON_PX,
@@ -22,7 +22,7 @@ type KarlMapMarkerViewProps = {
   isSelected: boolean;
   showScore?: boolean;
   showLocationLabel?: boolean;
-  /** Phone portrait: icon-only when false; label + temperature + score when true. */
+  /** Phone portrait: icon-only when false; label + clear-sky score when true. */
   showMarkerMeta?: boolean;
   size?: 'compact' | 'regular';
   isNighttime?: boolean;
@@ -72,8 +72,7 @@ export function KarlMapMarkerView({
   useSvgIcons = false,
 }: KarlMapMarkerViewProps) {
   const visual = getMarkerVisualState(location, isSelected);
-  const score = Math.round(location.sunshineScore);
-  const temperatureLabel = formatMarkerTemperature(location);
+  const score = getPhonePortraitMarkerScoreValue(location);
   const isCompact = size === 'compact';
   const scoreColor = isCompact ? Colors.gold : getScoreBadgeColor(score);
   const symbol = getMarkerConditionSymbol(visual.intensity, isNighttime);
@@ -130,23 +129,11 @@ export function KarlMapMarkerView({
               style={styles.locationLabelCompact}>
               {location.name}
             </Text>
-            <View style={styles.metaRow}>
-              {temperatureLabel ? (
-                <Text style={styles.temperatureText}>{temperatureLabel}</Text>
-              ) : null}
-              {showScore ? (
-                <>
-                  {temperatureLabel ? (
-                    <Text style={styles.metaDivider} accessibilityElementsHidden>
-                      ·
-                    </Text>
-                  ) : null}
-                  <Text style={[styles.scoreTextCompact, { color: scoreColor }]}>
-                    {score}
-                  </Text>
-                </>
-              ) : null}
-            </View>
+            {showScore ? (
+              <Text style={[styles.scoreTextCompact, { color: scoreColor }]}>
+                {score}
+              </Text>
+            ) : null}
           </View>
         ) : null
       ) : (
@@ -210,7 +197,7 @@ const styles = StyleSheet.create({
     gap: 1,
   },
   rootCompact: {
-    gap: 1,
+    gap: 2,
   },
   rootCompactSelected: {
     zIndex: 4,
@@ -227,20 +214,8 @@ const styles = StyleSheet.create({
   },
   metaBlock: {
     alignItems: 'center',
-    gap: 1,
+    gap: 2,
     maxWidth: 128,
-  },
-  metaRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: 4,
-    justifyContent: 'center',
-  },
-  metaDivider: {
-    color: 'rgba(255, 255, 255, 0.45)',
-    fontSize: 10,
-    fontWeight: '500',
-    lineHeight: 12,
   },
   symbol: {
     color: Colors.textPrimary,
@@ -277,23 +252,14 @@ const styles = StyleSheet.create({
     textShadowRadius: 3,
   },
   scoreTextCompact: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
-    lineHeight: 13,
-    letterSpacing: 0.2,
+    lineHeight: 14,
+    letterSpacing: 0.24,
     color: 'rgba(242, 163, 38, 0.95)',
     textShadowRadius: 3,
     textShadowColor: 'rgba(0, 0, 0, 0.9)',
     textShadowOffset: { width: 0, height: 1 },
-  },
-  temperatureText: {
-    color: 'rgba(255, 255, 255, 0.82)',
-    fontSize: 11,
-    fontWeight: '500',
-    lineHeight: 13,
-    textShadowColor: 'rgba(0, 0, 0, 0.9)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
   },
   locationLabel: {
     color: '#FFFFFF',
@@ -307,12 +273,12 @@ const styles = StyleSheet.create({
     textShadowRadius: 3,
   },
   locationLabelCompact: {
-    fontSize: 10.5,
-    lineHeight: 13,
+    fontSize: 11,
+    lineHeight: 14,
     fontWeight: '500',
-    letterSpacing: 0.15,
-    maxWidth: 124,
-    color: 'rgba(255, 255, 255, 0.85)',
+    letterSpacing: 0.17,
+    maxWidth: 136,
+    color: 'rgba(255, 255, 255, 0.88)',
     textAlign: 'center',
     textShadowColor: 'rgba(0, 0, 0, 0.9)',
     textShadowOffset: { width: 0, height: 1 },

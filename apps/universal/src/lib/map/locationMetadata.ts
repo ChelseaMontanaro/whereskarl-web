@@ -45,19 +45,6 @@ export function formatTemperature(location: LocationWeather): string | null {
   return `${Math.round(location.temperature)}°F`;
 }
 
-export function formatMarkerTemperature(
-  location: Pick<LocationWeather, 'temperature'>,
-): string | null {
-  if (
-    typeof location.temperature !== 'number' ||
-    !Number.isFinite(location.temperature)
-  ) {
-    return null;
-  }
-
-  return `${Math.round(location.temperature)}°`;
-}
-
 export function formatAirQuality(location: LocationWeather): string | null {
   const presentation = presentAirQuality(location.airQuality);
   return `AQI ${formatAirQualityCompact(presentation)}`;

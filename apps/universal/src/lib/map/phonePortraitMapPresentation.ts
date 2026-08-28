@@ -46,23 +46,28 @@ export const PHONE_PORTRAIT_MAP_VIEWPORT_PADDING: MapViewportPadding = {
 };
 
 /**
- * Pin Apple Maps Legal / logo near the MapView lower edge.
- * mapPadding raises Apple’s default attribution via layoutMargins; these
- * supported react-native-maps insets reposition without hiding attribution.
+ * Pin Apple Maps Legal / logo just above the phone bottom sheet stack.
+ *
+ * `mapPadding.bottom` reserves space for the selected-location card, bottom
+ * nav, and fog rail; without repositioning, Legal defaults to the inner edge
+ * of that margin and reads as floating lower-middle on the map. These insets
+ * tuck attribution into the bottom chrome gutter (above the sheet, below the
+ * map canvas) using react-native-maps' supported reposition API.
+ *
  * Non-zero edges required (native treats 0 as unset).
  */
 export const PHONE_PORTRAIT_APPLE_LEGAL_LABEL_INSETS = {
   top: 0,
   right: 0,
-  bottom: 14,
-  left: 10,
+  bottom: 196,
+  left: 8,
 } as const;
 
 export const PHONE_PORTRAIT_APPLE_LOGO_INSETS = {
   top: 0,
   left: 0,
-  bottom: 14,
-  right: 10,
+  bottom: 196,
+  right: 8,
 } as const;
 
 /** Rendered marker icon size on native phone portrait (slightly below web 2.25rem CSS). */

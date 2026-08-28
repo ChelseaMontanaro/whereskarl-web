@@ -1,6 +1,7 @@
 import { Image } from 'expo-image';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { KarlLogo } from '@/components/brand/KarlLogo';
 import { LiquidGlassSurface } from '@/components/ui/LiquidGlassSurface';
 import { Colors } from '@/constants/theme';
 import { useIsNighttime } from '@/hooks/useIsNighttime';
@@ -25,9 +26,8 @@ type MapPhonePortraitFogRailProps = {
 };
 
 /**
- * Compact icon-led fog-intensity rail (mobile Web parity).
- * Uses expo-image so SVG data-URI artwork renders on native.
- * Full state names stay on accessibilityLabel.
+ * Compact fog-intensity rail with icon-led cells and subordinate text labels
+ * (mobile-web MapPhonePortraitFogRail parity).
  */
 export function MapPhonePortraitFogRail({
   activeIntensity,
@@ -40,6 +40,10 @@ export function MapPhonePortraitFogRail({
       variant="rail"
       style={styles.panel}
       accessibilityLabel="Fog intensity filter">
+      <Text style={styles.header} accessibilityElementsHidden>
+        Fog{'\n'}Intensity
+      </Text>
+
       <View style={styles.cards}>
         {RAIL_INTENSITIES.map((intensity) => {
           const isActive = activeIntensity === intensity;
@@ -58,17 +62,29 @@ export function MapPhonePortraitFogRail({
                 isActive && styles.cardActive,
                 pressed && styles.pressed,
               ]}>
-              <Image
-                source={{
-                  uri: getPhonePortraitFogRailConditionIconDataUri(intensity, {
-                    isNighttime,
-                  }),
-                }}
-                style={styles.icon}
-                contentFit="contain"
+              {intensity === 'karlTerritory' ? (
+                <KarlLogo size={RAIL_ICON_SIZE} />
+              ) : (
+                <Image
+                  source={{
+                    uri: getPhonePortraitFogRailConditionIconDataUri(intensity, {
+                      isNighttime,
+                    }),
+                  }}
+                  style={styles.icon}
+                  contentFit="contain"
+                  accessibilityElementsHidden
+                  pointerEvents="none"
+                />
+              )}
+              <Text
+                style={[styles.label, isActive && styles.labelActive]}
                 accessibilityElementsHidden
-                pointerEvents="none"
-              />
+                numberOfLines={2}
+                adjustsFontSizeToFit
+                minimumFontScale={0.85}>
+                {label}
+              </Text>
             </Pressable>
           );
         })}
@@ -79,10 +95,10 @@ export function MapPhonePortraitFogRail({
 
 const styles = StyleSheet.create({
   panel: {
-    width: 48,
-    paddingHorizontal: 2,
-    paddingVertical: 3,
-    gap: 2,
+    width: 50,
+    paddingHorizontal: 3,
+    paddingVertical: 4,
+    gap: 4,
     borderRadius: 12,
     borderColor: 'rgba(150, 175, 200, 0.18)',
     backgroundColor: 'rgba(5, 13, 24, 0.82)',
@@ -92,18 +108,30 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 6,
   },
+  header: {
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: 7,
+    fontWeight: '800',
+    // Keep INTENSITY on one line inside the 50px rail without widening it.
+    letterSpacing: 0,
+    lineHeight: 9,
+    textAlign: 'center',
+    textTransform: 'uppercase',
+  },
   cards: {
-    gap: 2,
+    gap: 4,
   },
   card: {
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 10,
+    borderRadius: 12,
     borderWidth: 1.5,
     borderColor: 'rgba(150, 175, 200, 0.13)',
     backgroundColor: 'rgba(16, 28, 44, 0.45)',
-    minHeight: 44,
-    minWidth: 44,
+    gap: 2,
+    minHeight: 48,
+    paddingHorizontal: 2,
+    paddingVertical: 4,
   },
   cardActive: {
     borderColor: Colors.gold,
@@ -112,6 +140,18 @@ const styles = StyleSheet.create({
   icon: {
     width: RAIL_ICON_SIZE,
     height: RAIL_ICON_SIZE,
+  },
+  label: {
+    color: 'rgba(255, 255, 255, 0.85)',
+    fontSize: 8,
+    fontWeight: '600',
+    letterSpacing: -0.1,
+    lineHeight: 9,
+    textAlign: 'center',
+  },
+  labelActive: {
+    color: Colors.gold,
+    fontWeight: '700',
   },
   pressed: {
     opacity: 0.88,
