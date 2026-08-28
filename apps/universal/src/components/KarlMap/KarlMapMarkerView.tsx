@@ -10,7 +10,7 @@ import {
   type KarlMapMarkerLocation,
 } from '@/lib/map/markerAppearance';
 import { getMarkerConditionSymbol } from '@/lib/map/markerIcons';
-import { PHONE_PORTRAIT_MARKER_ICON_PX } from '@/lib/map/phonePortraitMapPresentation';
+import { PHONE_PORTRAIT_MARKER_ICON_OPACITY, PHONE_PORTRAIT_MARKER_ICON_PX } from '@/lib/map/phonePortraitMapPresentation';
 import { getPhonePortraitMarkerConditionIconDataUri } from '@/lib/map/phonePortraitConditionIcons';
 
 type KarlMapMarkerViewProps = {
@@ -33,7 +33,7 @@ function PhonePortraitMarkerIcon({
   size: number;
 }) {
   if (intensity === 'karlTerritory') {
-    return <KarlLogo size={size} />;
+    return <KarlLogo size={Math.round(size * 0.88)} />;
   }
 
   return (
@@ -43,7 +43,11 @@ function PhonePortraitMarkerIcon({
           isNighttime,
         }),
       }}
-      style={{ width: size, height: size }}
+      style={{
+        width: size,
+        height: size,
+        opacity: PHONE_PORTRAIT_MARKER_ICON_OPACITY,
+      }}
       contentFit="contain"
       accessibilityElementsHidden
       pointerEvents="none"
@@ -165,7 +169,7 @@ const styles = StyleSheet.create({
     gap: 1,
   },
   rootCompact: {
-    gap: 3,
+    gap: 2,
   },
   rootCompactSelected: {
     zIndex: 4,
@@ -176,8 +180,8 @@ const styles = StyleSheet.create({
   },
   iconWrapSelected: {
     shadowColor: Colors.gold,
-    shadowOpacity: 0.55,
-    shadowRadius: 10,
+    shadowOpacity: 0.45,
+    shadowRadius: 6,
     shadowOffset: { width: 0, height: 0 },
   },
   symbol: {
@@ -216,10 +220,13 @@ const styles = StyleSheet.create({
   },
   scoreTextCompact: {
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '600',
     lineHeight: 14,
-    textShadowRadius: 0,
-    textShadowColor: 'transparent',
+    letterSpacing: 0.24,
+    color: 'rgba(242, 163, 38, 0.95)',
+    textShadowRadius: 3,
+    textShadowColor: 'rgba(0, 0, 0, 0.9)',
+    textShadowOffset: { width: 0, height: 1 },
   },
   locationLabel: {
     color: '#FFFFFF',
@@ -234,8 +241,11 @@ const styles = StyleSheet.create({
   },
   locationLabelCompact: {
     fontSize: 11,
-    lineHeight: 13,
-    maxWidth: 112,
+    lineHeight: 14,
+    fontWeight: '500',
+    letterSpacing: 0.17,
+    maxWidth: 136,
+    color: 'rgba(255, 255, 255, 0.88)',
   },
   scoreTextSelected: {
     color: Colors.gold,

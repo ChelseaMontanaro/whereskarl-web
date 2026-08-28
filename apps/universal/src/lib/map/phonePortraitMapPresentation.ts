@@ -64,7 +64,12 @@ export const PHONE_PORTRAIT_APPLE_LOGO_INSETS = {
   right: 10,
 } as const;
 
-export const PHONE_PORTRAIT_MARKER_ICON_PX = 36;
+/** Rendered marker icon size on native phone portrait (slightly below web 2.25rem CSS
+ *  so fog artwork matches mobile-web visual weight on Apple Maps). */
+export const PHONE_PORTRAIT_MARKER_ICON_PX = 30;
+
+/** Matches mobile-web marker SVG opacity (phone-portrait-map.web.css). */
+export const PHONE_PORTRAIT_MARKER_ICON_OPACITY = 0.94;
 
 export const PHONE_PORTRAIT_MARKER_ICON_REM = '2.25rem';
 

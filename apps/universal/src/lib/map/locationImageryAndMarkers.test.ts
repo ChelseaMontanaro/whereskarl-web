@@ -24,6 +24,14 @@ describe('LocationCircularImage focal crop', () => {
 });
 
 describe('phone-portrait marker icon treatment', () => {
+  it('uses a lighter native marker footprint than web CSS rem tokens', async () => {
+    const { PHONE_PORTRAIT_MARKER_ICON_PX, PHONE_PORTRAIT_MARKER_ICON_OPACITY } =
+      await import('@/lib/map/phonePortraitMapPresentation');
+    expect(PHONE_PORTRAIT_MARKER_ICON_PX).toBeLessThan(36);
+    expect(PHONE_PORTRAIT_MARKER_ICON_OPACITY).toBeGreaterThan(0.9);
+    expect(PHONE_PORTRAIT_MARKER_ICON_OPACITY).toBeLessThan(1);
+  });
+
   it('uses cloud-free clear artwork for day and night', () => {
     const day = getPhonePortraitConditionIconSvg('clear', { isNighttime: false });
     const night = getPhonePortraitConditionIconSvg('clear', { isNighttime: true });
