@@ -26,7 +26,7 @@ import {
 import {
   PHONE_PORTRAIT_APPLE_LEGAL_LABEL_INSETS,
   PHONE_PORTRAIT_APPLE_LOGO_INSETS,
-  resolvePhonePortraitVisibleLabelIds,
+  resolvePhonePortraitVisibleMetaIds,
 } from '@/lib/map/phonePortraitMapPresentation';
 import {
   findBayAreaProductRegion,
@@ -49,6 +49,7 @@ function KarlMapMarker({
   location,
   isSelected,
   layout,
+  showMarkerMeta,
   showLocationLabel,
   isFilteredOut,
   isNighttime,
@@ -58,12 +59,16 @@ function KarlMapMarker({
   location: KarlMapProps['locations'][number];
   isSelected: boolean;
   layout: KarlMapProps['layout'];
+  showMarkerMeta?: boolean;
   showLocationLabel: boolean;
   isFilteredOut: boolean;
   isNighttime: boolean;
   useSvgIcons: boolean;
   onSelect: (locationId: string) => void;
 }) {
+  const hasMeta =
+    showMarkerMeta !== undefined ? showMarkerMeta : showLocationLabel;
+
   return (
     <Marker
       identifier={location.id}
@@ -73,14 +78,13 @@ function KarlMapMarker({
       }}
       onPress={() => onSelect(location.id)}
       accessibilityLabel={getMarkerAccessibilityLabel(location, isSelected)}
-      anchor={
-        showLocationLabel ? { x: 0.5, y: 0.45 } : { x: 0.5, y: 0.92 }
-      }
+      anchor={hasMeta ? { x: 0.5, y: 0.42 } : { x: 0.5, y: 0.92 }}
       opacity={isFilteredOut ? 0.35 : 1}
       tracksViewChanges={false}>
       <KarlMapMarkerView
         location={location}
         isSelected={isSelected}
+        showMarkerMeta={showMarkerMeta}
         showLocationLabel={showLocationLabel}
         size={layout === 'mobile' ? 'compact' : 'regular'}
         isNighttime={isNighttime}
@@ -230,17 +234,18 @@ const KarlMapNative = forwardRef<KarlMapHandle, KarlMapProps>(function KarlMapNa
         }
       : padding;
   const shouldShowLabels = showLocationLabels ?? layout === 'desktop';
-  const phonePortraitLabelIds = useMemo(() => {
+  const phonePortraitMetaIds = useMemo(() => {
     if (!phonePortraitWeb || !shouldShowLabels) {
       return null;
     }
 
-    return resolvePhonePortraitVisibleLabelIds(
+    return resolvePhonePortraitVisibleMetaIds(
       locations.map((location) => ({
         id: location.id,
         latitude: location.latitude,
         longitude: location.longitude,
         sunshineScore: location.sunshineScore,
+        region: location.region,
       })),
       selectedLocationId,
     );
@@ -269,8 +274,11 @@ const KarlMapNative = forwardRef<KarlMapHandle, KarlMapProps>(function KarlMapNa
           const isFilteredOut = intensityFilter
             ? !locationMatchesFogIntensityFilter(location, intensityFilter)
             : false;
-          const showLocationLabel = phonePortraitLabelIds
-            ? phonePortraitLabelIds.has(location.id)
+          const showMarkerMeta = phonePortraitMetaIds
+            ? phonePortraitMetaIds.has(location.id)
+            : undefined;
+          const showLocationLabel = phonePortraitMetaIds
+            ? false
             : shouldShowLabels;
 
           return (
@@ -279,6 +287,7 @@ const KarlMapNative = forwardRef<KarlMapHandle, KarlMapProps>(function KarlMapNa
               location={location}
               isSelected={selectedLocationId === location.id}
               layout={layout}
+              showMarkerMeta={showMarkerMeta}
               showLocationLabel={showLocationLabel}
               isFilteredOut={isFilteredOut}
               isNighttime={isNighttime}

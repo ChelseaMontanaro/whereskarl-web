@@ -10,7 +10,11 @@ import {
   type KarlMapMarkerLocation,
 } from '@/lib/map/markerAppearance';
 import { getMarkerConditionSymbol } from '@/lib/map/markerIcons';
-import { PHONE_PORTRAIT_MARKER_ICON_OPACITY, PHONE_PORTRAIT_MARKER_ICON_PX } from '@/lib/map/phonePortraitMapPresentation';
+import { formatMarkerTemperature } from '@/lib/map/locationMetadata';
+import {
+  PHONE_PORTRAIT_MARKER_ICON_OPACITY,
+  PHONE_PORTRAIT_MARKER_ICON_PX,
+} from '@/lib/map/phonePortraitMapPresentation';
 import { getPhonePortraitMarkerConditionIconDataUri } from '@/lib/map/phonePortraitConditionIcons';
 
 type KarlMapMarkerViewProps = {
@@ -18,6 +22,8 @@ type KarlMapMarkerViewProps = {
   isSelected: boolean;
   showScore?: boolean;
   showLocationLabel?: boolean;
+  /** Phone portrait: icon-only when false; label + temperature + score when true. */
+  showMarkerMeta?: boolean;
   size?: 'compact' | 'regular';
   isNighttime?: boolean;
   useSvgIcons?: boolean;
@@ -60,16 +66,19 @@ export function KarlMapMarkerView({
   isSelected,
   showScore = true,
   showLocationLabel = false,
+  showMarkerMeta,
   size = 'regular',
   isNighttime = false,
   useSvgIcons = false,
 }: KarlMapMarkerViewProps) {
   const visual = getMarkerVisualState(location, isSelected);
   const score = Math.round(location.sunshineScore);
+  const temperatureLabel = formatMarkerTemperature(location);
   const isCompact = size === 'compact';
   const scoreColor = isCompact ? Colors.gold : getScoreBadgeColor(score);
   const symbol = getMarkerConditionSymbol(visual.intensity, isNighttime);
   const iconSize = isCompact ? PHONE_PORTRAIT_MARKER_ICON_PX : 24;
+  const usePhonePortraitMeta = isCompact && showMarkerMeta !== undefined;
 
   return (
     <View
@@ -112,29 +121,61 @@ export function KarlMapMarkerView({
         )}
       </View>
 
-      {showLocationLabel ? (
-        <Text
-          numberOfLines={1}
-          ellipsizeMode="tail"
-          style={[
-            styles.locationLabel,
-            isCompact && styles.locationLabelCompact,
-          ]}>
-          {location.name}
-        </Text>
-      ) : null}
+      {usePhonePortraitMeta ? (
+        showMarkerMeta ? (
+          <View style={styles.metaBlock}>
+            <Text
+              numberOfLines={1}
+              ellipsizeMode="tail"
+              style={styles.locationLabelCompact}>
+              {location.name}
+            </Text>
+            <View style={styles.metaRow}>
+              {temperatureLabel ? (
+                <Text style={styles.temperatureText}>{temperatureLabel}</Text>
+              ) : null}
+              {showScore ? (
+                <>
+                  {temperatureLabel ? (
+                    <Text style={styles.metaDivider} accessibilityElementsHidden>
+                      ·
+                    </Text>
+                  ) : null}
+                  <Text style={[styles.scoreTextCompact, { color: scoreColor }]}>
+                    {score}
+                  </Text>
+                </>
+              ) : null}
+            </View>
+          </View>
+        ) : null
+      ) : (
+        <>
+          {showLocationLabel ? (
+            <Text
+              numberOfLines={1}
+              ellipsizeMode="tail"
+              style={[
+                styles.locationLabel,
+                isCompact && styles.locationLabelCompact,
+              ]}>
+              {location.name}
+            </Text>
+          ) : null}
 
-      {showScore ? (
-        <Text
-          style={[
-            styles.scoreText,
-            isCompact && styles.scoreTextCompact,
-            { color: scoreColor },
-            isSelected && !isCompact && styles.scoreTextSelected,
-          ]}>
-          {score}
-        </Text>
-      ) : null}
+          {showScore ? (
+            <Text
+              style={[
+                styles.scoreText,
+                isCompact && styles.scoreTextCompact,
+                { color: scoreColor },
+                isSelected && !isCompact && styles.scoreTextSelected,
+              ]}>
+              {score}
+            </Text>
+          ) : null}
+        </>
+      )}
     </View>
   );
 }
@@ -169,7 +210,7 @@ const styles = StyleSheet.create({
     gap: 1,
   },
   rootCompact: {
-    gap: 2,
+    gap: 1,
   },
   rootCompactSelected: {
     zIndex: 4,
@@ -183,6 +224,23 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.45,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 0 },
+  },
+  metaBlock: {
+    alignItems: 'center',
+    gap: 1,
+    maxWidth: 128,
+  },
+  metaRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 4,
+    justifyContent: 'center',
+  },
+  metaDivider: {
+    color: 'rgba(255, 255, 255, 0.45)',
+    fontSize: 10,
+    fontWeight: '500',
+    lineHeight: 12,
   },
   symbol: {
     color: Colors.textPrimary,
@@ -219,14 +277,23 @@ const styles = StyleSheet.create({
     textShadowRadius: 3,
   },
   scoreTextCompact: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
-    lineHeight: 14,
-    letterSpacing: 0.24,
+    lineHeight: 13,
+    letterSpacing: 0.2,
     color: 'rgba(242, 163, 38, 0.95)',
     textShadowRadius: 3,
     textShadowColor: 'rgba(0, 0, 0, 0.9)',
     textShadowOffset: { width: 0, height: 1 },
+  },
+  temperatureText: {
+    color: 'rgba(255, 255, 255, 0.82)',
+    fontSize: 11,
+    fontWeight: '500',
+    lineHeight: 13,
+    textShadowColor: 'rgba(0, 0, 0, 0.9)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
   locationLabel: {
     color: '#FFFFFF',
@@ -240,12 +307,16 @@ const styles = StyleSheet.create({
     textShadowRadius: 3,
   },
   locationLabelCompact: {
-    fontSize: 11,
-    lineHeight: 14,
+    fontSize: 10.5,
+    lineHeight: 13,
     fontWeight: '500',
-    letterSpacing: 0.17,
-    maxWidth: 136,
-    color: 'rgba(255, 255, 255, 0.88)',
+    letterSpacing: 0.15,
+    maxWidth: 124,
+    color: 'rgba(255, 255, 255, 0.85)',
+    textAlign: 'center',
+    textShadowColor: 'rgba(0, 0, 0, 0.9)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
   scoreTextSelected: {
     color: Colors.gold,

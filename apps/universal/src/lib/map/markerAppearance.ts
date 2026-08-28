@@ -19,7 +19,15 @@ export const CLEAR_MOON_COLOR = '#8CB8D8';
 
 export type KarlMapMarkerLocation = Pick<
   LocationWeather,
-  'id' | 'name' | 'latitude' | 'longitude' | 'fogScore' | 'sunshineScore' | 'status'
+  | 'id'
+  | 'name'
+  | 'latitude'
+  | 'longitude'
+  | 'fogScore'
+  | 'sunshineScore'
+  | 'status'
+  | 'temperature'
+  | 'region'
 >;
 
 export type MarkerVisualState = {

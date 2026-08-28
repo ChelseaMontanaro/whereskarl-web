@@ -1,6 +1,7 @@
 import type { MapViewportPadding } from '@/lib/map/mapConfig';
 import {
   isLocationWithinProductRegionBounds,
+  resolveProductRegionId,
   type LocationWithCoordinates,
   type MapBounds,
 } from '@/lib/map/regions';
@@ -64,9 +65,8 @@ export const PHONE_PORTRAIT_APPLE_LOGO_INSETS = {
   right: 10,
 } as const;
 
-/** Rendered marker icon size on native phone portrait (slightly below web 2.25rem CSS
- *  so fog artwork matches mobile-web visual weight on Apple Maps). */
-export const PHONE_PORTRAIT_MARKER_ICON_PX = 30;
+/** Rendered marker icon size on native phone portrait (slightly below web 2.25rem CSS). */
+export const PHONE_PORTRAIT_MARKER_ICON_PX = 28;
 
 /** Matches mobile-web marker SVG opacity (phone-portrait-map.web.css). */
 export const PHONE_PORTRAIT_MARKER_ICON_OPACITY = 0.94;
@@ -104,15 +104,15 @@ export function getPhonePortraitMarkerOffset(locationId: string): [number, numbe
 }
 
 export function getPhonePortraitMarkerMapOffset(
-  showLocationLabel: boolean,
+  showMarkerMeta: boolean,
 ): [number, number] {
-  return showLocationLabel ? [0, -36] : [0, -6];
+  return showMarkerMeta ? [0, -38] : [0, -6];
 }
 
 /**
  * Marker priority for the phone-portrait declutter pass. The approved SF
  * composition locations always win; everything else competes by clear-sky
- * score. Lower index = higher priority.
+ * score. Lower index = higher priority. Matches mobile-web canonical list.
  */
 export const PHONE_PORTRAIT_PRIORITY_LOCATION_IDS = [
   'san-francisco',
@@ -121,10 +121,6 @@ export const PHONE_PORTRAIT_PRIORITY_LOCATION_IDS = [
   'sausalito',
   'mill-valley',
   'stinson-beach',
-  'san-rafael',
-  'novato',
-  'san-anselmo',
-  // Bare `richmond` intentionally omitted — reserve richmond-district / richmond-ca.
 ] as const;
 
 export function getPhonePortraitMarkerPriority(locationId: string): number {
@@ -134,32 +130,86 @@ export function getPhonePortraitMarkerPriority(locationId: string): number {
   return index === -1 ? Number.MAX_SAFE_INTEGER : index;
 }
 
-type PhonePortraitLabelCandidate = {
+export type PhonePortraitMarkerPresentation = 'full' | 'icon-only';
+
+type PhonePortraitDeclutterCandidate = {
   id: string;
   latitude: number;
   longitude: number;
   sunshineScore: number;
+  region?: string | null;
 };
 
-/**
- * Native phone-portrait label declutter: keep every marker, but only show
- * text labels for the selected location plus a priority non-colliding set.
- * Approximate geographic proximity stands in for MapLibre screen projection.
- */
-export function resolvePhonePortraitVisibleLabelIds(
-  locations: readonly PhonePortraitLabelCandidate[],
+function selectPhonePortraitRegionAnchorIds(
+  locations: readonly PhonePortraitDeclutterCandidate[],
   selectedLocationId: string | null,
-): ReadonlySet<string> {
-  const visible = new Set<string>();
-  if (selectedLocationId) {
-    visible.add(selectedLocationId);
+): Set<string> {
+  const byRegion = new Map<string, PhonePortraitDeclutterCandidate[]>();
+
+  for (const location of locations) {
+    const regionId = resolveProductRegionId(location);
+    if (!regionId) {
+      continue;
+    }
+
+    const group = byRegion.get(regionId) ?? [];
+    group.push(location);
+    byRegion.set(regionId, group);
   }
+
+  const anchors = new Set<string>();
+  for (const group of byRegion.values()) {
+    const selected = group.find((location) => location.id === selectedLocationId);
+    if (selected) {
+      anchors.add(selected.id);
+      continue;
+    }
+
+    const best = [...group].sort((left, right) => {
+      const priorityDelta =
+        getPhonePortraitMarkerPriority(left.id) -
+        getPhonePortraitMarkerPriority(right.id);
+      if (priorityDelta !== 0) {
+        return priorityDelta;
+      }
+
+      return right.sunshineScore - left.sunshineScore;
+    })[0];
+
+    if (best) {
+      anchors.add(best.id);
+    }
+  }
+
+  return anchors;
+}
+
+/**
+ * Native phone-portrait marker declutter: every marker keeps its icon, but
+ * only a priority non-colliding subset shows label + temperature + clear-sky
+ * score. Geographic proximity stands in for MapLibre screen projection.
+ */
+export function resolvePhonePortraitMarkerPresentation(
+  locations: readonly PhonePortraitDeclutterCandidate[],
+  selectedLocationId: string | null,
+): ReadonlyMap<string, PhonePortraitMarkerPresentation> {
+  const presentation = new Map<string, PhonePortraitMarkerPresentation>();
+  const anchorIds = selectPhonePortraitRegionAnchorIds(
+    locations,
+    selectedLocationId,
+  );
 
   const ordered = [...locations].sort((left, right) => {
     const leftSelected = left.id === selectedLocationId;
     const rightSelected = right.id === selectedLocationId;
     if (leftSelected !== rightSelected) {
       return leftSelected ? -1 : 1;
+    }
+
+    const leftAnchor = anchorIds.has(left.id);
+    const rightAnchor = anchorIds.has(right.id);
+    if (leftAnchor !== rightAnchor) {
+      return leftAnchor ? -1 : 1;
     }
 
     const priorityDelta =
@@ -173,18 +223,27 @@ export function resolvePhonePortraitVisibleLabelIds(
   });
 
   const placed: Array<{ latitude: number; longitude: number }> = [];
-  // Slightly larger than prior pass — SF/Marin default framing still dense.
-  const latThreshold = 0.042;
-  const lngThreshold = 0.055;
+  // Tuned for label + temperature + score meta height around SF/Marin.
+  const latThreshold = 0.048;
+  const lngThreshold = 0.062;
 
   for (const location of ordered) {
-    if (PHONE_PORTRAIT_LOW_ZOOM_HIDDEN_LOCATION_IDS.has(location.id)) {
-      if (location.id === selectedLocationId) {
-        placed.push({
-          latitude: location.latitude,
-          longitude: location.longitude,
-        });
-      }
+    if (location.id === selectedLocationId) {
+      presentation.set(location.id, 'full');
+      placed.push({
+        latitude: location.latitude,
+        longitude: location.longitude,
+      });
+      continue;
+    }
+
+    const isAnchor = anchorIds.has(location.id);
+    const lowZoomSuppressed =
+      !isAnchor &&
+      PHONE_PORTRAIT_LOW_ZOOM_ICON_ONLY_LOCATION_IDS.has(location.id);
+
+    if (lowZoomSuppressed) {
+      presentation.set(location.id, 'icon-only');
       continue;
     }
 
@@ -194,18 +253,47 @@ export function resolvePhonePortraitVisibleLabelIds(
         Math.abs(other.longitude - location.longitude) < lngThreshold,
     );
 
-    if (collides && location.id !== selectedLocationId) {
+    if (collides) {
+      presentation.set(location.id, 'icon-only');
       continue;
     }
 
-    visible.add(location.id);
+    presentation.set(location.id, 'full');
     placed.push({
       latitude: location.latitude,
       longitude: location.longitude,
     });
   }
 
+  return presentation;
+}
+
+/** Set of markers that should render label + temperature + clear-sky score. */
+export function resolvePhonePortraitVisibleMetaIds(
+  locations: readonly PhonePortraitDeclutterCandidate[],
+  selectedLocationId: string | null,
+): ReadonlySet<string> {
+  const visible = new Set<string>();
+  const presentation = resolvePhonePortraitMarkerPresentation(
+    locations,
+    selectedLocationId,
+  );
+
+  for (const [locationId, state] of presentation) {
+    if (state === 'full') {
+      visible.add(locationId);
+    }
+  }
+
   return visible;
+}
+
+/** @deprecated Prefer {@link resolvePhonePortraitVisibleMetaIds}. */
+export function resolvePhonePortraitVisibleLabelIds(
+  locations: readonly PhonePortraitDeclutterCandidate[],
+  selectedLocationId: string | null,
+): ReadonlySet<string> {
+  return resolvePhonePortraitVisibleMetaIds(locations, selectedLocationId);
 }
 
 /** Approximate rendered marker footprint used for collision checks. */
@@ -213,12 +301,10 @@ export const PHONE_PORTRAIT_MARKER_COLLISION_X = 56;
 export const PHONE_PORTRAIT_MARKER_COLLISION_Y = 76;
 
 /**
- * Locations excluded from the approved wide composition (the mockup shows
- * only the ten curated Marin/central-Bay spots). They stay hidden while the
- * camera is at the composition zoom and reappear once the user zooms in past
- * this threshold.
+ * Dense SF/coastal cluster: icon-only at the wide all-Bay composition zoom
+ * so labels/temperature/score do not knot together. Icons remain clickable.
  */
-export const PHONE_PORTRAIT_LOW_ZOOM_HIDDEN_LOCATION_IDS = new Set([
+export const PHONE_PORTRAIT_LOW_ZOOM_ICON_ONLY_LOCATION_IDS = new Set([
   'daly-city',
   'pacifica',
   'presidio',
@@ -227,6 +313,10 @@ export const PHONE_PORTRAIT_LOW_ZOOM_HIDDEN_LOCATION_IDS = new Set([
   'marin-headlands',
   'half-moon-bay',
 ]);
+
+/** @deprecated Prefer {@link PHONE_PORTRAIT_LOW_ZOOM_ICON_ONLY_LOCATION_IDS}. */
+export const PHONE_PORTRAIT_LOW_ZOOM_HIDDEN_LOCATION_IDS =
+  PHONE_PORTRAIT_LOW_ZOOM_ICON_ONLY_LOCATION_IDS;
 
 export const PHONE_PORTRAIT_LOW_ZOOM_HIDE_THRESHOLD = 9.9;
 
