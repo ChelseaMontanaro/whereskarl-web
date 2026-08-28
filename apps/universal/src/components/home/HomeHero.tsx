@@ -87,8 +87,8 @@ const styles = StyleSheet.create({
   },
   tagline: {
     fontFamily: Fonts?.serif,
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: 13,
+    fontWeight: '800',
     letterSpacing: 3.2,
     textTransform: 'uppercase',
     color: Colors.gold,
@@ -133,9 +133,9 @@ const styles = StyleSheet.create({
   subheadline: {
     marginTop: 12,
     maxWidth: 320,
-    fontSize: 14.5,
+    fontSize: 16,
     fontWeight: '500',
-    lineHeight: 20,
+    lineHeight: 22,
     color: 'rgba(255,255,255,0.8)',
     textShadowColor: 'rgba(0,0,0,0.46)',
     textShadowOffset: { width: 0, height: 4 },

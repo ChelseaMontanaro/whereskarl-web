@@ -1,26 +1,33 @@
 import { Image } from 'expo-image';
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { router } from 'expo-router';
 
-import { ClearestSpotGauge } from '@/components/home/ClearestSpotGauge';
+import { KarlLogo } from '@/components/brand/KarlLogo';
+import { ClearestSpotMeter } from '@/components/home/ClearestSpotMeter';
 import {
   ClearSkiesScoreSlider,
   FogCoverageSlider,
 } from '@/components/home/MetricPercentSlider';
 import { Colors, Radius } from '@/constants/theme';
 import {
-  HOME_FOG_COVERAGE_ICON_URI,
-  HOME_MOON_ICON_URI,
-  HOME_SUNSHINE_ICON_URI,
-} from '@/lib/home/homeConditionIcons';
+  resolveFogCoverageMetricIcon,
+  resolveHomeClearConditionIconUri,
+  type HomeMetricIconRef,
+} from '@/lib/home/homeMetricIcons';
+import {
+  METRIC_DETAILS,
+  metricDetailAriaLabel,
+  type MetricDetailKey,
+} from '@/lib/home/metricDetails';
 import { resolveKarlStatusPhrase } from '@/lib/home/weatherDisplay';
-import { buildMapHref } from '@/lib/navigation';
 import type {
   BestSunshineResponse,
   CurrentResponse,
   KarlIntelligenceResponse,
 } from '@whereskarl/schemas';
+
+/** Modest bump from Phase 23.1 first pass (22) toward web’s 32px Map icons. */
+const METRIC_ICON_SIZE = 28;
 
 type DashboardGridProps = {
   current: CurrentResponse | null;
@@ -28,9 +35,16 @@ type DashboardGridProps = {
   intelligence?: KarlIntelligenceResponse | null;
   isLoading: boolean;
   isNightPresentation?: boolean;
+  onOpenMetricDetail: (key: MetricDetailKey) => void;
 };
 
-function MetricIcon({ uri, size = 22 }: { uri: string; size?: number }) {
+function MetricConditionIcon({
+  uri,
+  size = METRIC_ICON_SIZE,
+}: {
+  uri: string;
+  size?: number;
+}) {
   return (
     <Image
       source={{ uri }}
@@ -41,12 +55,20 @@ function MetricIcon({ uri, size = 22 }: { uri: string; size?: number }) {
   );
 }
 
+function MetricIcon({ icon }: { icon: HomeMetricIconRef }) {
+  if (icon.kind === 'karlLogo') {
+    return <KarlLogo size={METRIC_ICON_SIZE} />;
+  }
+
+  return <MetricConditionIcon uri={icon.uri} />;
+}
+
 function MetricCard({
   label,
   value,
   detail,
   isLoading,
-  iconUri,
+  icon,
   valueIsPhrase = false,
   gauge,
   onPress,
@@ -56,7 +78,7 @@ function MetricCard({
   value: string;
   detail: string;
   isLoading: boolean;
-  iconUri: string;
+  icon: HomeMetricIconRef;
   valueIsPhrase?: boolean;
   gauge?: ReactNode;
   onPress?: () => void;
@@ -80,7 +102,7 @@ function MetricCard({
           <Text style={styles.cardDetail}>{detail}</Text>
         </View>
         <View style={styles.iconFrame}>
-          <MetricIcon uri={iconUri} />
+          <MetricIcon icon={icon} />
         </View>
       </View>
       {gauge}
@@ -108,17 +130,28 @@ export function DashboardGrid({
   intelligence = null,
   isLoading,
   isNightPresentation = false,
+  onOpenMetricDetail,
 }: DashboardGridProps) {
-  const spotIconUri = isNightPresentation
-    ? HOME_MOON_ICON_URI
-    : HOME_SUNSHINE_ICON_URI;
+  const openMetricDetail = (key: MetricDetailKey) => {
+    if (isLoading) {
+      return;
+    }
+    onOpenMetricDetail(key);
+  };
 
-  const clearestPress =
-    !isLoading && bestSunshine?.locationID
-      ? () => {
-          router.push(buildMapHref(bestSunshine.locationID) as '/map');
-        }
-      : undefined;
+  const fogIcon =
+    !isLoading && current
+      ? resolveFogCoverageMetricIcon(current.fogCoverage, {
+          isNighttime: isNightPresentation,
+        })
+      : resolveFogCoverageMetricIcon(50, { isNighttime: isNightPresentation });
+
+  const clearSkiesIconUri = resolveHomeClearConditionIconUri({
+    isNighttime: false,
+  });
+  const clearestSpotIconUri = resolveHomeClearConditionIconUri({
+    isNighttime: isNightPresentation,
+  });
 
   return (
     <View
@@ -129,7 +162,11 @@ export function DashboardGrid({
         value={isLoading || !current ? '--' : `${current.fogCoverage}%`}
         detail={isLoading ? 'Checking conditions' : 'Bay Area'}
         isLoading={isLoading}
-        iconUri={HOME_FOG_COVERAGE_ICON_URI}
+        icon={fogIcon}
+        onPress={() => openMetricDetail('fog-coverage')}
+        accessibilityLabel={metricDetailAriaLabel(
+          METRIC_DETAILS['fog-coverage'].title,
+        )}
         gauge={
           !isLoading && current ? (
             <FogCoverageSlider fogCoveragePercent={current.fogCoverage} />
@@ -145,15 +182,23 @@ export function DashboardGrid({
         }
         detail={isLoading ? 'Checking conditions' : 'Across the Bay'}
         isLoading={isLoading}
-        iconUri={HOME_FOG_COVERAGE_ICON_URI}
+        icon={{ kind: 'karlLogo' }}
         valueIsPhrase
+        onPress={() => openMetricDetail('karl-status')}
+        accessibilityLabel={metricDetailAriaLabel(
+          METRIC_DETAILS['karl-status'].title,
+        )}
       />
       <MetricCard
         label="Clear Skies Score"
         value={isLoading || !current ? '--' : `${current.sunshineScore}`}
         detail={isLoading ? 'Checking conditions' : 'Bay Area average'}
         isLoading={isLoading}
-        iconUri={HOME_SUNSHINE_ICON_URI}
+        icon={{ kind: 'condition', uri: clearSkiesIconUri }}
+        onPress={() => openMetricDetail('sunshine-score')}
+        accessibilityLabel={metricDetailAriaLabel(
+          METRIC_DETAILS['sunshine-score'].title,
+        )}
         gauge={
           !isLoading && current ? (
             <ClearSkiesScoreSlider sunshineScore={current.sunshineScore} />
@@ -171,16 +216,14 @@ export function DashboardGrid({
             : bestSunshine.locationName
         }
         isLoading={isLoading}
-        iconUri={spotIconUri}
-        onPress={clearestPress}
-        accessibilityLabel={
-          bestSunshine
-            ? `View clearest spot on map: ${bestSunshine.locationName}`
-            : 'Clearest Spot'
-        }
+        icon={{ kind: 'condition', uri: clearestSpotIconUri }}
+        onPress={() => openMetricDetail('clearest-spot')}
+        accessibilityLabel={metricDetailAriaLabel(
+          METRIC_DETAILS['clearest-spot'].title,
+        )}
         gauge={
           !isLoading && bestSunshine ? (
-            <ClearestSpotGauge score={bestSunshine.sunshineScore} />
+            <ClearestSpotMeter score={bestSunshine.sunshineScore} />
           ) : null
         }
       />
@@ -209,7 +252,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   cardWithGauge: {
-    justifyContent: 'flex-end',
     gap: 4,
   },
   cardTop: {
@@ -220,10 +262,10 @@ const styles = StyleSheet.create({
   cardCopy: {
     flex: 1,
     minWidth: 0,
-    paddingRight: 28,
+    paddingRight: 34,
   },
   cardLabel: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '700',
     letterSpacing: 1.2,
     textTransform: 'uppercase',
@@ -231,16 +273,16 @@ const styles = StyleSheet.create({
   },
   cardValue: {
     marginTop: 6,
-    fontSize: 22,
+    fontSize: 26,
     fontWeight: '300',
-    lineHeight: 26,
+    lineHeight: 30,
     color: 'rgba(255,255,255,0.94)',
   },
   cardValuePhrase: {
-    // Web mobileKarlStatusValueClass: smaller phrase type, snug leading, up to 3 lines.
-    fontSize: 15,
+    // Still subordinate to numeric values; room for up to 3 lines.
+    fontSize: 17,
     fontWeight: '500',
-    lineHeight: 19,
+    lineHeight: 21,
     flexShrink: 1,
   },
   cardValueLoading: {
@@ -248,7 +290,7 @@ const styles = StyleSheet.create({
   },
   cardDetail: {
     marginTop: 6,
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '500',
     color: 'rgba(255,255,255,0.55)',
   },
@@ -256,8 +298,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     right: 0,
-    width: 28,
-    height: 28,
+    width: 34,
+    height: 34,
     alignItems: 'center',
     justifyContent: 'center',
   },

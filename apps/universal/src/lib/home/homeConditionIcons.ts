@@ -1,7 +1,6 @@
 /**
- * Home metric / insight icon SVG markup — mirrors apps/web ConditionIcons.
- * Rendered via expo-image data URIs (same pattern as map ConditionIcon).
- * Phase 23.1 will polish these; do not redesign here.
+ * Home insight icon SVG markup (Best Right Now, Next Hour, etc.).
+ * Dashboard metric cards use `homeMetricIcons` + Map phone-portrait artwork.
  */
 
 const FOG_COVERAGE_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" fill="none">

@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -7,10 +7,13 @@ import { DashboardGrid } from '@/components/home/DashboardGrid';
 import { HomeHero } from '@/components/home/HomeHero';
 import { HomeHeroBackground } from '@/components/home/HomeHeroBackground';
 import { IntelligenceNarrativeCard } from '@/components/home/IntelligenceNarrativeCard';
+import { MetricDetailSheet } from '@/components/home/MetricDetailSheet';
 import { NextHourOutlookCard } from '@/components/home/NextHourOutlookCard';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useHomeWeather } from '@/hooks/useHomeWeather';
 import { resolveHeroPresentation } from '@/lib/home/heroPresentation';
+import type { MetricDetailKey } from '@/lib/home/metricDetails';
+import { HOME_INSIGHT_STACK_ORDER } from '@/lib/home/homeHierarchy';
 import {
   bestRightNowItems,
   enrichBestRightNowItemsWithLocationWeather,
@@ -39,6 +42,8 @@ export default function HomeScreen() {
     hasLoadedCoreWeather,
   } = useHomeWeather();
   const { setClearSkiesNav } = useClearSkiesNav();
+  const [activeMetricDetail, setActiveMetricDetail] =
+    useState<MetricDetailKey | null>(null);
 
   const karlLocation = useMemo(
     () => foggiestKarlLocation(locations),
@@ -145,9 +150,12 @@ export default function HomeScreen() {
             intelligence={intelligence}
             isLoading={!hasLoadedCoreWeather}
             isNightPresentation={isNightPresentation}
+            onOpenMetricDetail={setActiveMetricDetail}
           />
 
-          <View style={styles.insightStack}>
+          <View
+            style={styles.insightStack}
+            accessibilityLabel={HOME_INSIGHT_STACK_ORDER.join(', ')}>
             <IntelligenceNarrativeCard
               intelligence={intelligence}
               karlReadPresentation={karlReadPresentation}
@@ -173,6 +181,15 @@ export default function HomeScreen() {
           ) : null}
         </View>
       </ScrollView>
+
+      {/*
+        Host metric sheets outside ScrollView so the Modal is not flattened
+        into the Home content gap layout (which hid Future Outlook).
+      */}
+      <MetricDetailSheet
+        metricKey={activeMetricDetail}
+        onClose={() => setActiveMetricDetail(null)}
+      />
 
       {/*
         Full-bleed hero is intentional (image under status bar at rest).
