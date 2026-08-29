@@ -15,9 +15,17 @@ export function NextHourOutlookCard({
   confidenceLabel,
   isLoading,
 }: NextHourOutlookCardProps) {
-  if (!isLoading && !summary) {
-    return null;
-  }
+  // Karl's pin can land on a location whose hourly prediction is unavailable
+  // (degraded pins report `predictionConfidenceLabel: "Unavailable"`). This card
+  // used to return null there, so Future Outlook vanished from Home entirely.
+  // The section always renders; only its body degrades.
+  const hasSummary = Boolean(summary);
+  const trimmedConfidence = confidenceLabel?.trim();
+  const showConfidence = Boolean(
+    hasSummary &&
+      trimmedConfidence &&
+      trimmedConfidence.toLowerCase() !== 'unavailable',
+  );
 
   return (
     <View style={styles.card}>
@@ -30,18 +38,28 @@ export function NextHourOutlookCard({
         />
       </View>
       <View style={styles.copy}>
-        <Text style={styles.label}>Future Outlook</Text>
+        <Text style={styles.label} allowFontScaling={false}>
+          Future Outlook
+        </Text>
         {isLoading ? (
-          <Text style={styles.loading}>Checking the future outlook…</Text>
-        ) : (
+          <Text style={styles.loading} allowFontScaling={false}>
+            Checking the future outlook…
+          </Text>
+        ) : hasSummary ? (
           <>
-            <Text style={styles.summary}>{summary}</Text>
-            {confidenceLabel ? (
-              <Text style={styles.confidence}>
-                {confidenceLabel} confidence
+            <Text style={styles.summary} allowFontScaling={false}>
+              {summary}
+            </Text>
+            {showConfidence ? (
+              <Text style={styles.confidence} allowFontScaling={false}>
+                {trimmedConfidence} confidence
               </Text>
             ) : null}
           </>
+        ) : (
+          <Text style={styles.loading} allowFontScaling={false}>
+            No hourly outlook available for Karl’s spot right now.
+          </Text>
         )}
       </View>
     </View>
@@ -67,8 +85,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   icon: {
-    width: 30,
-    height: 30,
+    // Web informational icon slot: h-8 w-8.
+    width: 32,
+    height: 32,
   },
   copy: {
     flex: 1,

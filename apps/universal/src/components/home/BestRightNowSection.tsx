@@ -41,16 +41,27 @@ function BestRightNowRow({
         />
       </View>
       <View style={styles.rowCopy}>
-        <Text style={styles.locationName}>{item.locationName}</Text>
-        <Text style={styles.detail}>{item.detail}</Text>
+        <Text style={styles.locationName} allowFontScaling={false}>
+          {item.locationName}
+        </Text>
+        <Text style={styles.detail} allowFontScaling={false}>
+          {item.detail}
+        </Text>
         {item.weatherMetadata && item.weatherMetadata.length > 0 ? (
-          <Text style={styles.metadata}>
+          <Text
+            style={styles.metadata}
+            allowFontScaling={false}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.85}>
             {item.weatherMetadata.join(' • ')}
           </Text>
         ) : null}
       </View>
       {item.score != null ? (
-        <Text style={styles.score}>{item.score}</Text>
+        <Text style={styles.score} allowFontScaling={false}>
+          {item.score}
+        </Text>
       ) : null}
     </>
   );
@@ -80,7 +91,9 @@ export function BestRightNowSection({
 
   return (
     <View style={styles.card}>
-      <Text style={styles.label}>Best Right Now</Text>
+      <Text style={styles.label} allowFontScaling={false}>
+        Best Right Now
+      </Text>
       <View style={styles.list}>
         {items.map((item) => (
           <BestRightNowRow
@@ -126,8 +139,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   icon: {
-    width: 28,
-    height: 28,
+    // Web informational icon slot: h-8 w-8.
+    width: 32,
+    height: 32,
   },
   rowCopy: {
     flex: 1,
@@ -146,6 +160,8 @@ const styles = StyleSheet.create({
   },
   metadata: {
     marginTop: 4,
+    // Web max-sm:text-xs / leading-snug. The one-line fit is guaranteed by
+    // numberOfLines + adjustsFontSizeToFit, not by shrinking the base size.
     fontSize: 12,
     fontWeight: '500',
     lineHeight: 16,

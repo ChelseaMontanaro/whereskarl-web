@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { KarlLogo } from '@/components/brand/KarlLogo';
+import { AirQualityMeter } from '@/components/home/AirQualityMeter';
 import { ClearestSpotMeter } from '@/components/home/ClearestSpotMeter';
 import {
   ClearSkiesScoreSlider,
@@ -10,6 +11,12 @@ import {
 } from '@/components/home/MetricPercentSlider';
 import { Colors, Radius } from '@/constants/theme';
 import {
+  airQualityMetricDetail,
+  airQualityMetricValue,
+  bayWideAirQuality,
+} from '@/lib/home/airQualityMetric';
+import {
+  resolveAirQualityMetricIconUri,
   resolveFogCoverageMetricIcon,
   resolveHomeClearConditionIconUri,
   type HomeMetricIconRef,
@@ -19,20 +26,14 @@ import {
   metricDetailAriaLabel,
   type MetricDetailKey,
 } from '@/lib/home/metricDetails';
-import { resolveKarlStatusPhrase } from '@/lib/home/weatherDisplay';
-import type {
-  BestSunshineResponse,
-  CurrentResponse,
-  KarlIntelligenceResponse,
-} from '@whereskarl/schemas';
+import type { BestSunshineResponse, CurrentResponse } from '@whereskarl/schemas';
 
-/** Modest bump from Phase 23.1 first pass (22) toward web’s 32px Map icons. */
-const METRIC_ICON_SIZE = 28;
+/** Web informational icon slot is 32 (`h-8 w-8`); Home now matches it. */
+const METRIC_ICON_SIZE = 32;
 
 type DashboardGridProps = {
   current: CurrentResponse | null;
   bestSunshine: BestSunshineResponse | null;
-  intelligence?: KarlIntelligenceResponse | null;
   isLoading: boolean;
   isNightPresentation?: boolean;
   onOpenMetricDetail: (key: MetricDetailKey) => void;
@@ -69,7 +70,6 @@ function MetricCard({
   detail,
   isLoading,
   icon,
-  valueIsPhrase = false,
   gauge,
   onPress,
   accessibilityLabel,
@@ -79,33 +79,34 @@ function MetricCard({
   detail: string;
   isLoading: boolean;
   icon: HomeMetricIconRef;
-  valueIsPhrase?: boolean;
   gauge?: ReactNode;
   onPress?: () => void;
   accessibilityLabel?: string;
 }) {
   const content = (
-    <View style={[styles.card, gauge ? styles.cardWithGauge : null]}>
+    <View style={styles.card}>
       <View style={styles.cardTop}>
         <View style={styles.cardCopy}>
-          <Text style={styles.cardLabel}>{label}</Text>
+          <Text style={styles.cardLabel} allowFontScaling={false}>
+            {label}
+          </Text>
           <Text
-            style={[
-              styles.cardValue,
-              valueIsPhrase && styles.cardValuePhrase,
-              isLoading && styles.cardValueLoading,
-            ]}
-            // Match mobile-web Karl Status (line-clamp-3); numeric metrics stay single-line.
-            numberOfLines={valueIsPhrase ? 3 : 1}>
+            style={[styles.cardValue, isLoading && styles.cardValueLoading]}
+            allowFontScaling={false}
+            // Every dashboard metric is now a numeric value: single line.
+            numberOfLines={1}>
             {value}
           </Text>
-          <Text style={styles.cardDetail}>{detail}</Text>
+          <Text style={styles.cardDetail} allowFontScaling={false}>
+            {detail}
+          </Text>
         </View>
         <View style={styles.iconFrame}>
           <MetricIcon icon={icon} />
         </View>
       </View>
-      {gauge}
+      {/* Web meters use mt-auto inside a flex column — pin gauge to tile bottom. */}
+      {gauge ? <View style={styles.gaugePin}>{gauge}</View> : null}
     </View>
   );
 
@@ -127,7 +128,6 @@ function MetricCard({
 export function DashboardGrid({
   current,
   bestSunshine,
-  intelligence = null,
   isLoading,
   isNightPresentation = false,
   onOpenMetricDetail,
@@ -152,6 +152,10 @@ export function DashboardGrid({
   const clearestSpotIconUri = resolveHomeClearConditionIconUri({
     isNighttime: isNightPresentation,
   });
+  const airQualityIconUri = resolveAirQualityMetricIconUri();
+
+  // Bay-wide aggregate straight from the backend's `bay-area-current` payload.
+  const airQuality = bayWideAirQuality(current);
 
   return (
     <View
@@ -174,20 +178,22 @@ export function DashboardGrid({
         }
       />
       <MetricCard
-        label="Karl Status"
-        value={
-          isLoading || !current
-            ? '--'
-            : resolveKarlStatusPhrase({ current, intelligence }) ?? '--'
+        label="Air Quality"
+        value={isLoading ? '--' : airQualityMetricValue(airQuality)}
+        detail={
+          isLoading ? 'Checking conditions' : airQualityMetricDetail(airQuality)
         }
-        detail={isLoading ? 'Checking conditions' : 'Across the Bay'}
         isLoading={isLoading}
-        icon={{ kind: 'karlLogo' }}
-        valueIsPhrase
-        onPress={() => openMetricDetail('karl-status')}
+        icon={{ kind: 'condition', uri: airQualityIconUri }}
+        onPress={() => openMetricDetail('air-quality')}
         accessibilityLabel={metricDetailAriaLabel(
-          METRIC_DETAILS['karl-status'].title,
+          METRIC_DETAILS['air-quality'].title,
         )}
+        gauge={
+          !isLoading && airQuality.available ? (
+            <AirQualityMeter presentation={airQuality} />
+          ) : null
+        }
       />
       <MetricCard
         label="Clear Skies Score"
@@ -242,17 +248,15 @@ const styles = StyleSheet.create({
     width: '48.5%',
   },
   card: {
-    minHeight: 148,
+    // Web phone tile: max-sm:h-[9.25rem] (148). Equal height across the 2×2.
+    height: 148,
     borderRadius: Radius.lg,
     borderWidth: 1,
     borderColor: Colors.glassBorder,
     backgroundColor: 'rgba(0,0,0,0.4)',
     paddingHorizontal: 14,
     paddingVertical: 12,
-    justifyContent: 'space-between',
-  },
-  cardWithGauge: {
-    gap: 4,
+    overflow: 'hidden',
   },
   cardTop: {
     flexDirection: 'row',
@@ -266,10 +270,16 @@ const styles = StyleSheet.create({
   },
   cardLabel: {
     fontSize: 11,
+    // Web mobileMetricTwoLineLabelClass: leading-[1.15]. Explicit so the
+    // two-line "Clear Skies Score" tile has a deterministic height.
+    lineHeight: 13,
     fontWeight: '700',
     letterSpacing: 1.2,
     textTransform: 'uppercase',
-    color: 'rgba(255,255,255,0.42)',
+    // Phase 23 closeout: web's text-white/42 read too faint over the
+    // photographic hero background on physical iPhone. Bumped for
+    // legibility; still clearly secondary to cardValue's 0.94 opacity.
+    color: 'rgba(255,255,255,0.62)',
   },
   cardValue: {
     marginTop: 6,
@@ -278,21 +288,21 @@ const styles = StyleSheet.create({
     lineHeight: 30,
     color: 'rgba(255,255,255,0.94)',
   },
-  cardValuePhrase: {
-    // Still subordinate to numeric values; room for up to 3 lines.
-    fontSize: 17,
-    fontWeight: '500',
-    lineHeight: 21,
-    flexShrink: 1,
-  },
   cardValueLoading: {
     opacity: 0.35,
   },
   cardDetail: {
     marginTop: 6,
-    fontSize: 13,
+    // Web max-sm:text-xs / text-white/55, bumped for physical-iPhone
+    // legibility (Phase 23 closeout) — still secondary to cardValue.
+    fontSize: 12,
+    lineHeight: 14,
     fontWeight: '500',
-    color: 'rgba(255,255,255,0.55)',
+    color: 'rgba(255,255,255,0.72)',
+  },
+  gaugePin: {
+    marginTop: 'auto',
+    width: '100%',
   },
   iconFrame: {
     position: 'absolute',

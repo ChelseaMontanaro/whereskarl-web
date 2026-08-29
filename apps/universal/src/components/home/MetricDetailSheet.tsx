@@ -74,7 +74,9 @@ const styles = StyleSheet.create({
   },
   backdrop: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(0,0,0,0.55)',
+    // Light veil only: the sheet is opaque enough to read on its own, so the
+    // backdrop just needs to signal modality without hiding Home behind it.
+    backgroundColor: 'rgba(0,0,0,0.16)',
   },
   sheet: {
     borderTopLeftRadius: 24,

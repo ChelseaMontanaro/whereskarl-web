@@ -14,7 +14,7 @@ import type {
 } from '@whereskarl/schemas';
 
 import { getApiBaseUrl, isApiBaseUrlConfigured } from '@/constants/config';
-import { foggiestKarlLocation } from '@/lib/home/weatherDisplay';
+import { resolveKarlLocation } from '@/lib/home/weatherDisplay';
 
 const apiConfig = { getBaseUrl: getApiBaseUrl };
 
@@ -95,7 +95,7 @@ export function useHomeWeather(): HomeWeatherState {
         hasLoadedCoreWeather,
       });
 
-      const focusLocationId = foggiestKarlLocation(locations)?.id ?? null;
+      const focusLocationId = resolveKarlLocation(current, locations)?.id ?? null;
 
       try {
         const intelligence = await getKarlIntelligence(

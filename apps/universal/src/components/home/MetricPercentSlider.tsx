@@ -60,8 +60,12 @@ export function MetricPercentSlider({
         />
       </View>
       <View style={styles.labels} importantForAccessibility="no-hide-descendants">
-        <Text style={styles.label}>{leftLabel}</Text>
-        <Text style={styles.label}>{rightLabel}</Text>
+        <Text style={styles.label} allowFontScaling={false}>
+          {leftLabel}
+        </Text>
+        <Text style={styles.label} allowFontScaling={false}>
+          {rightLabel}
+        </Text>
       </View>
     </View>
   );
@@ -98,16 +102,15 @@ export function ClearSkiesScoreSlider({
 }
 
 const styles = StyleSheet.create({
+  // Web mobileMetricIndicatorClass: mt-auto + max-sm:pt-3 (bottom-pinned by parent).
   root: {
-    marginTop: 10,
     width: '100%',
-    paddingTop: 2,
+    paddingTop: 12,
   },
   track: {
     height: 4,
     borderRadius: 999,
     backgroundColor: 'rgba(255,255,255,0.22)',
-    overflow: 'visible',
     justifyContent: 'center',
   },
   fill: {
@@ -135,9 +138,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   label: {
-    fontSize: 11,
+    // Web endpoint labels: text-[0.625rem] tracking-[0.02em] text-white/42,
+    // bumped for physical-iPhone legibility (Phase 23 closeout).
+    fontSize: 10,
+    lineHeight: 12,
     fontWeight: '500',
     letterSpacing: 0.2,
-    color: 'rgba(255,255,255,0.42)',
+    color: 'rgba(255,255,255,0.62)',
   },
 });

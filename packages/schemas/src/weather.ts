@@ -257,6 +257,11 @@ export type PollenDominantType = z.infer<typeof pollenDominantTypeSchema>;
 export const currentResponseSchema = z
   .object({
     id: z.literal("bay-area-current"),
+    /**
+     * Canonical Karl position. Optional so clients keep working against a
+     * backend deployed before this field existed.
+     */
+    karlLocationId: z.string().optional(),
     summary: z.string(),
     status: z.string(),
     temperature: z.number(),
@@ -271,7 +276,14 @@ export const currentResponseSchema = z
     iconName: z.string(),
     updatedAt: apiDateTimeSchema,
     source: apiSourceSchema,
+    /** Karl's current pin — location-specific, drives the Map-style tiles. */
     airQuality: airQualitySchema.optional(),
+    /**
+     * Bay-wide AQI: the mean of every location reporting AQI, classified
+     * through the canonical bands. Regional surfaces (Home) read this; a single
+     * degraded pin can no longer blank it. Optional for backend compatibility.
+     */
+    regionalAirQuality: airQualitySchema.optional(),
     uvIndex: ultravioletIndexSchema.optional(),
     pollen: pollenSchema.optional(),
     dataStatus: dataStatusSchema.optional(),

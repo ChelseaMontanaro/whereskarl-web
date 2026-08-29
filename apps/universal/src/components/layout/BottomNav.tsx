@@ -44,10 +44,11 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: MaxContentWidth,
     alignSelf: 'center',
+    // Mobile-web: pt-2 (8) + px-2 (8)
     paddingTop: 8,
-    paddingHorizontal: 4,
+    paddingHorizontal: 8,
   },
   navPhonePortrait: {
-    paddingTop: 2,
+    paddingTop: 8,
   },
 });

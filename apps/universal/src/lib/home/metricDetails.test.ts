@@ -8,21 +8,34 @@ import {
 describe('metricDetails', () => {
   it('covers all four Home dashboard metrics', () => {
     expect(Object.keys(METRIC_DETAILS).sort()).toEqual([
+      'air-quality',
       'clearest-spot',
       'fog-coverage',
-      'karl-status',
       'sunshine-score',
     ]);
+  });
+
+  it('no longer carries the retired Karl Status metric', () => {
+    expect(METRIC_DETAILS).not.toHaveProperty('karl-status');
   });
 
   it('keeps Fog Coverage aligned with mobile-web marine-layer meaning', () => {
     expect(METRIC_DETAILS['fog-coverage'].body).toContain("Karl's marine layer");
   });
 
-  it('introduces Karl the Fog in the Karl Status explanation', () => {
-    expect(METRIC_DETAILS['karl-status'].title).toBe('Karl Status');
-    expect(METRIC_DETAILS['karl-status'].body).toContain('Karl the Fog');
-    expect(METRIC_DETAILS['karl-status'].body).toContain('across the Bay');
+  it('explains Air Quality as Bay-wide AQI with Map for locations', () => {
+    const airQuality = METRIC_DETAILS['air-quality'];
+
+    expect(airQuality.title).toBe('Air Quality');
+    // What the number means, and that it is a Bay-wide figure.
+    expect(airQuality.body).toContain('Air Quality Index');
+    expect(airQuality.body).toContain('Bay Area as a whole');
+    // What the classification beneath it means, using canonical band names.
+    expect(airQuality.body).toContain('health category');
+    expect(airQuality.body).toContain('Good');
+    expect(airQuality.body).toContain('Hazardous');
+    // Location-specific AQI stays on Map.
+    expect(airQuality.body).toContain('Map');
   });
 
   it('explains Clear Skies Score with the Poor → Excellent scale', () => {
@@ -38,6 +51,6 @@ describe('metricDetails', () => {
   });
 
   it('builds Learn about aria labels', () => {
-    expect(metricDetailAriaLabel('Karl Status')).toBe('Learn about Karl Status');
+    expect(metricDetailAriaLabel('Air Quality')).toBe('Learn about Air Quality');
   });
 });

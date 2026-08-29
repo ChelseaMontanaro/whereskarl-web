@@ -180,6 +180,34 @@ export function foggiestKarlLocation(
   })[0];
 }
 
+/**
+ * Karl's canonical current location.
+ *
+ * `/current.karlLocationId` is authoritative: the backend chooses the pin, and
+ * every scalar on that same response (summary, temperature, wind, airQuality)
+ * already describes it. Deriving it here instead is what let Home contradict
+ * `/current` and let web and native disagree with each other.
+ *
+ * `foggiestKarlLocation` remains only as a fallback for a backend deployed
+ * before the field existed. It ranks by lowest `sunshineScore`, which does not
+ * agree with the backend's highest-`fogScore` rule on degraded pins.
+ */
+export function resolveKarlLocation(
+  current: CurrentResponse | null,
+  locations: LocationWeather[],
+): LocationWeather | null {
+  const canonicalId = current?.karlLocationId;
+
+  if (canonicalId) {
+    const match = locations.find((location) => location.id === canonicalId);
+    if (match) {
+      return match;
+    }
+  }
+
+  return foggiestKarlLocation(locations);
+}
+
 export function displayLocationName(locationId: string): string {
   return locationId
     .split('-')

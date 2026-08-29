@@ -1,43 +1,53 @@
 import { StyleSheet, Text, View } from 'react-native';
+import type { AirQualityPresentation } from '@whereskarl/domain';
 
 import {
-  clearestSpotMeterAriaLabel,
-  clearestSpotMeterFillPercent,
-} from '@/lib/home/clearestSpotMeter';
+  airQualityMeterAriaLabel,
+  airQualityMeterFillPercent,
+} from '@/lib/home/airQualityMetric';
 
-/** Clearest Spot indicator blue — distinct from Clear Skies gold slider. */
-const CLEAREST_SPOT_METER_BLUE = 'rgb(140, 184, 216)';
-const CLEAREST_SPOT_METER_BLUE_FILL = 'rgb(91, 155, 200)';
+/** Neutral indicator used when the backend reports AQI as unavailable. */
+const UNAVAILABLE_COLOR = 'rgba(255,255,255,0.45)';
 
-type ClearestSpotMeterProps = {
-  score: number;
+type AirQualityMeterProps = {
+  presentation: AirQualityPresentation;
 };
 
 /**
- * Horizontal Poor → Best score meter — approved Universal Clearest Spot control
- * (not the web semicircle gauge). Bottom-pinned by parent card like web meters.
+ * Bay-wide AQI band meter — same control family as the Fog / Clear Skies /
+ * Clearest Spot meters (4pt track, 14pt bead, endpoint labels), but scaled by
+ * canonical AQI band rather than by percent. Fill colour is the backend's own
+ * band colour token.
  */
-export function ClearestSpotMeter({ score }: ClearestSpotMeterProps) {
-  const fillPercent = clearestSpotMeterFillPercent(score);
+export function AirQualityMeter({ presentation }: AirQualityMeterProps) {
+  const fillPercent = airQualityMeterFillPercent(presentation);
+  const bandColor = presentation.color ?? UNAVAILABLE_COLOR;
 
   return (
     <View
       style={styles.root}
       accessible
       accessibilityRole="image"
-      accessibilityLabel={clearestSpotMeterAriaLabel(score)}>
+      accessibilityLabel={airQualityMeterAriaLabel(presentation)}>
       <View style={styles.track}>
-        <View style={[styles.fill, { width: `${fillPercent}%` }]} />
-        <View style={[styles.bead, { left: `${fillPercent}%` }]} />
+        <View
+          style={[
+            styles.fill,
+            { width: `${fillPercent}%`, backgroundColor: bandColor },
+          ]}
+        />
+        <View
+          style={[styles.bead, { left: `${fillPercent}%`, borderColor: bandColor }]}
+        />
       </View>
       <View
         style={styles.labels}
         importantForAccessibility="no-hide-descendants">
         <Text style={styles.label} allowFontScaling={false}>
-          Poor
+          Good
         </Text>
         <Text style={styles.label} allowFontScaling={false}>
-          Best
+          Hazardous
         </Text>
       </View>
     </View>
@@ -61,7 +71,6 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     borderRadius: 999,
-    backgroundColor: CLEAREST_SPOT_METER_BLUE_FILL,
   },
   bead: {
     position: 'absolute',
@@ -70,7 +79,6 @@ const styles = StyleSheet.create({
     marginLeft: -7,
     borderRadius: 999,
     borderWidth: 2,
-    borderColor: CLEAREST_SPOT_METER_BLUE,
     backgroundColor: '#fff',
   },
   labels: {
@@ -79,7 +87,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   label: {
-    // Matches the Fog / Clear Skies slider endpoint labels
+    // Matches the Fog / Clear Skies / Clearest Spot endpoint labels
     // (Phase 23 closeout contrast bump).
     fontSize: 10,
     lineHeight: 12,

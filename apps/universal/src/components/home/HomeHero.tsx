@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
 import { FindClearSkiesCta } from '@/components/home/FindClearSkiesCta';
 import { Colors, Fonts, MaxContentWidth, Spacing } from '@/constants/theme';
@@ -15,11 +15,19 @@ type HomeHeroProps = {
 function HeroPositionBadge({ isLoading }: { isLoading: boolean }) {
   return (
     <View style={styles.badge}>
-      <Text style={styles.badgeLabel}>
+      <Text style={styles.badgeLabel} allowFontScaling={false}>
         {isLoading ? "Reading Karl intelligence" : "Karl's current position"}
       </Text>
     </View>
   );
+}
+
+/**
+ * Mobile-web HomeHero phone rule: min-h-[min(560px,70vh)].
+ * Dimensions only — no device-model branching.
+ */
+export function resolveHeroMinHeight(windowHeight: number): number {
+  return Math.min(560, Math.round(windowHeight * 0.7));
 }
 
 export function HomeHero({
@@ -30,23 +38,40 @@ export function HomeHero({
   clearSkiesLocationId,
   isFindingClearSkies,
 }: HomeHeroProps) {
+  const { height: windowHeight } = useWindowDimensions();
+
   return (
     <View
-      style={styles.section}
+      style={[styles.section, { minHeight: resolveHeroMinHeight(windowHeight) }]}
       accessibilityLabel="Karl conditions hero">
       <View style={styles.brand}>
-        <Text style={styles.title}>Where&apos;s Karl?</Text>
-        <Text style={styles.tagline}>Track Karl across the Bay</Text>
+        <Text style={styles.title} allowFontScaling={false}>
+          Where&apos;s Karl?
+        </Text>
+        <Text
+          style={styles.tagline}
+          allowFontScaling={false}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.85}>
+          Track Karl across the Bay
+        </Text>
       </View>
 
       <View style={styles.copyBlock}>
         <HeroPositionBadge isLoading={isLoading} />
-        <Text style={[styles.headline, isLoading && styles.loadingText]}>
+        <Text
+          style={[styles.headline, isLoading && styles.loadingText]}
+          allowFontScaling={false}>
           {headline}
         </Text>
-        <Text style={styles.subheadline}>{subheadline}</Text>
+        <Text style={styles.subheadline} allowFontScaling={false}>
+          {subheadline}
+        </Text>
         {confidenceText ? (
-          <Text style={styles.confidence}>{confidenceText}</Text>
+          <Text style={styles.confidence} allowFontScaling={false}>
+            {confidenceText}
+          </Text>
         ) : null}
         <View style={styles.ctaWrap}>
           <FindClearSkiesCta
@@ -65,7 +90,6 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: MaxContentWidth,
     alignSelf: 'center',
-    minHeight: 420,
     justifyContent: 'space-between',
     paddingTop: Spacing.md,
   },
@@ -87,10 +111,17 @@ const styles = StyleSheet.create({
   },
   tagline: {
     fontFamily: Fonts?.serif,
-    fontSize: 13,
+    // Web text-xs; keep one line on physical iPhone.
+    fontSize: 12,
     fontWeight: '800',
     letterSpacing: 3.2,
     textTransform: 'uppercase',
+    // Final optical calibration: reuses the exact canonical sun-icon color.
+    // CLEAR_SUN_ONLY_ICON (lib/map/phonePortraitConditionIcons.ts — the sun
+    // behind Clear Skies Score / Clearest Spot) draws its outer disc AND its
+    // rays in `#F2A326`, with only a smaller `#F6C15A` inner highlight for
+    // dimensionality. `#F2A326` is the icon's identifying color and is
+    // `Colors.gold` (rgb(242,163,38)) verbatim — reused as-is, not derived.
     color: Colors.gold,
     textAlign: 'center',
   },

@@ -20,11 +20,15 @@ export function IntelligenceNarrativeCard({
     return (
       <View style={styles.card}>
         <View style={styles.icon}>
-          <KarlLogo size={28} />
+          <KarlLogo size={32} />
         </View>
         <View style={styles.copy}>
-          <Text style={styles.label}>Karl&apos;s Read</Text>
-          <Text style={styles.loadingHeadline}>Reading Karl intelligence…</Text>
+          <Text style={styles.label} allowFontScaling={false}>
+            Karl&apos;s Read
+          </Text>
+          <Text style={styles.loadingHeadline} allowFontScaling={false}>
+            Reading Karl intelligence…
+          </Text>
         </View>
       </View>
     );
@@ -46,14 +50,20 @@ export function IntelligenceNarrativeCard({
   return (
     <View style={styles.card}>
       <View style={styles.icon}>
-        <KarlLogo size={28} />
+        <KarlLogo size={32} />
       </View>
       <View style={styles.copy}>
-        <Text style={styles.label}>Karl&apos;s Read</Text>
-        <Text style={styles.headline}>{headline}</Text>
-        <Text style={styles.summary}>{summary}</Text>
+        <Text style={styles.label} allowFontScaling={false}>
+          Karl&apos;s Read
+        </Text>
+        <Text style={styles.headline} allowFontScaling={false}>
+          {headline}
+        </Text>
+        <Text style={styles.summary} allowFontScaling={false}>
+          {summary}
+        </Text>
         {confidenceLabel ? (
-          <Text style={styles.confidence}>
+          <Text style={styles.confidence} allowFontScaling={false}>
             {confidenceLabel} confidence
           </Text>
         ) : null}

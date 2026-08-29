@@ -19,6 +19,7 @@ import {
   heroHeadline,
   isNighttime,
   nextHourOutlookSummary,
+  resolveKarlLocation,
   resolveKarlStatusPhrase,
 } from '@/lib/home/weatherDisplay';
 import type {
@@ -79,6 +80,50 @@ describe('home weatherDisplay', () => {
       makeLocation({ id: 'b', name: 'B', sunshineScore: 15, cloudCover: 90 }),
     ]);
     expect(foggiest?.id).toBe('b');
+  });
+
+  /**
+   * Karl used to jump between locations on every refresh because the client
+   * ranked by lowest `sunshineScore` while `/current` ranked by highest
+   * `fogScore`, and coastal pins tie on both client keys during a uniform
+   * marine layer. `/current.karlLocationId` is now authoritative.
+   */
+  describe('canonical Karl position', () => {
+    const locations = [
+      makeLocation({ id: 'ocean-beach', name: 'Ocean Beach', sunshineScore: 56, cloudCover: 41 }),
+      makeLocation({ id: 'lands-end', name: 'Lands End', sunshineScore: 56, cloudCover: 41 }),
+      makeLocation({ id: 'moss-beach', name: 'Moss Beach', sunshineScore: 26, cloudCover: 55 }),
+    ];
+
+    it('follows /current.karlLocationId instead of re-ranking locally', () => {
+      const current = { karlLocationId: 'lands-end' } as CurrentResponse;
+
+      expect(resolveKarlLocation(current, locations)?.id).toBe('lands-end');
+      // The local heuristic would have said moss-beach.
+      expect(foggiestKarlLocation(locations)?.id).toBe('moss-beach');
+    });
+
+    it('is stable across refetches while the backend id is stable', () => {
+      const current = { karlLocationId: 'ocean-beach' } as CurrentResponse;
+      const reordered = [...locations].reverse();
+
+      // Array order no longer decides the winner among tied pins.
+      expect(resolveKarlLocation(current, locations)?.id).toBe('ocean-beach');
+      expect(resolveKarlLocation(current, reordered)?.id).toBe('ocean-beach');
+    });
+
+    it('falls back to the local heuristic only when the id is absent or unknown', () => {
+      expect(resolveKarlLocation(null, locations)?.id).toBe('moss-beach');
+      expect(
+        resolveKarlLocation({} as CurrentResponse, locations)?.id,
+      ).toBe('moss-beach');
+      expect(
+        resolveKarlLocation(
+          { karlLocationId: 'not-in-catalog' } as CurrentResponse,
+          locations,
+        )?.id,
+      ).toBe('moss-beach');
+    });
   });
 
   it('builds offshore headline when fog coverage is low', () => {

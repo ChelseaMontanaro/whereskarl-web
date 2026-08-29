@@ -17,7 +17,7 @@ import { HOME_INSIGHT_STACK_ORDER } from '@/lib/home/homeHierarchy';
 import {
   bestRightNowItems,
   enrichBestRightNowItemsWithLocationWeather,
-  foggiestKarlLocation,
+  resolveKarlLocation,
   formatUpdatedAt,
   heroConfidenceText,
   heroHeadline,
@@ -46,8 +46,8 @@ export default function HomeScreen() {
     useState<MetricDetailKey | null>(null);
 
   const karlLocation = useMemo(
-    () => foggiestKarlLocation(locations),
-    [locations],
+    () => resolveKarlLocation(current, locations),
+    [current, locations],
   );
 
   const isNightPresentation = useMemo(
@@ -147,7 +147,6 @@ export default function HomeScreen() {
           <DashboardGrid
             current={current}
             bestSunshine={bestSunshine}
-            intelligence={intelligence}
             isLoading={!hasLoadedCoreWeather}
             isNightPresentation={isNightPresentation}
             onOpenMetricDetail={setActiveMetricDetail}
@@ -175,7 +174,7 @@ export default function HomeScreen() {
           </View>
 
           {current ? (
-            <Text style={styles.updated}>
+            <Text style={styles.updated} allowFontScaling={false}>
               Updated {formatUpdatedAt(current.updatedAt)}
             </Text>
           ) : null}

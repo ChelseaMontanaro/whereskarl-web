@@ -1,11 +1,15 @@
 /**
  * Home metric card explanations — aligned with mobile-web `metricDetails`,
  * plus Clearest Spot (web routes that card to the map instead of a sheet).
+ *
+ * Air Quality replaced Karl Status on the Universal dashboard: the status
+ * phrase duplicated Karl's Read directly beneath the grid. Karl's Read and the
+ * rest of the Karl intelligence surfaces are unchanged.
  */
 
 export type MetricDetailKey =
   | 'fog-coverage'
-  | 'karl-status'
+  | 'air-quality'
   | 'sunshine-score'
   | 'clearest-spot';
 
@@ -19,9 +23,9 @@ export const METRIC_DETAILS: Record<MetricDetailKey, MetricDetailContent> = {
     title: 'Fog Coverage',
     body: "This estimates how much of the Bay Area is currently under Karl's marine layer.",
   },
-  'karl-status': {
-    title: 'Karl Status',
-    body: "Shows what Karl the Fog is doing across the Bay right now — whether he's settled in, shifting around, or giving way to clearer skies.",
+  'air-quality': {
+    title: 'Air Quality',
+    body: 'The Air Quality Index (AQI) for the Bay Area as a whole — lower numbers mean cleaner air. The label beneath it is the health category that number falls into, from Good through Hazardous. Open the Map to see air quality for a specific location.',
   },
   'sunshine-score': {
     title: 'Clear Skies Score',
