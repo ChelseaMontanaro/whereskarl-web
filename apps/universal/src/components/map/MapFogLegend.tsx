@@ -129,7 +129,8 @@ export function MapFogLegend({
   }
 
   return (
-    <View
+    <LiquidGlassSurface
+      variant="panel"
       style={[mapGlassPanel.panel, styles.panelStack]}
       accessibilityLabel="Fog intensity legend">
       <Text style={mapGlassPanel.eyebrow}>Fog Intensity</Text>
@@ -172,7 +173,7 @@ export function MapFogLegend({
           );
         })}
       </View>
-    </View>
+    </LiquidGlassSurface>
   );
 }
 

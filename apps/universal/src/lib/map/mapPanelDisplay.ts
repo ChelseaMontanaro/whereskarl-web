@@ -2,6 +2,7 @@ import {
   getFogIntensity,
   getFogIntensityLabel,
   resolveLocationFogIntensity,
+  type FogIntensity,
 } from '@whereskarl/domain';
 import type { LocationWeather } from '@whereskarl/schemas';
 
@@ -147,22 +148,39 @@ export function getKarlReadParagraph(
 export type SelectedLocationHourlyPeriod = {
   key: string;
   label: string;
+  /** Canonical condition intensity — drives the period's condition artwork. */
+  intensity: FogIntensity;
+  /**
+   * Rounded current temperature for the "Now" period. `null` for projected
+   * periods, where the backend exposes a fog projection but no temperature —
+   * those fall back to the intensity caption rather than inventing a number.
+   */
+  tempF: number | null;
   caption: string;
 };
 
-/** Lightweight Now + optional Next hr strip (matches mobile Web). */
+/**
+ * Lightweight Now + optional Next hr strip (matches mobile Web
+ * `buildForecastPeriods`): "Now" reads the live temperature, "Next hr" reads
+ * the projected intensity label. The backend exposes no hourly array yet, so
+ * this stays the single place to expand when one lands.
+ */
 export function getSelectedLocationHourlyPeriods(
   location: LocationWeather,
   isNighttime = false,
 ): SelectedLocationHourlyPeriod[] {
+  const currentIntensity = resolveLocationFogIntensity(location);
   const periods: SelectedLocationHourlyPeriod[] = [
     {
       key: 'now',
       label: 'Now',
-      caption: getFogIntensityLabel(
-        resolveLocationFogIntensity(location),
-        isNighttime,
-      ),
+      intensity: currentIntensity,
+      tempF:
+        typeof location.temperature === 'number' &&
+        Number.isFinite(location.temperature)
+          ? Math.round(location.temperature)
+          : null,
+      caption: getFogIntensityLabel(currentIntensity, isNighttime),
     },
   ];
 
@@ -174,6 +192,8 @@ export function getSelectedLocationHourlyPeriods(
     periods.push({
       key: 'next',
       label: 'Next hr',
+      intensity: nextIntensity,
+      tempF: null,
       caption: getFogIntensityLabel(nextIntensity, isNighttime),
     });
   }

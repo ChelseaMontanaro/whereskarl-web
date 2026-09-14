@@ -55,9 +55,8 @@ describe('native phone-portrait fog rail', () => {
       'utf8',
     );
 
-    expect(railSource).toContain('Fog');
-    expect(railSource).toContain('Intensity');
-    expect(railSource).toContain('getFogIntensityLabel');
+    expect(railSource).toContain('PHONE_PORTRAIT_FOG_RAIL_HEADING');
+    expect(railSource).toContain('phonePortraitFogRailDisplayLabel');
     expect(railSource).toContain("intensity === 'karlTerritory'");
     expect(railSource).toContain('<KarlLogo size={RAIL_ICON_SIZE} />');
   });
@@ -85,5 +84,8 @@ describe('native phone-portrait fog rail', () => {
     expect(controlsSource).toContain('flexShrink: 0');
     expect(controlsSource).toContain('chipRowTrailing');
     expect(controlsSource).toContain('marginHorizontal: -Spacing.sm');
+    expect(controlsSource).toContain('chipSpacing');
+    // Prefer per-chip margin over ScrollView gap (iOS content-width undercount).
+    expect(controlsSource).not.toMatch(/chipRow:[\s\S]*?gap:\s*6/);
   });
 });

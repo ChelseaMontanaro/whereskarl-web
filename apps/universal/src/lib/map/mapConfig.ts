@@ -55,6 +55,15 @@ export const BAY_AREA_DESKTOP_DEFAULT_MAX_ZOOM = 10.2;
 export const BAY_AREA_MOBILE_DEFAULT_MAX_ZOOM = 10.8;
 export const BAY_AREA_LOCATION_ZOOM = 11.4;
 
+/**
+ * MapLibre's default tile size. Used to convert {@link BAY_AREA_LOCATION_ZOOM}
+ * into an Apple Maps region span so search-select focus matches web's flyTo.
+ */
+export const MAPLIBRE_TILE_SIZE_PX = 512;
+
+/** Fallback canvas used when the native map has not reported layout yet. */
+const LOCATION_FOCUS_FALLBACK_VIEWPORT = { width: 390, height: 720 };
+
 export type MapViewportPadding =
   | number
   | {
@@ -161,5 +170,41 @@ export function boundsToRegion(
     longitude: (east + west) / 2,
     latitudeDelta: north - south,
     longitudeDelta: east - west,
+  };
+}
+
+/**
+ * Apple Maps `Camera.zoom` is a no-op (react-native-maps documents it as
+ * Google Maps only; `MKMapCameraWithDefaults` never reads `zoom`). Search
+ * focus therefore has to drive `animateToRegion` with a span equivalent to
+ * web's MapLibre `flyTo({ zoom: BAY_AREA_LOCATION_ZOOM })`.
+ */
+export function regionForCanonicalLocationZoom(
+  latitude: number,
+  longitude: number,
+  viewport?: { width: number; height: number } | null,
+): {
+  latitude: number;
+  longitude: number;
+  latitudeDelta: number;
+  longitudeDelta: number;
+} {
+  const width =
+    viewport?.width && viewport.width > 0
+      ? viewport.width
+      : LOCATION_FOCUS_FALLBACK_VIEWPORT.width;
+  const height =
+    viewport?.height && viewport.height > 0
+      ? viewport.height
+      : LOCATION_FOCUS_FALLBACK_VIEWPORT.height;
+  const worldPx = MAPLIBRE_TILE_SIZE_PX * 2 ** BAY_AREA_LOCATION_ZOOM;
+  const longitudeDelta = (width / worldPx) * 360;
+  const latitudeDelta = longitudeDelta * (height / width);
+
+  return {
+    latitude,
+    longitude,
+    latitudeDelta,
+    longitudeDelta,
   };
 }

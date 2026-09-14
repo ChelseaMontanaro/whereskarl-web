@@ -1,6 +1,7 @@
 import { Platform, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { mapGlassPanel } from '@/components/map/mapGlassPanel';
+import { LiquidGlassSurface } from '@/components/ui/LiquidGlassSurface';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import {
   KARL_MAP_STYLE_OPTIONS,
@@ -68,7 +69,11 @@ export function MapLayerControls({
   }
 
   return (
-    <View
+    // Rendered through the shared glass surface so the panel picks up the same
+    // real blur as the bottom nav and the selected-location card instead of
+    // sitting on the map as a flat fill.
+    <LiquidGlassSurface
+      variant="panel"
       style={[
         mapGlassPanel.panel,
         styles.panel,
@@ -194,7 +199,7 @@ export function MapLayerControls({
           </Pressable>
         </>
       ) : null}
-    </View>
+    </LiquidGlassSurface>
   );
 }
 

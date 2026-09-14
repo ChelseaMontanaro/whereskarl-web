@@ -28,6 +28,7 @@ import {
   type MapScreenViewMode,
 } from '@/components/MapViewModeToggle';
 import { SelectedLocationPreview } from '@/components/SelectedLocationPreview';
+import { BOTTOM_NAV_MAP_PHONE_OFFSET } from '@/constants/bottomNav';
 import { Colors, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useHomeLocation } from '@/hooks/useHomeLocation';
 import { useLocations } from '@/hooks/useLocations';
@@ -53,7 +54,6 @@ import {
   parseMapViewMode,
 } from '@/lib/map/mapRouteParams';
 import { getBestRightNowMapItems } from '@/lib/map/mapPanelDisplay';
-import { filterLocationsForPhonePortraitSfComposition } from '@/lib/map/phonePortraitMapPresentation';
 import {
   toggleRegionFilter,
   type BayAreaVisibleProductRegionId,
@@ -99,11 +99,11 @@ export default function MapScreen() {
   const [sortMode, setSortMode] = useState<LocationSortMode>('brightest');
   const [filterMode, setFilterMode] =
     useState<LocationFilterMode>('brightest');
-  // Approved phone-portrait layout opens on the SF region tab.
+  // Clean Map entry opens in the all-Bay state on every layout — no region is
+  // pre-selected and the SF chip resolves to the canonical SF product region
+  // (mobile-web parity: the phone map never defaults to San Francisco).
   const [selectedRegionId, setSelectedRegionId] =
-    useState<BayAreaVisibleProductRegionId | null>(() =>
-      isPhonePortraitMap ? 'san-francisco' : null,
-    );
+    useState<BayAreaVisibleProductRegionId | null>(null);
   const [conditionFilter, setConditionFilter] = useState<FogIntensity | null>(
     null,
   );
@@ -171,26 +171,22 @@ export default function MapScreen() {
     }
   }, [params.location, params.selected]);
 
-  const markerLocations = useMemo(() => {
-    // Phone SF tab keeps the approved Marin/central Bay composition: plot
-    // every monitored location inside the approved bounds instead of
-    // narrowing to backend SF-region locations only.
-    if (isPhonePortraitMap && selectedRegionId === 'san-francisco') {
-      return filterLocationsForPhonePortraitSfComposition(
-        prepareMapLocationResults(locations, {
-          query: searchQuery,
-          regionId: null,
-          conditionFilter: null,
-        }),
-      );
-    }
+  // Phone portrait drops the region filter while a location is selected so the
+  // selected marker is always plotted, even when it sits outside the active
+  // region chip (mobile-web parity). Every region — including SF — resolves
+  // through the canonical product-region membership.
+  const markerRegionId =
+    isPhonePortraitMap && selectedLocationId ? null : selectedRegionId;
 
-    return prepareMapLocationResults(locations, {
-      query: searchQuery,
-      regionId: selectedRegionId,
-      conditionFilter: null,
-    });
-  }, [isPhonePortraitMap, locations, searchQuery, selectedRegionId]);
+  const markerLocations = useMemo(
+    () =>
+      prepareMapLocationResults(locations, {
+        query: searchQuery,
+        regionId: markerRegionId,
+        conditionFilter: null,
+      }),
+    [locations, markerRegionId, searchQuery],
+  );
 
   const listLocations = useMemo(
     () =>
@@ -261,6 +257,25 @@ export default function MapScreen() {
     [locations, markerLocations, selectedLocationId],
   );
 
+  /**
+   * Applies the approved search-select camera focus. Every search-driven
+   * selection source routes through here so typing a strong match and tapping a
+   * result row behave identically; marker taps and deep links never call it.
+   */
+  const focusSearchSelection = useCallback(
+    (locationId: string) => {
+      if (!isPhone) {
+        return;
+      }
+
+      const target = locations.find((location) => location.id === locationId);
+      if (target) {
+        mapRef.current?.focusLocation(target.latitude, target.longitude);
+      }
+    },
+    [isPhone, locations],
+  );
+
   useEffect(() => {
     const trimmedQuery = searchQuery.trim();
     if (!trimmedQuery || showListMode) {
@@ -271,8 +286,18 @@ export default function MapScreen() {
     if (match && match.id !== selectedLocationId) {
       setSelectedLocationId(match.id);
       syncMapRoute(match.id);
+      // A strong query match is a search selection, so it owes the same camera
+      // focus as tapping the result row (mobile-web camera law).
+      focusSearchSelection(match.id);
     }
-  }, [markerLocations, searchQuery, selectedLocationId, showListMode, syncMapRoute]);
+  }, [
+    focusSearchSelection,
+    markerLocations,
+    searchQuery,
+    selectedLocationId,
+    showListMode,
+    syncMapRoute,
+  ]);
 
   function handleSelectLocation(locationId: string) {
     sheetDismissedRef.current = false;
@@ -280,13 +305,36 @@ export default function MapScreen() {
     syncMapRoute(locationId);
   }
 
+  /**
+   * Selected-location card × — closes the sheet only. The camera is
+   * deliberately left untouched and this is NOT a search clear: the active
+   * region chip and the search field both survive dismissal (mobile-web
+   * parity, where dismissal explicitly suppresses the viewport update).
+   */
   function handleClearSelection() {
     if (isPhone) {
       sheetDismissedRef.current = true;
     }
     setSelectedLocationId(null);
-    setSearchQuery('');
     syncMapRoute(null);
+  }
+
+  /**
+   * Search × — a distinct action from card dismissal: it clears the query and
+   * selection and returns the camera to the canonical all-Bay frame.
+   */
+  function handleSearchClearSelection() {
+    if (isPhone) {
+      sheetDismissedRef.current = true;
+    }
+    setSelectedLocationId(null);
+    setSearchQuery('');
+    setSelectedRegionId(null);
+    syncMapRoute(null);
+
+    if (isPhone) {
+      mapRef.current?.resetView();
+    }
   }
 
   function handleOpenLocationDetail(locationId: string) {
@@ -314,10 +362,15 @@ export default function MapScreen() {
     syncMapRoute(selectedLocationId, 'list');
   }
 
+  /**
+   * Search result tap — the only phone-portrait selection source that moves the
+   * camera. Marker taps and deep links intentionally leave it where it is.
+   */
   function handlePhoneSearchSelect(locationId: string) {
     sheetDismissedRef.current = false;
     setSelectedLocationId(locationId);
     syncMapRoute(locationId);
+    focusSearchSelection(locationId);
   }
 
   function handleSelectRegion(regionId: BayAreaVisibleProductRegionId) {
@@ -334,7 +387,22 @@ export default function MapScreen() {
   }
 
   function handleSelectCondition(condition: FogIntensity) {
-    setConditionFilter((current) => toggleConditionFilter(current, condition));
+    const next = toggleConditionFilter(conditionFilter, condition);
+    setConditionFilter(next);
+
+    // Web's fit precedence (BayAreaMap viewport effect): an active region chip
+    // owns the camera, then the fog-level filter frames whatever qualifies,
+    // then the all-Bay default. Deselecting the filter, or selecting one that
+    // nothing matches, falls through to all-Bay rather than leaving a stale
+    // frame. Kept out of the state updater so a double-invoked render can never
+    // fire the animation twice.
+    if (!isPhone || selectedRegionId) {
+      return;
+    }
+
+    if (!next || !mapRef.current?.fitToIntensityFilter(next)) {
+      mapRef.current?.resetView();
+    }
   }
 
   const isHomeSelected =
@@ -343,27 +411,15 @@ export default function MapScreen() {
     homeLocationId?.trim().toLowerCase() ===
       selectedLocationId?.trim().toLowerCase();
 
-  // Phone map always shows a selected-location sheet: explicit selection, or
-  // the current Best Right Now spot (mobile Web product hierarchy).
-  const featuredPhoneLocation = useMemo(() => {
-    if (selectedLocation) {
-      return selectedLocation;
-    }
-
-    const topLocationId = bestRightNowItems[0]?.locationId;
-    if (!topLocationId) {
-      return null;
-    }
-
-    return locations.find((location) => location.id === topLocationId) ?? null;
-  }, [bestRightNowItems, locations, selectedLocation]);
-
-  const phonePreview = isPhone && featuredPhoneLocation ? (
+  // Phone map shows the selected-location sheet only when a location is
+  // explicitly selected (including one-time BRN auto-select). After dismiss,
+  // do not fall back to a featured BRN card — mobile-web parity.
+  const phonePreview = isPhone && selectedLocation ? (
     <SelectedLocationPreview
-      location={featuredPhoneLocation}
-      isSelected={selectedLocationId !== null}
+      location={selectedLocation}
+      isSelected
       isHomeLocation={isHomeSelected}
-      onDismiss={selectedLocationId ? handleClearSelection : undefined}
+      onDismiss={handleClearSelection}
       onOpenDetail={handleOpenLocationDetail}
       variant="compact"
       phonePortrait
@@ -470,6 +526,7 @@ export default function MapScreen() {
         layout={mapLayout}
         showLocationLabels={isPhone}
         phonePortraitWeb={isPhonePortraitMap}
+        applyLowZoomLabelHiding={!selectedRegionId}
         searchQuery={searchQuery}
         mapStyle={mapStyle}
         fogLayerEnabled={fogLayerEnabled}
@@ -551,7 +608,7 @@ export default function MapScreen() {
                 onSelectRegion={handleSelectRegion}
                 locations={locations}
                 onSelectLocation={handlePhoneSearchSelect}
-                onClearSelectedLocation={handleClearSelection}
+                onClearSelectedLocation={handleSearchClearSelection}
                 isSearchDisabled={isLoading && locations.length === 0}
               />
             </View>
@@ -588,10 +645,15 @@ export default function MapScreen() {
             <View
               style={[
                 styles.phoneBottom,
-                { bottom: bottomInset + 64 },
+                {
+                  bottom: bottomInset + BOTTOM_NAV_MAP_PHONE_OFFSET,
+                  paddingHorizontal: Math.max(insets.left, insets.right, Spacing.sm),
+                },
               ]}
               pointerEvents="box-none">
-              {phonePreview}
+              <View style={styles.phoneBottomInner} pointerEvents="box-none">
+                {phonePreview}
+              </View>
             </View>
           </>
         ) : (
@@ -718,6 +780,8 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     alignItems: 'stretch',
+    overflow: 'visible',
+    zIndex: 20,
   },
   phoneFogRail: {
     position: 'absolute',
@@ -743,9 +807,14 @@ const styles = StyleSheet.create({
   },
   phoneBottom: {
     position: 'absolute',
-    left: Spacing.sm,
-    right: Spacing.sm,
-    gap: 8,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    zIndex: 25,
+  },
+  phoneBottomInner: {
+    width: '100%',
+    maxWidth: MaxContentWidth,
     alignItems: 'stretch',
   },
   tabletTopLeft: {

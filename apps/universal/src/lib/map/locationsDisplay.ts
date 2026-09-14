@@ -215,3 +215,31 @@ export function prepareMapLocationResults(
 
   return sortLocations(conditionFiltered, 'brightest');
 }
+
+/**
+ * The marker set for an active Fog Level selection.
+ *
+ * The rail is an exact category filter, not a de-emphasis. With a level
+ * selected, only that level's locations belong on the map, so non-matching
+ * markers leave the rendered set entirely rather than being dimmed — dimming is
+ * what let every other category bleed through and stay readable underneath.
+ *
+ * Both the rendered markers and the Fog Level camera fit go through this one
+ * function, so the framed set and the visible set cannot disagree, and both
+ * resolve categories through the single canonical
+ * `locationMatchesFogIntensityFilter` classification.
+ */
+export function filterMarkerLocationsByFogLevel<
+  T extends LocationConditionInput,
+>(
+  locations: readonly T[],
+  intensity: FogIntensity | null | undefined,
+): readonly T[] {
+  if (!intensity) {
+    return locations;
+  }
+
+  return locations.filter((location) =>
+    locationMatchesFogIntensityFilter(location, intensity),
+  );
+}

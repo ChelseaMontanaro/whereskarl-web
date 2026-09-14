@@ -12,9 +12,7 @@ import { KarlMapOverlayState } from '@/components/KarlMap/KarlMapOverlayState';
 import type { KarlMapHandle, KarlMapProps } from '@/components/KarlMap/KarlMap.types';
 import { Colors } from '@/constants/theme';
 import { syncFogOverlayLayer } from '@/lib/map/fogOverlays';
-import {
-  locationMatchesFogIntensityFilter,
-} from '@whereskarl/domain';
+import { filterMarkerLocationsByFogLevel } from '@/lib/map/locationsDisplay';
 import {
   CLEAR_SUN_COLOR,
   getMarkerAccessibilityLabel,
@@ -22,6 +20,10 @@ import {
   getScoreBadgeColor,
 } from '@/lib/map/markerAppearance';
 import { getMarkerIconMarkup } from '@/lib/map/markerIcons';
+import {
+  PHONE_PORTRAIT_INTENSITY_FILTER_MAX_ZOOM,
+  resolvePhonePortraitIntensityFilterCamera,
+} from '@/lib/map/phonePortraitCameraPresets';
 import { getPhonePortraitMarkerIconMarkup } from '@/lib/map/phonePortraitConditionIcons';
 import {
   BAY_AREA_CENTER,
@@ -66,7 +68,6 @@ function createMarkerElement(
   isSelected: boolean,
   layout: KarlMapLayoutMode,
   showLocationLabel: boolean,
-  isFilteredOut: boolean,
   isNighttime: boolean,
   phonePortraitWeb: boolean,
   onSelect: (locationId: string) => void,
@@ -97,7 +98,6 @@ function createMarkerElement(
     isPortable ? 'karl-universal-map-marker--portable' : '',
     isPhonePortrait ? 'karl-universal-map-marker--phone-portrait' : '',
     isSelected ? 'is-selected' : '',
-    isFilteredOut ? 'is-filtered-out' : '',
   ]
     .filter(Boolean)
     .join(' ');
@@ -302,11 +302,13 @@ const KarlMapWeb = forwardRef<KarlMapHandle, KarlMapProps>(function KarlMapWeb(
   const onSelectRef = useRef(onSelectLocation);
   const layoutRef = useRef(layout);
   const phonePortraitWebRef = useRef(phonePortraitWeb);
+  const locationsRef = useRef(locations);
   const mapReadyRef = useRef(false);
 
   onSelectRef.current = onSelectLocation;
   layoutRef.current = layout;
   phonePortraitWebRef.current = phonePortraitWeb;
+  locationsRef.current = locations;
 
   const shouldShowLabels = showLocationLabels ?? layout === 'desktop';
 
@@ -337,6 +339,39 @@ const KarlMapWeb = forwardRef<KarlMapHandle, KarlMapProps>(function KarlMapWeb(
       fitMapToProductRegion(map, regionId, layoutRef.current, {
         phonePortraitWeb: phonePortraitWebRef.current,
       });
+    },
+    focusLocation: (latitude: number, longitude: number) => {
+      mapRef.current?.flyTo({
+        center: [longitude, latitude],
+        zoom: BAY_AREA_LOCATION_ZOOM,
+        duration: 450,
+        essential: true,
+      });
+    },
+    fitToIntensityFilter: (intensity) => {
+      const map = mapRef.current;
+      if (!map || !phonePortraitWebRef.current) {
+        return false;
+      }
+
+      // Same helper the rendered marker set goes through, so the frame always
+      // contains exactly the markers the filter leaves on the map.
+      const preset = resolvePhonePortraitIntensityFilterCamera(
+        filterMarkerLocationsByFogLevel(locationsRef.current, intensity),
+      );
+
+      if (!preset) {
+        return false;
+      }
+
+      // MapLibre caps the fit itself, so no minimum-span widening is needed.
+      map.fitBounds(preset.bounds, {
+        padding: preset.padding,
+        maxZoom: PHONE_PORTRAIT_INTENSITY_FILTER_MAX_ZOOM,
+        duration: 450,
+        essential: true,
+      });
+      return true;
     },
     locateMe: () => {
       if (!navigator.geolocation || !mapRef.current) {
@@ -525,7 +560,14 @@ const KarlMapWeb = forwardRef<KarlMapHandle, KarlMapProps>(function KarlMapWeb(
       return;
     }
 
-    const nextIds = new Set(locations.map((location) => location.id));
+    // Fog Level is an exact category filter: non-matching locations leave the
+    // marker set entirely, so pruning and creation both work off this set and
+    // stale markers from a previously selected level are removed.
+    const visibleLocations = filterMarkerLocationsByFogLevel(
+      locations,
+      intensityFilter,
+    );
+    const nextIds = new Set(visibleLocations.map((location) => location.id));
 
     markersRef.current.forEach((marker, locationId) => {
       if (!nextIds.has(locationId)) {
@@ -534,11 +576,8 @@ const KarlMapWeb = forwardRef<KarlMapHandle, KarlMapProps>(function KarlMapWeb(
       }
     });
 
-    for (const location of locations) {
+    for (const location of visibleLocations) {
       const isSelected = selectedLocationId === location.id;
-      const isFilteredOut = intensityFilter
-        ? !locationMatchesFogIntensityFilter(location, intensityFilter)
-        : false;
       const existing = markersRef.current.get(location.id);
 
       if (existing) {
@@ -566,7 +605,6 @@ const KarlMapWeb = forwardRef<KarlMapHandle, KarlMapProps>(function KarlMapWeb(
           isSelected,
           layout,
           shouldShowLabels,
-          isFilteredOut,
           isNighttime,
           phonePortraitWeb,
           (locationId) => onSelectRef.current(locationId),
@@ -584,7 +622,9 @@ const KarlMapWeb = forwardRef<KarlMapHandle, KarlMapProps>(function KarlMapWeb(
       return;
     }
 
-    const entries: DeclutterEntry[] = locations.flatMap((location) => {
+    // Label slots are awarded by collision, so a filtered-out location must not
+    // be able to win one and suppress the label of a marker that is on the map.
+    const entries: DeclutterEntry[] = visibleLocations.flatMap((location) => {
       const marker = markersRef.current.get(location.id);
       if (!marker) {
         return [];
@@ -622,9 +662,12 @@ const KarlMapWeb = forwardRef<KarlMapHandle, KarlMapProps>(function KarlMapWeb(
     shouldShowLabels,
   ]);
 
+  // Phone portrait must not reframe on selection: marker taps, deep links, and
+  // sheet dismissal leave the camera untouched, and search selection reframes
+  // explicitly via `focusLocation`. Wider layouts keep recenter-on-selection.
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !selectedLocationId) {
+    if (!map || !selectedLocationId || phonePortraitWebRef.current) {
       return;
     }
 

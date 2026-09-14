@@ -76,6 +76,24 @@ export const PHONE_PORTRAIT_MARKER_ICON_PX = 28;
 /** Matches mobile-web marker SVG opacity (phone-portrait-map.web.css). */
 export const PHONE_PORTRAIT_MARKER_ICON_OPACITY = 0.94;
 
+/**
+ * There is deliberately no filtered-out marker opacity here.
+ *
+ * Fog Level is an exact category filter: `filterMarkerLocationsByFogLevel`
+ * removes non-matching locations from the marker set, so no marker can be
+ * present-but-de-emphasised. Dimming was the previous treatment and it failed
+ * both ways on a physical iPhone — the whole map washed out when little
+ * matched, and every other category stayed legible underneath, so the rail
+ * never read as a filter.
+ */
+
+/**
+ * Width of the out-of-flow label + score group beneath a phone-portrait marker
+ * icon. Mirrors mobile web, where label/score live in an absolutely positioned
+ * group so declutter changes never move the coordinate-anchored icon.
+ */
+export const PHONE_PORTRAIT_MARKER_META_WIDTH = 136;
+
 export const PHONE_PORTRAIT_MARKER_ICON_REM = '2.25rem';
 
 export const PHONE_PORTRAIT_MARKER_NAME_REM = '0.8125rem';
@@ -189,14 +207,94 @@ function selectPhonePortraitRegionAnchorIds(
   return anchors;
 }
 
+/** Rendered map viewport needed to express the px collision box in degrees. */
+export type PhonePortraitMapViewport = {
+  width: number;
+  height: number;
+  latitudeDelta: number;
+  longitudeDelta: number;
+};
+
+export type PhonePortraitCollisionThresholds = {
+  latitude: number;
+  longitude: number;
+};
+
+/**
+ * Degrees-per-pixel is unknown before the map reports its first region, so fall
+ * back to the historical all-Bay-tuned constants until then.
+ */
+export const PHONE_PORTRAIT_FALLBACK_COLLISION_THRESHOLDS: PhonePortraitCollisionThresholds =
+  { latitude: 0.048, longitude: 0.062 };
+
+/**
+ * Converts web's pixel collision box into the geographic thresholds that the
+ * native declutter compares against, using the live viewport. This is what
+ * makes zooming in reveal labels the way mobile web does.
+ */
+export function resolvePhonePortraitCollisionThresholds(
+  viewport?: PhonePortraitMapViewport | null,
+): PhonePortraitCollisionThresholds {
+  if (
+    !viewport ||
+    !Number.isFinite(viewport.width) ||
+    !Number.isFinite(viewport.height) ||
+    !Number.isFinite(viewport.latitudeDelta) ||
+    !Number.isFinite(viewport.longitudeDelta) ||
+    viewport.width <= 0 ||
+    viewport.height <= 0 ||
+    viewport.latitudeDelta <= 0 ||
+    viewport.longitudeDelta <= 0
+  ) {
+    return PHONE_PORTRAIT_FALLBACK_COLLISION_THRESHOLDS;
+  }
+
+  return {
+    latitude:
+      (viewport.latitudeDelta / viewport.height) *
+      PHONE_PORTRAIT_MARKER_COLLISION_Y,
+    longitude:
+      (viewport.longitudeDelta / viewport.width) *
+      PHONE_PORTRAIT_MARKER_COLLISION_X,
+  };
+}
+
+export type PhonePortraitDeclutterOptions = {
+  /** Live rendered viewport; omit before the map reports its first region. */
+  viewport?: PhonePortraitMapViewport | null;
+  /**
+   * When false, skip the all-Bay coastal-cluster label suppression (web:
+   * `applyLowZoomHiding = !selectedRegionId`). Defaults to true.
+   */
+  applyLowZoomHiding?: boolean;
+};
+
+/**
+ * Approximate MapLibre zoom from a native region span so the low-zoom label
+ * suppression threshold can be evaluated the same way web uses `map.getZoom()`.
+ */
+export function estimatePhonePortraitZoom(
+  viewport: PhonePortraitMapViewport,
+): number {
+  if (viewport.width <= 0 || viewport.longitudeDelta <= 0) {
+    return 0;
+  }
+
+  return Math.log2(
+    (viewport.width * 360) / (512 * viewport.longitudeDelta),
+  );
+}
+
 /**
  * Native phone-portrait marker declutter: every marker keeps its icon, but
  * only a priority non-colliding subset shows label + temperature + clear-sky
- * score. Geographic proximity stands in for MapLibre screen projection.
+ * score. Collision thresholds are derived from the live viewport so the
+ * geographic reach tracks zoom exactly as web's DOM measurement does.
  */
 export function resolvePhonePortraitMarkerPresentation(
   locations: readonly PhonePortraitDeclutterCandidate[],
   selectedLocationId: string | null,
+  options?: PhonePortraitDeclutterOptions,
 ): ReadonlyMap<string, PhonePortraitMarkerPresentation> {
   const presentation = new Map<string, PhonePortraitMarkerPresentation>();
   const anchorIds = selectPhonePortraitRegionAnchorIds(
@@ -228,9 +326,8 @@ export function resolvePhonePortraitMarkerPresentation(
   });
 
   const placed: Array<{ latitude: number; longitude: number }> = [];
-  // Tuned for label + temperature + score meta height around SF/Marin.
-  const latThreshold = 0.048;
-  const lngThreshold = 0.062;
+  const { latitude: latThreshold, longitude: lngThreshold } =
+    resolvePhonePortraitCollisionThresholds(options?.viewport);
 
   for (const location of ordered) {
     if (location.id === selectedLocationId) {
@@ -243,7 +340,13 @@ export function resolvePhonePortraitMarkerPresentation(
     }
 
     const isAnchor = anchorIds.has(location.id);
+    const applyLowZoomHiding = options?.applyLowZoomHiding ?? true;
+    const zoom = options?.viewport
+      ? estimatePhonePortraitZoom(options.viewport)
+      : 0;
     const lowZoomSuppressed =
+      applyLowZoomHiding &&
+      zoom < PHONE_PORTRAIT_LOW_ZOOM_HIDE_THRESHOLD &&
       !isAnchor &&
       PHONE_PORTRAIT_LOW_ZOOM_ICON_ONLY_LOCATION_IDS.has(location.id);
 
@@ -277,11 +380,13 @@ export function resolvePhonePortraitMarkerPresentation(
 export function resolvePhonePortraitVisibleMetaIds(
   locations: readonly PhonePortraitDeclutterCandidate[],
   selectedLocationId: string | null,
+  options?: PhonePortraitDeclutterOptions,
 ): ReadonlySet<string> {
   const visible = new Set<string>();
   const presentation = resolvePhonePortraitMarkerPresentation(
     locations,
     selectedLocationId,
+    options,
   );
 
   for (const [locationId, state] of presentation) {
@@ -301,7 +406,13 @@ export function resolvePhonePortraitVisibleLabelIds(
   return resolvePhonePortraitVisibleMetaIds(locations, selectedLocationId);
 }
 
-/** Approximate rendered marker footprint used for collision checks. */
+/**
+ * Label collision box in rendered pixels, matching mobile web's
+ * PHONE_PORTRAIT_MARKER_COLLISION_X/Y. Web measures collisions from live DOM
+ * geometry, so its effective geographic reach shrinks as the map zooms in and
+ * previously hidden labels reappear;
+ * {@link resolvePhonePortraitCollisionThresholds} reproduces that on native.
+ */
 export const PHONE_PORTRAIT_MARKER_COLLISION_X = 56;
 export const PHONE_PORTRAIT_MARKER_COLLISION_Y = 76;
 

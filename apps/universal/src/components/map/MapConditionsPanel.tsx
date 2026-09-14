@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { LiquidGlassSurface } from '@/components/ui/LiquidGlassSurface';
 import { mapGlassPanel } from '@/components/map/mapGlassPanel';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import {
@@ -32,7 +33,8 @@ export function MapConditionsPanel({
   const updatedLabel = formatRelativeUpdatedAt(getLatestUpdatedAt(locations));
 
   return (
-    <View
+    <LiquidGlassSurface
+      variant="panel"
       style={[
         mapGlassPanel.panel,
         styles.panel,
@@ -82,7 +84,7 @@ export function MapConditionsPanel({
         <View style={styles.liveDot} />
         <Text style={styles.footerText}>{updatedLabel}</Text>
       </View>
-    </View>
+    </LiquidGlassSurface>
   );
 }
 

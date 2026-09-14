@@ -14,6 +14,7 @@ import { getMarkerConditionSymbol } from '@/lib/map/markerIcons';
 import {
   PHONE_PORTRAIT_MARKER_ICON_OPACITY,
   PHONE_PORTRAIT_MARKER_ICON_PX,
+  PHONE_PORTRAIT_MARKER_META_WIDTH,
 } from '@/lib/map/phonePortraitMapPresentation';
 import { getPhonePortraitMarkerConditionIconDataUri } from '@/lib/map/phonePortraitConditionIcons';
 
@@ -85,6 +86,14 @@ export function KarlMapMarkerView({
         styles.root,
         !isCompact && { transform: [{ scale: visual.scale }] },
         isCompact && styles.rootCompact,
+        // Phone portrait pins the icon box as the only in-flow content so the
+        // native annotation frame (and therefore its press target) stays the
+        // icon itself, independent of whether the label/score are shown.
+        usePhonePortraitMeta && {
+          width: iconSize,
+          height: iconSize,
+          gap: 0,
+        },
         isCompact && isSelected && styles.rootCompactSelected,
       ]}>
       <View
@@ -122,7 +131,16 @@ export function KarlMapMarkerView({
 
       {usePhonePortraitMeta ? (
         showMarkerMeta ? (
-          <View style={styles.metaBlock}>
+          <View
+            pointerEvents="none"
+            style={[
+              styles.metaBlock,
+              styles.metaBlockPinned,
+              {
+                top: iconSize + 2,
+                left: (iconSize - PHONE_PORTRAIT_MARKER_META_WIDTH) / 2,
+              },
+            ]}>
             <Text
               numberOfLines={1}
               ellipsizeMode="tail"
@@ -216,6 +234,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 2,
     maxWidth: 128,
+  },
+  // Out of flow so the declutter pass can show/hide the label without ever
+  // resizing the marker view or moving the coordinate-anchored icon.
+  metaBlockPinned: {
+    position: 'absolute',
+    width: PHONE_PORTRAIT_MARKER_META_WIDTH,
+    maxWidth: PHONE_PORTRAIT_MARKER_META_WIDTH,
   },
   symbol: {
     color: Colors.textPrimary,
