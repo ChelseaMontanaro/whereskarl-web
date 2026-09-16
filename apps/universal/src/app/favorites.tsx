@@ -1,65 +1,203 @@
-import { StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useMemo } from 'react';
+import {
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Colors, Fonts, MaxContentWidth, Radius, Spacing } from '@/constants/theme';
-
-type PlaceholderScreenProps = {
-  title: string;
-  description: string;
-};
+import { ConditionsStatusChip } from '@/components/favorites/ConditionsStatusChip';
+import { FavoritesAtmosphereBackground } from '@/components/favorites/FavoritesAtmosphereBackground';
+import { FavoritesEmptyState } from '@/components/favorites/FavoritesEmptyState';
+import { FavoritesHeader } from '@/components/favorites/FavoritesHeader';
+import { FavoritesSummaryRow } from '@/components/favorites/FavoritesSummaryRow';
+import { FavoritesTipCard } from '@/components/favorites/FavoritesTipCard';
+import { SavedLocationCard } from '@/components/favorites/SavedLocationCard';
+import { TopSavedLocationCard } from '@/components/favorites/TopSavedLocationCard';
+import { BOTTOM_NAV_SCROLL_INSET } from '@/constants/bottomNav';
+import { Colors, MaxContentWidth, Spacing } from '@/constants/theme';
+import { useFavorites } from '@/hooks/useFavorites';
+import { useLocations } from '@/hooks/useLocations';
+import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
+import {
+  resolveConditionsPresentation,
+} from '@/lib/home/conditionsStatus';
 
 export default function FavoritesScreen() {
-  return (
-    <PlaceholderScreen
-      title="Favorites"
-      description="Saved clear-sky locations will appear here."
-    />
-  );
-}
+  const insets = useSafeAreaInsets();
+  const { horizontalPadding } = useResponsiveLayout();
+  const {
+    locations,
+    isLoading,
+    isRefreshing,
+    hasLiveData,
+    refresh,
+  } = useLocations();
+  const {
+    favoriteLocations,
+    topSavedLocation,
+    summary,
+    isLoading: isLoadingFavorites,
+    removeFavorite,
+  } = useFavorites(locations);
 
-function PlaceholderScreen({ title, description }: PlaceholderScreenProps) {
+  const conditionsPresentation = useMemo(
+    () =>
+      resolveConditionsPresentation({
+        isLoading: isLoading || isLoadingFavorites,
+        hasLoadedWeather: locations.length > 0,
+        currentSource: hasLiveData ? 'live' : undefined,
+      }),
+    [hasLiveData, isLoading, isLoadingFavorites, locations.length],
+  );
+
+  const statusBarInset = Math.max(insets.top, Spacing.sm);
+  const hasFavorites = favoriteLocations.length > 0;
+  // Phase 25 §12: keep this restrained — only surface it while there is
+  // something notable to communicate (loading/estimated/cached/unavailable),
+  // so it never competes with the Favorites hierarchy during normal use.
+  const showConditionsChip = conditionsPresentation !== 'live';
+  const locationCountLabel =
+    favoriteLocations.length === 1 ? '1 location' : `${favoriteLocations.length} locations`;
+
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
-      <View style={styles.content}>
-        <Text style={styles.title}>{title}</Text>
-        <View style={styles.card}>
-          <Text style={styles.description}>{description}</Text>
-        </View>
-      </View>
-    </SafeAreaView>
+    <View style={styles.root}>
+      <FavoritesAtmosphereBackground />
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={[
+          styles.content,
+          {
+            paddingTop: statusBarInset + Spacing.md,
+            paddingBottom:
+              BOTTOM_NAV_SCROLL_INSET +
+              Math.max(insets.bottom, Spacing.sm) +
+              (hasFavorites ? 0 : Spacing.xl),
+            paddingHorizontal: horizontalPadding,
+            flexGrow: 1,
+          },
+        ]}
+        showsVerticalScrollIndicator={false}
+        contentInsetAdjustmentBehavior="never"
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={refresh}
+            tintColor={Colors.gold}
+          />
+        }>
+        <FavoritesHeader />
+
+        {showConditionsChip ? (
+          <ConditionsStatusChip presentation={conditionsPresentation} />
+        ) : null}
+
+        {hasFavorites ? (
+          <>
+            <FavoritesSummaryRow summary={summary} />
+
+            {topSavedLocation ? (
+              <TopSavedLocationCard
+                location={topSavedLocation}
+                onRemoveFavorite={removeFavorite}
+              />
+            ) : null}
+
+            <View style={styles.section}>
+              <View style={styles.sectionHeaderRow}>
+                <Text style={styles.sectionTitle}>All Favorites</Text>
+                <Text style={styles.sectionCount}>{locationCountLabel}</Text>
+              </View>
+              <View style={styles.list}>
+                {favoriteLocations.map((location) => (
+                  <SavedLocationCard
+                    key={location.id}
+                    location={location}
+                    onRemoveFavorite={removeFavorite}
+                  />
+                ))}
+              </View>
+            </View>
+          </>
+        ) : (
+          <>
+            <View style={styles.emptyWrap}>
+              <FavoritesEmptyState />
+            </View>
+            {/* Phase 25 §2/§9: the Tip is optional empty-state support —
+                a floating hint, not a full-width footer against the nav. */}
+            <View style={styles.tipSlot}>
+              <FavoritesTipCard />
+            </View>
+          </>
+        )}
+      </ScrollView>
+      <View
+        pointerEvents="none"
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+        style={[styles.statusBarScrim, { height: statusBarInset }]}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
+  root: {
     flex: 1,
     backgroundColor: Colors.navy,
   },
-  content: {
+  scroll: {
     flex: 1,
+  },
+  content: {
     width: '100%',
     maxWidth: MaxContentWidth,
     alignSelf: 'center',
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.xl,
     gap: Spacing.md,
   },
-  title: {
-    fontFamily: Fonts?.serif,
-    fontSize: 28,
+  section: {
+    marginTop: 4,
+    gap: 8,
+  },
+  emptyWrap: {
+    flex: 1,
+    justifyContent: 'center',
+    minHeight: 240,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    gap: Spacing.sm,
+    paddingHorizontal: 2,
+  },
+  sectionTitle: {
+    fontSize: 17,
     fontWeight: '600',
     color: Colors.textPrimary,
   },
-  card: {
-    borderRadius: Radius.lg,
-    borderWidth: 1,
-    borderColor: Colors.glassBorder,
-    backgroundColor: Colors.glassBackground,
-    padding: Spacing.lg,
+  sectionCount: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: 'rgba(255, 255, 255, 0.55)',
   },
-  description: {
-    fontSize: 14,
-    lineHeight: 20,
-    color: Colors.textSecondary,
+  list: {
+    gap: 10,
+  },
+  tipSlot: {
+    alignItems: 'stretch',
+    paddingHorizontal: Spacing.md,
+    marginBottom: Spacing.xl,
+  },
+  statusBarScrim: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.42)',
   },
 });
