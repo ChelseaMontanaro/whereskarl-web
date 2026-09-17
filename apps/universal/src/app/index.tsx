@@ -189,19 +189,6 @@ export default function HomeScreen() {
         metricKey={activeMetricDetail}
         onClose={() => setActiveMetricDetail(null)}
       />
-
-      {/*
-        Full-bleed hero is intentional (image under status bar at rest).
-        Once scrolled, glass cards colliding with the Dynamic Island is not.
-        A short non-interactive top scrim — height = status-bar inset only —
-        softens that collision without adding header chrome.
-      */}
-      <View
-        pointerEvents="none"
-        accessibilityElementsHidden
-        importantForAccessibility="no-hide-descendants"
-        style={[styles.statusBarScrim, { height: statusBarInset }]}
-      />
     </View>
   );
 }
@@ -233,14 +220,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 12,
     color: 'rgba(255,255,255,0.35)',
-  },
-  statusBarScrim: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 20,
-    // Soft veil only — hero still reads through at rest; scrolled cards stay legible.
-    backgroundColor: 'rgba(0, 0, 0, 0.42)',
   },
 });

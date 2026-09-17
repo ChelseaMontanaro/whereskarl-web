@@ -371,3 +371,24 @@ describe('Home final polish (authorized changes)', () => {
     );
   });
 });
+
+/**
+ * Phase 27.1 — Home status-bar full-bleed.
+ * Authorized correction: remove the Home-local hard 42% black statusBarScrim.
+ * Content still clears the status bar via paddingTop: statusBarInset.
+ * HomeHeroBackground remains full-bleed behind the status bar.
+ */
+describe('Phase 27.1 Home status-bar full-bleed', () => {
+  it('has no hard status-bar scrim and still pads content below the inset', () => {
+    const homeScreen = readFileSync(
+      resolve(process.cwd(), 'src/app/index.tsx'),
+      'utf8',
+    );
+
+    expect(homeScreen).not.toContain('statusBarScrim');
+    expect(homeScreen).not.toContain("backgroundColor: 'rgba(0, 0, 0, 0.42)'");
+    expect(homeScreen).toContain('<HomeHeroBackground');
+    expect(homeScreen).toContain('paddingTop: statusBarInset');
+    expect(homeScreen).toContain('const statusBarInset = Math.max(insets.top, 8)');
+  });
+});
