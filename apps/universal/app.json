@@ -9,7 +9,7 @@
     "userInterfaceStyle": "dark",
     "ios": {
       "bundleIdentifier": "com.anonymous.whereskarl-universal",
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/images/wheres-karl-app-icon.png"
     },
     "android": {
       "adaptiveIcon": {
