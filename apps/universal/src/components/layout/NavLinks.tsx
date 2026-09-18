@@ -1,5 +1,6 @@
 import { Image } from 'expo-image';
 import { Link, usePathname } from 'expo-router';
+import { SymbolView } from 'expo-symbols';
 import { useMemo } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -21,28 +22,18 @@ import {
 const NAV_ICON_COLOR = 'rgba(255, 255, 255, 0.72)';
 
 /**
- * Native Favorites/Settings artwork, frozen. These two glyphs — and their
- * active/inactive treatment — are restored verbatim from the approved
- * pre-Phase-23.1 implementation, and are deliberately NOT the mobile-web
- * heart/gear paths. Only their size was later re-authorized in the Phase 23
- * physical-iPhone closeout, to stay visually balanced once Home/Map grew to
- * 32pt (see lib/layout/bottomNavIcons for that side).
- *
- * The two glyphs don't scale 1:1 with each other at a shared font size: ⚙
- * draws close to (or past) its own em box, while ♥ draws visibly smaller at
- * the same size. `navGlyph.fontSize` (20) already brings ⚙ to parity with
- * Home/Map; `navGlyphHeart` adds a further native-only bump so ♥ reaches the
- * same rendered weight without moving ⚙.
+ * Native Favorites artwork. The Unicode ♥ is deliberately NOT the
+ * mobile-web heart path. Phase 27.3 tints it with Colors.gold when active.
+ * Settings uses expo-symbols `gearshape.fill` (not Unicode, not the web SVG).
  */
 const NAV_GLYPH = {
   '/favorites': '♥',
-  '/settings': '⚙',
 } as const;
 
 /**
- * Home and Map only: mobile-web path data in a fixed square, so their weight
- * and vertical centre come from the layout box instead of per-glyph font
- * metrics (see lib/layout/bottomNavIcons).
+ * Home and Map: mobile-web path data in a fixed square, so their weight and
+ * vertical centre come from the layout box instead of per-glyph font metrics
+ * (see lib/layout/bottomNavIcons).
  */
 function VectorNavIcon({
   href,
@@ -73,23 +64,32 @@ function NavIcon({
 }: {
   href: PrimaryNavItem['href'];
   isPhonePortraitWeb: boolean;
-  /** Only the vector (Home/Map) tabs use this — see below. */
   isActive?: boolean;
 }) {
+  if (href === '/settings') {
+    return (
+      <SymbolView
+        name="gearshape.fill"
+        type="monochrome"
+        tintColor={isActive ? Colors.gold : NAV_ICON_COLOR}
+        size={BOTTOM_NAV_ICON_SIZE}
+        resizeMode="scaleAspectFit"
+        accessibilityElementsHidden
+      />
+    );
+  }
+
   if (isBottomNavVectorHref(href)) {
     return <VectorNavIcon href={href} isActive={isActive} />;
   }
 
-  // Frozen: the approved glyph never re-tinted on active — the label carries
-  // the active state. Only the two vector tabs follow mobile web's gold icon.
   return (
     <Text
       style={[
         styles.navGlyph,
-        // Heart-only, native-only: closes the remaining size gap to ⚙ without
-        // touching ⚙ or either tab's phone-portrait-web rendering.
         href === '/favorites' && !isPhonePortraitWeb && styles.navGlyphHeart,
         isPhonePortraitWeb && styles.navGlyphPhonePortrait,
+        isActive && styles.navGlyphActive,
       ]}>
       {NAV_GLYPH[href]}
     </Text>
@@ -121,11 +121,13 @@ function PrimaryNavLink({
         ]}>
         {layout === 'bottom' ? (
           <View style={styles.bottomLinkInner}>
-            <NavIcon
-              href={item.href}
-              isPhonePortraitWeb={isPhonePortraitWeb}
-              isActive={isActive}
-            />
+            <View style={styles.navIconWrapper}>
+              <NavIcon
+                href={item.href}
+                isPhonePortraitWeb={isPhonePortraitWeb}
+                isActive={isActive}
+              />
+            </View>
             <Text
               numberOfLines={2}
               style={[
@@ -231,25 +233,28 @@ const styles = StyleSheet.create({
   bottomLabelActive: {
     color: Colors.gold,
   },
+  // Shared structural box for all four tabs. 32 is the smallest size that
+  // still contains Home/Map at BOTTOM_NAV_ICON_SIZE without shrinking
+  // Favorites (♥ 22) or raising the bar. Glyphs are centered inside; vectors
+  // fill it. Gap 4 remains between this box and the label, so all four
+  // labels share one baseline.
+  navIconWrapper: {
+    width: BOTTOM_NAV_ICON_SIZE,
+    height: BOTTOM_NAV_ICON_SIZE,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   navIcon: {
-    // Home / Map vector box — mobile-web: h-5 w-5 (20px)
     width: BOTTOM_NAV_ICON_SIZE,
     height: BOTTOM_NAV_ICON_SIZE,
   },
   navGlyph: {
-    // Favorites / Settings native glyphs — artwork/color verbatim
-    // pre-Phase-23.1. fontSize (⚙'s effective size) has been re-calibrated
-    // twice against physical-iPhone measurements: 18 → 20 (to reach the 32pt
-    // Home/Map icons), then 20 → 18 (⚙'s drawn ink overshoots its own em box,
-    // so 20 ended up heavier than Home/Map — 18 measured back to parity).
-    fontSize: 18,
     color: NAV_ICON_COLOR,
   },
-  // Native-only, independent of navGlyph: ♥'s drawn ink is a *smaller*
-  // fraction of its em box than ⚙'s, so the two glyphs never track a shared
-  // fontSize. Recalibrated 24 → 22 alongside navGlyph's drop, measured
-  // against the current physical-iPhone screenshot to land ♥ at the same
-  // perceived height as Home/Map/⚙.
+  navGlyphActive: {
+    color: Colors.gold,
+  },
+  // 22 is the frozen Favorites optical-size authority.
   navGlyphHeart: {
     fontSize: 22,
   },
