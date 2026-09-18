@@ -100,7 +100,6 @@ export function SelectedLocationPreview({
         location={location}
         isHomeLocation={isHomeLocation}
         onDismiss={onDismiss}
-        onOpenDetail={onOpenDetail}
         isNighttime={isNighttime}
       />
     );
@@ -264,13 +263,11 @@ function PhoneSelectedLocationSheet({
   location,
   isHomeLocation,
   onDismiss,
-  onOpenDetail,
   isNighttime,
 }: {
   location: LocationWeather;
   isHomeLocation: boolean;
   onDismiss?: () => void;
-  onOpenDetail?: (locationId: string) => void;
   isNighttime: boolean;
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -668,19 +665,6 @@ function PhoneSelectedLocationSheet({
               ))}
             </ScrollView>
           </View>
-
-          {onOpenDetail ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={`Open details for ${location.name}`}
-              onPress={() => onOpenDetail(location.id)}
-              style={({ pressed }) => [
-                styles.detailLink,
-                pressed && styles.buttonPressed,
-              ]}>
-              <Text style={styles.detailLinkLabel}>View details ›</Text>
-            </Pressable>
-          ) : null}
         </ScrollView>
       ) : null}
     </LiquidGlassSurface>

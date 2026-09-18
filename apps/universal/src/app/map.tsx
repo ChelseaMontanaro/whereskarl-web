@@ -420,7 +420,6 @@ export default function MapScreen() {
       isSelected
       isHomeLocation={isHomeSelected}
       onDismiss={handleClearSelection}
-      onOpenDetail={handleOpenLocationDetail}
       variant="compact"
       phonePortrait
     />

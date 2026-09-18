@@ -32,4 +32,40 @@ describe('selected location dismiss (physical iPhone QA)', () => {
     expect(previewSource).toContain('presentClimate');
     expect(previewSource).toContain('maxWidth: MaxContentWidth');
   });
+
+  it('removes View details from the expanded phone sheet only', () => {
+    const mapSource = readFileSync(
+      resolve(process.cwd(), 'src/app/map.tsx'),
+      'utf8',
+    );
+    const previewSource = readFileSync(
+      resolve(process.cwd(), 'src/components/SelectedLocationPreview.tsx'),
+      'utf8',
+    );
+
+    const phoneSheetStart = previewSource.indexOf(
+      'function PhoneSelectedLocationSheet(',
+    );
+    const phoneSheetEnd = previewSource.indexOf('type EnvironmentalMetricData');
+    const phoneSheet = previewSource.slice(phoneSheetStart, phoneSheetEnd);
+
+    expect(phoneSheetStart).toBeGreaterThan(-1);
+    expect(phoneSheetEnd).toBeGreaterThan(phoneSheetStart);
+    expect(phoneSheet).not.toContain('View details ›');
+    expect(phoneSheet).not.toContain('onOpenDetail');
+    expect(phoneSheet).not.toContain('Open details for');
+
+    const phonePreviewStart = mapSource.indexOf('const phonePreview =');
+    const phonePreviewEnd = mapSource.indexOf('const selectedPreview =');
+    const phonePreview = mapSource.slice(phonePreviewStart, phonePreviewEnd);
+
+    expect(phonePreviewStart).toBeGreaterThan(-1);
+    expect(phonePreviewEnd).toBeGreaterThan(phonePreviewStart);
+    expect(phonePreview).not.toContain('onOpenDetail');
+
+    expect(previewSource).toContain('View details ›');
+    expect(mapSource).toContain('onOpenDetail={handleOpenLocationDetail}');
+    expect(mapSource).toContain('function handleOpenLocationDetail(');
+    expect(mapSource).toContain('handleOpenLocationDetail(locationId)');
+  });
 });
