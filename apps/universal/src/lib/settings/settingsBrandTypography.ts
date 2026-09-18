@@ -30,7 +30,7 @@ export const SETTINGS_BRANDED_DISPLAY = {
  *   fontWeight: '800'
  *   letterSpacing: 3.2
  *   textTransform: 'uppercase'
- *   color: Colors.gold
+ *   color: Colors.brandTaglineText
  *
  * Settings reuses that exact contract. Home is not imported or modified.
  */
@@ -40,5 +40,5 @@ export const SETTINGS_BRANDED_TAGLINE = {
   fontWeight: '800' as const,
   letterSpacing: 3.2,
   textTransform: 'uppercase' as const,
-  color: Colors.gold,
+  color: Colors.brandTaglineText,
 } as const;

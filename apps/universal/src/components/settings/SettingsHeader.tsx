@@ -1,11 +1,10 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-import { Spacing } from '@/constants/theme';
+import { Colors, Spacing } from '@/constants/theme';
 import {
   SETTINGS_BRANDED_DISPLAY,
   SETTINGS_BRANDED_TAGLINE,
 } from '@/lib/settings/settingsBrandTypography';
-import { SettingsChrome } from '@/lib/settings/settingsChrome';
 import { SETTINGS_COPY } from '@/lib/settings/settingsCopy';
 
 export function SettingsHeader() {
@@ -36,9 +35,12 @@ const styles = StyleSheet.create({
   },
   title: {
     ...SETTINGS_BRANDED_DISPLAY,
-    fontSize: 34,
-    color: SettingsChrome.textPrimary,
+    fontSize: 32,
+    color: Colors.textPrimary,
     textAlign: 'left',
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 6,
   },
   subtitle: {
     ...SETTINGS_BRANDED_TAGLINE,

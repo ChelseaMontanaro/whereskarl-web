@@ -14,6 +14,11 @@ export const Colors = {
   navyGlass: rgbToken(designTokens.navyGlass, 'css-comma'),
   gold: rgbToken(designTokens.gold, 'css-comma'),
   goldDeep: rgbToken(designTokens.goldDeep, 'css-comma'),
+  /**
+   * Atmospheric branded-header tagline only (Home / Favorites / Settings).
+   * Not a replacement for `gold` product accents.
+   */
+  brandTaglineText: 'rgba(255, 248, 230, 0.96)',
   textPrimary: 'rgba(255, 255, 255, 0.96)',
   textSecondary: 'rgba(255, 255, 255, 0.8)',
   textMuted: 'rgba(255, 255, 255, 0.48)',

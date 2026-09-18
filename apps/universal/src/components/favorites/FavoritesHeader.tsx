@@ -1,12 +1,19 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-import { Colors, Spacing } from '@/constants/theme';
+import { Colors, Fonts, Spacing } from '@/constants/theme';
 
 export function FavoritesHeader() {
   return (
     <View style={styles.header} accessibilityRole="header">
-      <Text style={styles.title}>Favorites</Text>
-      <Text style={styles.subtitle} numberOfLines={1}>
+      <Text style={styles.title} allowFontScaling={false}>
+        Favorites
+      </Text>
+      <Text
+        style={styles.subtitle}
+        allowFontScaling={false}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.85}>
         Your saved Bay Area locations
       </Text>
     </View>
@@ -21,8 +28,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xs,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '700',
+    fontFamily: Fonts?.serif,
+    fontSize: 32,
+    fontWeight: '600',
+    letterSpacing: 0.3,
     color: Colors.textPrimary,
     textAlign: 'left',
     textShadowColor: 'rgba(0, 0, 0, 0.4)',
@@ -30,9 +39,12 @@ const styles = StyleSheet.create({
     textShadowRadius: 6,
   },
   subtitle: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.7)',
+    fontFamily: Fonts?.serif,
+    fontSize: 12,
+    fontWeight: '800',
+    letterSpacing: 3.2,
+    textTransform: 'uppercase',
+    color: Colors.brandTaglineText,
     textAlign: 'left',
   },
 });

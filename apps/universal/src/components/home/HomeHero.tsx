@@ -116,13 +116,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 3.2,
     textTransform: 'uppercase',
-    // Final optical calibration: reuses the exact canonical sun-icon color.
-    // CLEAR_SUN_ONLY_ICON (lib/map/phonePortraitConditionIcons.ts — the sun
-    // behind Clear Skies Score / Clearest Spot) draws its outer disc AND its
-    // rays in `#F2A326`, with only a smaller `#F6C15A` inner highlight for
-    // dimensionality. `#F2A326` is the icon's identifying color and is
-    // `Colors.gold` (rgb(242,163,38)) verbatim — reused as-is, not derived.
-    color: Colors.gold,
+    color: Colors.brandTaglineText,
     textAlign: 'center',
   },
   copyBlock: {

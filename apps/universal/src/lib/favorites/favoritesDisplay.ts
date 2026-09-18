@@ -131,6 +131,40 @@ export function shouldPersistSanitizedFavoriteIds(input: {
   return input.sanitizedIds.length !== input.storedIds.length;
 }
 
+export type FavoritesContentPresentation = 'hydrating' | 'empty' | 'populated';
+
+/**
+ * Distinguishes catalog/ID hydration from a genuine first-run empty Favorites
+ * screen. A temporarily empty join (`favoriteLocations === []` while the
+ * catalog is still loading) is not proof the user has no saved favorites.
+ */
+export function resolveFavoritesContentPresentation(input: {
+  favoriteLocationsCount: number;
+  favoriteIdsCount: number;
+  isLoadingFavoriteIds: boolean;
+  catalogSize: number;
+  isLoadingCatalog: boolean;
+}): FavoritesContentPresentation {
+  if (input.favoriteLocationsCount > 0) {
+    return 'populated';
+  }
+
+  if (input.isLoadingFavoriteIds) {
+    return 'hydrating';
+  }
+
+  if (input.favoriteIdsCount === 0) {
+    return 'empty';
+  }
+
+  const catalogReady = input.catalogSize > 0;
+  if (!catalogReady) {
+    return 'hydrating';
+  }
+
+  return 'empty';
+}
+
 export function sanitizeFavoriteIds(
   favoriteIds: string[],
   validLocationIds: Iterable<string>,

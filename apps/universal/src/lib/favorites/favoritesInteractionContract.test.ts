@@ -218,3 +218,29 @@ describe('Phase 25 — cross-screen favorite sync (§11)', () => {
     expect(source).toContain('return { isFavorite, handleToggleFavorite }');
   });
 });
+
+describe('Phase 27.2 — Favorites content gate, not native-repaint workarounds', () => {
+  it('keeps Favorites→Map as a push of the selected location', () => {
+    const saved = readSource(SAVED_LOCATION_CARD);
+    const top = readSource(TOP_SAVED_LOCATION_CARD);
+
+    expect(saved).toContain("router.push(buildMapHref(location.id)");
+    expect(top).toContain("router.push(buildMapHref(location.id)");
+  });
+
+  it('gates empty state through resolveFavoritesContentPresentation', () => {
+    const screen = readSource(FAVORITES_SCREEN);
+
+    expect(screen).toContain('resolveFavoritesContentPresentation');
+    expect(screen).toContain("contentPresentation === 'populated'");
+    expect(screen).toContain("contentPresentation === 'empty'");
+    expect(screen).not.toContain(
+      'const hasFavorites = favoriteLocations.length > 0',
+    );
+    expect(screen).not.toContain('useFocusEffect');
+    expect(screen).not.toContain('collapsable={false}');
+    expect(screen).not.toContain('removeClippedSubviews={false}');
+    expect(screen).not.toContain('setTimeout');
+    expect(screen).not.toContain('setInterval');
+  });
+});

@@ -27,7 +27,7 @@ describe('Phase 26 — Settings branded typography matches Home', () => {
     expect(about).toContain('allowFontScaling={false}');
   });
 
-  it('reuses the Home hero tagline contract for family, weight, tracking, and gold', () => {
+  it('reuses the Home hero tagline contract for family, weight, tracking, and brand tagline text', () => {
     const home = readSource('src/components/home/HomeHero.tsx');
     const brand = readSource('src/lib/settings/settingsBrandTypography.ts');
     const header = readSource('src/components/settings/SettingsHeader.tsx');
@@ -36,14 +36,14 @@ describe('Phase 26 — Settings branded typography matches Home', () => {
     expect(home).toContain("fontWeight: '800'");
     expect(home).toContain('letterSpacing: 3.2');
     expect(home).toContain("textTransform: 'uppercase'");
-    expect(home).toContain('color: Colors.gold');
+    expect(home).toContain('color: Colors.brandTaglineText');
     expect(home).toContain('Track Karl across the Bay');
 
     expect(brand).toContain("fontSize: 12");
     expect(brand).toContain("fontWeight: '800'");
     expect(brand).toContain('letterSpacing: 3.2');
     expect(brand).toContain("textTransform: 'uppercase'");
-    expect(brand).toContain('color: Colors.gold');
+    expect(brand).toContain('color: Colors.brandTaglineText');
 
     expect(header).toContain('SETTINGS_BRANDED_TAGLINE');
     expect(header).toContain('SETTINGS_COPY.subtitle');
@@ -51,5 +51,20 @@ describe('Phase 26 — Settings branded typography matches Home', () => {
     expect(header).toContain('adjustsFontSizeToFit');
     expect(header).toContain('minimumFontScale={0.85}');
     expect(header).not.toContain("TRACK KARL ACROSS THE BAY");
+  });
+
+  it('renders the Settings page title in white at size 32 with the inner-page shadow', () => {
+    const header = readSource('src/components/settings/SettingsHeader.tsx');
+
+    expect(header).toContain('...SETTINGS_BRANDED_DISPLAY');
+    expect(header).toContain('fontSize: 32');
+    expect(header).not.toContain('fontSize: 34');
+    expect(header).toContain('color: Colors.textPrimary');
+    expect(header).not.toContain('SettingsChrome.textPrimary');
+    expect(header).toContain("textShadowColor: 'rgba(0, 0, 0, 0.4)'");
+    expect(header).toContain('textShadowOffset: { width: 0, height: 2 }');
+    expect(header).toContain('textShadowRadius: 6');
+    expect(header).toContain('...SETTINGS_BRANDED_TAGLINE');
+    expect(header).toContain("textAlign: 'left'");
   });
 });

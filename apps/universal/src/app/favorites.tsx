@@ -21,6 +21,7 @@ import { Colors, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useLocations } from '@/hooks/useLocations';
 import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
+import { resolveFavoritesContentPresentation } from '@/lib/favorites/favoritesDisplay';
 import {
   resolveConditionsPresentation,
 } from '@/lib/home/conditionsStatus';
@@ -36,6 +37,7 @@ export default function FavoritesScreen() {
     refresh,
   } = useLocations();
   const {
+    favoriteIds,
     favoriteLocations,
     topSavedLocation,
     summary,
@@ -53,8 +55,17 @@ export default function FavoritesScreen() {
     [hasLiveData, isLoading, isLoadingFavorites, locations.length],
   );
 
+  const contentPresentation = resolveFavoritesContentPresentation({
+    favoriteLocationsCount: favoriteLocations.length,
+    favoriteIdsCount: favoriteIds.length,
+    isLoadingFavoriteIds: isLoadingFavorites,
+    catalogSize: locations.length,
+    isLoadingCatalog: isLoading,
+  });
+  const showPopulated = contentPresentation === 'populated';
+  const showEmpty = contentPresentation === 'empty';
+
   const statusBarInset = Math.max(insets.top, Spacing.sm);
-  const hasFavorites = favoriteLocations.length > 0;
   // Phase 25 §12: keep this restrained — only surface it while there is
   // something notable to communicate (loading/estimated/cached/unavailable),
   // so it never competes with the Favorites hierarchy during normal use.
@@ -74,7 +85,7 @@ export default function FavoritesScreen() {
             paddingBottom:
               BOTTOM_NAV_SCROLL_INSET +
               Math.max(insets.bottom, Spacing.sm) +
-              (hasFavorites ? 0 : Spacing.xl),
+              (showEmpty ? Spacing.xl : 0),
             paddingHorizontal: horizontalPadding,
             flexGrow: 1,
           },
@@ -94,7 +105,7 @@ export default function FavoritesScreen() {
           <ConditionsStatusChip presentation={conditionsPresentation} />
         ) : null}
 
-        {hasFavorites ? (
+        {showPopulated ? (
           <>
             <FavoritesSummaryRow summary={summary} />
 
@@ -121,7 +132,9 @@ export default function FavoritesScreen() {
               </View>
             </View>
           </>
-        ) : (
+        ) : null}
+
+        {showEmpty ? (
           <>
             <View style={styles.emptyWrap}>
               <FavoritesEmptyState />
@@ -132,14 +145,8 @@ export default function FavoritesScreen() {
               <FavoritesTipCard />
             </View>
           </>
-        )}
+        ) : null}
       </ScrollView>
-      <View
-        pointerEvents="none"
-        accessibilityElementsHidden
-        importantForAccessibility="no-hide-descendants"
-        style={[styles.statusBarScrim, { height: statusBarInset }]}
-      />
     </View>
   );
 }
@@ -191,13 +198,5 @@ const styles = StyleSheet.create({
     alignItems: 'stretch',
     paddingHorizontal: Spacing.md,
     marginBottom: Spacing.xl,
-  },
-  statusBarScrim: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.42)',
   },
 });

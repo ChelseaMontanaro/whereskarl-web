@@ -4,6 +4,7 @@ import {
   computeFavoritesSummary,
   locationQualifiesAsKarlFavorite,
   resolveFavoriteLocations,
+  resolveFavoritesContentPresentation,
   sanitizeFavoriteIds,
   selectTopSavedLocation,
   shouldPersistSanitizedFavoriteIds,
@@ -177,6 +178,24 @@ describe('favoritesDisplay', () => {
     ).toBe(false);
   });
 
+  it('joins stored favorite ids with a loaded catalog in one pass', () => {
+    const catalog = [
+      makeLocation({ id: 'cupertino', name: 'Cupertino', sunshineScore: 70 }),
+      makeLocation({ id: 'berkeley', name: 'Berkeley', sunshineScore: 88 }),
+      makeLocation({ id: 'sausalito', name: 'Sausalito', sunshineScore: 40 }),
+    ];
+    const storedIds = ['cupertino', 'berkeley'];
+
+    const first = resolveFavoriteLocations(storedIds, catalog);
+    const second = resolveFavoriteLocations(storedIds, catalog);
+
+    expect(first.map((location) => location.id)).toEqual(['berkeley', 'cupertino']);
+    expect(second.map((location) => location.id)).toEqual(
+      first.map((location) => location.id),
+    );
+    expect(selectTopSavedLocation(first)?.id).toBe('berkeley');
+  });
+
   it('handles zero favorites gracefully', () => {
     expect(selectTopSavedLocation([])).toBeNull();
     expect(computeFavoritesSummary([], false)).toEqual({
@@ -218,5 +237,63 @@ describe('favoritesDisplay', () => {
 
     const afterRemovingAll: typeof favorites = [];
     expect(selectTopSavedLocation(afterRemovingAll)).toBeNull();
+  });
+});
+
+describe('Phase 27.2 — Favorites content presentation vs catalog hydration', () => {
+  it('does not treat persisted IDs + an empty/loading catalog as genuine empty', () => {
+    expect(
+      resolveFavoritesContentPresentation({
+        favoriteLocationsCount: 0,
+        favoriteIdsCount: 2,
+        isLoadingFavoriteIds: false,
+        catalogSize: 0,
+        isLoadingCatalog: true,
+      }),
+    ).toBe('hydrating');
+
+    expect(
+      resolveFavoritesContentPresentation({
+        favoriteLocationsCount: 0,
+        favoriteIdsCount: 2,
+        isLoadingFavoriteIds: true,
+        catalogSize: 0,
+        isLoadingCatalog: true,
+      }),
+    ).toBe('hydrating');
+  });
+
+  it('selects genuine empty only after favorite IDs have hydrated to []', () => {
+    expect(
+      resolveFavoritesContentPresentation({
+        favoriteLocationsCount: 0,
+        favoriteIdsCount: 0,
+        isLoadingFavoriteIds: false,
+        catalogSize: 0,
+        isLoadingCatalog: true,
+      }),
+    ).toBe('empty');
+
+    expect(
+      resolveFavoritesContentPresentation({
+        favoriteLocationsCount: 0,
+        favoriteIdsCount: 0,
+        isLoadingFavoriteIds: false,
+        catalogSize: 8,
+        isLoadingCatalog: false,
+      }),
+    ).toBe('empty');
+  });
+
+  it('selects populated when the catalog join has resolved saved locations', () => {
+    expect(
+      resolveFavoritesContentPresentation({
+        favoriteLocationsCount: 2,
+        favoriteIdsCount: 2,
+        isLoadingFavoriteIds: false,
+        catalogSize: 8,
+        isLoadingCatalog: false,
+      }),
+    ).toBe('populated');
   });
 });
