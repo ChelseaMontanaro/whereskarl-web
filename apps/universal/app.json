@@ -11,7 +11,10 @@
       "bundleIdentifier": "whereskarl.live.app",
       "buildNumber": "1",
       "appleTeamId": "5CNF3D3CGN",
-      "icon": "./assets/images/wheres-karl-app-icon.png"
+      "icon": "./assets/images/wheres-karl-app-icon.png",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
