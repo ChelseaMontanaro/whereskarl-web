@@ -66,7 +66,7 @@ describe("AppShell", () => {
   });
 
   it("renders mobile bottom navigation with the four primary tabs", () => {
-    renderShell("/");
+    renderShell("/favorites");
 
     const bottomNav = screen.getAllByRole("navigation", { name: "Primary" })[1];
     for (const label of ["Home", "Map", "Favorites", "Settings"]) {
@@ -75,7 +75,7 @@ describe("AppShell", () => {
   });
 
   it("uses glass styling and canonical bottom safe-area padding on the mobile bottom nav", () => {
-    renderShell("/");
+    renderShell("/favorites");
 
     const bottomNav = screen.getAllByRole("navigation", { name: "Primary" })[1];
     const navInner = bottomNav.firstElementChild as HTMLElement;
@@ -90,7 +90,7 @@ describe("AppShell", () => {
   });
 
   it("renders the desktop top navigation with primary links and Find Clear Skies", () => {
-    renderShell("/");
+    renderShell("/favorites");
 
     const topNav = screen.getAllByRole("navigation", { name: "Primary" })[0];
     expect(within(topNav).getByRole("link", { name: "Home" })).toBeInTheDocument();
@@ -113,7 +113,7 @@ describe("AppShell", () => {
   });
 
   it("renders Privacy and Support links in the mobile footer", () => {
-    renderShell("/");
+    renderShell("/favorites");
 
     const legalNav = screen.getByRole("navigation", { name: "Legal and support" });
     expect(within(legalNav).getByRole("link", { name: "Privacy" })).toBeInTheDocument();
@@ -121,7 +121,7 @@ describe("AppShell", () => {
   });
 
   it("renders placeholder content and conditions footer without API data", () => {
-    renderShell("/");
+    renderShell("/favorites");
 
     expect(screen.getByText("Placeholder content")).toBeInTheDocument();
     expect(screen.getByLabelText("Conditions status")).toHaveTextContent(
@@ -134,17 +134,12 @@ describe("AppShell", () => {
     ).toBeInTheDocument();
   });
 
-  it("trims phone portrait Home scroll chrome to nav clearance only", () => {
+  it("serves the marketing homepage without product chrome", () => {
     usePhonePortraitMock.mockReturnValue(true);
     renderShell("/");
 
-    const main = screen.getByText("Placeholder content").closest("main");
-    expect(main?.className).toContain(
-      "pb-[calc(4.25rem+env(safe-area-inset-bottom,0.5rem))]",
-    );
-    expect(main?.className).not.toContain("pb-24");
-    expect(main?.className).not.toContain("flex-1");
-    expect(screen.getByText("Placeholder content").closest("div.min-h-screen")).toBeNull();
+    expect(screen.getByText("Placeholder content")).toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "Primary" })).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Conditions status")).not.toBeInTheDocument();
     expect(screen.queryByRole("navigation", { name: "Legal and support" })).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Developer status")).not.toBeInTheDocument();
@@ -172,6 +167,28 @@ describe("AppShell", () => {
     expect(bottomNav.firstElementChild?.className).toContain(
       "pb-[max(env(safe-area-inset-bottom,0px),0.5rem)]",
     );
+  });
+
+  it("leaves product navigation off the marketing homepage, privacy, and support routes", () => {
+    renderShell("/");
+
+    expect(screen.getByText("Placeholder content")).toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "Primary" })).not.toBeInTheDocument();
+
+    cleanup();
+    renderShell("/privacy");
+
+    expect(screen.getByText("Placeholder content")).toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "Primary" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "Legal and support" })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Conditions status")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Developer status")).not.toBeInTheDocument();
+
+    cleanup();
+    renderShell("/support");
+
+    expect(screen.queryByRole("navigation", { name: "Primary" })).not.toBeInTheDocument();
+    expect(screen.getByText("Placeholder content")).toBeInTheDocument();
   });
 
   it("keeps tablet/desktop map chrome with in-flow footers and min-h-screen shell", () => {

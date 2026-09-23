@@ -46,6 +46,14 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const isPhonePortrait = usePhonePortrait();
   /**
+   * The marketing site owns `/`, `/privacy`, and `/support`. Skip the product
+   * navigation so those pages do not inherit Home, Map, Favorites, or Settings.
+   */
+  if (pathname === "/" || pathname === "/privacy" || pathname === "/support") {
+    return children;
+  }
+
+  /**
    * Phone Home: immersive trim (no min-h-screen / footers).
    *
    * Phone Map: keep `min-h-screen` so fixed top search stays correctly placed
