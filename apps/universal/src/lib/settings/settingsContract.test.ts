@@ -220,7 +220,7 @@ describe('Phase 26 — Settings source contracts', () => {
     expect(screen).toContain('Constants.expoConfig');
     expect(screen).not.toContain('Version 1.0.0 (1)');
     expect(appJson).toContain('"version": "1.0.0"');
-    expect(appJson).not.toContain('buildNumber');
+    expect(appJson).toContain('"buildNumber": "1"');
   });
 
   it('does not change frozen bottom navigation, Home, Map, or Favorites', () => {

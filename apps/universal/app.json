@@ -1,14 +1,16 @@
 {
   "expo": {
-    "name": "Where's Karl Universal",
-    "slug": "whereskarl-universal",
+    "name": "Where's Karl",
+    "slug": "whereskarl",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "whereskarluniversal",
     "userInterfaceStyle": "dark",
     "ios": {
-      "bundleIdentifier": "com.anonymous.whereskarl-universal",
+      "bundleIdentifier": "whereskarl.live.app",
+      "buildNumber": "1",
+      "appleTeamId": "5CNF3D3CGN",
       "icon": "./assets/images/wheres-karl-app-icon.png"
     },
     "android": {
@@ -38,6 +40,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "877e9ea7-01b1-4735-83e0-e023a2c038fe"
+      }
+    },
+    "owner": "whereskarl"
   }
 }
