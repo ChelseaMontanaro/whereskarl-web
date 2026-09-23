@@ -112,13 +112,13 @@ export function LandingPage() {
         </div>
         <div className="relative z-10 mx-auto grid w-full max-w-6xl items-start gap-8 px-5 pb-6 pt-1 sm:px-8 lg:grid-cols-[minmax(0,34rem)_auto] lg:gap-8 lg:px-10 lg:pb-3 lg:pt-2">
           <div className="max-w-xl pt-2 lg:max-w-[34rem] lg:pt-4">
-            <h1 className="font-serif text-[2.6rem] font-semibold leading-[1.02] tracking-tight text-[#10243f] sm:text-6xl lg:text-[3.25rem]">
+            <h1 className="font-serif text-[2.6rem] font-semibold leading-[1.02] tracking-tight text-white sm:text-6xl lg:text-[3.25rem]">
               Find the sun.
-              <span className="mt-1 block text-[#1d4e89] lg:whitespace-nowrap">
+              <span className="mt-1 block text-balance text-white lg:whitespace-nowrap">
                 Know where Karl is.
               </span>
             </h1>
-            <p className="mt-3 max-w-md text-base leading-snug text-[#1c334d] sm:text-[1.05rem]">
+            <p className="mt-3 max-w-[15.5rem] text-base leading-snug text-white sm:max-w-md sm:text-[1.05rem]">
               Bay Area conditions can change in just a few miles. Where&apos;s Karl helps
               you see where the fog is, where skies are clearing, and where to go next.
             </p>
@@ -225,13 +225,13 @@ export function LandingPage() {
           alt="Daytime Crissy Field and the Golden Gate"
           className="absolute inset-0 h-full w-full object-cover object-[center_70%]"
         />
-        <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-8 px-5 py-8 sm:px-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:py-8">
+        <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-10 px-5 py-10 sm:px-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-8 lg:py-8">
           <div className="max-w-lg text-white">
-            <h2 className="font-serif text-4xl font-semibold leading-[1.02] tracking-tight sm:text-5xl lg:text-[2.15rem]">
+            <h2 className="font-serif text-4xl font-semibold leading-[1.12] tracking-tight sm:text-5xl lg:text-[2.15rem] lg:leading-[1.02]">
               Different skies.
               <span className="mt-1 block">A brighter day.</span>
             </h2>
-            <p className="mt-3 max-w-md text-base leading-snug">
+            <p className="mt-4 max-w-md text-base leading-normal [text-shadow:0_0_2px_rgba(0,0,0,1),0_1px_2px_rgba(0,0,0,0.95),0_2px_8px_rgba(0,0,0,0.85)] lg:mt-3 lg:leading-snug">
               From foggy mornings to sunny afternoons,
               <br className="hidden sm:block" />
               the Bay Area always keeps things interesting.

@@ -19,8 +19,8 @@ export function MarketingHeader({ tone = "solid" }: { tone?: "solid" | "overlay"
   return (
     <header className={overlay ? "bg-transparent" : "border-b border-[#d5e0ec] bg-white"}>
       <div
-        className={`mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-8 gap-y-4 px-5 sm:px-8 ${
-          overlay ? "py-3" : "py-4"
+        className={`mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-8 gap-y-5 px-5 py-5 sm:px-8 lg:gap-y-4 ${
+          overlay ? "lg:py-3" : "lg:py-4"
         }`}
       >
         <Link
@@ -45,10 +45,10 @@ export function MarketingHeader({ tone = "solid" }: { tone?: "solid" | "overlay"
               Where&apos;s Karl
             </span>
             <span
-              className={`block font-semibold uppercase text-[#4d627c] ${
+              className={`block font-semibold uppercase tracking-[0.16em] ${
                 overlay
-                  ? "mt-1 text-[0.625rem] tracking-[0.16em]"
-                  : "mt-0.5 text-[0.625rem] tracking-[0.16em]"
+                  ? "mt-1 text-[0.625rem] text-white"
+                  : "mt-0.5 text-[0.625rem] text-[#4d627c]"
               }`}
             >
               Bay Area fog forecasts
@@ -56,7 +56,7 @@ export function MarketingHeader({ tone = "solid" }: { tone?: "solid" | "overlay"
           </span>
         </Link>
 
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+        <div className="flex w-full flex-wrap items-center justify-between gap-x-6 gap-y-3 lg:w-auto lg:justify-start">
           <nav aria-label="Site">
             <ul className="flex flex-wrap items-center gap-x-5 gap-y-2">
               {NAV_ITEMS.map((item) => {

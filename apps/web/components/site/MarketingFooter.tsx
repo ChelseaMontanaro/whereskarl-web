@@ -14,8 +14,8 @@ export function MarketingFooter({ lockup = "default" }: { lockup?: "default" | "
   return (
     <footer className="border-t border-[#d5e0ec] bg-white">
       <div
-        className={`mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-8 gap-y-4 px-5 sm:px-8 ${
-          landing ? "py-4" : "py-6"
+        className={`mx-auto flex w-full max-w-6xl flex-wrap justify-between gap-x-8 gap-y-6 px-5 sm:px-8 max-lg:items-start lg:items-center lg:gap-y-4 ${
+          landing ? "py-6 lg:py-4" : "py-6"
         }`}
       >
         <Link
@@ -43,7 +43,7 @@ export function MarketingFooter({ lockup = "default" }: { lockup?: "default" | "
           </span>
         </Link>
 
-        <nav aria-label="Footer">
+        <nav aria-label="Footer" className="w-full lg:w-auto">
           <ul className="flex flex-wrap items-center gap-x-5 gap-y-2">
             {FOOTER_LINKS.map((item) => (
               <li key={item.href}>
@@ -57,7 +57,7 @@ export function MarketingFooter({ lockup = "default" }: { lockup?: "default" | "
             ))}
           </ul>
         </nav>
-        <p className="text-sm text-[#4d627c]">
+        <p className="w-full text-sm text-[#4d627c] lg:w-auto">
           © {new Date().getFullYear()} Where&apos;s Karl. All rights reserved.
         </p>
       </div>
