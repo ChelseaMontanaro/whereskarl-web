@@ -5,6 +5,7 @@ import { createElement, type ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import HomePage from "@/app/page";
+import { KARL_LOGO_SRC } from "@/lib/brand/karlLogo";
 import {
   HERO_MAP_SCREEN_SCALE,
   HOME_OVERVIEW_SCREEN_SCALE,
@@ -126,5 +127,23 @@ describe("marketing landing page", () => {
       expect(badge.className).not.toContain("rounded-full");
     }
     expect(document.body.innerHTML).not.toMatch(/apps\.apple\.com|itunes\.apple\.com/i);
+
+    const [headerBrand] = screen.getAllByRole("link", {
+      name: /Where's Karl Bay Area fog forecasts/i,
+    });
+    const headerLogos = [...headerBrand.querySelectorAll("img")];
+    expect(headerLogos).toHaveLength(2);
+    const mobileLogo = headerLogos.find((img) => img.className.includes("md:hidden"));
+    expect(mobileLogo?.getAttribute("src")).toBe(KARL_LOGO_SRC);
+    expect(mobileLogo?.className).toContain("h-10");
+    expect(mobileLogo?.className).toContain("w-10");
+    expect(mobileLogo?.getAttribute("srcset")).toBeNull();
+    const desktopLogo = headerLogos.find((img) => !img.className.includes("md:hidden"));
+    expect(decodeURIComponent(desktopLogo?.getAttribute("src") ?? "")).toContain(
+      KARL_LOGO_SRC,
+    );
+    expect(desktopLogo?.getAttribute("srcset")).toBeTruthy();
+    expect(desktopLogo?.className).toContain("h-10");
+    expect(desktopLogo?.className).toContain("w-10");
   });
 });

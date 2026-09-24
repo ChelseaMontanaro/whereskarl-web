@@ -27,15 +27,25 @@ export function MarketingHeader({ tone = "solid" }: { tone?: "solid" | "overlay"
           href="/"
           className="flex min-w-0 items-center gap-2.5 rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1d4f91]"
         >
-          <span
-            className={`flex shrink-0 items-center justify-center rounded-full ${
-              overlay
-                ? "h-11 w-11 drop-shadow-[0_2px_3px_rgba(12,24,40,0.28)]"
-                : "h-10 w-10 bg-[#16325c]"
-            }`}
-          >
-            <KarlLogo className={overlay ? "h-10 w-10" : "h-7 w-7"} size={overlay ? 128 : 32} />
-          </span>
+          {overlay ? (
+            <span className="relative flex h-11 w-11 shrink-0 items-center justify-center">
+              <span className="flex h-11 w-11 items-center justify-center drop-shadow-[0_2px_3px_rgba(12,24,40,0.28)] max-md:absolute max-md:inset-0">
+                <KarlLogo className="h-10 w-10" size={128} />
+              </span>
+              {/* Below md, iOS paints this filtered logo's eyes pale. A second,
+                  unfiltered copy of the same file covers it. md+ keeps the
+                  single filtered logo above. */}
+              <KarlLogo
+                unoptimized
+                className="relative h-10 w-10 md:hidden"
+                size={128}
+              />
+            </span>
+          ) : (
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#16325c]">
+              <KarlLogo className="h-7 w-7" size={32} />
+            </span>
+          )}
           <span className="min-w-0">
             <span
               className={`block font-serif font-semibold tracking-tight text-[#16325c] ${

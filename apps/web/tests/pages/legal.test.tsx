@@ -95,6 +95,7 @@ describe("legal pages", () => {
     expect(headerCta.tagName).not.toBe("A");
     expect(headerCta.className).toContain("rounded-full");
     expect(headerCta.textContent).toBe("Download on the App Store");
+    expect(document.querySelector('img.md\\:hidden')).toBeNull();
     expect(screen.queryByRole("navigation", { name: "Primary" })).not.toBeInTheDocument();
   });
 });
