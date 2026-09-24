@@ -5,7 +5,7 @@ import { createElement, type ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import HomePage from "@/app/page";
-import { MARKETING_SCREENSHOTS } from "@/lib/site/marketingAssets";
+import { HERO_MAP_SCREEN_SCALE, MARKETING_SCREENSHOTS } from "@/lib/site/marketingAssets";
 
 vi.mock("next/link", () => ({
   default: ({
@@ -58,6 +58,18 @@ describe("marketing landing page", () => {
     expect(mapOverviews.map((image) => image.getAttribute("src"))).toEqual([
       MARKETING_SCREENSHOTS.heroMap,
     ]);
+    expect(mapOverviews[0]?.getAttribute("style")).toContain(
+      `scale(${HERO_MAP_SCREEN_SCALE})`,
+    );
+    expect(mapOverviews[0]?.parentElement?.className).toContain("overflow-hidden");
+    for (const image of [
+      screen.getByAltText("Where's Karl home overview"),
+      screen.getByAltText("Where's Karl Mill Valley location details"),
+      screen.getByAltText("Where's Karl Favorites"),
+    ]) {
+      expect(image.getAttribute("style")).toBeNull();
+      expect(image.parentElement?.className).not.toContain("overflow-hidden");
+    }
     expect(screen.getByAltText("Where's Karl home overview")).toHaveAttribute(
       "src",
       MARKETING_SCREENSHOTS.homeOverview,

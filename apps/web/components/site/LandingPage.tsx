@@ -4,6 +4,7 @@ import { MarketingFooter } from "@/components/site/MarketingFooter";
 import { MarketingHeader } from "@/components/site/MarketingHeader";
 import { PhoneFrame } from "@/components/site/PhoneFrame";
 import {
+  HERO_MAP_SCREEN_SCALE,
   MARKETING_HERO_PHOTO,
   MARKETING_SCENIC_PHOTO,
   MARKETING_SCREENSHOTS,
@@ -130,6 +131,7 @@ export function LandingPage() {
             <PhoneFrame
               src={MARKETING_SCREENSHOTS.heroMap}
               alt="Where's Karl map overview"
+              screenScale={HERO_MAP_SCREEN_SCALE}
             />
           </div>
         </div>
