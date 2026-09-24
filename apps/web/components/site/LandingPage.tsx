@@ -4,6 +4,7 @@ import { MarketingHeader } from "@/components/site/MarketingHeader";
 import { PhoneFrame } from "@/components/site/PhoneFrame";
 import {
   HERO_MAP_SCREEN_SCALE,
+  HOME_OVERVIEW_SCREEN_SCALE,
   MARKETING_HERO_PHOTO,
   MARKETING_SCENIC_PHOTO,
   MARKETING_SCREENSHOTS,
@@ -187,6 +188,7 @@ export function LandingPage() {
               <PhoneFrame
                 src={MARKETING_SCREENSHOTS.homeOverview}
                 alt="Where's Karl home overview"
+                screenScale={HOME_OVERVIEW_SCREEN_SCALE}
               />
             </div>
             <div className="relative z-10 w-[210px] md:-mx-4 md:w-[188px] lg:-mx-4 lg:w-[192px]">

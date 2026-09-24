@@ -88,9 +88,13 @@ describe("legal pages", () => {
       "href",
       "/#about",
     );
-    expect(
-      screen.getByLabelText("Download on the App Store. Listing coming soon."),
-    ).not.toHaveAttribute("href");
+    const headerCta = screen.getByLabelText(
+      "Download on the App Store. Listing coming soon.",
+    );
+    expect(headerCta).not.toHaveAttribute("href");
+    expect(headerCta.tagName).not.toBe("A");
+    expect(headerCta.className).toContain("rounded-full");
+    expect(headerCta.textContent).toBe("Download on the App Store");
     expect(screen.queryByRole("navigation", { name: "Primary" })).not.toBeInTheDocument();
   });
 });

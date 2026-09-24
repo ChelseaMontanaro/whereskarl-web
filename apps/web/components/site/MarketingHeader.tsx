@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { KarlLogo } from "@/components/brand/KarlLogo";
-import { AppStoreBadge } from "@/components/site/AppStoreBadge";
+import { HeaderAppStoreCta } from "@/components/site/AppStoreBadge";
 
 const NAV_ITEMS = [
   { href: "/#about", label: "About" },
@@ -79,7 +79,7 @@ export function MarketingHeader({ tone = "solid" }: { tone?: "solid" | "overlay"
               })}
             </ul>
           </nav>
-          <AppStoreBadge />
+          <HeaderAppStoreCta />
         </div>
       </div>
     </header>

@@ -5,7 +5,11 @@ import { createElement, type ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import HomePage from "@/app/page";
-import { HERO_MAP_SCREEN_SCALE, MARKETING_SCREENSHOTS } from "@/lib/site/marketingAssets";
+import {
+  HERO_MAP_SCREEN_SCALE,
+  HOME_OVERVIEW_SCREEN_SCALE,
+  MARKETING_SCREENSHOTS,
+} from "@/lib/site/marketingAssets";
 
 vi.mock("next/link", () => ({
   default: ({
@@ -62,8 +66,12 @@ describe("marketing landing page", () => {
       `scale(${HERO_MAP_SCREEN_SCALE})`,
     );
     expect(mapOverviews[0]?.parentElement?.className).toContain("overflow-hidden");
+    const homeOverview = screen.getByAltText("Where's Karl home overview");
+    expect(homeOverview.getAttribute("style")).toContain(
+      `scale(${HOME_OVERVIEW_SCREEN_SCALE})`,
+    );
+    expect(homeOverview.parentElement?.className).toContain("overflow-hidden");
     for (const image of [
-      screen.getByAltText("Where's Karl home overview"),
       screen.getByAltText("Where's Karl Mill Valley location details"),
       screen.getByAltText("Where's Karl Favorites"),
     ]) {
@@ -98,10 +106,24 @@ describe("marketing landing page", () => {
       "/support",
     );
     expect(within(siteNav).queryByRole("link", { name: "Map" })).not.toBeInTheDocument();
-    expect(screen.getAllByLabelText("Download on the App Store. Listing coming soon.").length).toBeGreaterThan(0);
-    for (const badge of screen.getAllByLabelText("Download on the App Store. Listing coming soon.")) {
+    const downloadCtas = screen.getAllByLabelText(
+      "Download on the App Store. Listing coming soon.",
+    );
+    expect(downloadCtas).toHaveLength(3);
+    for (const badge of downloadCtas) {
       expect(badge.tagName).not.toBe("A");
       expect(badge.getAttribute("href")).toBeNull();
+    }
+    const headerCta = within(siteNav.parentElement as HTMLElement).getByLabelText(
+      "Download on the App Store. Listing coming soon.",
+    );
+    expect(headerCta.className).toContain("rounded-full");
+    expect(headerCta.textContent).toBe("Download on the App Store");
+    const officialBadges = downloadCtas.filter((badge) => badge !== headerCta);
+    expect(officialBadges).toHaveLength(2);
+    for (const badge of officialBadges) {
+      expect(badge.className).toContain("rounded-lg");
+      expect(badge.className).not.toContain("rounded-full");
     }
     expect(document.body.innerHTML).not.toMatch(/apps\.apple\.com|itunes\.apple\.com/i);
   });
