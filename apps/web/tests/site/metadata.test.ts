@@ -19,10 +19,24 @@ describe("site metadata", () => {
     expect(rootMetadata.description).toBe(DEFAULT_DESCRIPTION);
   });
 
-  it("avoids social image references until CDN assets exist", () => {
-    expect(rootMetadata.openGraph?.images).toBeUndefined();
-    expect(rootMetadata.twitter?.images).toBeUndefined();
-    expect(JSON.stringify(rootMetadata.twitter)).toContain('"summary"');
+  it("points social previews at the approved Karl icon and keeps a summary card", () => {
+    expect(rootMetadata.openGraph?.images).toEqual([
+      {
+        url: "/opengraph-image.png",
+        width: 1024,
+        height: 1024,
+        type: "image/png",
+      },
+    ]);
+    expect(rootMetadata.twitter?.images).toEqual([
+      {
+        url: "/twitter-image.png",
+        width: 1024,
+        height: 1024,
+        type: "image/png",
+      },
+    ]);
+    expect(rootMetadata.twitter?.card).toBe("summary");
   });
 
   it("builds canonical URLs for public routes", () => {
@@ -38,7 +52,15 @@ describe("site metadata", () => {
 
     expect(metadata.alternates?.canonical).toBe(`${SITE_URL}/map`);
     expect(metadata.openGraph?.url).toBe(`${SITE_URL}/map`);
-    expect(metadata.openGraph?.images).toBeUndefined();
+    expect(metadata.openGraph?.images).toEqual([
+      {
+        url: "/opengraph-image.png",
+        width: 1024,
+        height: 1024,
+        type: "image/png",
+      },
+    ]);
+    expect(metadata.twitter?.card).toBe("summary");
     expect(metadata.description).toBe(DEFAULT_DESCRIPTION);
   });
 });
