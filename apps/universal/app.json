@@ -9,7 +9,7 @@
     "userInterfaceStyle": "dark",
     "ios": {
       "bundleIdentifier": "whereskarl.live.app",
-      "buildNumber": "1",
+      "buildNumber": "2",
       "appleTeamId": "5CNF3D3CGN",
       "icon": "./assets/images/wheres-karl-app-icon.png",
       "infoPlist": {
