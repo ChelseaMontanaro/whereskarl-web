@@ -50,8 +50,8 @@ describe("marketing landing page", () => {
     expect(
       screen.getByRole("heading", { name: "Different skies. A brighter day." }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Where's Karl for iPhone" })).toBeInTheDocument();
-    expect(screen.getByText("See the Bay Area more clearly.")).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Where's Karl for iPhone" })).not.toBeInTheDocument();
+    expect(screen.queryByText("See the Bay Area more clearly.")).not.toBeInTheDocument();
     expect(document.getElementById("about")).toBeTruthy();
 
     const mapOverviews = screen.getAllByAltText("Where's Karl map overview");

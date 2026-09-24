@@ -1,4 +1,3 @@
-import { KarlLogo } from "@/components/brand/KarlLogo";
 import { AppStoreBadge } from "@/components/site/AppStoreBadge";
 import { MarketingFooter } from "@/components/site/MarketingFooter";
 import { MarketingHeader } from "@/components/site/MarketingHeader";
@@ -101,7 +100,7 @@ function BenefitIcon({ name }: { name: (typeof BENEFITS)[number]["icon"] }) {
 
 export function LandingPage() {
   return (
-    <div className="min-h-screen bg-white text-[#16325c]">
+    <div className="bg-white text-[#16325c]">
       <section className="relative overflow-hidden bg-[#d7e4f2]">
         <img
           src={MARKETING_HERO_PHOTO}
@@ -241,19 +240,8 @@ export function LandingPage() {
               Where&apos;s Karl helps you find the best of it.
             </p>
           </div>
-          <div className="w-full max-w-[25rem] justify-self-start rounded-2xl bg-white/95 px-3.5 py-3 text-[#16325c] shadow-[0_12px_32px_rgba(8,18,32,0.22)] lg:justify-self-end">
-            <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#16325c]">
-                <KarlLogo className="h-7 w-7" size={64} />
-              </span>
-              <div className="min-w-0 flex-1">
-                <h3 className="font-serif text-base font-semibold leading-tight">
-                  Where&apos;s Karl for iPhone
-                </h3>
-                <p className="mt-0.5 text-xs leading-snug text-[#3e5168]">See the Bay Area more clearly.</p>
-              </div>
-              <AppStoreBadge />
-            </div>
+          <div className="justify-self-center lg:justify-self-end">
+            <AppStoreBadge />
           </div>
         </div>
       </section>
