@@ -11,6 +11,7 @@ import {
   FAVORITES_GLASS_FILL,
 } from '@/components/favorites/favoritesChrome';
 import { Colors, Radius, Spacing } from '@/constants/theme';
+import { presentFavoritesDescriptiveStatus } from '@/lib/favorites/favoritesDisplay';
 import { contentPositionFromFocalPoint } from '@/lib/location/locationCircularImage';
 import {
   getLocationConditionLabel,
@@ -32,7 +33,7 @@ export function TopSavedLocationCard({
   const isNightPresentation = isNighttime(new Date().getHours());
   const intensity = resolveLocationFogIntensity(location);
   const statusLine =
-    location.status.trim() ||
+    presentFavoritesDescriptiveStatus(location.status) ||
     getLocationConditionLabel(location, isNightPresentation);
   const imageUrl =
     typeof location.imageUrl === 'string' && location.imageUrl.trim().length > 0

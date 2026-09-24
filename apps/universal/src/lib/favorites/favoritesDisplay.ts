@@ -12,6 +12,18 @@ export type FavoritesSummary = {
   clearLabel: 'Sunny' | 'Clear';
 };
 
+/**
+ * Favorites card descriptive copy only.
+ * An empty result preserves each card's existing condition fallback.
+ */
+export function presentFavoritesDescriptiveStatus(status: string): string {
+  const trimmed = status.trim();
+  if (trimmed === 'Mostly Sunny') {
+    return 'Mostly Clear';
+  }
+  return trimmed;
+}
+
 function compareSunshineScore(
   left: LocationWeather,
   right: LocationWeather,

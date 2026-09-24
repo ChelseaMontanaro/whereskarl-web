@@ -10,6 +10,7 @@ import {
   FAVORITES_GLASS_FILL,
 } from '@/components/favorites/favoritesChrome';
 import { Colors, Radius, Spacing } from '@/constants/theme';
+import { presentFavoritesDescriptiveStatus } from '@/lib/favorites/favoritesDisplay';
 import {
   getFogIntensityLabel,
   resolveLocationFogIntensity,
@@ -30,7 +31,8 @@ export function SavedLocationCard({
   const isNightPresentation = isNighttime(new Date().getHours());
   const intensity = resolveLocationFogIntensity(location);
   const fogLevelLabel = getFogIntensityLabel(intensity);
-  const statusLine = location.status.trim() || fogLevelLabel;
+  const statusLine =
+    presentFavoritesDescriptiveStatus(location.status) || fogLevelLabel;
   const subtitle = location.distanceText
     ? `${statusLine} · ${location.distanceText}`
     : statusLine;

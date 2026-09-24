@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   computeFavoritesSummary,
   locationQualifiesAsKarlFavorite,
+  presentFavoritesDescriptiveStatus,
   resolveFavoriteLocations,
   resolveFavoritesContentPresentation,
   sanitizeFavoriteIds,
@@ -43,6 +44,30 @@ function makeLocation(
     ...rest,
   } as LocationWeather;
 }
+
+describe('presentFavoritesDescriptiveStatus', () => {
+  it('shows Mostly Clear for the upstream Mostly Sunny phrase', () => {
+    expect(presentFavoritesDescriptiveStatus('Mostly Sunny')).toBe(
+      'Mostly Clear',
+    );
+    expect(presentFavoritesDescriptiveStatus('  Mostly Sunny  ')).toBe(
+      'Mostly Clear',
+    );
+  });
+
+  it('leaves other statuses unchanged', () => {
+    expect(presentFavoritesDescriptiveStatus('Clear')).toBe('Clear');
+    expect(presentFavoritesDescriptiveStatus('Sunny')).toBe('Sunny');
+    expect(presentFavoritesDescriptiveStatus('Partly Cloudy')).toBe(
+      'Partly Cloudy',
+    );
+  });
+
+  it('returns an empty string so card condition fallbacks still apply', () => {
+    expect(presentFavoritesDescriptiveStatus('')).toBe('');
+    expect(presentFavoritesDescriptiveStatus('   ')).toBe('');
+  });
+});
 
 describe('favoritesDisplay', () => {
   it('selects the top saved location by clear-sky score', () => {
