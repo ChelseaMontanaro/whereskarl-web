@@ -22,8 +22,10 @@ describe('selected location dismiss (physical iPhone QA)', () => {
 
     expect(previewSource).toContain('testID="selected-location-dismiss"');
     expect(previewSource).toContain('Environmental Metrics');
-    expect(previewSource).toContain('Marine Layer');
-    expect(previewSource).toContain('Fog Ceiling');
+    expect(previewSource).not.toContain('MARINE LAYER');
+    expect(previewSource).not.toContain('FOG CEILING');
+    expect(previewSource).toContain('Karl’s Read');
+    expect(previewSource).toContain('Hourly Outlook');
     expect(previewSource).toContain('presentAirQuality');
     expect(previewSource).toContain('presentUvIndex');
     expect(previewSource).toContain('presentPollen');

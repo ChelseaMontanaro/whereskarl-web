@@ -29,7 +29,6 @@ import {
   ENV_METRIC_ICON_SLOT,
   getClimateMetricIconUri,
   getEnvironmentalMetricIconUri,
-  type EnvironmentalMetricIconKind,
 } from '@/lib/map/environmentalMetricIcons';
 import {
   formatTemperature,
@@ -614,13 +613,6 @@ function PhoneSelectedLocationSheet({
             </View>
           </View>
 
-          <View
-            style={styles.marineRow}
-            accessibilityLabel="Marine layer and fog ceiling">
-            <ComingSoonMetric title="MARINE LAYER" iconKind="marineLayer" />
-            <ComingSoonMetric title="FOG CEILING" iconKind="fogCeiling" />
-          </View>
-
           <View style={styles.sectionBlock} accessibilityLabel="Karl’s Read">
             <Text style={styles.sectionLabel}>Karl’s Read</Text>
             <View style={styles.karlReadRow}>
@@ -749,47 +741,6 @@ function EnvironmentalMetricCell({
         maxFontSizeMultiplier={PHONE_SHEET_LABEL_MAX_FONT_SCALE}>
         {metric.supporting ?? '\u00A0'}
       </Text>
-    </View>
-  );
-}
-
-/**
- * Marine Layer / Fog Ceiling placeholder. Approved horizontal composition:
- * icon left and vertically centred, title + "Coming Soon" stacked left.
- */
-function ComingSoonMetric({
-  title,
-  iconKind,
-}: {
-  title: string;
-  iconKind: EnvironmentalMetricIconKind;
-}) {
-  return (
-    <View
-      style={styles.comingSoonCard}
-      accessibilityLabel={`${title} height, Coming Soon`}>
-      <Image
-        source={{
-          uri: getEnvironmentalMetricIconUri(
-            iconKind,
-            ENV_METRIC_ICON_COLOR.marine,
-          ),
-        }}
-        style={styles.comingSoonIcon}
-        contentFit="contain"
-        accessibilityElementsHidden
-      />
-      <View style={styles.comingSoonCopy}>
-        <Text
-          style={styles.comingSoonTitle}
-          numberOfLines={1}
-          maxFontSizeMultiplier={PHONE_SHEET_LABEL_MAX_FONT_SCALE}
-          adjustsFontSizeToFit
-          minimumFontScale={0.85}>
-          {title}
-        </Text>
-        <Text style={styles.comingSoonValue}>Coming Soon</Text>
-      </View>
     </View>
   );
 }
@@ -1289,49 +1240,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: 'rgba(255, 255, 255, 0.55)',
     textAlign: 'center',
-  },
-  marineRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  comingSoonCard: {
-    flex: 1,
-    minWidth: 0,
-    minHeight: 82,
-    maxHeight: 86,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.09)',
-    backgroundColor: 'rgba(255, 255, 255, 0.125)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-  },
-  comingSoonIcon: {
-    width: ENV_METRIC_ICON_SIZE.marine,
-    height: ENV_METRIC_ICON_SIZE.marine,
-  },
-  comingSoonCopy: {
-    flex: 1,
-    minWidth: 0,
-    gap: 6,
-    alignItems: 'flex-start',
-  },
-  comingSoonTitle: {
-    fontSize: 12,
-    fontWeight: '600',
-    letterSpacing: 0.72,
-    lineHeight: 14,
-    color: 'rgba(255, 255, 255, 0.78)',
-    textAlign: 'left',
-  },
-  comingSoonValue: {
-    fontSize: 12,
-    fontWeight: '400',
-    lineHeight: 14,
-    color: 'rgba(255, 255, 255, 0.4)',
   },
   karlReadRow: {
     flexDirection: 'row',

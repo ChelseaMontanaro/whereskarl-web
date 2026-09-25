@@ -150,12 +150,14 @@ describe('Phase 24 — selected location card parity', () => {
     expect(preview).toContain('CLIMATE_ICON_COLOR');
   });
 
-  it('SL-7: Marine Layer / Fog Ceiling are horizontal icon cards', () => {
-    expect(preview).toContain('minHeight: 82');
-    expect(preview).toContain('maxHeight: 86');
-    expect(preview).toContain("iconKind=\"marineLayer\"");
-    expect(preview).toContain("iconKind=\"fogCeiling\"");
-    expect(preview).toContain('comingSoonCopy');
+  it('SL-7: does not render Marine Layer or Fog Ceiling Coming Soon cards', () => {
+    expect(preview).not.toContain('ComingSoonMetric');
+    expect(preview).not.toContain('MARINE LAYER');
+    expect(preview).not.toContain('FOG CEILING');
+    expect(preview).not.toContain('comingSoonCopy');
+    expect(preview).toContain('Environmental Metrics');
+    expect(preview).toContain('karlReadRow');
+    expect(preview).toContain('Hourly Outlook');
   });
 
   it('SL-9: section labels are gold, with a white Hourly Outlook variant', () => {

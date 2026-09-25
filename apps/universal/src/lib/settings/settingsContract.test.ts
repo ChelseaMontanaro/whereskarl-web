@@ -10,8 +10,6 @@ function readSource(relativePath: string): string {
 }
 
 const SETTINGS_SCREEN = 'src/app/settings.tsx';
-const TEMPERATURE_CONTROL =
-  'src/components/settings/TemperatureUnitControl.tsx';
 const SETTINGS_FOOTER = 'src/components/settings/SettingsFooter.tsx';
 const SETTINGS_ABOUT = 'src/components/settings/SettingsAboutSheet.tsx';
 const KARL_LOGO_RESOLVER = 'src/lib/brand/karlLogo.ts';
@@ -27,7 +25,8 @@ describe('Phase 26 — Settings source contracts', () => {
 
     expect(header).toContain('SETTINGS_COPY.title');
     expect(header).toContain('SETTINGS_COPY.subtitle');
-    expect(screen).toContain('SETTINGS_COPY.temperatureTitle');
+    expect(screen).not.toContain('SETTINGS_COPY.preferencesEyebrow');
+    expect(screen).not.toContain('SETTINGS_COPY.temperatureTitle');
     expect(screen).toContain('SETTINGS_COPY.aboutTitle');
     expect(screen).toContain('SETTINGS_COPY.helpTitle');
     expect(screen).toContain('SETTINGS_COPY.privacyTitle');
@@ -46,20 +45,17 @@ describe('Phase 26 — Settings source contracts', () => {
     expect(screen).not.toContain('/favorites');
   });
 
-  it('keeps Temperature Unit visual-only with no persistence or conversion', () => {
+  it('omits the unfinished Temperature Unit preference without adding conversion', () => {
     const screen = readSource(SETTINGS_SCREEN);
-    const control = readSource(TEMPERATURE_CONTROL);
-    const temperature = readSource('src/lib/settings/settingsTemperature.ts');
     const storage = readSource(STORAGE_KEYS_FILE);
-    const joined = `${screen}\n${control}\n${temperature}`;
 
-    expect(control).toContain("pointerEvents={interactive ? 'auto' : 'none'}");
-    expect(control).toContain('SETTINGS_COPY.comingSoon');
-    expect(control).not.toContain('onPress');
-    expect(joined).not.toContain('writeStorageItem');
-    expect(joined).not.toContain('AsyncStorage');
-    expect(joined).not.toMatch(/whereskarl\.temperature/i);
-    expect(joined).not.toMatch(/celsiusToFahrenheit|fahrenheitToCelsius/);
+    expect(screen).not.toContain('TemperatureUnitControl');
+    expect(screen).not.toContain('SETTINGS_COPY.fahrenheit');
+    expect(screen).not.toContain('SETTINGS_COPY.celsius');
+    expect(screen).not.toContain('SETTINGS_COPY.comingSoon');
+    expect(screen).not.toMatch(/celsiusToFahrenheit|fahrenheitToCelsius/);
+    expect(screen).not.toContain('AsyncStorage');
+    expect(screen).not.toMatch(/whereskarl\.temperature/i);
     expect(storage).not.toContain('temperature');
     expect(screen).not.toContain('setHomeLocationId');
   });
@@ -74,20 +70,36 @@ describe('Phase 26 — Settings source contracts', () => {
     expect(storage).toContain("homeLocationId: 'whereskarl.homeLocationId'");
   });
 
-  it('keeps Help & Support and Privacy Policy Coming Soon and non-navigating', () => {
+  it('opens Help & Support and Privacy Policy in the in-app browser', () => {
     const screen = readSource(SETTINGS_SCREEN);
     const rows = readSource('src/components/settings/SettingsRows.tsx');
 
     expect(screen).toContain('SETTINGS_COPY.helpTitle');
+    expect(screen).toContain('SETTINGS_COPY.helpSupport');
     expect(screen).toContain('SETTINGS_COPY.privacyTitle');
-    expect(screen).toContain('<SettingsComingSoonBadge');
-    expect(screen).not.toContain('WebBrowser');
-    expect(screen).not.toContain('openSettingsExternalDestination');
-    expect(screen).not.toContain('SETTINGS_SUPPORT_URL');
-    expect(screen).not.toContain('SETTINGS_PRIVACY_URL');
-    expect(screen).not.toContain('whereskarl.live/support');
-    expect(screen).not.toContain('whereskarl.live/privacy');
-    expect(rows).not.toContain("accessibilityRole: 'link'");
+    expect(screen).toContain('SETTINGS_COPY.privacySupport');
+    expect(screen).toContain("from 'expo-web-browser'");
+    expect(screen).toContain('WebBrowser.openBrowserAsync');
+    expect(screen).toContain(
+      "const SETTINGS_SUPPORT_URL = 'https://whereskarl.live/support'",
+    );
+    expect(screen).toContain(
+      "const SETTINGS_PRIVACY_URL = 'https://whereskarl.live/privacy'",
+    );
+    expect(screen).toContain(
+      'openSettingsExternalDestination(SETTINGS_SUPPORT_URL)',
+    );
+    expect(screen).toContain(
+      'openSettingsExternalDestination(SETTINGS_PRIVACY_URL)',
+    );
+    expect(screen).toContain('icon="help"');
+    expect(screen).toContain('icon="privacy"');
+    expect(rows).toContain('accessibilityRole="button"');
+    expect(screen).not.toContain('SettingsComingSoonBadge');
+    expect(screen).not.toContain('SettingsInfoRow');
+    expect(screen).not.toContain('SETTINGS_COPY.comingSoon');
+    expect(screen).not.toContain('WebView');
+    expect(screen).not.toContain('react-native-webview');
   });
 
   it('presents About locally with the approved Meet Karl copy', () => {

@@ -438,13 +438,19 @@ describe('collapsed card layout contract', () => {
     expect(source).toContain("justifyContent: 'center'");
   });
 
-  it('keeps MARINE LAYER fully visible rather than ellipsizing it', () => {
+  it('omits unfinished Marine Layer and Fog Ceiling cards', () => {
     const source = readSource(SELECTED_PREVIEW_SOURCE);
 
-    expect(source).toContain('title="MARINE LAYER"');
-    expect(source).toContain('title="FOG CEILING"');
-    expect(source).toContain('maxHeight: 86');
-    expect(source).toContain('minHeight: 82');
+    expect(source).not.toContain('MARINE LAYER');
+    expect(source).not.toContain('FOG CEILING');
+    expect(source).not.toContain('ComingSoonMetric');
+    expect(source).toContain('title="CLEAR SKY SCORE"');
+    expect(source).toContain('title="FOG"');
+    expect(source).toContain('title="TEMP"');
+    expect(source).toContain('title="WIND"');
+    expect(source).toContain('Environmental Metrics');
+    expect(source).toContain('Karl’s Read');
+    expect(source).toContain('Hourly Outlook');
   });
 });
 
