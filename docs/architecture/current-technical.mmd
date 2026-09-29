@@ -1,0 +1,50 @@
+flowchart TB
+  subgraph clients [Clients]
+    HOME["iOS Home"]
+    MAPFAV["iOS Map and Favorites"]
+    WEB["Website map"]
+  end
+
+  HOME --> CUR["GET /current"]
+  HOME --> LOC["GET /locations"]
+  HOME --> BEST["GET /best-sunshine"]
+  HOME --> INTEL["GET /karl-intelligence"]
+  MAPFAV --> LOC
+  WEB --> CUR
+  WEB --> LOC
+  WEB --> BEST
+  WEB --> ML["MapLibre"]
+  ML --> CARTO["CARTO tiles"]
+
+  CUR --> PIPE["liveWeatherService"]
+  LOC --> PIPE
+  BEST --> PIPE
+  INTEL --> PIPE
+
+  PIPE --> OM["Open-Meteo forecast"]
+  PIPE --> NWS["NWS observations"]
+  OM --> FUSE["Observation fusion"]
+  NWS --> FUSE
+  FUSE --> FOG["Fog score and marine rules"]
+  FOG --> SUN["Sunshine score"]
+  PIPE --> AQI["AQI and UV instance cache"]
+  PIPE --> POL["Pollen instance cache"]
+
+  CUR --> POS["Karl position service"]
+  POS --> REDIS["Redis if configured"]
+  POS --> MEM["Process-memory fallback"]
+
+  BEST --> RANK["Rank by sunshine"]
+
+  INTEL --> HIST["historyEngine instance memory"]
+  HIST --> TREND["Trends, clearing, destinations"]
+  TREND --> NARR["Template narrative"]
+  NARR --> HERO["Hero image key"]
+  HERO --> BLOB["Vercel Blob PNG"]
+  LOC --> BLOB
+
+  MAPFAV --> ASYNC["AsyncStorage"]
+  HOME --> HOMESTATE["Home component state"]
+  MAPFAV --> WARM["10-minute locations cache"]
+  WEB --> RQ["React Query 10 minutes"]
+  WEB --> LS["localStorage favorite IDs"]

@@ -1,0 +1,45 @@
+flowchart TB
+  subgraph surfaces [User surfaces]
+    IOS["iOS 1.0.0 Build 3"]
+    SITE["whereskarl.live marketing"]
+    WEBMAP["whereskarl.live/map"]
+  end
+
+  API["Where's Karl API"]
+
+  subgraph external [External data]
+    FORECAST["Open-Meteo Forecast"]
+    AIRQ["Open-Meteo AQI and UV"]
+    NWS["NWS observations"]
+    POLLEN["Google Pollen"]
+  end
+
+  subgraph maps [Maps]
+    APPLE["Apple Maps"]
+    CARTO["CARTO basemap"]
+  end
+
+  subgraph state [State and storage]
+    SNAP["Server instance cache"]
+    REDIS["Upstash Redis if configured"]
+    BLOB["Vercel Blob"]
+    DEVICE["iOS AsyncStorage"]
+    BROWSER["Browser localStorage"]
+  end
+
+  IOS --> API
+  WEBMAP --> API
+  SITE --> BLOB
+  IOS --> BLOB
+  WEBMAP --> BLOB
+  IOS --> APPLE
+  WEBMAP --> CARTO
+  IOS --> DEVICE
+  WEBMAP --> BROWSER
+  API --> SNAP
+  SNAP --> FORECAST
+  SNAP --> AIRQ
+  SNAP --> NWS
+  SNAP --> POLLEN
+  API --> REDIS
+  API --> BLOB
