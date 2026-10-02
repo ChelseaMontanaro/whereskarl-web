@@ -76,6 +76,24 @@ Owner physical QA: the live website App Store links open the correct Where's Kar
 
 Website rollback reference: redeploy `7973b985665afaf37c80752d9c5cac8c27092d4d` only under a new authorized phase. That SHA is the pre-link production site.
 
+### Public domains
+
+Frozen in Phase P2 on October 2, 2026. Closeout re-verified the same day and changed nothing.
+
+| Host | Role |
+|------|------|
+| `whereskarl.live` | Canonical website. Valid TLS. HTTP 200. |
+| `www.whereskarl.live` | Alternate hostname. Valid TLS for `www.whereskarl.live`. HTTP 308 to the same path and query on `whereskarl.live`. |
+| `api.whereskarl.live` | API. Not changed by the www repair. |
+
+Before the repair, `www` already had a CNAME to `whereskarl.live` and reached Vercel, but it was not a domain on project `whereskarl-web` (`prj_Au4rXiDuR2fMq6bVoMaEU5NbbVPA`, team `wheres-karl`). Vercel presented the apex certificate, so standards-compliant clients failed TLS before the redirect.
+
+The repair added `www.whereskarl.live` to that existing project with a 308 redirect to `whereskarl.live`. Vercel provisioned a Let's Encrypt certificate for `www`. Registrar DNS was not changed. Website source was not changed. No deployment was triggered. Production deployment remained `dpl_EhbMdSsDcRQHsyEZkwsrUbkxh6Kz` at `019cffab71746714c3fac4c451f6aca3ab6cdcbd`.
+
+Closeout confirmation: `/`, `/privacy`, `/support`, and `/?source=www-test` on `www` redirect to the same path and query on `whereskarl.live`, then return HTTP 200. No redirect loop. Homepage, privacy, and support on the apex return HTTP 200. The App Store CTA remains `https://apps.apple.com/app/wheres-karl/id6815249247`. Favicon and Open Graph image return HTTP 200. `GET /health` on the API returns HTTP 200.
+
+Further domain or DNS changes need a new explicitly authorized post-launch phase.
+
 ## 4. Backend production checkpoint
 
 | Item | Value |
@@ -164,11 +182,11 @@ Recorded during website phase W1. Not introduced by App Store CTA activation. Th
 
 ## 9. Deferred post-launch roadmap
 
-Not implemented. Not launch-day work.
+Item 1 is done. The remaining items are not implemented and were not launch-day work.
 
 Infrastructure and operations:
 
-1. Fix `www.whereskarl.live` TLS / redirect.
+1. Fix `www.whereskarl.live` TLS / redirect. **DONE** in Phase P2, October 2, 2026. See the public-domain record in section 3.
 2. Google Pollen API / shared-cache optimization.
 3. Server-side cache architecture review.
 4. Production observability / cost monitoring.
@@ -205,5 +223,6 @@ Product and business:
 | Image migration | Frozen |
 | App Store 1.0 metadata | Frozen |
 | Additional launch-day changes | Not authorized |
+| Public domains | Frozen. Canonical `whereskarl.live`. `www.whereskarl.live` 308 to the apex. `api.whereskarl.live` unchanged. |
 
 This documentation commit does not change application source, production configuration, or any deployed system.

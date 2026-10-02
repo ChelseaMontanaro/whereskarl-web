@@ -326,6 +326,8 @@ Production TTL numbers above are code defaults. Overrides are unverified. See se
 
 DNS for `whereskarl.live` and `api.whereskarl.live` points at Vercel. The exact git branch configured in each Vercel project was not read from the dashboard.
 
+Phase P2, October 2, 2026: `www.whereskarl.live` is a 308 redirect to `whereskarl.live` and has its own valid certificate. See section 18. The post-launch record is `docs/operations/V1_LAUNCH_RECORD.md`.
+
 Secret boundaries, names only:
 
 | Boundary | Names |
@@ -510,7 +512,15 @@ Code defaults are documented in sections 8 and 12. Verify whether Vercel environ
 
 ### 5. `www` domain behavior
 
-`https://www.whereskarl.live` is listed in API CORS. Whether that host is an alias, a redirect, or a separate deployment was not fetched. Verify only if that host becomes operationally relevant.
+Resolved in Phase P2 on October 2, 2026, and re-verified at closeout the same day. This item is no longer unverified.
+
+`https://whereskarl.live` is the canonical website. Its certificate is valid for that hostname.
+
+`https://www.whereskarl.live` is an alternate hostname. Before the repair it was listed in API CORS and its DNS CNAME already pointed at the apex, but it was not assigned to Vercel project `whereskarl-web`. The edge presented the apex certificate, so hostname verification failed before any redirect.
+
+The repair added `www.whereskarl.live` to project `prj_Au4rXiDuR2fMq6bVoMaEU5NbbVPA` with redirect target `whereskarl.live` and status 308. Vercel provisioned a Let's Encrypt certificate valid for `www.whereskarl.live`. Registrar DNS was not changed. No source change and no deployment were made. Production deployment stayed `dpl_EhbMdSsDcRQHsyEZkwsrUbkxh6Kz`.
+
+Frozen behavior: `www` returns 308 to the same path and query on `whereskarl.live`. `api.whereskarl.live` was not part of the repair. Further domain changes need a new authorized phase. The launch record is `docs/operations/V1_LAUNCH_RECORD.md`.
 
 ## 19. Deferred Post-Launch Architecture Initiatives
 
@@ -574,7 +584,6 @@ None of the following is implemented in the diagrams above.
 - Vercel production-branch settings and deployment ids.
 - Cron or other schedulers outside the repo.
 - Production values of optional TTL environment variables.
-- Behavior of `www.whereskarl.live`.
 - App Store Connect binary hash versus `7287b648ac85d93a99386c61f5500d07c7bd09f8`. Source and `app.json` match Build 3. The binary was not downloaded.
 - EAS certificate details.
 - Completeness of the unused sibling `WheresKarl-iOS` tree. It is not the Expo Build 3 app and is not a production surface.
@@ -624,5 +633,6 @@ None of the following is implemented in the diagrams above.
 | Website checkpoint `7973b98` | live `https://whereskarl.live` HTML versus `main` | Phase A1 live fingerprint |
 | API checkpoint `a730b50` | live `https://api.whereskarl.live` JSON versus backend `feature/product-hardening` | Phase A1 live fingerprint |
 | Live pollen, AQI, UV, and Blob hosts | `GET /locations`, `GET /current`, `GET /karl-intelligence` on 2026-09-29 | production endpoint behavior |
+| `www.whereskarl.live` 308 to `whereskarl.live` with its own certificate | Phase P2 closeout, October 2, 2026 | production TLS and redirect behavior |
 
 No secret values are recorded in this document.
