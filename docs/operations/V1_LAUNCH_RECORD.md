@@ -134,6 +134,27 @@ Production Upstash Redis was verified active before this closeout. This closeout
 | TTL | None (`-1`) |
 | Accepted credential family | `UPSTASH_REDIS_REST_KV_REST_API_URL` and `UPSTASH_REDIS_REST_KV_REST_API_TOKEN` |
 
+### Pollen cache
+
+Closed and frozen in Phase P4 on October 2, 2026. This closeout did not write Redis and did not change Google Cloud, the website, Blob, DNS, or iOS.
+
+| Item | Value |
+|------|--------|
+| Current production SHA | `26610516a204e9a3ababe0fe1fa13fc7ff72af0a` |
+| Vercel production deployment | `dpl_DRXmWv1poFfJQFcJ8PAYJ5iVYSX8` |
+| Status | READY |
+| Provider | Paid Google Pollen API |
+| Policy | One successful fetch per unique coordinate cell per Pacific calendar day |
+| Timezone | `America/Los_Angeles` |
+| Intraday refresh | Not required |
+| Rolling 24-hour TTL | Not used |
+| Lookup | Process cache, then shared Redis, then Google |
+| Unique cells | 54 |
+| Modeled target | about 54 successful calls per day, about 1,620 per 30 days |
+| Build 3 | Compatible. No new binary. Owner physical QA passed. |
+
+Section 4 remains the launch checkpoint. The SHA in this table is the backend that is in production after Pollen optimization. Pollen keys expire. `karl:position:v1` stays a separate key with TTL `-1`. Provider failures are not cached. A successful response with no usable current-day category can show as unavailable. That is accepted. Future freshness changes need explicit owner authorization.
+
 ## 6. Image production checkpoint
 
 | Item | Value |
@@ -182,12 +203,12 @@ Recorded during website phase W1. Not introduced by App Store CTA activation. Th
 
 ## 9. Deferred post-launch roadmap
 
-Item 1 is done. The remaining items are not implemented and were not launch-day work.
+Items 1 and 2 are done. The remaining items are not implemented and were not launch-day work.
 
 Infrastructure and operations:
 
 1. Fix `www.whereskarl.live` TLS / redirect. **DONE** in Phase P2, October 2, 2026. See the public-domain record in section 3.
-2. Google Pollen API / shared-cache optimization.
+2. Google Pollen API / shared-cache optimization. **DONE** in Phase P4, October 2, 2026. See the Pollen cache record in section 5.
 3. Server-side cache architecture review.
 4. Production observability / cost monitoring.
 5. API fallback visibility.
@@ -224,5 +245,6 @@ Product and business:
 | App Store 1.0 metadata | Frozen |
 | Additional launch-day changes | Not authorized |
 | Public domains | Frozen. Canonical `whereskarl.live`. `www.whereskarl.live` 308 to the apex. `api.whereskarl.live` unchanged. |
+| Pollen freshness | Frozen. One successful Google Pollen fetch per coordinate cell per Pacific calendar day. Intraday refresh is not authorized. |
 
 This documentation commit does not change application source, production configuration, or any deployed system.

@@ -21,7 +21,7 @@ flowchart TB
 
   subgraph state [State and storage]
     SNAP["Server instance cache"]
-    REDIS["Upstash Redis if configured"]
+    REDIS["Upstash Redis: Karl position and pollen cache"]
     BLOB["Vercel Blob"]
     DEVICE["iOS AsyncStorage"]
     BROWSER["Browser localStorage"]

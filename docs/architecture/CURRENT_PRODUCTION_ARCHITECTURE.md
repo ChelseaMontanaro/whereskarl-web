@@ -208,13 +208,34 @@ No cron and no background timer are defined in the API repo. Upstream fetches ha
 | Open-Meteo Forecast `https://api.open-meteo.com/v1/forecast` | Temperature, humidity, clouds, wind, weather code, visibility | Server | No key in code | Covered by the 30-second pipeline snapshot. Request timeout default 8 seconds. |
 | Open-Meteo Air Quality `https://air-quality-api.open-meteo.com/v1/air-quality` | US AQI and UV | Server | No key in code | 15-minute instance cache. Max observation age 3 hours. Batch size 50. |
 | NWS `https://api.weather.gov` | Station observations fused with the model | Server | `NWS_USER_AGENT` | 5-minute instance cache. Max age default 45 minutes. |
-| Google Pollen `https://pollen.googleapis.com/v1/forecast:lookup` | Daily pollen index and plant text | Server | `GOOGLE_POLLEN_API_KEY`, else `GOOGLE_MAPS_API_KEY` | 12-hour instance cache. Concurrency 4. No automatic retries. Timeout 8 seconds. |
+| Google Pollen `https://pollen.googleapis.com/v1/forecast:lookup` | Paid daily pollen index and plant text | Server | `GOOGLE_POLLEN_API_KEY`, else `GOOGLE_MAPS_API_KEY` | One successful fetch per coordinate cell per Pacific calendar day. Process cache, then shared Redis. Concurrency 4. No automatic retry inside one request. Timeout 8 seconds. |
 | Apple Maps | iOS basemap | Device | No map key in the app config | Platform tile cache |
 | CARTO Dark Matter | Website basemap | Browser | Public style URL | Browser and CARTO caches |
 | Vercel Blob | Public PNG heroes | API writes URLs; clients download objects | Public read. Write token is upload-only. | Public HTTP cache and client image caches |
-| Upstash Redis | Karl incumbent `{ locationId, sinceMs }` at `karl:position:v1` | Server | REST URL and token | No TTL on the key. Used only when a full credential pair is present. |
+| Upstash Redis | Karl incumbent `{ locationId, sinceMs }` at `karl:position:v1`, plus expiring Pollen cache keys | Server | REST URL and token | Karl key has no TTL. Pollen keys expire. The Pollen cache does not read or write `karl:position:v1`. |
 
 Live location payloads report `source: "Open-Meteo"` for AQI and UV and `source: "Google Pollen"` for pollen. Image URLs use `https://snhitxyrhse7o7xm.public.blob.vercel-storage.com`.
+
+### Pollen freshness policy
+
+Frozen in Phase P4 on October 2, 2026. Google Pollen is a paid external provider. Intraday refresh is not required. A later change to this policy needs explicit owner authorization.
+
+Lookup order is process memory, then shared Upstash Redis, then the Google Pollen API.
+
+- Timezone: `America/Los_Angeles`.
+- One successful fetch per unique coordinate cell per Pacific calendar day. The current catalog has 54 unique cells.
+- A successful result, including a valid payload with no usable current-day category, stays cached for that Pacific date.
+- The next Pacific date is a new cache identity. A flat 24-hour TTL is not used.
+- Redis expiry is the number of seconds until the next Pacific midnight, plus a 15-minute cleanup margin. Yesterday's key cannot satisfy today's lookup.
+- Process cache key: `{pacificDate}:{lat2},{lon2}:d5:len:p1`.
+- Redis key: `pollen:v1:{environment}:{lat2},{lon2}:{pacificDate}:d5:len:p1`.
+- Production, preview, and development do not share keys. An ambiguous environment does not write Redis.
+- Provider and network failures are not negative-cached. A later request may try Google again. One request does not retry by itself.
+- The stored value is the normalized pollen object. Raw Google payloads and credentials are not stored.
+- Modeled steady state is about 54 successful calls per Pacific day, about 1,620 per 30 days. That is a target, not a measured billing cap. Failures, Redis fallback, cold-instance races, and preview or development traffic can add calls.
+- Existing Version 1.0.0 Build 3 consumes this without an API schema change or a new binary. Some locations can show pollen unavailable when Google has no usable current-day category. That is accepted provider behavior.
+
+Production backend at closeout: `26610516a204e9a3ababe0fe1fa13fc7ff72af0a`, deployment `dpl_DRXmWv1poFfJQFcJ8PAYJ5iVYSX8`.
 
 ## 9. Google Cloud / BigQuery Classification
 
@@ -298,7 +319,7 @@ Failed or missing location images show "Coming Soon". Hero metadata can name a f
 | Live weather snapshot | API pipeline | instance memory | 30 seconds by default | SERVER INSTANCE |
 | NWS observations | NWS client | instance memory | 5 minutes by default | SERVER INSTANCE |
 | AQI and UV | Open-Meteo air quality | instance memory | 15 minutes by default; 3-hour max age | SERVER INSTANCE |
-| Pollen | Google Pollen client | instance memory | 12 hours by default | SERVER INSTANCE |
+| Pollen | Google Pollen client | process memory, then Redis `pollen:v1:*` | rest of the Pacific calendar day, plus 15 minutes | SHARED for the day; Karl's key is separate |
 | Image bytes | Vercel Blob | public URL | object lifetime | PUBLIC CDN, plus client image cache |
 | Home hero URL | `/karl-intelligence` | not stored on device | replaced on the next Home fetch | NONE on device |
 | iOS locations cache | `useLocations` | module memory | 10 minutes | DEVICE |
@@ -320,7 +341,7 @@ Production TTL numbers above are code defaults. Overrides are unverified. See se
 | API source | GitHub `ChelseaMontanaro/whereskarl-backend` | `feature/product-hardening` |
 | iOS binary | EAS production profile, App Store | 1.0.0 build 3, `whereskarl.live.app` |
 | Website | Vercel project `whereskarl-web` | content matches `main` `7973b98` |
-| API | Vercel project `whereskarl-backend` | content matches `a730b50` |
+| API | Vercel project `whereskarl-backend` | `main` `26610516a204e9a3ababe0fe1fa13fc7ff72af0a`, deployment `dpl_DRXmWv1poFfJQFcJ8PAYJ5iVYSX8` |
 | Images | Vercel Blob | public store named in live URLs |
 | Pollen | Google Cloud | Pollen API only |
 
@@ -441,7 +462,8 @@ flowchart TB
   FUSE --> FOG["Fog score and marine rules"]
   FOG --> SUN["Sunshine score"]
   PIPE --> AQI["AQI and UV instance cache"]
-  PIPE --> POL["Pollen instance cache"]
+  PIPE --> POL["Pollen process cache then Redis"]
+  POL --> REDIS
 
   CUR --> POS["Karl position service"]
   POS --> REDIS["Redis if configured"]
@@ -471,8 +493,8 @@ These are facts about the system as it runs today.
 
 - Photographs are full-resolution PNGs on every surface.
 - Home does not retain the last hero URL across a remount. A new Home mount refetches `/current`, `/locations`, `/best-sunshine`, and `/karl-intelligence`.
-- Server caches for the live snapshot, NWS, AQI/UV, and pollen are instance-local. A new serverless instance repeats upstream calls.
-- The pollen cache is instance-local. There is no shared pollen cache and no automatic retry.
+- Server caches for the live snapshot, NWS, and AQI/UV are instance-local. A new serverless instance repeats those upstream calls.
+- Pollen is shared. A warm process checks its own cache first, then Redis. A failed Google request is not stored, so a later request can try again. One request does not retry by itself.
 - `historyEngine` is process memory only. Clearing trends do not survive a new instance.
 - Redis production configuration is unverified. Missing credentials fall back to process memory, and Karl's position is then not shared across instances.
 - Website Favorites and Settings are placeholders.
@@ -508,7 +530,7 @@ The repository contains no cron configuration. Verify whether any scheduled job 
 
 ### 4. Production TTL overrides
 
-Code defaults are documented in sections 8 and 12. Verify whether Vercel environment variables override `LIVE_WEATHER_CACHE_TTL_MS`, `NWS_CACHE_TTL_MS`, `AQI_CACHE_TTL_MS`, `POLLEN_CACHE_TTL_MS`, or the related timeout and batch settings.
+Code defaults are documented in sections 8 and 12. Verify whether Vercel environment variables override `LIVE_WEATHER_CACHE_TTL_MS`, `NWS_CACHE_TTL_MS`, `AQI_CACHE_TTL_MS`, or the related timeout and batch settings. `POLLEN_CACHE_TTL_MS` is unused. Pollen freshness is the Pacific calendar day described in section 8.
 
 ### 5. `www` domain behavior
 
@@ -524,9 +546,7 @@ Frozen behavior: `www` returns 308 to the same path and query on `whereskarl.liv
 
 ## 19. Deferred Post-Launch Architecture Initiatives
 
-**DEFERRED — NOT CURRENT PRODUCTION**
-
-None of the following is implemented in the diagrams above.
+**DEFERRED — NOT CURRENT PRODUCTION**, except item 5, which is done and frozen.
 
 ### Performance / UX
 
@@ -554,13 +574,10 @@ None of the following is implemented in the diagrams above.
 
 ### Infrastructure / cost
 
-5. **Google Pollen API Cost Optimization**
-   - usage measurement
-   - shared caching
-   - TTL review
-   - cost modeling
-   - budget alerts
-   - Google Cloud optimization tooling
+5. **Google Pollen API / Shared Cache Optimization — DONE**
+   - Closed and frozen in Phase P4 on October 2, 2026.
+   - Shared Redis cache and one successful fetch per coordinate cell per Pacific calendar day.
+   - Budget alerts and broader cost monitoring stay in Production Observability / Cost Monitoring.
 
 6. **Upstash Redis Production Verification**
 
@@ -623,7 +640,7 @@ None of the following is implemented in the diagrams above.
 | `/current` average fog versus pin fields | `WheresKarl-Backend/services/weatherService.js` | backend source |
 | Template narrative, not a model | `WheresKarl-Backend/services/karlNarrativeService.js` | backend source |
 | In-process intelligence history | `WheresKarl-Backend/services/historyEngine.js`, `services/karlIntelligenceService.js` | backend source |
-| Pollen provider | `WheresKarl-Backend/services/googlePollenClient.js` | backend source |
+| Pollen provider and daily shared cache | `WheresKarl-Backend/services/googlePollenClient.js`, `services/pollenRedisCache.js`; production `26610516a204e9a3ababe0fe1fa13fc7ff72af0a` | backend source and Phase P4 closeout |
 | Blob imagery keys | `WheresKarl-Backend/data/heroImageManifest.js` | backend source |
 | Hero upload is operator-only | `WheresKarl-Backend/scripts/uploadHeroImages.js`, `package.json` script `upload:hero-images` | backend source |
 | API hosting rewrite | `WheresKarl-Backend/vercel.json` | deployment configuration |
