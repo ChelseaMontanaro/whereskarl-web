@@ -53,7 +53,10 @@ describe("legal pages", () => {
       "href",
       "mailto:support@whereskarl.live",
     );
-    expect(document.body.innerHTML).not.toMatch(/apps\.apple\.com|itunes\.apple\.com/i);
+    expect(document.body.innerHTML).not.toMatch(/itunes\.apple\.com|testflight|appstoreconnect\.apple\.com/i);
+    expect(document.body.innerHTML).toContain(
+      "https://apps.apple.com/app/wheres-karl/id6815249247",
+    );
   });
 
   it("renders the approved support copy with a mailto and no placeholder contact note", () => {
@@ -73,10 +76,13 @@ describe("legal pages", () => {
       "href",
       "mailto:support@whereskarl.live",
     );
-    expect(document.body.innerHTML).not.toMatch(/apps\.apple\.com|itunes\.apple\.com/i);
+    expect(document.body.innerHTML).not.toMatch(/itunes\.apple\.com|testflight|appstoreconnect\.apple\.com/i);
+    expect(document.body.innerHTML).toContain(
+      "https://apps.apple.com/app/wheres-karl/id6815249247",
+    );
   });
 
-  it("uses the marketing header and keeps the App Store badge non-linking", () => {
+  it("uses the marketing header App Store link", () => {
     render(createElement(PrivacyPage));
 
     const siteNav = screen.getByRole("navigation", { name: "Site" });
@@ -88,11 +94,12 @@ describe("legal pages", () => {
       "href",
       "/#about",
     );
-    const headerCta = screen.getByLabelText(
-      "Download on the App Store. Listing coming soon.",
+    const headerCta = screen.getByLabelText("Download on the App Store");
+    expect(headerCta.tagName).toBe("A");
+    expect(headerCta).toHaveAttribute(
+      "href",
+      "https://apps.apple.com/app/wheres-karl/id6815249247",
     );
-    expect(headerCta).not.toHaveAttribute("href");
-    expect(headerCta.tagName).not.toBe("A");
     expect(headerCta.className).toContain("rounded-full");
     expect(headerCta.textContent).toBe("Download on the App Store");
     expect(document.querySelector('img.md\\:hidden')).toBeNull();

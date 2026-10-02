@@ -107,16 +107,15 @@ describe("marketing landing page", () => {
       "/support",
     );
     expect(within(siteNav).queryByRole("link", { name: "Map" })).not.toBeInTheDocument();
-    const downloadCtas = screen.getAllByLabelText(
-      "Download on the App Store. Listing coming soon.",
-    );
+    const appStoreUrl = "https://apps.apple.com/app/wheres-karl/id6815249247";
+    const downloadCtas = screen.getAllByLabelText("Download on the App Store");
     expect(downloadCtas).toHaveLength(3);
     for (const badge of downloadCtas) {
-      expect(badge.tagName).not.toBe("A");
-      expect(badge.getAttribute("href")).toBeNull();
+      expect(badge.tagName).toBe("A");
+      expect(badge.getAttribute("href")).toBe(appStoreUrl);
     }
     const headerCta = within(siteNav.parentElement as HTMLElement).getByLabelText(
-      "Download on the App Store. Listing coming soon.",
+      "Download on the App Store",
     );
     expect(headerCta.className).toContain("rounded-full");
     expect(headerCta.textContent).toBe("Download on the App Store");
@@ -126,7 +125,12 @@ describe("marketing landing page", () => {
       expect(badge.className).toContain("rounded-lg");
       expect(badge.className).not.toContain("rounded-full");
     }
-    expect(document.body.innerHTML).not.toMatch(/apps\.apple\.com|itunes\.apple\.com/i);
+    expect(document.body.innerHTML).not.toMatch(/itunes\.apple\.com|testflight|appstoreconnect\.apple\.com/i);
+    expect(document.body.innerHTML.match(/apps\.apple\.com\/[^"'\s]*/g)).toEqual([
+      "apps.apple.com/app/wheres-karl/id6815249247",
+      "apps.apple.com/app/wheres-karl/id6815249247",
+      "apps.apple.com/app/wheres-karl/id6815249247",
+    ]);
 
     const [headerBrand] = screen.getAllByRole("link", {
       name: /Where's Karl Bay Area fog forecasts/i,
