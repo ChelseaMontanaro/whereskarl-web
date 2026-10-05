@@ -22,7 +22,6 @@ import {
   heroConfidenceText,
   heroHeadline,
   heroSubheadline,
-  isNighttime,
   nextHourOutlookSummary,
   resolveKarlReadPresentation,
 } from '@/lib/home/weatherDisplay';
@@ -40,6 +39,7 @@ export default function HomeScreen() {
     bestSunshine,
     intelligence,
     hasLoadedCoreWeather,
+    isNightPresentation,
   } = useHomeWeather();
   const { setClearSkiesNav } = useClearSkiesNav();
   const [activeMetricDetail, setActiveMetricDetail] =
@@ -48,11 +48,6 @@ export default function HomeScreen() {
   const karlLocation = useMemo(
     () => resolveKarlLocation(current, locations),
     [current, locations],
-  );
-
-  const isNightPresentation = useMemo(
-    () => isNighttime(new Date().getHours()),
-    [],
   );
 
   const heroPresentation = useMemo(

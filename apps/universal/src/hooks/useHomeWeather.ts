@@ -1,4 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { AppState, type AppStateStatus } from 'react-native';
+import { useFocusEffect } from 'expo-router';
 
 import {
   getBestSunshine,
@@ -6,126 +8,177 @@ import {
   getKarlIntelligence,
   getLocations,
 } from '@whereskarl/api-client';
-import type {
-  BestSunshineResponse,
-  CurrentResponse,
-  KarlIntelligenceResponse,
-  LocationWeather,
-} from '@whereskarl/schemas';
 
 import { getApiBaseUrl, isApiBaseUrlConfigured } from '@/constants/config';
-import { resolveKarlLocation } from '@/lib/home/weatherDisplay';
+import {
+  createHomeRefreshGuard,
+  executeHomeRefresh,
+  homeDashboardNightPresentation,
+  INITIAL_HOME_WEATHER,
+  nextDueDelayMs,
+  nextHomeSuccessAt,
+  shouldStartHomeRefresh,
+  type HomeWeatherSnapshot,
+} from '@/lib/home/homeWeatherRefresh';
 
 const apiConfig = { getBaseUrl: getApiBaseUrl };
 
-export type HomeWeatherState = {
-  isLoading: boolean;
-  isLoadingIntelligence: boolean;
-  current: CurrentResponse | null;
-  locations: LocationWeather[];
-  bestSunshine: BestSunshineResponse | null;
-  intelligence: KarlIntelligenceResponse | null;
-  hasLiveData: boolean;
-  hasLoadedCoreWeather: boolean;
+export type HomeWeatherState = HomeWeatherSnapshot & {
+  isNightPresentation: boolean;
 };
 
-const INITIAL_STATE: HomeWeatherState = {
-  isLoading: true,
-  isLoadingIntelligence: false,
-  current: null,
-  locations: [],
-  bestSunshine: null,
-  intelligence: null,
-  hasLiveData: false,
-  hasLoadedCoreWeather: false,
-};
-
+/**
+ * One coordinator for mount/focus, foreground, and the due timer.
+ *
+ * The due timer stays armed while the app is active, including when Home is
+ * covered, because that Home instance remains mounted. Background clears it.
+ * Returning to active refreshes only when the last full success is at least
+ * 10 minutes old. Blur does not cancel the due timer and does not refetch.
+ */
 export function useHomeWeather(): HomeWeatherState {
-  const [state, setState] = useState<HomeWeatherState>(INITIAL_STATE);
+  const [snapshot, setSnapshot] = useState<HomeWeatherSnapshot>(INITIAL_HOME_WEATHER);
+  const [isNightPresentation, setIsNightPresentation] = useState(() =>
+    homeDashboardNightPresentation(new Date()),
+  );
+  const snapshotRef = useRef(snapshot);
+  const lastSuccessAtRef = useRef<number | null>(null);
+  const lastAttemptAtRef = useRef<number | null>(null);
+  const inFlightRef = useRef(false);
+  const appActiveRef = useRef(AppState.currentState === 'active');
+  const guardRef = useRef(createHomeRefreshGuard());
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const aliveRef = useRef(true);
+  const refreshRef = useRef<() => Promise<void>>(async () => {});
 
-  useEffect(() => {
-    let cancelled = false;
+  const clearDueTimer = useCallback(() => {
+    if (timerRef.current != null) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  }, []);
 
-    async function loadWeather() {
-      if (!isApiBaseUrlConfigured()) {
-        if (!cancelled) {
-          setState({
-            ...INITIAL_STATE,
-            isLoading: false,
-          });
-        }
-        return;
+  const armDueTimer = useCallback(() => {
+    clearDueTimer();
+    if (!appActiveRef.current) {
+      return;
+    }
+
+    const delay = nextDueDelayMs({
+      lastSuccessAt: lastSuccessAtRef.current,
+      lastAttemptAt: lastAttemptAtRef.current,
+      now: Date.now(),
+    });
+    timerRef.current = setTimeout(() => {
+      timerRef.current = null;
+      void refreshRef.current();
+    }, delay);
+  }, [clearDueTimer]);
+
+  const refresh = useCallback(async () => {
+    if (!isApiBaseUrlConfigured()) {
+      if (aliveRef.current) {
+        const next = { ...INITIAL_HOME_WEATHER, isLoading: false };
+        snapshotRef.current = next;
+        setSnapshot(next);
       }
+      return;
+    }
 
-      const [currentResult, locationsResult, bestSunshineResult] =
-        await Promise.allSettled([
-          getCurrent(apiConfig),
-          getLocations(apiConfig),
-          getBestSunshine(apiConfig),
-        ]);
+    const decision = shouldStartHomeRefresh({
+      lastSuccessAt: lastSuccessAtRef.current,
+      now: Date.now(),
+      inFlight: inFlightRef.current,
+    });
+    if (decision === 'skip-inflight') {
+      return;
+    }
+    if (decision === 'skip-fresh') {
+      armDueTimer();
+      return;
+    }
 
-      if (cancelled) {
-        return;
-      }
+    clearDueTimer();
+    inFlightRef.current = true;
+    const token = guardRef.current.issue();
 
-      const current =
-        currentResult.status === 'fulfilled' ? currentResult.value : null;
-      const locations =
-        locationsResult.status === 'fulfilled'
-          ? locationsResult.value.locations
-          : [];
-      const bestSunshine =
-        bestSunshineResult.status === 'fulfilled'
-          ? bestSunshineResult.value
-          : null;
-
-      const hasLiveData = Boolean(
-        current || locations.length > 0 || bestSunshine,
-      );
-      const hasLoadedCoreWeather = Boolean(current && locations.length > 0);
-
-      setState({
-        isLoading: false,
-        isLoadingIntelligence: true,
-        current,
-        locations,
-        bestSunshine,
-        intelligence: null,
-        hasLiveData,
-        hasLoadedCoreWeather,
+    try {
+      const result = await executeHomeRefresh({
+        previous: snapshotRef.current,
+        now: new Date(),
+        getCurrent: () => getCurrent(apiConfig),
+        getLocations: () => getLocations(apiConfig),
+        getBestSunshine: () => getBestSunshine(apiConfig),
+        getKarlIntelligence: (locationId) =>
+          getKarlIntelligence(
+            apiConfig,
+            locationId ? { locationId } : undefined,
+          ),
+        onCore: (core) => {
+          if (!aliveRef.current || !guardRef.current.isCurrent(token)) {
+            return;
+          }
+          snapshotRef.current = core;
+          setSnapshot(core);
+          setIsNightPresentation(homeDashboardNightPresentation(new Date()));
+        },
       });
 
-      const focusLocationId = resolveKarlLocation(current, locations)?.id ?? null;
+      if (!aliveRef.current || !guardRef.current.isCurrent(token)) {
+        return;
+      }
 
-      try {
-        const intelligence = await getKarlIntelligence(
-          apiConfig,
-          focusLocationId ? { locationId: focusLocationId } : undefined,
-        );
-
-        if (!cancelled) {
-          setState((prev) => ({
-            ...prev,
-            intelligence,
-            isLoadingIntelligence: false,
-          }));
-        }
-      } catch {
-        if (!cancelled) {
-          setState((prev) => ({
-            ...prev,
-            isLoadingIntelligence: false,
-          }));
+      snapshotRef.current = result.next;
+      setSnapshot(result.next);
+      setIsNightPresentation(result.isNightPresentation);
+      lastSuccessAtRef.current = nextHomeSuccessAt(
+        lastSuccessAtRef.current,
+        result.fullySuccessful,
+        Date.now(),
+      );
+    } finally {
+      if (guardRef.current.isCurrent(token)) {
+        inFlightRef.current = false;
+        lastAttemptAtRef.current = Date.now();
+        if (aliveRef.current) {
+          armDueTimer();
         }
       }
     }
+  }, [armDueTimer, clearDueTimer]);
 
-    loadWeather();
+  refreshRef.current = refresh;
+
+  useFocusEffect(
+    useCallback(() => {
+      void refreshRef.current();
+      return undefined;
+    }, []),
+  );
+
+  useEffect(() => {
+    aliveRef.current = true;
+    const subscription = AppState.addEventListener(
+      'change',
+      (nextStatus: AppStateStatus) => {
+        const active = nextStatus === 'active';
+        appActiveRef.current = active;
+        if (!active) {
+          clearDueTimer();
+          return;
+        }
+        void refreshRef.current();
+      },
+    );
 
     return () => {
-      cancelled = true;
+      aliveRef.current = false;
+      clearDueTimer();
+      subscription.remove();
     };
-  }, []);
+  }, [clearDueTimer]);
 
-  return state;
+  return {
+    ...snapshot,
+    isNightPresentation,
+  };
 }
