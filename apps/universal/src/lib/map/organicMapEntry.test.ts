@@ -251,6 +251,9 @@ describe('organic map source contract', () => {
     expect(appJson).toContain('"locationAlwaysPermission": false');
     expect(appJson).toContain('"locationAlwaysAndWhenInUsePermission": false');
     expect(appJson).toContain('"isIosBackgroundLocationEnabled": false');
+    expect(appJson).toContain('"isAndroidBackgroundLocationEnabled": false');
+    expect(appJson).toContain('"motionUsagePermission": false');
     expect(appJson).not.toContain('NSLocationAlwaysUsageDescription');
+    expect(appJson).not.toContain('NSMotionUsageDescription');
   });
 });
