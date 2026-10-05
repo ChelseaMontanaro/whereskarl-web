@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import {
   FlatList,
   Keyboard,
@@ -12,11 +12,16 @@ import {
 import { LiquidGlassSurface } from '@/components/ui/LiquidGlassSurface';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { LiquidGlassTokens } from '@/constants/liquidGlass';
+import { dismissMapSearchFromMapTap } from '@/lib/map/mapSearchKeyboardDismissal';
 import { filterCanonicalLocationsBySearch } from '@whereskarl/search';
 import type { LocationWeather } from '@whereskarl/schemas';
 
 /** Gap between the search pill and its results dropdown. */
 const OVERLAY_GAP = 6;
+
+export type MapLocationSearchHandle = {
+  dismissKeyboardFromMap: () => void;
+};
 
 type MapLocationSearchBarProps = {
   locations: readonly LocationWeather[];
@@ -29,12 +34,18 @@ type MapLocationSearchBarProps = {
  * Immersive phone map search pill — floats over the map like mobile Web.
  * Canonical catalog matching only (name + aliases); no local search algorithm.
  */
-export function MapLocationSearchBar({
-  locations,
-  onSelectLocation,
-  onClearSelectedLocation,
-  isDisabled = false,
-}: MapLocationSearchBarProps) {
+export const MapLocationSearchBar = forwardRef<
+  MapLocationSearchHandle,
+  MapLocationSearchBarProps
+>(function MapLocationSearchBar(
+  {
+    locations,
+    onSelectLocation,
+    onClearSelectedLocation,
+    isDisabled = false,
+  },
+  ref,
+) {
   const [query, setQuery] = useState('');
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
   /**
@@ -90,6 +101,17 @@ export function MapLocationSearchBar({
     endSearchEditing();
     onClearSelectedLocation();
   }
+
+  function dismissKeyboardFromMap() {
+    const dismissal = dismissMapSearchFromMapTap(query);
+    setIsOverlayOpen(dismissal.isOverlayOpen);
+    inputRef.current?.blur();
+    Keyboard.dismiss();
+  }
+
+  useImperativeHandle(ref, () => ({
+    dismissKeyboardFromMap,
+  }));
 
   const hasQuery = query.length > 0;
   const showOverlay =
@@ -174,7 +196,7 @@ export function MapLocationSearchBar({
       ) : null}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   root: {

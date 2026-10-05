@@ -424,8 +424,8 @@ describe('phone map search interaction contract', () => {
   });
 
   it('confines keyboard dismissal to the search-state handlers', () => {
-    // Scattering dismissals through typing/focus handlers would fight the user.
-    expect(source.match(/Keyboard\.dismiss\(\);/g)).toHaveLength(1);
+    // Typing and focus must not dismiss. A map tap is a separate exit.
+    expect(source.match(/Keyboard\.dismiss\(\);/g)).toHaveLength(2);
     const typing = source.slice(
       source.indexOf('onChangeText'),
       source.indexOf('placeholder='),

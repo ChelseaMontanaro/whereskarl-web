@@ -49,7 +49,8 @@ describe('native marker identity', () => {
   it('presses select the marker’s own location id, never a positional index', () => {
     const source = readSource(MAP_NATIVE_SOURCE);
 
-    expect(source).toContain('onPress={() => onSelect(location.id)}');
+    expect(source).toContain('onSelect(location.id)');
+    expect(source).toContain('onMapPress?.()');
     expect(source).toContain('identifier={location.id}');
     expect(source).toContain('key={location.id}');
     // A press handler must never resolve its target through list position.

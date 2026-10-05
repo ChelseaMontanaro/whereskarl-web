@@ -26,6 +26,8 @@ export type KarlMapProps = {
    * matching web's `applyLowZoomHiding = !selectedRegionId`.
    */
   applyLowZoomLabelHiding?: boolean;
+  /** Dismisses an open search keyboard. Does not select or clear a location. */
+  onMapPress?: () => void;
   onZoomIn?: () => void;
   onZoomOut?: () => void;
   onResetView?: () => void;

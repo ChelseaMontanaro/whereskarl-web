@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { forwardRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { MapLocationSearchBar } from '@/components/map/MapLocationSearchBar';
+import {
+  MapLocationSearchBar,
+  type MapLocationSearchHandle,
+} from '@/components/map/MapLocationSearchBar';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import {
   PHONE_PORTRAIT_CHIP_FONT_SIZE,
@@ -34,14 +37,20 @@ type MapPhonePortraitControlsProps = {
  * floating search pill → compact horizontal region chips.
  * No page title, no “Around the Bay” section labels.
  */
-export function MapPhonePortraitControls({
-  selectedRegionId,
-  onSelectRegion,
-  locations = [],
-  onSelectLocation,
-  onClearSelectedLocation,
-  isSearchDisabled = false,
-}: MapPhonePortraitControlsProps) {
+export const MapPhonePortraitControls = forwardRef<
+  MapLocationSearchHandle,
+  MapPhonePortraitControlsProps
+>(function MapPhonePortraitControls(
+  {
+    selectedRegionId,
+    onSelectRegion,
+    locations = [],
+    onSelectLocation,
+    onClearSelectedLocation,
+    isSearchDisabled = false,
+  },
+  ref,
+) {
   const showSearch =
     typeof onSelectLocation === 'function' &&
     typeof onClearSelectedLocation === 'function';
@@ -60,6 +69,7 @@ export function MapPhonePortraitControls({
     <View style={styles.root} accessibilityLabel="Map search and regions">
       {showSearch ? (
         <MapLocationSearchBar
+          ref={ref}
           locations={locations}
           onSelectLocation={onSelectLocation}
           onClearSelectedLocation={onClearSelectedLocation}
@@ -121,7 +131,7 @@ export function MapPhonePortraitControls({
       </ScrollView>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   root: {

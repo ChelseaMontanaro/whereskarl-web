@@ -20,6 +20,7 @@ import { MapBestRightNowTray } from '@/components/MapBestRightNowTray';
 import { MapConditionsPanel } from '@/components/map/MapConditionsPanel';
 import { MapFogLegend } from '@/components/map/MapFogLegend';
 import { MapLayerControls } from '@/components/map/MapLayerControls';
+import type { MapLocationSearchHandle } from '@/components/map/MapLocationSearchBar';
 import { MapPhonePortraitControls } from '@/components/map/MapPhonePortraitControls';
 import { MapPhonePortraitFogRail } from '@/components/map/MapPhonePortraitFogRail';
 import { MapPhonePortraitFloatingControls } from '@/components/map/MapPhonePortraitFloatingControls';
@@ -75,6 +76,10 @@ export default function MapScreen() {
   const isPhonePortrait = usePhonePortrait();
   const isNighttime = useIsNighttime();
   const mapRef = useRef<KarlMapHandle>(null);
+  const mapSearchRef = useRef<MapLocationSearchHandle>(null);
+  const dismissMapSearchKeyboard = useCallback(() => {
+    mapSearchRef.current?.dismissKeyboardFromMap();
+  }, []);
   const organicRequestRef = useRef(0);
   const { setClearSkiesNav } = useClearSkiesNav();
 
@@ -543,6 +548,7 @@ export default function MapScreen() {
         intensityFilter={conditionFilter}
         isNighttime={isPhone ? isNighttime : false}
         useConditionSvgIcons={isPhone}
+        onMapPress={dismissMapSearchKeyboard}
       />
 
       <View style={styles.overlayRoot} pointerEvents="box-none">
@@ -614,6 +620,7 @@ export default function MapScreen() {
               ]}
               pointerEvents="box-none">
               <MapPhonePortraitControls
+                ref={mapSearchRef}
                 selectedRegionId={selectedRegionId}
                 onSelectRegion={handleSelectRegion}
                 locations={locations}

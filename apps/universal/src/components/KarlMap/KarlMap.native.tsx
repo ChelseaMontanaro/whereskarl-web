@@ -75,6 +75,7 @@ function KarlMapMarker({
   isNighttime,
   useSvgIcons,
   onSelect,
+  onMapPress,
 }: {
   location: KarlMapProps['locations'][number];
   isSelected: boolean;
@@ -84,6 +85,7 @@ function KarlMapMarker({
   isNighttime: boolean;
   useSvgIcons: boolean;
   onSelect: (locationId: string) => void;
+  onMapPress?: () => void;
 }) {
   const hasMeta =
     showMarkerMeta !== undefined ? showMarkerMeta : showLocationLabel;
@@ -100,7 +102,10 @@ function KarlMapMarker({
         latitude: location.latitude,
         longitude: location.longitude,
       }}
-      onPress={() => onSelect(location.id)}
+      onPress={() => {
+        onMapPress?.();
+        onSelect(location.id);
+      }}
       accessibilityLabel={getMarkerAccessibilityLabel(location, isSelected, {
         isNighttime,
       })}
@@ -143,6 +148,7 @@ const KarlMapNative = forwardRef<KarlMapHandle, KarlMapProps>(function KarlMapNa
     useConditionSvgIcons = false,
     phonePortraitWeb = false,
     applyLowZoomLabelHiding = true,
+    onMapPress,
   },
   ref,
 ) {
@@ -460,6 +466,9 @@ const KarlMapNative = forwardRef<KarlMapHandle, KarlMapProps>(function KarlMapNa
         showsCompass={false}
         showsBuildings={false}
         showsTraffic={false}
+        onPress={() => {
+          onMapPress?.();
+        }}
         onLayout={handleMapLayout}
         onRegionChange={handleRegionChangeComplete}
         onRegionChangeComplete={handleRegionChangeComplete}
@@ -494,6 +503,7 @@ const KarlMapNative = forwardRef<KarlMapHandle, KarlMapProps>(function KarlMapNa
               isNighttime={isNighttime}
               useSvgIcons={useConditionSvgIcons}
               onSelect={onSelectLocation}
+              onMapPress={onMapPress}
             />
           );
         })}
