@@ -39,7 +39,7 @@ describe('Phase 25 — direct unfavorite does not trigger card navigation', () =
   it('SavedLocationCard wires the card body to buildMapHref and the heart to onRemoveFavorite only', () => {
     const source = readSource(SAVED_LOCATION_CARD);
 
-    expect(source).toContain("router.push(buildMapHref(location.id)");
+    expect(source).toContain('openPrimaryRoute(buildMapHref(location.id)');
     expect(source).toContain('onPress={handlePress}');
     expect(source).toContain('onRemove={() => onRemoveFavorite(location.id)}');
 
@@ -47,6 +47,7 @@ describe('Phase 25 — direct unfavorite does not trigger card navigation', () =
     const heartBlock = source.slice(source.indexOf('<FavoriteHeartButton'));
     expect(heartBlock).not.toContain('handlePress');
     expect(heartBlock).not.toContain('router.push');
+    expect(heartBlock).not.toContain('openPrimaryRoute');
   });
 
   it('TopSavedLocationCard nests the heart button inside the navigating card Pressable', () => {
@@ -66,6 +67,7 @@ describe('Phase 25 — direct unfavorite does not trigger card navigation', () =
 
     expect(heartBlock).not.toContain('handlePress');
     expect(heartBlock).not.toContain('router.push');
+    expect(heartBlock).not.toContain('openPrimaryRoute');
     expect(source).toContain('onRemove={() => onRemoveFavorite(location.id)}');
   });
 
@@ -220,12 +222,14 @@ describe('Phase 25 — cross-screen favorite sync (§11)', () => {
 });
 
 describe('Phase 27.2 — Favorites content gate, not native-repaint workarounds', () => {
-  it('keeps Favorites→Map as a push of the selected location', () => {
+  it('opens a saved location through the shared primary-route helper', () => {
     const saved = readSource(SAVED_LOCATION_CARD);
     const top = readSource(TOP_SAVED_LOCATION_CARD);
 
-    expect(saved).toContain("router.push(buildMapHref(location.id)");
-    expect(top).toContain("router.push(buildMapHref(location.id)");
+    expect(saved).toContain('openPrimaryRoute(buildMapHref(location.id)');
+    expect(top).toContain('openPrimaryRoute(buildMapHref(location.id)');
+    expect(saved).not.toContain('router.push');
+    expect(top).not.toContain('router.push');
   });
 
   it('gates empty state through resolveFavoritesContentPresentation', () => {

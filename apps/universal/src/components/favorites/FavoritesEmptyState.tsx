@@ -1,5 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { router } from 'expo-router';
+import { useNavigationContainerRef } from 'expo-router';
+
+import { openPrimaryRoute } from '@/lib/navigation/openPrimaryRoute';
 
 import { Colors, Spacing } from '@/constants/theme';
 
@@ -12,6 +14,8 @@ import { Colors, Spacing } from '@/constants/theme';
  * the approved mockup) instead of the gold-outline treatment.
  */
 export function FavoritesEmptyState() {
+  const navigationRef = useNavigationContainerRef();
+
   return (
     <View style={styles.container}>
       <View style={styles.heartBadge} accessibilityElementsHidden>
@@ -25,7 +29,7 @@ export function FavoritesEmptyState() {
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Explore the map"
-        onPress={() => router.push('/map')}
+        onPress={() => openPrimaryRoute('/map', navigationRef.current?.getRootState())}
         style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}>
         <Text style={styles.buttonLabel}>Explore the Map</Text>
       </Pressable>

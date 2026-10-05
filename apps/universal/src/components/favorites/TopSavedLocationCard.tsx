@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { router } from 'expo-router';
+import { useNavigationContainerRef } from 'expo-router';
 
 import { ConditionIcon } from '@/components/conditions/ConditionIcon';
 import { FavoriteHeartButton } from '@/components/favorites/FavoriteHeartButton';
@@ -19,6 +19,7 @@ import {
 } from '@whereskarl/domain';
 import { isNighttime } from '@/lib/home/weatherDisplay';
 import { buildMapHref } from '@/lib/navigation';
+import { openPrimaryRoute } from '@/lib/navigation/openPrimaryRoute';
 import type { LocationWeather } from '@whereskarl/schemas';
 
 type TopSavedLocationCardProps = {
@@ -30,6 +31,7 @@ export function TopSavedLocationCard({
   location,
   onRemoveFavorite,
 }: TopSavedLocationCardProps) {
+  const navigationRef = useNavigationContainerRef();
   const isNightPresentation = isNighttime(new Date().getHours());
   const intensity = resolveLocationFogIntensity(location);
   const statusLine =
@@ -47,7 +49,7 @@ export function TopSavedLocationCard({
   }, [imageUrl]);
 
   const handlePress = () => {
-    router.push(buildMapHref(location.id) as '/map');
+    openPrimaryRoute(buildMapHref(location.id), navigationRef.current?.getRootState());
   };
 
   return (

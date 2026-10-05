@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { Link, usePathname } from 'expo-router';
+import { useNavigationContainerRef, usePathname } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useMemo } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -18,6 +18,7 @@ import {
   primaryNavItems,
   type PrimaryNavItem,
 } from '@/lib/navigation';
+import { openPrimaryRoute } from '@/lib/navigation/openPrimaryRoute';
 
 const NAV_ICON_COLOR = 'rgba(255, 255, 255, 0.72)';
 
@@ -106,19 +107,20 @@ function PrimaryNavLink({
   layout: NavLayout;
 }) {
   const pathname = usePathname();
+  const navigationRef = useNavigationContainerRef();
   const isPhonePortraitWeb = Platform.OS === 'web' && usePhonePortrait();
   const isActive = isPrimaryNavActive(pathname, item.href);
 
   return (
-    <Link href={item.href} asChild>
-      <Pressable
-        accessibilityRole="link"
-        accessibilityState={{ selected: isActive }}
-        style={({ pressed }) => [
-          layout === 'top' ? styles.topLink : styles.bottomLink,
-          isActive && (layout === 'top' ? styles.topLinkActive : styles.bottomLinkActive),
-          pressed && styles.pressed,
-        ]}>
+    <Pressable
+      accessibilityRole="link"
+      accessibilityState={{ selected: isActive }}
+      onPress={() => openPrimaryRoute(item.href, navigationRef.current?.getRootState())}
+      style={({ pressed }) => [
+        layout === 'top' ? styles.topLink : styles.bottomLink,
+        isActive && (layout === 'top' ? styles.topLinkActive : styles.bottomLinkActive),
+        pressed && styles.pressed,
+      ]}>
         {layout === 'bottom' ? (
           <View style={styles.bottomLinkInner}>
             <View style={styles.navIconWrapper}>
@@ -147,8 +149,7 @@ function PrimaryNavLink({
             {item.label}
           </Text>
         )}
-      </Pressable>
-    </Link>
+    </Pressable>
   );
 }
 
