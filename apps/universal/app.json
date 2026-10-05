@@ -2,14 +2,14 @@
   "expo": {
     "name": "Where's Karl",
     "slug": "whereskarl",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "whereskarluniversal",
     "userInterfaceStyle": "dark",
     "ios": {
       "bundleIdentifier": "whereskarl.live.app",
-      "buildNumber": "3",
+      "buildNumber": "4",
       "appleTeamId": "5CNF3D3CGN",
       "icon": "./assets/images/wheres-karl-app-icon.png",
       "infoPlist": {

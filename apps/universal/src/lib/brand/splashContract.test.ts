@@ -26,8 +26,8 @@ describe('native splash branding', () => {
     expect(config.image).toBe('./assets/images/splash-icon.png');
     expect(config.imageWidth).toBe(76);
     expect(appJson.expo.ios.icon).toBe('./assets/images/wheres-karl-app-icon.png');
-    expect(appJson.expo.version).toBe('1.0.0');
-    expect(appJson.expo.ios.buildNumber).toBe('3');
+    expect(appJson.expo.version).toBe('1.0.1');
+    expect(appJson.expo.ios.buildNumber).toBe('4');
     expect(appJson.expo.ios.bundleIdentifier).toBe('whereskarl.live.app');
 
     const splashBytes = read('assets/images/splash-icon.png');
