@@ -16,8 +16,8 @@ type NavigationSnapshot = {
   }>;
 };
 
-function readSelected(params: Record<string, unknown> | undefined): string | undefined {
-  const value = params?.selected;
+function readParam(params: Record<string, unknown> | undefined, key: string): string | undefined {
+  const value = params?.[key];
   if (typeof value === 'string' && value.trim().length > 0) {
     return value;
   }
@@ -50,7 +50,9 @@ export function readPrimaryRoutes(state: NavigationSnapshot | null | undefined):
   return state.routes.map((route) => ({
     name: route.name,
     params: {
-      selected: readSelected(route.params),
+      selected: readParam(route.params, 'selected'),
+      entry: readParam(route.params, 'entry'),
+      orient: readParam(route.params, 'orient'),
     },
   }));
 }

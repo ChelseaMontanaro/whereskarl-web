@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
+import { buildOrganicMapHref } from '@/lib/map/organicMapEntry';
 import { buildMapHref } from '@/lib/navigation';
 import {
   applyPrimaryNavigation,
@@ -186,9 +187,51 @@ describe('primary route history', () => {
       'utf8',
     );
 
-    expect(nav).toContain('openPrimaryRoute(item.href');
+    expect(nav).toContain('buildOrganicMapHref(nextOrganicMapOrient())');
+    expect(nav).toContain('openPrimaryRoute(');
     expect(nav).not.toContain('<Link');
     expect(saved).toContain('openPrimaryRoute(buildMapHref(location.id)');
     expect(top).toContain('openPrimaryRoute(buildMapHref(location.id)');
+  });
+
+  it('reorients an existing Map on an organic tap without a second Map', () => {
+    const withSelection = applyPrimaryNavigation([HOME], buildMapHref('crissy-field'));
+    const decision = decidePrimaryNavigation(
+      withSelection,
+      buildOrganicMapHref('orient-2'),
+    );
+
+    expect(decision.type).toBe('dismissTo');
+    const reoriented = applyPrimaryNavigation(
+      withSelection,
+      buildOrganicMapHref('orient-2'),
+    );
+
+    expect(mapCount(reoriented)).toBe(1);
+    expect(reoriented.find((route) => route.name === 'map')?.params?.selected).toBeUndefined();
+    expect(reoriented.find((route) => route.name === 'map')?.params?.entry).toBe('organic');
+    expect(reoriented.find((route) => route.name === 'map')?.params?.orient).toBe('orient-2');
+  });
+
+  it('keeps one Map across 50 organic Map taps', () => {
+    const hrefs = Array.from({ length: 50 }, (_, index) =>
+      buildOrganicMapHref(`orient-${index}`),
+    );
+    const { routes, maxMap, maxLength } = walk([HOME], hrefs);
+
+    expect(maxMap).toBe(1);
+    expect(maxLength).toBeLessThanOrEqual(2);
+    expect(mapCount(routes)).toBe(1);
+    expect(routes.find((route) => route.name === 'map')?.params?.orient).toBe('orient-49');
+    expect(routes.find((route) => route.name === 'map')?.params?.selected).toBeUndefined();
+  });
+
+  it('lets an explicit Favorite replace an organic Map on the same screen', () => {
+    let routes = applyPrimaryNavigation([HOME], buildOrganicMapHref('orient-1'));
+    routes = applyPrimaryNavigation(routes, buildMapHref('baker-beach'));
+
+    expect(mapCount(routes)).toBe(1);
+    expect(routes.find((route) => route.name === 'map')?.params?.selected).toBe('baker-beach');
+    expect(decidePrimaryNavigation(routes, buildMapHref('baker-beach')).type).not.toBe('push');
   });
 });

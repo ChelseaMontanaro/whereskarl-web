@@ -16,6 +16,8 @@ export type PrimaryRoute = {
   name: string;
   params?: {
     selected?: string;
+    entry?: string;
+    orient?: string;
   };
 };
 
@@ -36,13 +38,26 @@ export function primaryScreenNameFromHref(href: string): string | null {
   return PRIMARY_SCREEN_BY_PATH[path] ?? null;
 }
 
-function queryParams(href: string): { selected?: string } {
+function queryParams(href: string): {
+  selected?: string;
+  entry?: string;
+  orient?: string;
+} {
   const query = href.split('?')[1];
   if (!query) {
     return {};
   }
 
-  const selected = new URLSearchParams(query).get('selected') ?? undefined;
+  const search = new URLSearchParams(query);
+  if (search.get('entry') === 'organic') {
+    const orient = search.get('orient') ?? undefined;
+    return {
+      entry: 'organic',
+      orient,
+    };
+  }
+
+  const selected = search.get('selected') ?? undefined;
   return selected ? { selected } : {};
 }
 
@@ -59,9 +74,15 @@ function findLastIndex(routes: PrimaryRoute[], name: string): number {
 /**
  * A bare `/map` visit must not wipe a selection already on the Map screen.
  * Favorite opens pass `selected` explicitly and replace it.
+ * An organic bottom-nav tap is a new "orient to me" request and must not
+ * keep that previous selection.
  */
 function hrefPreservingMapSelection(routes: PrimaryRoute[], href: string): string {
   if (primaryScreenNameFromHref(href) !== 'map') {
+    return href;
+  }
+
+  if (queryParams(href).entry === 'organic') {
     return href;
   }
 
@@ -92,6 +113,16 @@ export function decidePrimaryNavigation(
 
   const current = routes[routes.length - 1];
   if (current?.name === name) {
+    if (name === 'map' && queryParams(resolvedHref).entry === 'organic') {
+      const nextOrient = queryParams(resolvedHref).orient ?? '';
+      const currentOrient = current.params?.orient ?? '';
+      if (nextOrient !== currentOrient) {
+        return { type: 'dismissTo', href: resolvedHref };
+      }
+
+      return { type: 'none' };
+    }
+
     if (
       name === 'map' &&
       (current.params?.selected ?? '') !== (queryParams(resolvedHref).selected ?? '')
@@ -149,6 +180,16 @@ export function applyPrimaryNavigation(
   return routes.slice(0, targetIndex + 1).map((route, index) => {
     if (index !== targetIndex || !decision.href.includes('?')) {
       return route;
+    }
+
+    if (params.entry === 'organic') {
+      return {
+        name: route.name,
+        params: {
+          entry: 'organic',
+          orient: params.orient,
+        },
+      };
     }
 
     return {

@@ -18,6 +18,7 @@ import {
   primaryNavItems,
   type PrimaryNavItem,
 } from '@/lib/navigation';
+import { buildOrganicMapHref, nextOrganicMapOrient } from '@/lib/map/organicMapEntry';
 import { openPrimaryRoute } from '@/lib/navigation/openPrimaryRoute';
 
 const NAV_ICON_COLOR = 'rgba(255, 255, 255, 0.72)';
@@ -115,7 +116,12 @@ function PrimaryNavLink({
     <Pressable
       accessibilityRole="link"
       accessibilityState={{ selected: isActive }}
-      onPress={() => openPrimaryRoute(item.href, navigationRef.current?.getRootState())}
+      onPress={() =>
+        openPrimaryRoute(
+          item.href === '/map' ? buildOrganicMapHref(nextOrganicMapOrient()) : item.href,
+          navigationRef.current?.getRootState(),
+        )
+      }
       style={({ pressed }) => [
         layout === 'top' ? styles.topLink : styles.bottomLink,
         isActive && (layout === 'top' ? styles.topLinkActive : styles.bottomLinkActive),

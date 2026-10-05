@@ -32,6 +32,7 @@ import { BOTTOM_NAV_MAP_PHONE_OFFSET } from '@/constants/bottomNav';
 import { Colors, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useHomeLocation } from '@/hooks/useHomeLocation';
 import { useLocations } from '@/hooks/useLocations';
+import { useOrganicMapOrientation } from '@/hooks/useOrganicMapOrientation';
 import { usePhonePortrait } from '@/hooks/usePhonePortrait';
 import { useIsNighttime } from '@/hooks/useIsNighttime';
 import {
@@ -66,12 +67,15 @@ export default function MapScreen() {
     view?: string;
     selected?: string;
     location?: string;
+    entry?: string;
+    orient?: string;
   }>();
   const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const isPhonePortrait = usePhonePortrait();
   const isNighttime = useIsNighttime();
   const mapRef = useRef<KarlMapHandle>(null);
+  const organicRequestRef = useRef(0);
   const { setClearSkiesNav } = useClearSkiesNav();
 
   const {
@@ -167,7 +171,11 @@ export default function MapScreen() {
     }
 
     if (params.selected !== undefined || params.location !== undefined) {
-      setSelectedLocationId(parseMapSelectedLocationId(params));
+      const explicitId = parseMapSelectedLocationId(params);
+      if (explicitId) {
+        organicRequestRef.current += 1;
+      }
+      setSelectedLocationId(explicitId);
     }
   }, [params.location, params.selected]);
 
@@ -219,33 +227,36 @@ export default function MapScreen() {
     });
   }, [bestRightNowItems, isLoading, locations.length, setClearSkiesNav]);
 
-  // Phone map: auto-select Best Right Now into the bottom sheet (mobile Web parity).
-  useEffect(() => {
-    if (!isPhone || showListMode || sheetDismissedRef.current) {
-      return;
-    }
+  const organicEntry = Array.isArray(params.entry) ? params.entry[0] : params.entry ?? null;
+  const organicOrient = Array.isArray(params.orient)
+    ? params.orient[0]
+    : params.orient ?? null;
 
-    if (selectedLocationId || locations.length === 0) {
-      return;
-    }
+  const clearOrganicSelection = useCallback(() => {
+    setSelectedLocationId(null);
+  }, []);
 
-    const bestLocation = [...locations].sort(
-      (left, right) => right.sunshineScore - left.sunshineScore,
-    )[0];
+  const selectOrganicLocation = useCallback(
+    (locationId: string) => {
+      sheetDismissedRef.current = false;
+      setSelectedLocationId(locationId);
+      syncMapRoute(locationId);
+    },
+    [syncMapRoute],
+  );
 
-    if (!bestLocation) {
-      return;
-    }
-
-    setSelectedLocationId(bestLocation.id);
-    syncMapRoute(bestLocation.id);
-  }, [
-    isPhone,
+  useOrganicMapOrientation({
+    entry: organicEntry,
+    orient: organicOrient,
+    explicitSelectedId: parseMapSelectedLocationId(params),
     locations,
-    selectedLocationId,
-    showListMode,
-    syncMapRoute,
-  ]);
+    isLoading,
+    isPhone,
+    mapRef,
+    cancelSignalRef: organicRequestRef,
+    onClearSelection: clearOrganicSelection,
+    onSelectLocation: selectOrganicLocation,
+  });
 
   const selectedLocation = useMemo(
     () =>
