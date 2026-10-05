@@ -40,6 +40,7 @@ import {
   getSelectedLocationHourlyPeriods,
   getSelectedLocationSubtitle,
 } from '@/lib/map/mapPanelDisplay';
+import { presentMapLocationCardFogMetric } from '@/lib/map/mapLocationCardFogMetric';
 import { getPhonePortraitFogRailConditionIconDataUri } from '@/lib/map/phonePortraitConditionIcons';
 import {
   PHONE_SHEET_LABEL_MAX_FONT_SCALE,
@@ -51,7 +52,6 @@ import {
   clearSkiesScoreColor,
   compactAirQualityTileLabel,
   CLIMATE_ICON_COLOR,
-  getFogIntensityLabel,
   getProductRegionNameForLocation,
   presentAirQuality,
   presentClearSkiesScore,
@@ -290,9 +290,7 @@ function PhoneSelectedLocationSheet({
   const { isFavorite, handleToggleFavorite } = useFavoriteToggle(location.id);
   const score = presentClearSkiesScore(location.sunshineScore);
   const fogScore = resolveFogScore(location);
-  const fogLabel = getFogIntensityLabel(
-    resolveLocationFogIntensity(location),
-  );
+  const fogMetric = presentMapLocationCardFogMetric(fogScore);
   const temperature = formatTemperature(location);
   const hasWindSpeed =
     typeof location.windSpeed === 'number' && Number.isFinite(location.windSpeed);
@@ -562,8 +560,8 @@ function PhoneSelectedLocationSheet({
         />
         <CoreWeatherCell
           title="FOG"
-          value={fogScore === null ? METRIC_VALUE_PLACEHOLDER : `${fogScore}%`}
-          supporting={fogLabel}
+          value={fogMetric.value}
+          supporting={fogMetric.supporting}
           flex={1.25}
         />
         <CoreWeatherCell
