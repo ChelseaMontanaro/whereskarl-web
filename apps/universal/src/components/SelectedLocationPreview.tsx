@@ -1,6 +1,7 @@
 import { Image } from 'expo-image';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import {
+  PanResponder,
   PixelRatio,
   Pressable,
   ScrollView,
@@ -41,6 +42,11 @@ import {
   getSelectedLocationSubtitle,
 } from '@/lib/map/mapPanelDisplay';
 import { presentMapLocationCardFogMetric } from '@/lib/map/mapLocationCardFogMetric';
+import {
+  locationCardGrabberShouldClaimSwipe,
+  nextLocationCardExpanded,
+  resolveLocationCardGrabberSwipe,
+} from '@/lib/map/locationCardGrabberSwipe';
 import { getPhonePortraitFogRailConditionIconDataUri } from '@/lib/map/phonePortraitConditionIcons';
 import {
   PHONE_SHEET_LABEL_MAX_FONT_SCALE,
@@ -271,6 +277,44 @@ function PhoneSelectedLocationSheet({
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const expandedScrollRef = useRef<ScrollView>(null);
+  // Set when a grabber swipe has already snapped the detent, so the trailing
+  // press cannot toggle it back. Cleared by that press, or on the next frame
+  // when the press was cancelled.
+  const grabberSwipeAppliedRef = useRef(false);
+  const grabberPanResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => false,
+      onStartShouldSetPanResponderCapture: () => false,
+      onMoveShouldSetPanResponder: () => false,
+      onMoveShouldSetPanResponderCapture: (_event, gesture) =>
+        locationCardGrabberShouldClaimSwipe(gesture.dx, gesture.dy),
+      onPanResponderGrant: (_event, gesture) => {
+        const decision = resolveLocationCardGrabberSwipe(gesture.dx, gesture.dy);
+        grabberSwipeAppliedRef.current = true;
+        if (decision === 'NONE') {
+          return;
+        }
+
+        setIsExpanded((current) => {
+          const next = nextLocationCardExpanded(current, gesture.dx, gesture.dy);
+          if (next && !current) {
+            expandedScrollRef.current?.scrollTo({ y: 0, animated: false });
+          }
+          return next;
+        });
+      },
+      onPanResponderRelease: () => {
+        requestAnimationFrame(() => {
+          grabberSwipeAppliedRef.current = false;
+        });
+      },
+      onPanResponderTerminate: () => {
+        requestAnimationFrame(() => {
+          grabberSwipeAppliedRef.current = false;
+        });
+      },
+    }),
+  ).current;
   // Web parity: after the card mounts (or switches location) briefly ignore
   // surface taps so the marker/search tap that opened it cannot fall through
   // and immediately expand it. The grab handle stays available throughout.
@@ -423,6 +467,11 @@ function PhoneSelectedLocationSheet({
   ];
 
   function handleToggleExpanded() {
+    if (grabberSwipeAppliedRef.current) {
+      grabberSwipeAppliedRef.current = false;
+      return;
+    }
+
     setIsExpanded((current) => {
       const next = !current;
       if (next) {
@@ -454,15 +503,17 @@ function PhoneSelectedLocationSheet({
       {/* Mobile-web parity: the expansion affordance is a grab handle above the
           header plus a collapsed surface tap, not a labelled row
           (apps/web/components/ui/BottomSheet.tsx). */}
-      <Pressable
-        accessibilityRole="button"
-        accessibilityState={{ expanded: isExpanded }}
-        accessibilityLabel={isExpanded ? 'Collapse details' : 'Expand details'}
-        onPress={handleToggleExpanded}
-        hitSlop={{ top: 8, bottom: 4, left: 0, right: 0 }}
-        style={styles.sheetGrabHandleHitArea}>
-        <View style={styles.sheetGrabHandle} />
-      </Pressable>
+      <View {...grabberPanResponder.panHandlers} collapsable={false}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ expanded: isExpanded }}
+          accessibilityLabel={isExpanded ? 'Collapse details' : 'Expand details'}
+          onPress={handleToggleExpanded}
+          hitSlop={{ top: 8, bottom: 4, left: 0, right: 0 }}
+          style={styles.sheetGrabHandleHitArea}>
+          <View style={styles.sheetGrabHandle} />
+        </Pressable>
+      </View>
 
       <Pressable
         // Not its own accessibility element: the grab handle is the announced
