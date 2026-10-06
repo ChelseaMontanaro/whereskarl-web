@@ -252,8 +252,11 @@ describe('organic map source contract', () => {
     expect(appJson).toContain('"locationAlwaysAndWhenInUsePermission": false');
     expect(appJson).toContain('"isIosBackgroundLocationEnabled": false');
     expect(appJson).toContain('"isAndroidBackgroundLocationEnabled": false');
-    expect(appJson).toContain('"motionUsagePermission": false');
+    expect(appJson).toContain(
+      '"motionUsagePermission": "Where\'s Karl does not track your motion or fitness activity. Motion access is included by the location software used by the app."',
+    );
+    expect(appJson).not.toContain('"motionUsagePermission": false');
     expect(appJson).not.toContain('NSLocationAlwaysUsageDescription');
-    expect(appJson).not.toContain('NSMotionUsageDescription');
+    expect(appJson).not.toContain('NSLocationAlwaysAndWhenInUseUsageDescription');
   });
 });

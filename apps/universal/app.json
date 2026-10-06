@@ -9,7 +9,7 @@
     "userInterfaceStyle": "dark",
     "ios": {
       "bundleIdentifier": "whereskarl.live.app",
-      "buildNumber": "4",
+      "buildNumber": "5",
       "appleTeamId": "5CNF3D3CGN",
       "icon": "./assets/images/wheres-karl-app-icon.png",
       "infoPlist": {
@@ -47,7 +47,7 @@
           "locationAlwaysPermission": false,
           "isIosBackgroundLocationEnabled": false,
           "isAndroidBackgroundLocationEnabled": false,
-          "motionUsagePermission": false
+          "motionUsagePermission": "Where's Karl does not track your motion or fitness activity. Motion access is included by the location software used by the app."
         }
       ]
     ],
