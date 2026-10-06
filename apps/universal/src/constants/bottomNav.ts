@@ -11,5 +11,10 @@ export const BOTTOM_NAV_BAR_HEIGHT = 68;
 /** Scroll/content padding so tab screens clear the floating bottom nav. */
 export const BOTTOM_NAV_SCROLL_INSET = BOTTOM_NAV_BAR_HEIGHT;
 
-/** Phone map floating chrome offset above the bottom nav (web 4.75rem). */
-export const BOTTOM_NAV_MAP_PHONE_OFFSET = 76;
+/**
+ * Phone map card offset above BottomNav, excluding the safe-area inset.
+ * Native bar content is about 74pt (8 + 16 + 32 icon + 4 + 14 label).
+ * 86 leaves about a 12pt gap. The map screen adds the safe area itself.
+ * Home scroll inset stays on BOTTOM_NAV_BAR_HEIGHT.
+ */
+export const BOTTOM_NAV_MAP_PHONE_OFFSET = 86;

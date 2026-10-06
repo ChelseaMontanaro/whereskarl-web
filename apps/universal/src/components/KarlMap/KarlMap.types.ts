@@ -41,10 +41,9 @@ export type KarlMapHandle = {
   locateMe: () => void;
   fitToRegion: (regionId: BayAreaVisibleProductRegionId) => void;
   /**
-   * Focus one location at canonical search zoom. Phone portrait moves the
-   * camera on *search* selection only — marker taps and deep links never
-   * reframe — so selection-source-aware callers drive this explicitly instead
-   * of the map reacting to `selectedLocationId`.
+   * Focus one location at canonical search zoom. Phone portrait does not
+   * reframe from `selectedLocationId` alone. Search selection, Organic Map,
+   * and external selected routes call this explicitly. Marker taps do not.
    */
   focusLocation: (latitude: number, longitude: number) => void;
   /**

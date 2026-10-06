@@ -52,6 +52,10 @@ import {
   resolveMapScreenLayoutProfile,
 } from '@/lib/map/mapLayout';
 import {
+  externalSelectedFocusId,
+  resolvePendingExternalMapFocus,
+} from '@/lib/map/externalMapCameraFocus';
+import {
   parseMapSelectedLocationId,
   parseMapViewMode,
 } from '@/lib/map/mapRouteParams';
@@ -124,6 +128,15 @@ export default function MapScreen() {
   const [isLayersPanelOpen, setIsLayersPanelOpen] = useState(false);
   /** Phone sheet dismiss latch — matches mobile Web BRN auto-select behavior. */
   const sheetDismissedRef = useRef(false);
+  /**
+   * External `selected=` (Favorite, Find Clear Skies, Best Right Now, location
+   * detail, direct link) waits here until the catalog row exists, then focuses
+   * once. Marker, search, and Organic writes do not set it.
+   */
+  const [pendingExternalFocusId, setPendingExternalFocusId] = useState<string | null>(
+    null,
+  );
+  const pendingExternalFocusIdRef = useRef<string | null>(null);
 
   const routeSyncSource = useRef<'local' | 'external'>('external');
 
@@ -172,6 +185,11 @@ export default function MapScreen() {
   useEffect(() => {
     if (routeSyncSource.current === 'local') {
       routeSyncSource.current = 'external';
+      pendingExternalFocusIdRef.current = externalSelectedFocusId({
+        routeSource: 'local',
+        explicitSelectedId: null,
+      });
+      setPendingExternalFocusId(pendingExternalFocusIdRef.current);
       return;
     }
 
@@ -181,8 +199,29 @@ export default function MapScreen() {
         organicRequestRef.current += 1;
       }
       setSelectedLocationId(explicitId);
+      pendingExternalFocusIdRef.current = externalSelectedFocusId({
+        routeSource: 'external',
+        explicitSelectedId: explicitId,
+      });
+      setPendingExternalFocusId(pendingExternalFocusIdRef.current);
     }
   }, [params.location, params.selected]);
+
+  useEffect(() => {
+    const pendingId = pendingExternalFocusIdRef.current;
+    if (!pendingId || !isPhone) {
+      return;
+    }
+
+    const target = resolvePendingExternalMapFocus(pendingId, locations);
+    if (!target) {
+      return;
+    }
+
+    pendingExternalFocusIdRef.current = null;
+    setPendingExternalFocusId(null);
+    mapRef.current?.focusLocation(target.latitude, target.longitude);
+  }, [isPhone, locations, pendingExternalFocusId]);
 
   // Phone portrait drops the region filter while a location is selected so the
   // selected marker is always plotted, even when it sits outside the active
@@ -276,7 +315,8 @@ export default function MapScreen() {
   /**
    * Applies the approved search-select camera focus. Every search-driven
    * selection source routes through here so typing a strong match and tapping a
-   * result row behave identically; marker taps and deep links never call it.
+   * result row behave identically. Marker taps never call it. External
+   * selected routes focus through the pending-id effect above.
    */
   const focusSearchSelection = useCallback(
     (locationId: string) => {
@@ -379,8 +419,8 @@ export default function MapScreen() {
   }
 
   /**
-   * Search result tap — the only phone-portrait selection source that moves the
-   * camera. Marker taps and deep links intentionally leave it where it is.
+   * Search result tap. Marker taps leave the camera where it is. External
+   * selected routes focus separately when the route param arrives.
    */
   function handlePhoneSearchSelect(locationId: string) {
     sheetDismissedRef.current = false;

@@ -9,10 +9,12 @@ import { bottomNavItems } from '@/lib/navigation';
 
 describe('shared bottom navigation sizing', () => {
   it('matches mobile-web bottom nav clearance scale', () => {
-    // Web home clearance ~4.25rem; map sheet clearance ~4.75rem.
+    // Home inset stays on the shared bar height. The phone map card uses a
+    // larger offset: native nav content is about 74pt, plus a 12pt gap.
     expect(BOTTOM_NAV_BAR_HEIGHT).toBe(68);
     expect(BOTTOM_NAV_SCROLL_INSET).toBe(BOTTOM_NAV_BAR_HEIGHT);
-    expect(BOTTOM_NAV_MAP_PHONE_OFFSET).toBe(76);
+    expect(BOTTOM_NAV_MAP_PHONE_OFFSET).toBe(86);
+    expect(BOTTOM_NAV_MAP_PHONE_OFFSET).toBeGreaterThan(BOTTOM_NAV_BAR_HEIGHT);
   });
 
   it('preserves Universal tab names and routes', () => {

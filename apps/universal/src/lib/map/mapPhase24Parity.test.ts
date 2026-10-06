@@ -36,7 +36,7 @@ describe('Phase 24 — source-aware camera behaviour', () => {
     expect(webMap).toContain('phonePortraitWebRef.current');
   });
 
-  it('CAM-1: search selection is the only phone source that moves the camera', () => {
+  it('CAM-1: search selection focuses, and marker taps do not', () => {
     expect(mapScreen).toContain('mapRef.current?.focusLocation(');
     // Marker taps go through handleSelectLocation, which must not focus.
     const markerHandler = mapScreen.slice(

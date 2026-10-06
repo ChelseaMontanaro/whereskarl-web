@@ -77,9 +77,11 @@ describe('search selection camera law', () => {
     expect(source).toContain('focusSearchSelection(locationId)');
     expect(source).toContain('mapRef.current?.focusLocation(');
 
-    // focusLocation must be reachable only through the search helper.
-    const focusCalls = source.match(/focusLocation\(/g) ?? [];
-    expect(focusCalls).toHaveLength(1);
+    const searchFocus = source.slice(
+      source.indexOf('const focusSearchSelection'),
+      source.indexOf('useEffect(() => {\n    const trimmedQuery'),
+    );
+    expect(searchFocus).toContain('focusLocation(');
   });
 
   it('applies search focus via Apple Maps region span, not Camera.zoom', () => {
@@ -105,7 +107,7 @@ describe('search selection camera law', () => {
     expect(focused.longitudeDelta).toBeGreaterThan(0.05);
   });
 
-  it('leaves marker taps, deep links and card dismiss without camera motion', () => {
+  it('leaves marker taps and card dismiss without camera motion', () => {
     const source = readSource(MAP_SCREEN_SOURCE);
 
     const markerHandler = source.slice(

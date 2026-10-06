@@ -12,7 +12,10 @@ import {
 import { LiquidGlassSurface } from '@/components/ui/LiquidGlassSurface';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { LiquidGlassTokens } from '@/constants/liquidGlass';
-import { dismissMapSearchFromMapTap } from '@/lib/map/mapSearchKeyboardDismissal';
+import {
+  consumeSearchFocus,
+  dismissMapSearchFromMapTap,
+} from '@/lib/map/mapSearchKeyboardDismissal';
 import { filterCanonicalLocationsBySearch } from '@whereskarl/search';
 import type { LocationWeather } from '@whereskarl/schemas';
 
@@ -67,6 +70,8 @@ export const MapLocationSearchBar = forwardRef<
   const [isQueryResolved, setIsQueryResolved] = useState(false);
   const [pillHeight, setPillHeight] = useState(0);
   const inputRef = useRef<TextInput>(null);
+  /** One iOS focus event after a map-tap blur must not reopen the dropdown. */
+  const ignoreMapDismissFocusRef = useRef(false);
 
   const results = useMemo(() => {
     if (query.trim().length === 0) {
@@ -104,9 +109,29 @@ export const MapLocationSearchBar = forwardRef<
 
   function dismissKeyboardFromMap() {
     const dismissal = dismissMapSearchFromMapTap(query);
+    ignoreMapDismissFocusRef.current = true;
     setIsOverlayOpen(dismissal.isOverlayOpen);
     inputRef.current?.blur();
     Keyboard.dismiss();
+  }
+
+  function handleSearchFieldPressIn() {
+    const next = consumeSearchFocus({
+      ignorePendingDismissFocus: ignoreMapDismissFocusRef.current,
+      fromFieldPress: true,
+    });
+    ignoreMapDismissFocusRef.current = next.ignorePendingDismissFocus;
+  }
+
+  function handleSearchFieldFocus() {
+    const next = consumeSearchFocus({
+      ignorePendingDismissFocus: ignoreMapDismissFocusRef.current,
+      fromFieldPress: false,
+    });
+    ignoreMapDismissFocusRef.current = next.ignorePendingDismissFocus;
+    if (next.openOverlay) {
+      setIsOverlayOpen(true);
+    }
   }
 
   useImperativeHandle(ref, () => ({
@@ -134,7 +159,8 @@ export const MapLocationSearchBar = forwardRef<
             setIsQueryResolved(false);
             setIsOverlayOpen(true);
           }}
-          onFocus={() => setIsOverlayOpen(true)}
+          onPressIn={handleSearchFieldPressIn}
+          onFocus={handleSearchFieldFocus}
           placeholder="Search locations…"
           placeholderTextColor="rgba(255, 255, 255, 0.42)"
           editable={!isDisabled}

@@ -21,3 +21,25 @@ export function dismissMapSearchFromMapTap(
     selectionChanged: false,
   };
 }
+
+/**
+ * iOS can deliver one TextInput focus event after a map-tap blur. That event
+ * must not reopen the dropdown. A later press on the field clears the latch
+ * before its own focus, so a real tap can show results again.
+ */
+export function consumeSearchFocus(input: {
+  ignorePendingDismissFocus: boolean;
+  fromFieldPress: boolean;
+}): { openOverlay: boolean; ignorePendingDismissFocus: boolean } {
+  if (input.fromFieldPress || input.ignorePendingDismissFocus) {
+    return {
+      openOverlay: false,
+      ignorePendingDismissFocus: false,
+    };
+  }
+
+  return {
+    openOverlay: true,
+    ignorePendingDismissFocus: false,
+  };
+}

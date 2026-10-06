@@ -86,10 +86,17 @@ describe('Phase 24 phone selected-sheet expanded height', () => {
   });
 
   it('tracks the reference 62dvh ratio when space allows', () => {
-    // 390x844 and 430x932 both have room for the preferred ratio.
-    expect(resolvePhoneSheetExpandedMaxHeight(932, 59, 34)).toBe(
-      Math.round(932 * PHONE_SHEET_EXPANDED_VIEWPORT_RATIO),
+    expect(resolvePhoneSheetExpandedMaxHeight(1000, 47, 34)).toBe(
+      Math.round(1000 * PHONE_SHEET_EXPANDED_VIEWPORT_RATIO),
     );
+  });
+
+  it('lets the map nav gap win when the 62dvh ratio would touch BottomNav', () => {
+    const preferred = Math.round(932 * PHONE_SHEET_EXPANDED_VIEWPORT_RATIO);
+    const height = resolvePhoneSheetExpandedMaxHeight(932, 59, 34);
+
+    expect(height).toBeLessThan(preferred);
+    expect(phoneSheetFitsViewport(932, 59, 34)).toBe(true);
   });
 
   it('degrades to available space on short viewports instead of overflowing', () => {

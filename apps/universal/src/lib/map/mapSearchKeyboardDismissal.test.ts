@@ -2,7 +2,10 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-import { dismissMapSearchFromMapTap } from '@/lib/map/mapSearchKeyboardDismissal';
+import {
+  consumeSearchFocus,
+  dismissMapSearchFromMapTap,
+} from '@/lib/map/mapSearchKeyboardDismissal';
 
 function readSource(relativePath: string): string {
   return readFileSync(resolve(process.cwd(), relativePath), 'utf8');
@@ -21,6 +24,38 @@ describe('map search keyboard dismissal', () => {
       });
     },
   );
+
+  it('ignores one focus after a map tap and lets a later field press clear the latch', () => {
+    expect(
+      consumeSearchFocus({
+        ignorePendingDismissFocus: true,
+        fromFieldPress: false,
+      }),
+    ).toEqual({
+      openOverlay: false,
+      ignorePendingDismissFocus: false,
+    });
+
+    expect(
+      consumeSearchFocus({
+        ignorePendingDismissFocus: true,
+        fromFieldPress: true,
+      }),
+    ).toEqual({
+      openOverlay: false,
+      ignorePendingDismissFocus: false,
+    });
+
+    expect(
+      consumeSearchFocus({
+        ignorePendingDismissFocus: false,
+        fromFieldPress: false,
+      }),
+    ).toEqual({
+      openOverlay: true,
+      ignorePendingDismissFocus: false,
+    });
+  });
 });
 
 describe('map search keyboard source contract', () => {
@@ -40,6 +75,8 @@ describe('map search keyboard source contract', () => {
     expect(handler).toContain('inputRef.current?.blur()');
     expect(handler).toContain('Keyboard.dismiss()');
     expect(handler).toContain('setIsOverlayOpen(dismissal.isOverlayOpen)');
+    expect(handler).toContain('ignoreMapDismissFocusRef.current = true');
+    expect(handler).not.toContain('setIsQueryResolved');
     expect(handler).not.toContain('setQuery');
     expect(handler).not.toContain('onSelectLocation');
     expect(handler).not.toContain('onClearSelectedLocation');

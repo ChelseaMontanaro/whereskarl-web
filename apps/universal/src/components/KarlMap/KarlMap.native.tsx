@@ -350,10 +350,9 @@ const KarlMapNative = forwardRef<KarlMapHandle, KarlMapProps>(function KarlMapNa
   }));
 
   // Selection-driven reframing is layout-scoped. Phone portrait must NOT move
-  // the camera when `selectedLocationId` changes: marker taps, deep links, and
-  // sheet dismissal all leave the camera untouched, and search selection
-  // reframes explicitly through `focusLocation`. Tablet/desktop keep the
-  // existing recenter-on-selection behaviour.
+  // the camera when `selectedLocationId` changes. Marker taps and sheet
+  // dismissal leave it. Search, Organic Map, and external selected routes
+  // call `focusLocation` themselves. Tablet/desktop keep recenter-on-selection.
   useEffect(() => {
     if (phonePortraitWeb || !selectedLocationId || !mapRef.current) {
       return;
