@@ -75,7 +75,7 @@ describe('external selected camera source contract', () => {
   const bestRightNow = readSource('src/components/home/BestRightNowSection.tsx');
   const detail = readSource('src/app/location/[id].tsx');
 
-  it('focuses from the external route effect and not from a marker tap', () => {
+  it('focuses external routes once and phone marker taps through the existing camera', () => {
     const external = map.slice(
       map.indexOf("if (routeSyncSource.current === 'local')"),
       map.indexOf('const markerRegionId'),
@@ -84,13 +84,27 @@ describe('external selected camera source contract', () => {
     expect(external).toContain('resolvePendingExternalMapFocus');
     expect(external).toContain('focusLocation(');
 
-    const marker = map.slice(
+    const selection = map.slice(
       map.indexOf('function handleSelectLocation('),
+      map.indexOf('function handleMarkerSelect('),
+    );
+    expect(selection).not.toContain('focusLocation');
+    expect(selection).not.toContain('setPendingExternalFocusId');
+    expect(selection).not.toContain('resolvePendingExternalMapFocus');
+
+    const marker = map.slice(
+      map.indexOf('function handleMarkerSelect('),
       map.indexOf('function handleClearSelection('),
     );
-    expect(marker).not.toContain('focusLocation');
+    expect(marker).toContain('handleSelectLocation(locationId)');
+    expect(marker).toContain('if (!isPhone)');
+    expect(marker.match(/focusLocation\(/g)).toHaveLength(1);
     expect(marker).not.toContain('setPendingExternalFocusId');
     expect(marker).not.toContain('resolvePendingExternalMapFocus');
+    expect(marker).not.toContain('useEffect');
+    expect(map.match(/onSelectLocation=\{handleMarkerSelect\}/g)).toHaveLength(1);
+    expect(map).toContain('onSelectLocation: selectOrganicLocation');
+    expect(map).toContain('onSelectLocation={handlePhoneSearchSelect}');
 
     const dismiss = map.slice(
       map.indexOf('function handleClearSelection('),

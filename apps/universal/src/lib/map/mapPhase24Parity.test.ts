@@ -36,16 +36,29 @@ describe('Phase 24 — source-aware camera behaviour', () => {
     expect(webMap).toContain('phonePortraitWebRef.current');
   });
 
-  it('CAM-1: search selection focuses, and marker taps do not', () => {
+  it('CAM-1: search selection focuses, and phone marker taps use that same focus', () => {
     expect(mapScreen).toContain('mapRef.current?.focusLocation(');
-    // Marker taps go through handleSelectLocation, which must not focus.
-    const markerHandler = mapScreen.slice(
+    const selectionHandler = mapScreen.slice(
       mapScreen.indexOf('function handleSelectLocation'),
+      mapScreen.indexOf('function handleMarkerSelect'),
+    );
+    expect(selectionHandler).not.toContain('focusLocation');
+    expect(selectionHandler).not.toContain('fitToRegion');
+    expect(selectionHandler).not.toContain('resetView');
+
+    const markerHandler = mapScreen.slice(
+      mapScreen.indexOf('function handleMarkerSelect'),
       mapScreen.indexOf('function handleClearSelection'),
     );
-    expect(markerHandler).not.toContain('focusLocation');
-    expect(markerHandler).not.toContain('fitToRegion');
+    expect(markerHandler).toContain('handleSelectLocation(locationId)');
+    expect(markerHandler).toContain('if (!isPhone)');
+    expect(markerHandler).toContain('Number.isFinite(target.latitude)');
+    expect(markerHandler).toContain('Number.isFinite(target.longitude)');
+    expect(markerHandler.match(/focusLocation\(/g)).toHaveLength(1);
+    expect(markerHandler).not.toContain('useEffect');
     expect(markerHandler).not.toContain('resetView');
+    expect(mapScreen.match(/onSelectLocation=\{handleMarkerSelect\}/g)).toHaveLength(1);
+    expect(mapScreen.match(/onSelectLocation=\{handleSelectLocation\}/g)).toHaveLength(2);
   });
 
   it('CAM-3: card dismissal returns the phone camera to the existing all-Bay reset', () => {
@@ -176,6 +189,33 @@ describe('Phase 24 — selected location card parity', () => {
     expect(preview).toContain('getPhonePortraitFogRailConditionIconDataUri');
     expect(preview).toContain('period.intensity');
     expect(preview).toContain('period.tempF');
+    expect(preview).toContain('getSelectedLocationHourlyPeriods');
+  });
+
+  it('keeps Last Updated in the compact header and after Hourly Outlook when expanded', () => {
+    expect(preview).toContain('formatRelativeUpdatedAt(location.updatedAt ?? null)');
+    expect(preview).toContain('isExpanded ? null : updatedLabel');
+
+    const header = preview.slice(
+      preview.indexOf('style={styles.phoneMeta}'),
+      preview.indexOf('phoneHeaderActions'),
+    );
+    expect(header).toContain('regionName ? `${regionName}, CA` : null');
+    expect(header).toContain('isExpanded ? null : updatedLabel');
+
+    const hourlyAt = preview.indexOf('accessibilityLabel="Hourly outlook"');
+    const expanded = preview.slice(
+      hourlyAt,
+      preview.indexOf(') : null}', hourlyAt),
+    );
+    expect(expanded).toContain('Hourly Outlook');
+    expect(expanded).toContain('<ScrollView');
+    const hourlyEnd = expanded.indexOf('</ScrollView>');
+    const footer = expanded.slice(hourlyEnd);
+    expect(footer).toContain('{updatedLabel}');
+    expect(footer.match(/\{updatedLabel\}/g)).toHaveLength(1);
+    expect(preview).toContain('sheetGrabHandle');
+    expect(preview).toContain("isExpanded ? 'Collapse details' : 'Expand details'");
   });
 
   it('expanded body height comes from the viewport, not a fixed cap', () => {

@@ -301,6 +301,7 @@ function PhoneSelectedLocationSheet({
       : `${Math.round(location.windSpeed)}`
     : null;
   const regionName = getProductRegionNameForLocation(location);
+  const updatedLabel = formatRelativeUpdatedAt(location.updatedAt ?? null);
   const karlRead = getKarlReadParagraph(location);
   const hourly = getSelectedLocationHourlyPeriods(location, isNighttime);
 
@@ -494,7 +495,7 @@ function PhoneSelectedLocationSheet({
             minimumFontScale={0.85}>
             {[
               regionName ? `${regionName}, CA` : null,
-              formatRelativeUpdatedAt(location.updatedAt ?? null),
+              isExpanded ? null : updatedLabel,
             ]
               .filter(Boolean)
               .join(' · ')}
@@ -655,6 +656,11 @@ function PhoneSelectedLocationSheet({
               ))}
             </ScrollView>
           </View>
+          <Text
+            style={styles.phoneMeta}
+            maxFontSizeMultiplier={PHONE_SHEET_LABEL_MAX_FONT_SCALE}>
+            {updatedLabel}
+          </Text>
         </ScrollView>
       ) : null}
     </LiquidGlassSurface>

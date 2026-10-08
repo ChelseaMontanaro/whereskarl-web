@@ -362,6 +362,31 @@ export default function MapScreen() {
   }
 
   /**
+   * Phone marker taps select the location and focus through the existing
+   * canonical camera. Tablet and desktop keep selection only; their layouts
+   * still recenter from the map's own selection effect. Search, Organic Map,
+   * and external routes do not use this handler.
+   */
+  function handleMarkerSelect(locationId: string) {
+    handleSelectLocation(locationId);
+
+    if (!isPhone) {
+      return;
+    }
+
+    const target = locations.find((location) => location.id === locationId);
+    if (
+      !target ||
+      !Number.isFinite(target.latitude) ||
+      !Number.isFinite(target.longitude)
+    ) {
+      return;
+    }
+
+    mapRef.current?.focusLocation(target.latitude, target.longitude);
+  }
+
+  /**
    * Selected-location card × — closes the sheet and returns the phone camera
    * to the existing all-Bay frame. This is not a search clear: the query and
    * the active region chip both survive dismissal.
@@ -578,7 +603,7 @@ export default function MapScreen() {
         ref={mapRef}
         locations={markerLocations}
         selectedLocationId={selectedLocationId}
-        onSelectLocation={handleSelectLocation}
+        onSelectLocation={handleMarkerSelect}
         isLoading={isLoading}
         error={error}
         layout={mapLayout}

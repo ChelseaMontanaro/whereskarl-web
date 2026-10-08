@@ -107,15 +107,29 @@ describe('search selection camera law', () => {
     expect(focused.longitudeDelta).toBeGreaterThan(0.05);
   });
 
-  it('leaves marker taps unfocused and returns card dismiss to the all-Bay reset', () => {
+  it('focuses phone marker taps and returns card dismiss to the all-Bay reset', () => {
     const source = readSource(MAP_SCREEN_SOURCE);
 
-    const markerHandler = source.slice(
+    const selectionHandler = source.slice(
       source.indexOf('function handleSelectLocation('),
+      source.indexOf('function handleMarkerSelect('),
+    );
+    expect(selectionHandler).not.toContain('focusSearchSelection');
+    expect(selectionHandler).not.toContain('focusLocation');
+    expect(selectionHandler).not.toContain('resetView');
+    expect(selectionHandler).not.toContain('fitToRegion');
+
+    const markerHandler = source.slice(
+      source.indexOf('function handleMarkerSelect('),
       source.indexOf('function handleClearSelection('),
     );
+    expect(markerHandler).toContain('handleSelectLocation(locationId)');
+    expect(markerHandler).toContain('if (!isPhone)');
+    expect(markerHandler).toContain('Number.isFinite(target.latitude)');
+    expect(markerHandler).toContain('Number.isFinite(target.longitude)');
+    expect(markerHandler.match(/focusLocation\(/g)).toHaveLength(1);
     expect(markerHandler).not.toContain('focusSearchSelection');
-    expect(markerHandler).not.toContain('focusLocation');
+    expect(markerHandler).not.toContain('useEffect');
     expect(markerHandler).not.toContain('resetView');
     expect(markerHandler).not.toContain('fitToRegion');
 
