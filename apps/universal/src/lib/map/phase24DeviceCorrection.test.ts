@@ -107,7 +107,7 @@ describe('search selection camera law', () => {
     expect(focused.longitudeDelta).toBeGreaterThan(0.05);
   });
 
-  it('leaves marker taps and card dismiss without camera motion', () => {
+  it('leaves marker taps unfocused and returns card dismiss to the all-Bay reset', () => {
     const source = readSource(MAP_SCREEN_SOURCE);
 
     const markerHandler = source.slice(
@@ -123,8 +123,9 @@ describe('search selection camera law', () => {
       source.indexOf('function handleClearSelection('),
       source.indexOf('function handleSearchClearSelection('),
     );
-    expect(dismissHandler).not.toContain('resetView');
+    expect(dismissHandler).toContain('mapRef.current?.resetView()');
     expect(dismissHandler).not.toContain('focusLocation');
+    expect(dismissHandler).not.toContain('setSearchQuery');
   });
 
   it('keeps search clear on the canonical all-Bay reset', () => {

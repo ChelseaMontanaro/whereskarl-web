@@ -17,6 +17,11 @@ import { Colors } from '@/constants/theme';
 import { getMarkerAccessibilityLabel } from '@/lib/map/markerAppearance';
 import { filterMarkerLocationsByFogLevel } from '@/lib/map/locationsDisplay';
 import {
+  cameraStepsOnMapReady,
+  rememberPreReadyMapFocus,
+  type RememberedMapFocus,
+} from '@/lib/map/mapCameraReadiness';
+import {
   boundsToRegion,
   getMapBoundsForLayout,
   getMapViewportPaddingForLayout,
@@ -153,6 +158,10 @@ const KarlMapNative = forwardRef<KarlMapHandle, KarlMapProps>(function KarlMapNa
   ref,
 ) {
   const mapRef = useRef<MapView>(null);
+  // Phone explicit destinations can request focus before `onMapReady`.
+  // The request stays here until that callback fits all-Bay and then focuses.
+  const mapReadyRef = useRef(false);
+  const pendingFocusRef = useRef<RememberedMapFocus | null>(null);
   // Rendered size + current region, so label collision can be evaluated in
   // screen space like mobile web instead of against fixed geographic deltas.
   const mapSizeRef = useRef<{ width: number; height: number } | null>(null);
@@ -255,6 +264,40 @@ const KarlMapNative = forwardRef<KarlMapHandle, KarlMapProps>(function KarlMapNa
     [],
   );
 
+  const dispatchCanonicalLocationFocus = useCallback(
+    (latitude: number, longitude: number) => {
+      // Apple Maps ignores Camera.zoom (Google Maps only). Drive the
+      // canonical search zoom through animateToRegion instead.
+      mapRef.current?.animateToRegion(
+        regionForCanonicalLocationZoom(
+          latitude,
+          longitude,
+          mapSizeRef.current,
+        ),
+        450,
+      );
+    },
+    [],
+  );
+
+  const handlePhoneMapReady = useCallback(() => {
+    // `fitToCoordinates` and `animateToRegion` are synchronous MapKit region
+    // commands. Calling the all-Bay fit first and the location focus second
+    // makes the focus the later camera write, without a timer.
+    const steps = cameraStepsOnMapReady(pendingFocusRef.current);
+    for (const step of steps) {
+      if (step.type === 'all-bay') {
+        fitCameraPreset(PHONE_PORTRAIT_ALL_BAY_CAMERA, false);
+        continue;
+      }
+
+      dispatchCanonicalLocationFocus(step.latitude, step.longitude);
+    }
+
+    pendingFocusRef.current = null;
+    mapReadyRef.current = true;
+  }, [dispatchCanonicalLocationFocus, fitCameraPreset]);
+
   useImperativeHandle(ref, () => ({
     zoomIn: () => undefined,
     zoomOut: () => undefined,
@@ -314,16 +357,16 @@ const KarlMapNative = forwardRef<KarlMapHandle, KarlMapProps>(function KarlMapNa
       );
     },
     focusLocation: (latitude: number, longitude: number) => {
-      // Apple Maps ignores Camera.zoom (Google Maps only). Drive the
-      // canonical search zoom through animateToRegion instead.
-      mapRef.current?.animateToRegion(
-        regionForCanonicalLocationZoom(
+      if (phonePortraitWeb && !mapReadyRef.current) {
+        pendingFocusRef.current = rememberPreReadyMapFocus(
+          pendingFocusRef.current,
           latitude,
           longitude,
-          mapSizeRef.current,
-        ),
-        450,
-      );
+        );
+        return;
+      }
+
+      dispatchCanonicalLocationFocus(latitude, longitude);
     },
     fitToIntensityFilter: (intensity) => {
       // Phone-portrait-only: the filter fit is part of the immersive phone
@@ -350,9 +393,10 @@ const KarlMapNative = forwardRef<KarlMapHandle, KarlMapProps>(function KarlMapNa
   }));
 
   // Selection-driven reframing is layout-scoped. Phone portrait must NOT move
-  // the camera when `selectedLocationId` changes. Marker taps and sheet
-  // dismissal leave it. Search, Organic Map, and external selected routes
-  // call `focusLocation` themselves. Tablet/desktop keep recenter-on-selection.
+  // the camera when `selectedLocationId` changes. Marker taps leave it.
+  // Card dismissal calls `resetView` from the screen. Search, Organic Map,
+  // and external selected routes call `focusLocation` themselves.
+  // Tablet/desktop keep recenter-on-selection.
   useEffect(() => {
     if (phonePortraitWeb || !selectedLocationId || !mapRef.current) {
       return;
@@ -471,11 +515,7 @@ const KarlMapNative = forwardRef<KarlMapHandle, KarlMapProps>(function KarlMapNa
         onLayout={handleMapLayout}
         onRegionChange={handleRegionChangeComplete}
         onRegionChangeComplete={handleRegionChangeComplete}
-        onMapReady={
-          phonePortraitWeb
-            ? () => fitCameraPreset(PHONE_PORTRAIT_ALL_BAY_CAMERA, false)
-            : undefined
-        }
+        onMapReady={phonePortraitWeb ? handlePhoneMapReady : undefined}
         mapPadding={mapPadding}
         legalLabelInsets={
           phonePortraitWeb ? PHONE_PORTRAIT_APPLE_LEGAL_LABEL_INSETS : undefined

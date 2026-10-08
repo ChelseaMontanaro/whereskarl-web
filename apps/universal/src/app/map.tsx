@@ -362,10 +362,9 @@ export default function MapScreen() {
   }
 
   /**
-   * Selected-location card × — closes the sheet only. The camera is
-   * deliberately left untouched and this is NOT a search clear: the active
-   * region chip and the search field both survive dismissal (mobile-web
-   * parity, where dismissal explicitly suppresses the viewport update).
+   * Selected-location card × — closes the sheet and returns the phone camera
+   * to the existing all-Bay frame. This is not a search clear: the query and
+   * the active region chip both survive dismissal.
    */
   function handleClearSelection() {
     if (isPhone) {
@@ -373,6 +372,10 @@ export default function MapScreen() {
     }
     setSelectedLocationId(null);
     syncMapRoute(null);
+
+    if (isPhone) {
+      mapRef.current?.resetView();
+    }
   }
 
   /**

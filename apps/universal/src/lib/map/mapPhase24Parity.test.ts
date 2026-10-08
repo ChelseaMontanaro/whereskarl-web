@@ -48,12 +48,12 @@ describe('Phase 24 — source-aware camera behaviour', () => {
     expect(markerHandler).not.toContain('resetView');
   });
 
-  it('CAM-3 stays reverted: card dismissal never moves the camera', () => {
+  it('CAM-3: card dismissal returns the phone camera to the existing all-Bay reset', () => {
     const dismissHandler = mapScreen.slice(
       mapScreen.indexOf('function handleClearSelection'),
       mapScreen.indexOf('function handleSearchClearSelection'),
     );
-    expect(dismissHandler).not.toContain('resetView');
+    expect(dismissHandler).toContain('mapRef.current?.resetView()');
     expect(dismissHandler).not.toContain('focusLocation');
     expect(dismissHandler).not.toContain('fitToRegion');
     // Dismissal is not a search clear: it leaves the query alone.
