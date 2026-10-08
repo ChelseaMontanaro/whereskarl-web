@@ -192,16 +192,17 @@ describe('Phase 24 — selected location card parity', () => {
     expect(preview).toContain('getSelectedLocationHourlyPeriods');
   });
 
-  it('keeps Last Updated in the compact header and after Hourly Outlook when expanded', () => {
+  it('shows region in both headers and Last Updated only after Hourly Outlook', () => {
     expect(preview).toContain('formatRelativeUpdatedAt(location.updatedAt ?? null)');
-    expect(preview).toContain('isExpanded ? null : updatedLabel');
+    expect(preview).not.toContain('isExpanded ? null : updatedLabel');
 
     const header = preview.slice(
       preview.indexOf('style={styles.phoneMeta}'),
       preview.indexOf('phoneHeaderActions'),
     );
     expect(header).toContain('regionName ? `${regionName}, CA` : null');
-    expect(header).toContain('isExpanded ? null : updatedLabel');
+    expect(header).not.toContain('updatedLabel');
+    expect(header).not.toContain('formatRelativeUpdatedAt');
 
     const hourlyAt = preview.indexOf('accessibilityLabel="Hourly outlook"');
     const expanded = preview.slice(

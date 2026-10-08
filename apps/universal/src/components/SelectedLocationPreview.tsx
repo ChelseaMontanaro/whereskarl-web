@@ -493,12 +493,7 @@ function PhoneSelectedLocationSheet({
             maxFontSizeMultiplier={PHONE_SHEET_LABEL_MAX_FONT_SCALE}
             adjustsFontSizeToFit
             minimumFontScale={0.85}>
-            {[
-              regionName ? `${regionName}, CA` : null,
-              isExpanded ? null : updatedLabel,
-            ]
-              .filter(Boolean)
-              .join(' · ')}
+            {regionName ? `${regionName}, CA` : null}
           </Text>
         </View>
 
